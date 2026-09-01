@@ -6,10 +6,11 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { HeroBackdrop } from "@/components/sections/hero-layers/HeroBackdrop";
+import { HeroStarfield } from "@/components/sections/hero-layers/HeroStarfield";
 import { FOCUS_ANCHOR_ID, GLOBE_FIT } from "@/components/ui/globe/EarthGlobe";
 import type {
   GlobeAnchor,
+  GlobeArc,
   GlobeFocus,
   ProjectedAnchor,
 } from "@/components/ui/globe/EarthGlobe";
@@ -27,8 +28,6 @@ interface MiningSite extends GlobeAnchor {
   country: string;
   /** One short line shown only while the marker is hovered or focused. */
   detail: string;
-  /** Antarctica's label is dropped on phones, where space is tightest. */
-  labelOnMobile?: boolean;
 }
 
 /**
@@ -39,18 +38,70 @@ interface MiningSite extends GlobeAnchor {
  * production. Swap it if the company has real data to put behind it.
  */
 const MINING_SITES: MiningSite[] = [
-  { id: "north-america", region: "North America", country: "Canada", detail: "Mining region", lat: 56, lng: -106, labelOnMobile: true },
-  { id: "south-america", region: "South America", country: "Chile", detail: "Mining region", lat: -30, lng: -71, labelOnMobile: true },
-  { id: "europe", region: "Europe", country: "Sweden", detail: "Mining region", lat: 60, lng: 18, labelOnMobile: true },
-  { id: "africa", region: "Africa", country: "South Africa", detail: "Mining region", lat: -30, lng: 24, labelOnMobile: true },
-  { id: "asia", region: "Asia", country: "Mongolia", detail: "Mining region", lat: 46, lng: 104, labelOnMobile: true },
-  { id: "australia", region: "Australia", country: "Western Australia", detail: "Mining region", lat: -25, lng: 122, labelOnMobile: true },
+  { id: "north-america", region: "North America", country: "Canada", detail: "Mining region", lat: 56, lng: -106 },
+  { id: "south-america", region: "South America", country: "Chile", detail: "Mining region", lat: -30, lng: -71 },
+  { id: "europe", region: "Europe", country: "Sweden", detail: "Mining region", lat: 60, lng: 18 },
+  { id: "africa", region: "Africa", country: "South Africa", detail: "Mining region", lat: -30, lng: 24 },
+  { id: "asia", region: "Asia", country: "Mongolia", detail: "Mining region", lat: 46, lng: 104 },
+  { id: "australia", region: "Australia", country: "Western Australia", detail: "Mining region", lat: -25, lng: 122 },
+  // The three below are markers only — they are not tour stops and carry no arcs.
+  //
+  // They exist because the original six sat at longitudes -106, -71, 18, 24, 104 and 122,
+  // which leaves two wide empty sweeps: the Atlantic between Chile and Sweden, and the
+  // whole Pacific from Western Australia back round to Canada. Only about a third of the
+  // set was ever on the near face at once. Filling those gaps is what keeps five or more
+  // markers presented at any rotation angle, and each is a real mining region rather than
+  // a dot placed to space the set out.
+  { id: "brazil", region: "South America", country: "Brazil", detail: "Mining region", lat: -20, lng: -44 },
+  { id: "central-asia", region: "Central Asia", country: "Kazakhstan", detail: "Mining region", lat: 48, lng: 68 },
+  { id: "southeast-asia", region: "Southeast Asia", country: "Indonesia", detail: "Mining region", lat: -4, lng: 137 },
   // NOTE: at -82 this pin sits permanently below the container's bottom crop — the globe
   // is deliberately cut off there, and no view pitch brings 82S onto the visible arc
   // without pushing Sweden and Canada over the top rim. It is kept geographically honest;
   // to actually surface it, either raise VISIBLE_FRACTION toward 0.9 (a ~20% smaller
   // globe) or move the pin to the Antarctic Peninsula.
-  { id: "antarctica", region: "Antarctica", country: "Research site", detail: "Geographic representation", lat: -82, lng: 0, labelOnMobile: false },
+  { id: "antarctica", region: "Antarctica", country: "Research site", detail: "Geographic representation", lat: -82, lng: 0 },
+];
+
+/**
+ * The connection network: ten arcs over six of the regions.
+ *
+ * WHY ASIA IS IN THE SET NOW. The first six were chosen against the RESTING longitude of
+ * 18E, where Mongolia sits out on the far limb and an arc to it spends most of its length
+ * behind the planet, fading to nothing in the shader's occlusion test. That reasoning only
+ * ever held for a stationary globe: this one drifts continuously and the tour aims at all
+ * seven stops in turn, Asia among them, so an Asia arc is fully presented for a large part
+ * of every cycle and merely grazing for the rest. Leaving the largest landmass unconnected
+ * was the more visible problem.
+ *
+ * The four additions reach it from four different directions — down from Sweden, up from
+ * South Africa, across to Western Australia — rather than all from one side, so the new
+ * lines open out across the Indian Ocean and the western Pacific instead of stacking in
+ * one quarter. na-au is the one that carries no Asia endpoint: it throws a single line
+ * across the Pacific, which is the emptiest part of the disc at the resting angle.
+ *
+ * Antarctica stays out. At -82 it is below the card's crop at every pitch the framing
+ * allows, so an arc to it would be cropped rather than drawn.
+ *
+ * Phases are spread unevenly across the cycle rather than at even tenths: an even split
+ * has every arc firing on a common beat, which reads as a metronome. These share no
+ * simple ratio, so the set never resolves into a pattern, and the four new values are
+ * interleaved into the gaps the original six left rather than appended after them.
+ *
+ * onMobile thins the set to five on small viewports, over a globe that has far less room
+ * to carry them.
+ */
+const HERO_ARCS: GlobeArc[] = [
+  { id: "na-eu", fromId: "north-america", toId: "europe", phase: 0.0, onMobile: true },
+  { id: "eu-as", fromId: "europe", toId: "asia", phase: 0.09 },
+  { id: "na-sa", fromId: "north-america", toId: "south-america", phase: 0.17 },
+  { id: "eu-af", fromId: "europe", toId: "africa", phase: 0.31, onMobile: true },
+  { id: "af-as", fromId: "africa", toId: "asia", phase: 0.39 },
+  { id: "sa-af", fromId: "south-america", toId: "africa", phase: 0.48, onMobile: true },
+  { id: "as-au", fromId: "asia", toId: "australia", phase: 0.58, onMobile: true },
+  { id: "eu-au", fromId: "europe", toId: "australia", phase: 0.66, onMobile: true },
+  { id: "af-au", fromId: "africa", toId: "australia", phase: 0.83 },
+  { id: "na-au", fromId: "north-america", toId: "australia", phase: 0.91 },
 ];
 
 const ANCHORS: GlobeAnchor[] = MINING_SITES.map(({ id, lat, lng }) => ({
@@ -126,8 +177,38 @@ const ATMOSPHERE_HALO = [
  */
 const HALO_HEADROOM = (HALO_OUTER_STOP / 100 - GLOBE_FIT) / 2;
 
-/** Below this projected opacity a pin is edge-on: no label, no pointer events. */
-const LABEL_OPACITY_FLOOR = 0.5;
+/** Below this projected opacity a pin is edge-on, and takes no pointer events. */
+const MARKER_OPACITY_FLOOR = 0.5;
+
+/**
+ * Per-marker pulse timing, consumed by .globe-pin-dot and .globe-pin-ring in globals.css.
+ *
+ * The old stagger was a single stride — index * 0.42s against one shared 3.2s period —
+ * which offsets the markers but does not desynchronise them: every ring still opens on
+ * the same 3.2s beat, so the set reads as one metronome heard from several places, and
+ * any two markers 3.2s apart in delay pulse in exact lockstep.
+ *
+ * Giving each its OWN period as well is what breaks that. The periods below are spread
+ * across the brief's 2-3s and share no simple ratio, so the set has no common multiple to
+ * drift back into phase on — the same trick the WebGL arc nodes use, where the comment on
+ * ARC_NODE_PERIOD_MIN explains the reasoning at more length.
+ *
+ * Indexed modulo length, so the table does not have to be kept the same size as the site
+ * list — a marker past the end simply reuses an earlier pairing, and with the periods all
+ * mutually irrational-ish even a reused pair does not visibly twin with its partner.
+ */
+type PinPulseStyle = React.CSSProperties &
+  Record<"--pin-period" | "--pin-delay", string>;
+
+const PIN_PULSE: PinPulseStyle[] = [
+  { "--pin-period": "2.30s", "--pin-delay": "0s" },
+  { "--pin-period": "2.75s", "--pin-delay": "0.53s" },
+  { "--pin-period": "2.15s", "--pin-delay": "1.11s" },
+  { "--pin-period": "2.90s", "--pin-delay": "0.27s" },
+  { "--pin-period": "2.45s", "--pin-delay": "1.64s" },
+  { "--pin-period": "2.60s", "--pin-delay": "0.82s" },
+  { "--pin-period": "2.05s", "--pin-delay": "1.38s" },
+];
 
 /**
  * Order the tour visits. One entry per continent, matched to MINING_SITES by id, and
@@ -269,9 +350,6 @@ function stepSpring(
   }
 }
 
-/** Labels other than the active stop's are dimmed to this while the tour runs. */
-const RESTING_LABEL_OPACITY = 0.32;
-
 /**
  * Where in the tour the wipe into Stats begins.
  *
@@ -313,6 +391,19 @@ const CURTAIN_START = 0.90;
  * run is what makes the handoff seamless. Everything above 58% is translucent, so the
  * planet still reads through the rich part instead of being covered by it.
  */
+/**
+ * The hero ground.
+ *
+ * #0D1B2A at the top is the navbar's scrolled-state navy, so the header pinning over
+ * the hero produces no colour step; it settles to #0A1128 lower down. The radial pool
+ * sits at bottom-centre because that is where the planet sits in the horizon framing —
+ * it is depth under the limb, not a second hue. Nothing here is outside the navy range.
+ */
+const HERO_NAVY = [
+  "radial-gradient(130% 90% at 50% 100%, rgba(17,40,71,0.55) 0%, rgba(10,17,40,0) 62%),",
+  "linear-gradient(180deg, #0D1B2A 0%, #0B1526 48%, #0A1128 100%)",
+].join(" ");
+
 const STATS_WIPE = [
   "linear-gradient(180deg,",
   "rgba(212,175,55,0) 0%,",
@@ -423,23 +514,17 @@ export const GlobeHero: React.FC = () => {
   const markerLayerRef = useRef<HTMLDivElement>(null);
   const curtainRef = useRef<HTMLDivElement>(null);
   const markerRefs = useRef(new Map<string, HTMLDivElement | null>());
-  const labelRefs = useRef(new Map<string, HTMLDivElement | null>());
 
   /**
-   * Card bounds in the globe canvas's coordinate space, plus the label footprint
-   * for the current breakpoint. Cached on resize rather than measured per frame, so the
-   * render loop never forces layout.
+   * Card bounds in the globe canvas's coordinate space. Cached on resize rather than
+   * measured per frame, so the render loop never forces layout.
    */
   const layoutRef = useRef({
-    minY: -Infinity,
     maxY: Infinity,
     minX: -Infinity,
     maxX: Infinity,
     fadeX: 110,
     fadeY: 130,
-    labelW: 132,
-    labelH: 40,
-    compact: false,
   });
 
   const [metrics, setMetrics] = useState<Metrics>({ boxSize: 0, boxTop: 0 });
@@ -558,8 +643,6 @@ export const GlobeHero: React.FC = () => {
   const [reduceMotion, setReduceMotion] = useState(false);
 
   // Reused across frames so collision resolution allocates nothing per tick.
-  const placedBoxes = useRef<Array<{ x: number; y: number; w: number; h: number }>>([]);
-  const orderScratch = useRef<ProjectedAnchor[]>([]);
 
   useEffect(() => {
     const card = cardRef.current;
@@ -570,8 +653,6 @@ export const GlobeHero: React.FC = () => {
       const c = card.getBoundingClientRect();
       const s = slot.getBoundingClientRect();
       if (!c.height || !s.width || !s.height) return;
-
-      const compact = window.matchMedia("(max-width: 767px)").matches;
 
       // The slot is a normal flow child sitting directly under the subtitle and
       // stretching to the card's bottom edge, so its box already *is* the frame the
@@ -608,10 +689,6 @@ export const GlobeHero: React.FC = () => {
       const boxLeft = s.left - c.left + (s.width - boxSize) / 2;
 
       layoutRef.current = {
-        // The card extends above the canvas box, so a label sitting over the whitespace
-        // between the copy and the globe is still on screen — it just has a negative y
-        // in the box's coordinate space.
-        minY: -boxTopInCard,
         maxY: c.height - boxTopInCard,
         minX: -boxLeft,
         maxX: c.width - boxLeft,
@@ -619,9 +696,6 @@ export const GlobeHero: React.FC = () => {
         // pass across a narrow phone container.
         fadeX: Math.min(80, c.width * 0.12),
         fadeY: Math.min(60, c.height * 0.08),
-        labelW: compact ? 96 : 132,
-        labelH: compact ? 32 : 40,
-        compact,
       };
     };
 
@@ -818,12 +892,7 @@ export const GlobeHero: React.FC = () => {
   }, [applyStage]);
 
   const handleProject = useCallback((projected: ProjectedAnchor[]) => {
-    const { minY, maxY, minX, maxX, fadeX, fadeY, labelW, labelH, compact } =
-      layoutRef.current;
-
-    // Which stop owns this frame. Read from a ref rather than a prop, so the label
-    // treatment costs nothing per frame.
-    const tourStop = engagedRef.current ? TOUR[stageIndexRef.current] : null;
+    const { maxY, minX, maxX, fadeX, fadeY } = layoutRef.current;
 
     // The aim point drifts while the globe swings onto a new stop, so the zoom has to be
     // re-pinned every frame, not only when the scroll position changes.
@@ -832,9 +901,6 @@ export const GlobeHero: React.FC = () => {
     // Unconditional: this is the per-frame heartbeat that samples the scroll position,
     // so it has to run before any focus exists too, or the tour could never engage.
     applyStage();
-
-    const order = orderScratch.current;
-    order.length = 0;
 
     for (const anchor of projected) {
       const el = markerRefs.current.get(anchor.id);
@@ -849,86 +915,14 @@ export const GlobeHero: React.FC = () => {
       const style = el.style;
       if (opacity <= 0.01) {
         if (style.visibility !== "hidden") style.visibility = "hidden";
-        const label = labelRefs.current.get(anchor.id);
-        if (label) label.style.opacity = "0";
         continue;
       }
       if (style.visibility === "hidden") style.visibility = "";
 
       style.setProperty("--mx", `${anchor.x.toFixed(1)}px`);
       style.setProperty("--my", `${anchor.y.toFixed(1)}px`);
-      style.setProperty("--dx", anchor.dirX.toFixed(4));
-      style.setProperty("--dy", anchor.dirY.toFixed(4));
-      style.setProperty(
-        "--angle",
-        `${Math.atan2(anchor.dirY, anchor.dirX).toFixed(4)}rad`,
-      );
       style.opacity = opacity.toFixed(3);
-      style.pointerEvents = opacity >= LABEL_OPACITY_FLOOR ? "auto" : "none";
-
-      order.push({ ...anchor, opacity });
-    }
-
-    // --- Label collision ---------------------------------------------------------
-    // Most face-on markers win; anything whose label would overlap an already placed one,
-    // or would sit outside the card, keeps its pin but drops its text.
-    order.sort((a, b) => b.opacity - a.opacity);
-
-    const boxes = placedBoxes.current;
-    boxes.length = 0;
-
-    for (const anchor of order) {
-      const label = labelRefs.current.get(anchor.id);
-      if (!label) continue;
-
-      const site = MINING_SITES.find((s) => s.id === anchor.id);
-      // The stop being visited is exempt from every suppression rule — it is the point
-      // of the stage, so it keeps its label even edge-on, on a phone, or under a
-      // collision that would otherwise drop it.
-      const isStop = tourStop !== null && anchor.id === tourStop;
-      const suppressed =
-        !isStop &&
-        (anchor.opacity < LABEL_OPACITY_FLOOR ||
-          (compact && site?.labelOnMobile === false));
-
-      if (suppressed) {
-        label.style.opacity = "0";
-        continue;
-      }
-
-      const len = compact ? 40 : 64;
-      const cx = anchor.x + anchor.dirX * len;
-      const cy = anchor.y + anchor.dirY * len;
-
-      const insideCard =
-        cx - labelW / 2 >= minX &&
-        cx + labelW / 2 <= maxX &&
-        cy - labelH / 2 >= minY &&
-        cy + labelH / 2 <= maxY;
-
-      let collides = false;
-      if (insideCard) {
-        for (const b of boxes) {
-          if (
-            Math.abs(cx - b.x) < (labelW + b.w) / 2 + 8 &&
-            Math.abs(cy - b.y) < (labelH + b.h) / 2 + 8
-          ) {
-            collides = true;
-            break;
-          }
-        }
-      }
-
-      if (!isStop && (!insideCard || collides)) {
-        label.style.opacity = "0";
-        continue;
-      }
-
-      boxes.push({ x: cx, y: cy, w: labelW, h: labelH });
-      // While the tour runs the other continents stay legible but recede, so the stop
-      // reads as the subject without the rest of the world blinking out.
-      label.style.opacity =
-        isStop || tourStop === null ? "1" : String(RESTING_LABEL_OPACITY);
+      style.pointerEvents = opacity >= MARKER_OPACITY_FLOOR ? "auto" : "none";
     }
   }, [applyStage]);
 
@@ -949,13 +943,33 @@ export const GlobeHero: React.FC = () => {
   // creates a containing block for it. The heading, subtitle and globe each keep their
   // own entrance, so the effect survives without the wrapper's.
   return (
-    <section className="relative w-full bg-white">
+    <section className="relative isolate w-full bg-[#0D1B2A]">
       {/*
-        Layers 1-4 of the hero ground. Painted at -z-10, which puts it above this
-        section's own white but below the copy's text and below the globe card, so it
-        needs nothing from either of them and neither needs to know it is here.
+        isolate is load-bearing, not decoration. position:relative with z-index:auto does
+        NOT open a stacking context, so the -z-10 starfield below was painting underneath
+        this section's own background colour and was invisible. isolation:isolate makes
+        this element a stacking context, which puts its background first and the
+        negative-z layer on top of it, while still keeping it under the in-flow copy.
       */}
-      <HeroBackdrop />
+      {/*
+        The hero ground behind the copy. Flat #0D1B2A rather than the full ramp: this
+        section is STAGE_COUNT * STAGE_VH tall, so a gradient here would stretch over
+        roughly twelve thousand pixels and the copy would see only its first sliver.
+        Flat also means the seam where the sticky card's top edge meets it is invisible,
+        because the card's ramp starts on this exact value.
+
+        The starfield is pinned to the first viewport for the same reason the old
+        backdrop was — across the full band it would be a scattering of dust. -z-10 is
+        load-bearing: an absolutely positioned layer at auto z-index paints ABOVE the
+        in-flow copy below it, so a positive or default z-index here would lay stars over
+        the headline.
+      */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-screen"
+      >
+        <HeroStarfield zone="copy" />
+      </div>
 
       {/* Copy — normal flow, scrolls away before anything pins. */}
       <div
@@ -970,7 +984,7 @@ export const GlobeHero: React.FC = () => {
           adds a scroll listener, and nothing here holds a transform that could become a
           containing block for the sticky globe frame below.
         */}
-        <p className="hero-rise [animation-delay:60ms] font-mono text-[10px] font-semibold uppercase leading-none tracking-[0.2em] text-[#9E7208] sm:text-[11px] sm:tracking-[0.22em]">
+        <p className="hero-rise [animation-delay:60ms] font-mono text-[10px] font-semibold uppercase leading-none tracking-[0.2em] text-[#D4AF37] sm:text-[11px] sm:tracking-[0.22em]">
           Mining Media <span aria-hidden="true">&times;</span> Marketing{" "}
           <span aria-hidden="true">&times;</span> Investor Reach
         </p>
@@ -987,7 +1001,7 @@ export const GlobeHero: React.FC = () => {
           paragraph box. Reading order is unchanged: a screen reader still gets one
           continuous sentence.
         */}
-        <h1 className="hero-rise [animation-delay:160ms] mt-4 max-w-[1050px] font-geist text-[clamp(3rem,6vw,5.5rem)] font-bold uppercase leading-[0.96] tracking-[-0.02em] text-[#0B1F3A] sm:mt-5">
+        <h1 className="hero-rise [animation-delay:160ms] mt-4 max-w-[1050px] font-geist text-[clamp(3rem,6vw,5.5rem)] font-bold uppercase leading-[0.96] tracking-[-0.02em] text-white sm:mt-5">
           {HEADLINE_LINES.map((line, index) => (
             /*
               The mask. overflow-hidden is what turns a slow drift into a line leaving:
@@ -1015,7 +1029,7 @@ export const GlobeHero: React.FC = () => {
           ))}
         </h1>
 
-        <p className="hero-rise [animation-delay:260ms] mt-6 max-w-[600px] font-geist text-[clamp(1rem,1.35vw,1.25rem)] font-normal leading-[1.5] tracking-[-0.005em] text-[#57595E] sm:mt-7">
+        <p className="hero-rise [animation-delay:260ms] mt-6 max-w-[600px] font-geist text-[clamp(1rem,1.35vw,1.25rem)] font-normal leading-[1.5] tracking-[-0.005em] text-[#B8BCC8] sm:mt-7">
           Mining Discovery combines industry media, digital marketing and investor-focused
           communication to put mining companies in front of the audiences that matter.
         </p>
@@ -1028,7 +1042,7 @@ export const GlobeHero: React.FC = () => {
         <div className="hero-rise [animation-delay:360ms] mt-7 flex w-full flex-col items-stretch gap-3 sm:mt-8 sm:w-auto sm:flex-row sm:items-center sm:gap-4">
           <Link
             href="/#contact"
-            className="group inline-flex items-center justify-center gap-2 rounded-lg bg-[#B8860B] px-7 py-3.5 font-sans text-[13px] font-semibold uppercase tracking-[0.08em] text-[#0B1F3A] shadow-sm transition-colors duration-200 hover:bg-[#D4AF37] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B8860B] focus-visible:ring-offset-2"
+            className="group inline-flex items-center justify-center gap-2 rounded-lg bg-[#B8860B] px-7 py-3.5 font-sans text-[13px] font-semibold uppercase tracking-[0.08em] text-[#0B1F3A] shadow-sm transition-colors duration-200 hover:bg-[#D4AF37] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B8860B] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A1128]"
           >
             Start a Campaign
             <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -1036,7 +1050,7 @@ export const GlobeHero: React.FC = () => {
 
           <Link
             href="/#services"
-            className="group inline-flex items-center justify-center gap-2 rounded-lg border border-[#15181C]/25 px-7 py-3.5 font-sans text-[13px] font-semibold uppercase tracking-[0.08em] text-[#15181C] transition-colors duration-200 hover:border-[#0B1F3A] hover:bg-[#0B1F3A]/[0.04] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0B1F3A] focus-visible:ring-offset-2"
+            className="group inline-flex items-center justify-center gap-2 rounded-lg border border-white/25 px-7 py-3.5 font-sans text-[13px] font-semibold uppercase tracking-[0.08em] text-white transition-colors duration-200 hover:border-white/45 hover:bg-white/[0.06] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A1128]"
           >
             Explore Our Services
             <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -1060,7 +1074,8 @@ export const GlobeHero: React.FC = () => {
         */}
         <div
           ref={cardRef}
-          className="sticky top-0 h-screen w-full overflow-hidden bg-white"
+          className="sticky top-0 h-screen w-full overflow-hidden bg-[#0A1128]"
+          style={{ background: HERO_NAVY }}
         >
           {/*
             The globe slot is now the whole pinned viewport rather than the leftovers
@@ -1070,12 +1085,20 @@ export const GlobeHero: React.FC = () => {
           */}
           <div ref={slotRef} className="relative h-full w-full">
             {/*
-              The card is opaque white and covers the backdrop above, which would leave
-              the planet sitting on flat paper. This is the tonal floor that seats it: a
-              cool navy wash rising from the card's bottom edge at 5% and gone by 72%,
-              kept under the globe box's z-10 so it can only ever show around the limb.
-              Purely a background layer - the globe, its halo and its metrics are all
-              untouched by it.
+              The card is opaque and covers the section behind it, so it carries its own
+              copy of the starfield. This is the field the globe actually sits against for
+              the whole pinned tour. z-0, first in the slot, so it stays under the wash
+              below and under the globe box's z-10.
+            */}
+            <div className="absolute inset-0 z-0">
+              <HeroStarfield zone="stage" />
+            </div>
+
+            {/*
+              The tonal floor that seats the planet: a cool navy wash rising from the
+              card's bottom edge, kept under the globe box's z-10 so it can only ever
+              show around the limb. Purely a background layer - the globe, its halo and
+              its metrics are all untouched by it.
             */}
             <div
               aria-hidden="true"
@@ -1119,6 +1142,7 @@ export const GlobeHero: React.FC = () => {
                   style={{ position: "relative" }}
                   className="h-full w-full"
                   anchors={ANCHORS}
+                  arcs={HERO_ARCS}
                   onProject={handleProject}
                   onReady={handleReady}
                   focusRef={focusRef}
@@ -1138,6 +1162,7 @@ export const GlobeHero: React.FC = () => {
                 {MINING_SITES.map((site, index) => {
                   const isActive =
                     activeId === site.id || TOUR[stageIndex] === site.id;
+                  const pulse = PIN_PULSE[index % PIN_PULSE.length];
                   return (
                     <div
                       key={site.id}
@@ -1148,14 +1173,8 @@ export const GlobeHero: React.FC = () => {
                         transform:
                           "translate3d(var(--mx, -9999px), var(--my, -9999px), 0) scale(var(--unzoom, 1))",
                       }}
-                      className="absolute left-0 top-0 [--len:40px] md:[--len:64px]"
+                      className="absolute left-0 top-0"
                     >
-                      {/* Thin gold connector from the surface out to the label */}
-                      <span
-                        className="absolute left-0 top-0 block h-px origin-left bg-[linear-gradient(90deg,rgba(184,134,11,0.75),rgba(184,134,11,0.18))]"
-                        style={{ width: "var(--len)", transform: "rotate(var(--angle, 0rad))" }}
-                      />
-
                       {/* Pin — 44px hit target centred on the geographic point */}
                       <button
                         type="button"
@@ -1169,52 +1188,22 @@ export const GlobeHero: React.FC = () => {
                       >
                         <span
                           className="globe-pin-ring"
-                          style={{ animationDelay: `${index * 0.42}s` }}
+                          style={pulse}
                           aria-hidden="true"
                         />
                         <span
                           className={`globe-pin-dot ${isActive ? "globe-pin-dot--active" : ""}`}
-                          style={{ animationDelay: `${index * 0.42}s` }}
+                          style={pulse}
                           aria-hidden="true"
                         />
                       </button>
 
-                      {/* Label, offset along the outward normal so it clears the sphere */}
-                      <div
-                        ref={(el) => {
-                          labelRefs.current.set(site.id, el);
-                        }}
-                        style={{
-                          opacity: 0,
-                          transform:
-                            "translate3d(calc(var(--dx, 0) * var(--len)), calc(var(--dy, 0) * var(--len)), 0)",
-                        }}
-                        // 500ms rather than 200: the label's opacity is written as
-                        // discrete steps (1, resting, 0) as a stage takes over, so this
-                        // transition is the entire fade the viewer sees. At 200 it read
-                        // as a switch.
-                        className="absolute left-0 top-0 transition-opacity duration-500 ease-out"
-                      >
-                        <div
-                          className={`
-                            -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-lg px-2.5 py-1 text-center
-                            transition-colors duration-300 ease-out
-                            ${isActive ? "border border-[#E7DCC0] bg-white/95 shadow-[0_4px_16px_rgba(16,24,40,0.12)]" : "border border-transparent"}
-                          `}
-                        >
-                          <span className="block font-geist text-[11px] font-semibold leading-tight tracking-[-0.01em] text-[#15181C] md:text-[12px]">
-                            {site.region}
-                          </span>
-                          <span className="block font-geist text-[9px] font-medium uppercase leading-tight tracking-[0.14em] text-[#9A7B1F] md:text-[10px]">
-                            {site.country}
-                          </span>
-                          {isActive && (
-                            <span className="mt-0.5 block font-geist text-[9px] font-normal leading-tight text-[#57595E] md:text-[10px]">
-                              {site.detail}
-                            </span>
-                          )}
-                        </div>
-                      </div>
+                      {/*
+                        No visible text label. The region, country and detail live only in
+                        the pin's aria-label above: the globe is meant to read as surface,
+                        atmosphere, dots and arcs, and a rendered name on the sphere read
+                        as a stray artefact rather than as a caption.
+                      */}
                     </div>
                   );
                 })}

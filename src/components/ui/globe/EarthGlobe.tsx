@@ -4,12 +4,16 @@ import React, { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { buildEarthTextures } from "./earthTexture";
 import {
+  arcFragmentShader,
+  arcVertexShader,
   atmosphereFragmentShader,
   atmosphereVertexShader,
   cloudFragmentShader,
   cloudVertexShader,
   earthFragmentShader,
   earthVertexShader,
+  arcNodeVertexShader,
+  arcNodeFragmentShader,
 } from "./shaders";
 
 export interface GlobeAnchor {
@@ -28,6 +32,26 @@ export interface ProjectedAnchor {
   dirY: number;
   /** 0 when the anchor has rotated onto the far side, 1 when it faces the camera. */
   opacity: number;
+}
+
+/**
+ * A connection between two anchors, drawn as a great-circle arc in the earth's frame.
+ *
+ * Endpoints are given as anchor ids rather than coordinates so the arc cannot drift from
+ * the marker it lands on: both read the same entry in `anchors`, and moving a region
+ * moves its connections with it.
+ */
+export interface GlobeArc {
+  id: string;
+  fromId: string;
+  toId: string;
+  /**
+   * Where this arc sits in the shared pulse cycle, 0..1. Spacing these unevenly is what
+   * keeps the set from reading as a metronome.
+   */
+  phase: number;
+  /** Set true to keep this arc on small viewports, where the set is thinned. */
+  onMobile?: boolean;
 }
 
 /**
@@ -55,6 +79,13 @@ export interface EarthGlobeProps {
   focusRef?: React.RefObject<GlobeFocus | null>;
   /** Geographic points the caller wants projected to screen space every frame. */
   anchors?: GlobeAnchor[];
+  /** Connections to draw between anchors. Read once, when the scene is built. */
+  arcs?: GlobeArc[];
+  /**
+   * Anchor the viewer is pointing at. Arcs touching it strengthen; every other arc holds
+   * its resting weight. Eased inside the render loop, so changing it never snaps.
+   */
+  emphasisId?: string | null;
   /** Fired once per frame with projected anchors. Write to DOM refs here, never to state. */
   onProject?: (anchors: ProjectedAnchor[]) => void;
   /** Fired once the textures are built and the first frame has rendered. */
@@ -101,6 +132,100 @@ const AXIAL_TILT = THREE.MathUtils.degToRad(-19);
 const VIEW_PITCH = THREE.MathUtils.degToRad(-15);
 
 /**
+ * Ambient light drift — the whole of the section's "atmospheric motion", and deliberately
+ * the smallest moving part on screen.
+ *
+ * The sun vector swings AMBIENT_SUN_SWING radians either side of its rest direction on a
+ * AMBIENT_SUN_PERIOD cycle: 3.2 degrees either way, 140 seconds a cycle, so the light
+ * travels about 0.09 degrees a second against the planet's own 6.2. Under a seventieth of
+ * the rate of the thing it is lighting is the whole design — it is well beneath the speed
+ * at which the eye will track it, so it is never the subject, and what it buys is that the
+ * terminator and the ocean glint are not quite where they were a minute ago.
+ *
+ * Chosen over particles or a bloom pulse on purpose: it adds no draw call, no geometry and
+ * no second element to composite — one uniform, already uploaded every frame, is written
+ * to a slightly different value. Set the swing to 0 to remove the effect entirely.
+ */
+// 0 parks the sun on its rest bearing and holds it there. The swing was the moving
+// half of the shading: it walked the terminator and the ocean glint back and forth
+// across the disc on a 140s cycle, which is the band that was sweeping the surface.
+// The accumulator below still runs and still resolves to cos 1 / sin 0, so the vector
+// is written to exactly its rest value every frame and no code path goes stale.
+const AMBIENT_SUN_SWING = 0;
+const AMBIENT_SUN_PERIOD = 140;
+
+/**
+ * --- Connection arcs ---------------------------------------------------------------
+ *
+ * Vertices per arc. A great circle across half the planet subtends ~180 degrees, so 96
+ * segments is a vertex every two degrees — smooth at the tour's 2.8x magnification, and
+ * 480 vertices across the whole set, which is less geometry than a single one of the
+ * sphere's latitude bands.
+ */
+const ARC_SEGMENTS = 96;
+/**
+ * Radius the arc leaves and re-enters the surface at. Just clear of the sphere so the
+ * ends read as touching down on their region rather than floating over it.
+ */
+const ARC_RADIUS = 1.006;
+/**
+ * How high an arc bows, as a fraction of the planet's radius: a fixed floor plus a share
+ * proportional to how far the arc has to travel, so a short hop between Sweden and
+ * Mongolia stays flat while a crossing to Australia is allowed a little more air.
+ *
+ * Both numbers are small on purpose. At their maximum — an antipodal pair — the peak is
+ * 8.3% of the radius, which reads as a trajectory lifting off the surface and never as
+ * an arch thrown over the planet. Raising ARC_LIFT_SPAN much past ~0.1 starts to make
+ * the set look like flight paths, which is the one reference this section must not
+ * suggest.
+ */
+const ARC_LIFT_BASE = 0.028;
+const ARC_LIFT_SPAN = 0.055;
+/** Seconds for one arc's pulse cycle, counting the long idle between crossings. */
+const ARC_PULSE_PERIOD = 16;
+/**
+ * Share of that cycle the pulse is actually in flight. At 0.22 a head takes ~3.5s to
+ * cross and the arc then rests for ~12.5s; with the phases spread across the set, close
+ * to one arc in the whole system is carrying a pulse at any moment.
+ */
+const ARC_PULSE_TRAVEL = 0.22;
+/** Exponential rate the emphasis eases toward its target. */
+const ARC_EMPHASIS_EASE = 4.5;
+/** Resting alpha of the hairline, before emphasis. Thinned on small viewports. */
+const ARC_OPACITY = 0.5;
+const ARC_OPACITY_COMPACT = 0.4;
+
+/**
+ * Arc endpoint nodes.
+ *
+ * uSize is the sprite's full width in CSS px, not the dot's radius: the visible core is
+ * the inner 36% of it (see the fragment shader), so 20 here puts the core at a ~3.6px
+ * radius with the remaining width spent on the glow falloff. Sizing the sprite to the
+ * core instead would leave the halo nowhere to render and the node would read as a hard
+ * pixel.
+ */
+const ARC_NODE_SIZE = 20;
+const ARC_NODE_OPACITY = 0.95;
+/** Pulse periods, in seconds. Spread across the brief's 2-3s so no two nodes share one. */
+const ARC_NODE_PERIOD_MIN = 2.0;
+const ARC_NODE_PERIOD_SPAN = 1.0;
+
+/**
+ * Rate the drift speed eases toward its target, as an exponential time constant.
+ *
+ * Written as 1 - exp(-dt * k) rather than as the old dt * k, which is that curve's
+ * first-order Taylor term: it agrees at small dt and runs increasingly ahead of it as
+ * frames lengthen (7% high at 60fps, 9% at the loop's 0.05s delta clamp, and past dt =
+ * 0.29s it would exceed 1 outright, were the clamp not there to stop it).
+ *
+ * The clamp meant the old form was never unstable, so this is not a bug fix. It is that
+ * the deceleration is now the same curve on a 120Hz display and on a machine dropping
+ * frames, instead of being slightly quicker on whichever device is struggling — the
+ * hover slow-down settles identically everywhere.
+ */
+const SPEED_EASE = 3.5;
+
+/**
  * Converts a coordinate to a point on the unit sphere using the same convention as
  * THREE.SphereGeometry UVs, so markers land exactly on their painted landmass.
  * With phiStart = 0, u = 0 maps to (-1, 0, 0), which is longitude -180.
@@ -131,9 +256,16 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
   style,
   focusRef,
   anchors,
+  arcs,
+  emphasisId = null,
   onProject,
   onReady,
-  rotationPeriod = 52,
+  // 58, not 52. The brief for this pass was "slow, elegant, non-distracting", and the
+  // drift was already close — this is a ~11% slowing, which is under the threshold where
+  // the change reads as a different animation but is enough that the eye stops tracking
+  // the rotation and starts reading the surface. Anything much past 70 and the globe
+  // reads as stalled rather than as turning.
+  rotationPeriod = 58,
   initialLongitude = 18,
   speedScale = 1,
 }) => {
@@ -144,6 +276,8 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
   const onProjectRef = useRef(onProject);
   const onReadyRef = useRef(onReady);
   const anchorsRef = useRef(anchors);
+  const arcsRef = useRef(arcs);
+  const emphasisIdRef = useRef(emphasisId);
   const rotationPeriodRef = useRef(rotationPeriod);
   const speedScaleRef = useRef(speedScale);
   const focusSourceRef = useRef(focusRef);
@@ -152,6 +286,8 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     onProjectRef.current = onProject;
     onReadyRef.current = onReady;
     anchorsRef.current = anchors;
+    arcsRef.current = arcs;
+    emphasisIdRef.current = emphasisId;
     rotationPeriodRef.current = rotationPeriod;
     speedScaleRef.current = speedScale;
     focusSourceRef.current = focusRef;
@@ -192,9 +328,11 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     }
 
     const isSmallViewport = window.matchMedia("(max-width: 767px)").matches;
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
+    // Live, not a snapshot. The preference can be toggled while the page is open — on
+    // Windows it rides the "animation effects" system switch — and a globe that keeps
+    // spinning after the user has asked it to stop is the failure this guards against.
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let prefersReducedMotion = motionQuery.matches;
 
     renderer.setClearAlpha(0);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -239,11 +377,19 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
       uniforms: {
         uColor: { value: new THREE.Color("#8FB3D9") },
         uSunDirection: { value: sunDirection },
-        uStrength: { value: 0.34 },
+        // 0.38, up from 0.34. Paired with the deeper limb darkening on the surface below:
+        // the two are one adjustment, not two. Taking the surface down at the silhouette
+        // and bringing the haze that sits over it up separates the shell from the ball,
+        // and it is that separation — not brightness — that reads as atmosphere. Held
+        // well under the point where the band becomes a glow in its own right.
+        uStrength: { value: 0.38 },
         uLimb: { value: Math.sqrt(1 - 1 / (ATMOSPHERE_RADIUS * ATMOSPHERE_RADIUS)) },
         // Lower falloff spreads the haze further in from the limb, so the lit edge is a
-        // soft band rather than a thin bright line at horizon scale.
-        uInnerFalloff: { value: 9 },
+        // soft band rather than a thin bright line at horizon scale. Eased from 9 to 8.2:
+        // the card crops the sphere near its crown, so a band concentrated tight on the
+        // limb spends most of itself off screen, and reaching ~10% further in is what
+        // puts the softness where the framing can actually show it.
+        uInnerFalloff: { value: 8.2 },
       },
       transparent: true,
       depthWrite: false,
@@ -288,6 +434,194 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     clouds.renderOrder = 2;
     tiltGroup.add(clouds);
 
+    // --- Connection arcs ----------------------------------------------------------
+    //
+    // Parented to the earth MESH rather than to tiltGroup, and that is the whole of the
+    // "arcs must rotate with the globe" requirement: earth.rotation.y is the only thing
+    // the drift and the tour's aim ever write, so anything under it inherits both exactly
+    // and cannot drift out of step by construction. There is no second transform to keep
+    // in sync and nothing to update per frame.
+    //
+    // renderOrder 5 places them after the surface (1) and the clouds (2) and before the
+    // atmosphere (10). With no depth buffer that ordering is what decides occlusion
+    // between layers, so the arcs sit over the planet and the limb haze still washes over
+    // them — an arc running out toward the silhouette recedes into the atmosphere instead
+    // of staying crisp on top of it. Being hidden by the planet ITSELF is not ordering;
+    // that is solved per fragment in arcFragmentShader.
+    interface ArcRecord {
+      /** The two anchor ids this arc joins, for the emphasis test. */
+      fromId: string;
+      toId: string;
+      phase: number;
+      material: THREE.ShaderMaterial;
+      geometry: THREE.BufferGeometry;
+      /** Eased toward 1 while either endpoint is the emphasised region. */
+      emphasis: number;
+    }
+    const arcRecords: ArcRecord[] = [];
+    const arcGroup = new THREE.Group();
+    earth.add(arcGroup);
+
+    // One Points draw for every endpoint in the set, built after the arcs so it can take
+    // its positions from whichever arcs actually survived the mobile filter.
+    let arcNodes: THREE.Points | null = null;
+    let arcNodeGeometry: THREE.BufferGeometry | null = null;
+    let arcNodeMaterial: THREE.ShaderMaterial | null = null;
+
+    const buildArcs = () => {
+      const list = arcsRef.current ?? [];
+      const points = anchorsRef.current ?? [];
+      const byId = new Map(points.map((a) => [a.id, a]));
+
+      for (const arc of list) {
+        // Small viewports carry only the arcs marked for them. Fewer lines over less
+        // planet is the whole of the mobile answer — the ones that remain keep their
+        // geometry and their pacing rather than being shrunk or sped up.
+        if (isSmallViewport && !arc.onMobile) continue;
+
+        const from = byId.get(arc.fromId);
+        const to = byId.get(arc.toId);
+        if (!from || !to) {
+          console.warn("[EarthGlobe] arc references unknown anchor", arc.id);
+          continue;
+        }
+
+        const a = latLngToVector3(from.lat, from.lng);
+        const b = latLngToVector3(to.lat, to.lng);
+        const angle = a.angleTo(b);
+        const sinAngle = Math.sin(angle);
+        // Coincident or antipodal endpoints have no unique great circle to follow.
+        if (sinAngle < 1e-4) continue;
+
+        const lift = ARC_LIFT_BASE + ARC_LIFT_SPAN * (angle / Math.PI);
+        const positions = new Float32Array((ARC_SEGMENTS + 1) * 3);
+        const ts = new Float32Array(ARC_SEGMENTS + 1);
+        const point = new THREE.Vector3();
+
+        for (let i = 0; i <= ARC_SEGMENTS; i += 1) {
+          const t = i / ARC_SEGMENTS;
+          // Spherical interpolation, so the path is the great circle between the two
+          // regions rather than a chord through the planet reprojected onto it.
+          point
+            .copy(a)
+            .multiplyScalar(Math.sin((1 - t) * angle) / sinAngle)
+            .addScaledVector(b, Math.sin(t * angle) / sinAngle)
+            .normalize()
+            // sin gives zero lift at both ends and the peak at the midpoint, so the arc
+            // leaves and rejoins the surface tangentially instead of stepping off it.
+            .multiplyScalar(ARC_RADIUS + lift * Math.sin(Math.PI * t));
+
+          positions[i * 3] = point.x;
+          positions[i * 3 + 1] = point.y;
+          positions[i * 3 + 2] = point.z;
+          ts[i] = t;
+        }
+
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute("aT", new THREE.BufferAttribute(ts, 1));
+
+        const material = new THREE.ShaderMaterial({
+          vertexShader: arcVertexShader,
+          fragmentShader: arcFragmentShader,
+          uniforms: {
+            // The darkest gold on the site, at low alpha. A subdued accent rather than a
+            // new colour, and dark enough to hold against both the ocean and the lit
+            // land the line has to cross.
+            uColor: { value: new THREE.Color("#D4AF37") },
+            // The pulse is the one place the brighter gold appears, and only over the
+            // ~5% of the line the head covers.
+            uPulseColor: { value: new THREE.Color("#D4AF37") },
+            uOpacity: {
+              value: isSmallViewport ? ARC_OPACITY_COMPACT : ARC_OPACITY,
+            },
+            uEmphasis: { value: 0 },
+            uPulse: { value: -1 },
+            uPulseGain: { value: prefersReducedMotion ? 0 : 1 },
+          },
+          transparent: true,
+          depthWrite: false,
+          depthTest: false,
+        });
+
+        const line = new THREE.Line(geometry, material);
+        line.renderOrder = 5;
+        // The arc is a fixed shape in the earth's frame; only its parent ever moves.
+        line.matrixAutoUpdate = false;
+        line.updateMatrix();
+        // Its own bounds are meaningless with depthTest off and the camera this close.
+        line.frustumCulled = false;
+        arcGroup.add(line);
+
+        arcRecords.push({
+          fromId: arc.fromId,
+          toId: arc.toId,
+          phase: arc.phase,
+          material,
+          geometry,
+          emphasis: 0,
+        });
+      }
+
+      // --- Endpoint nodes ---------------------------------------------------------
+      // Deduplicated: a point shared by three arcs is one node, not three stacked on the
+      // same pixel, which would triple its alpha and desynchronise nothing.
+      const nodeIds = new Set<string>();
+      for (const record of arcRecords) {
+        nodeIds.add(record.fromId);
+        nodeIds.add(record.toId);
+      }
+      if (nodeIds.size === 0) return;
+
+      const positions = new Float32Array(nodeIds.size * 3);
+      const phases = new Float32Array(nodeIds.size);
+      const periods = new Float32Array(nodeIds.size);
+
+      let n = 0;
+      for (const id of nodeIds) {
+        const anchor = byId.get(id);
+        if (!anchor) continue;
+        const v = latLngToVector3(anchor.lat, anchor.lng).multiplyScalar(ARC_RADIUS);
+        positions[n * 3] = v.x;
+        positions[n * 3 + 1] = v.y;
+        positions[n * 3 + 2] = v.z;
+        // Golden-ratio stride for the phase and an irrational-ish walk for the period:
+        // both are deterministic, and neither divides evenly into the other, so the set
+        // has no common cycle to drift back into sync on.
+        phases[n] = (n * 0.618034 * Math.PI * 2) % (Math.PI * 2);
+        periods[n] = ARC_NODE_PERIOD_MIN + ((n * 0.381966) % 1) * ARC_NODE_PERIOD_SPAN;
+        n += 1;
+      }
+
+      arcNodeGeometry = new THREE.BufferGeometry();
+      arcNodeGeometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+      arcNodeGeometry.setAttribute("aPhase", new THREE.BufferAttribute(phases, 1));
+      arcNodeGeometry.setAttribute("aPeriod", new THREE.BufferAttribute(periods, 1));
+
+      arcNodeMaterial = new THREE.ShaderMaterial({
+        vertexShader: arcNodeVertexShader,
+        fragmentShader: arcNodeFragmentShader,
+        uniforms: {
+          uColor: { value: new THREE.Color("#D4AF37") },
+          uOpacity: { value: ARC_NODE_OPACITY },
+          uSize: { value: ARC_NODE_SIZE },
+          uPixelRatio: { value: renderer.getPixelRatio() },
+          uTime: { value: 0 },
+          uPulseGain: { value: prefersReducedMotion ? 0 : 1 },
+        },
+        transparent: true,
+        depthWrite: false,
+        depthTest: false,
+      });
+
+      arcNodes = new THREE.Points(arcNodeGeometry, arcNodeMaterial);
+      // Above the arcs, so a node sits on top of the hairlines meeting it.
+      arcNodes.renderOrder = 6;
+      arcNodes.frustumCulled = false;
+      arcGroup.add(arcNodes);
+    };
+    buildArcs();
+
     let earthMaterial: THREE.ShaderMaterial | null = null;
     let cloudMaterial: THREE.ShaderMaterial | null = null;
     let dayTexture: THREE.CanvasTexture | null = null;
@@ -295,12 +629,26 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     let cloudTexture: THREE.CanvasTexture | null = null;
 
     // --- Sizing -----------------------------------------------------------------
-    let width = canvas.clientWidth || 1;
-    let height = canvas.clientHeight || 1;
+    // Start at 0 so the first applySize() always passes the unchanged-size guard below.
+    let width = 0;
+    let height = 0;
 
+    /**
+     * Resizes the drawing buffer, and reports whether it actually had to.
+     *
+     * The guard is not a micro-optimisation. setPixelRatio + setSize reallocate the
+     * drawing buffer, which at the sizes this component asks for is tens of megabytes of
+     * GPU memory freed and re-acquired — and a ResizeObserver on a full-height element
+     * fires continuously on mobile, where showing or hiding the URL bar changes 100vh by
+     * a hundred pixels mid-scroll. Reallocating through that is what turns a scroll into
+     * a stutter. Same-size notifications now cost a pair of integer compares.
+     */
     const applySize = () => {
-      width = Math.max(canvas.clientWidth, 1);
-      height = Math.max(canvas.clientHeight, 1);
+      const nextWidth = Math.max(canvas.clientWidth, 1);
+      const nextHeight = Math.max(canvas.clientHeight, 1);
+      if (nextWidth === width && nextHeight === height) return false;
+      width = nextWidth;
+      height = nextHeight;
 
       // The box is deliberately far wider than the viewport, so a raw devicePixelRatio
       // would allocate an enormous framebuffer. Cap the longest drawing-buffer edge; the
@@ -339,6 +687,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
       renderer.setSize(width, height, false);
+      return true;
     };
     applySize();
 
@@ -423,21 +772,97 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
 
     // Eased toward the requested scale so hovering a marker slows the drift smoothly
     // instead of snapping it.
-    let currentSpeed = 1;
+    //
+    // Starts at rest rather than at full drift. The planet's first move is then an
+    // acceleration into the turn instead of a cut into one already at speed, which is the
+    // difference between the globe arriving and the globe having been running off screen
+    // all along. No new curve for it: the same SPEED_EASE the hover slow-down uses carries
+    // it, ~0.9s to 95% of the drift, which sits inside the 1400ms reveal the hero fades
+    // the canvas up over — so the fade and the spin-up read as one gesture, not two.
+    //
+    // It costs nothing afterwards. start()/stop() do not touch this, so a globe that
+    // scrolls out of view and back resumes at the speed it was already at rather than
+    // easing in a second time, and the hover slow-down is unaffected in either direction.
+    let currentSpeed = 0;
     // The free drift is tracked separately from what is finally written to the mesh, so
     // focus can blend against it and releasing focus resumes mid-drift with no jump.
     let freeYaw = earth.rotation.y;
     let cloudLead = 0;
+    /**
+     * Free-running phase for the light drift. Accumulated from the same clamped delta the
+     * rotation uses rather than read from the clock, so a backgrounded tab resumes the
+     * swing where it left off instead of jumping to wherever wall time had reached.
+     */
+    let sunPhase = 0;
+    /** Shared pulse clock. Every arc reads it and offsets by its own phase. */
+    let arcClock = 0;
+    // The rest direction, kept intact: sunDirection itself is rewritten every frame, and
+    // the swing has to be measured from a fixed origin or it would integrate into a slow
+    // drift all the way round the planet.
+    const sunRestX = sunDirection.x;
+    const sunRestZ = sunDirection.z;
 
     const renderFrame = (delta: number) => {
       if (delta > 0) {
         const target = speedScaleRef.current;
-        currentSpeed += (target - currentSpeed) * Math.min(delta * 3.5, 1);
+        currentSpeed += (target - currentSpeed) * (1 - Math.exp(-delta * SPEED_EASE));
 
         const turn = (delta * Math.PI * 2 * currentSpeed) / rotationPeriodRef.current;
         freeYaw += turn;
         // Slight parallax: the cloud sheet runs a touch ahead of the surface.
         cloudLead += turn * 0.12;
+
+        // Ambient light drift. One rotation of the sun vector about the world's vertical,
+        // written in place — the earth, cloud and atmosphere materials all hold a
+        // reference to this same Vector3, so all three stay lit by one consistent source
+        // for free. y is untouched, so the sun keeps its elevation and only its bearing
+        // moves; swinging it vertically instead would walk the terminator across the
+        // poles, which reads as the planet nodding.
+        sunPhase += delta;
+        const swing =
+          Math.sin((sunPhase / AMBIENT_SUN_PERIOD) * Math.PI * 2) * AMBIENT_SUN_SWING;
+        const cos = Math.cos(swing);
+        const sin = Math.sin(swing);
+        sunDirection.x = sunRestX * cos + sunRestZ * sin;
+        sunDirection.z = -sunRestX * sin + sunRestZ * cos;
+
+        arcClock += delta;
+      }
+
+      // --- Arcs ---------------------------------------------------------------------
+      // One shared clock and one loop over at most five records: no arc owns a timer, a
+      // tween or an animation loop of its own, which is what keeps the layer's cost flat
+      // whatever the set grows to.
+      if (arcRecords.length > 0) {
+        const emphasised = emphasisIdRef.current;
+        for (const arc of arcRecords) {
+          // Phase is per arc, so the heads are spread around the cycle rather than
+          // leaving together. Outside the travel window uPulse parks at -1, which is far
+          // enough from the 0..1 the shader samples that the head evaluates to nothing.
+          const cycle = (arcClock / ARC_PULSE_PERIOD + arc.phase) % 1;
+          arc.material.uniforms.uPulse.value =
+            cycle < ARC_PULSE_TRAVEL ? cycle / ARC_PULSE_TRAVEL : -1;
+
+          // The node pulse reads the same clock. Written once per frame regardless of
+          // how many nodes there are — the per-node offset lives in the attributes.
+          if (arcNodeMaterial) arcNodeMaterial.uniforms.uTime.value = arcClock;
+
+          // Only the arcs touching the region being pointed at respond; the rest hold
+          // their resting weight, so one regional network is emphasised at a time.
+          const target =
+            emphasised !== null &&
+            (arc.fromId === emphasised || arc.toId === emphasised)
+              ? 1
+              : 0;
+          if (delta > 0 && arc.emphasis !== target) {
+            arc.emphasis +=
+              (target - arc.emphasis) * (1 - Math.exp(-delta * ARC_EMPHASIS_EASE));
+            if (Math.abs(target - arc.emphasis) < 1e-3) arc.emphasis = target;
+          } else if (delta <= 0) {
+            arc.emphasis = target;
+          }
+          arc.material.uniforms.uEmphasis.value = arc.emphasis;
+        }
       }
 
       const focus = focusSourceRef.current?.current ?? null;
@@ -496,10 +921,25 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
       else stop();
     };
 
+    /**
+     * Resizes are coalesced into the next frame rather than handled on the notification.
+     *
+     * A ResizeObserver can fire several times for one visual change — a CSS transition on
+     * the box, or the tour's own scale settling — and each notification arrives before
+     * paint. Doing the reallocation on every one of them meant the buffer could be thrown
+     * away and rebuilt two or three times for a single resize the user perceives as one.
+     * Batching to a frame collapses those into the last size that was actually asked for.
+     */
+    let resizeFrame: number | null = null;
     const resizeObserver = new ResizeObserver(() => {
-      applySize();
-      // Keep a paused globe (reduced motion, or scrolled out of view) in sync.
-      if (!running) renderFrame(0);
+      if (resizeFrame !== null) return;
+      resizeFrame = requestAnimationFrame(() => {
+        resizeFrame = null;
+        if (disposed) return;
+        // Keep a paused globe (reduced motion, or scrolled out of view) in sync — but
+        // only when the size genuinely moved, since a running loop redraws anyway.
+        if (applySize() && !running) renderFrame(0);
+      });
     });
     resizeObserver.observe(canvas);
 
@@ -513,6 +953,29 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     intersectionObserver.observe(canvas);
 
     document.addEventListener("visibilitychange", syncRunState);
+
+    // Reduced motion, honoured live. Turning it on parks the loop and leaves the planet
+    // on screen, lit and fully rendered, exactly as it looks at rest — the globe is
+    // content here, not decoration, so it is the motion that goes and not the sphere.
+    const onMotionPreferenceChange = () => {
+      prefersReducedMotion = motionQuery.matches;
+      // The arcs stay, and stay lit; it is only the travelling head that goes. Killing
+      // the gain rather than the layer is what "do not remove the entire visual" asks
+      // for, and it leaves emphasis on hover working exactly as it does otherwise.
+      for (const arc of arcRecords) {
+        arc.material.uniforms.uPulseGain.value = prefersReducedMotion ? 0 : 1;
+      }
+      // Nodes park at full brightness rather than vanishing: the dot is content, it is
+      // only its breathing that reduced motion asks to stop.
+      if (arcNodeMaterial) arcNodeMaterial.uniforms.uPulseGain.value = prefersReducedMotion ? 0 : 1;
+      if (prefersReducedMotion) {
+        stop();
+        renderFrame(0);
+      } else {
+        syncRunState();
+      }
+    };
+    motionQuery.addEventListener("change", onMotionPreferenceChange);
 
     // --- Async texture build ----------------------------------------------------
     //
@@ -588,7 +1051,27 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
             uOpacity: { value: 1.0 },
             uDesaturate: { value: 0.16 },
             uSpecularStrength: { value: 0.55 },
-            uLimbDarkening: { value: 0.38 },
+            // 0.44, up from 0.38. The single most effective dial for making the sphere
+            // read as a sphere on a white ground, because it is the one cue that survives
+            // the tour's magnification: a terminator can rotate off screen and a specular
+            // glint can miss the visible cap, but the falloff toward the silhouette is
+            // present in every frame at every zoom. Raised only to the point where the
+            // limb still holds legible surface detail — past ~0.55 the edge goes to mud
+            // and the coastlines there stop reading.
+            uLimbDarkening: { value: 0.44 },
+            // The sunset band. Written as a hex so three converts it out of sRGB the
+            // same way uHazeColor above is converted, which puts it in the linear space
+            // the shader adds it in; the linear triple it lands on is ~(0.55, 0.34, 0.15)
+            // — a warm ochre inside the site's existing gold family rather than a new
+            // colour introduced at the terminator.
+            //
+            // 0.32 is set against the band's own peak of 0.25, so the strongest fragment
+            // anywhere on the planet gains ~0.04 of red over what it had. That is a
+            // quarter-stop of warmth on the one strip where a sunset belongs and nothing
+            // anywhere else — visible as the terminator drifts across, invisible as an
+            // effect, which is the order this section asks for.
+            uTerminatorColor: { value: new THREE.Color("#C49E6C") },
+            uTerminatorStrength: { value: 0.32 },
           },
           transparent: true,
           depthWrite: false,
@@ -634,10 +1117,18 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     return () => {
       disposed = true;
       stop();
+      if (resizeFrame !== null) cancelAnimationFrame(resizeFrame);
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
       document.removeEventListener("visibilitychange", syncRunState);
+      motionQuery.removeEventListener("change", onMotionPreferenceChange);
 
+      for (const arc of arcRecords) {
+        arc.geometry.dispose();
+        arc.material.dispose();
+      }
+      arcNodeGeometry?.dispose();
+      arcNodeMaterial?.dispose();
       earthGeometry.dispose();
       cloudGeometry.dispose();
       atmosphereGeometry.dispose();

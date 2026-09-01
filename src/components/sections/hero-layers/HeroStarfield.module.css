@@ -1,0 +1,57 @@
+/*
+ * Scoped styles for the hero starfield.
+ *
+ * A CSS Module rather than a rule in globals.css on purpose: the class name AND the
+ * keyframe name are both hashed at build time, so nothing here can be reached from,
+ * or collide with, any other section or page. globals.css is left untouched.
+ */
+
+.twinkle {
+  animation-name: starTwinkle;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+  /* Duration and delay are per-star inline styles; only opacity is animated, which
+     the compositor handles without layout or paint. */
+  will-change: opacity;
+}
+
+/*
+ * The rest opacity is read from --star-opacity so a twinkling star pulses around its
+ * own brightness rather than a shared constant — otherwise every twinkling star would
+ * converge on the same value at the bottom of the cycle and the effect would read as a
+ * blink in unison.
+ */
+@keyframes starTwinkle {
+  0%,
+  100% {
+    opacity: var(--star-opacity);
+  }
+  50% {
+    opacity: calc(var(--star-opacity) * 0.3);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .twinkle {
+    animation: none;
+  }
+}
+
+/*
+ * Parallax easing.
+ *
+ * The transform target is written imperatively on pointermove; this is what makes the
+ * move smooth instead of a snap. A long, decelerating curve so the field trails the
+ * cursor slightly rather than tracking it — the effect should read as depth, not as
+ * something following the mouse.
+ */
+.drift {
+  transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drift {
+    transition: none;
+  }
+}

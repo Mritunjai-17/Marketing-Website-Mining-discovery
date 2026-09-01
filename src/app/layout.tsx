@@ -1,18 +1,20 @@
 import type { Metadata } from "next";
-import { DM_Serif_Display, Geist, Inter, IBM_Plex_Mono } from "next/font/google";
+import { Inter, IBM_Plex_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { Header, Footer, SmoothScroll } from "@/components/layout";
 
-const dmSerifDisplay = DM_Serif_Display({
+/**
+ * Playfair Display, the brand display serif.
+ *
+ * No `weight` key on purpose: Playfair Display ships as a variable font whose wght
+ * axis runs 400-900, so omitting it loads that one variable file and every weight in
+ * the range is available - 400 regular, 500/600 medium, 700 bold, 800/900 for the
+ * large headlines. Listing static cuts instead would download five files to cover the
+ * same range.
+ */
+const playfairDisplay = Playfair_Display({
   subsets: ["latin"],
-  variable: "--font-serif-custom",
-  weight: ["400"],
-  display: "swap",
-});
-
-const geist = Geist({
-  subsets: ["latin"],
-  variable: "--font-geist-custom",
+  variable: "--font-display-custom",
   display: "swap",
 });
 
@@ -43,7 +45,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${dmSerifDisplay.variable} ${geist.variable} ${inter.variable} ${ibmPlexMono.variable}`}
+      className={`${playfairDisplay.variable} ${inter.variable} ${ibmPlexMono.variable}`}
     >
       <body className="min-h-screen flex flex-col bg-[#FAFAF9] text-[#1A1D21] antialiased selection:bg-[#B8860B]/20 selection:text-[#0B1F3A]">
         <SmoothScroll>
