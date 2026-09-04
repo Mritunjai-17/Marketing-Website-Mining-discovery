@@ -2,29 +2,56 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import { Menu, X, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 /*
- * ABOUT and SERVICES are real routes now, not in-page anchors. The other three stay
- * anchors but are root-relative ("/#contact", not "#contact") — a bare hash on /about
- * would only set the fragment on a page that has no such section, and nothing would happen.
+ * Every item here is a real route, so none of them are in-page anchors any more.
  *
  * Pointing SERVICES at /services does not touch the homepage's own services section: it
- * keeps its id and its place, and the footer still links to it.
+ * keeps its id and its place, and the footer still links to it. The same holds for the
+ * two entries that used to sit between SERVICES and CONTACT — COMPANIES ("/#trusted-by")
+ * and SUBMIT NEWS ("/#submit-news") are gone from the nav, but the sections they pointed
+ * at are untouched and the footer still links to them.
  */
 const navLinks = [
   { name: "About", href: "/about" },
   { name: "Services", href: "/services" },
-  { name: "Companies", href: "/#trusted-by" },
-  { name: "Submit News", href: "/#submit-news" },
-  { name: "Contact", href: "/#contact" },
+  { name: "Contact", href: "/contact" },
 ];
 
 export const Header: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  /*
+   * GET FEATURED goes to /contact like the nav's Contact item does. router.push rather
+   * than wrapping the Button in a Link: Button renders a real <button>, and an <a> around
+   * a <button> is interactive content inside interactive content.
+   */
+  const router = useRouter();
+  const pathname = usePathname();
+
+  /*
+   * Whether the header is currently sitting on a light page ground.
+   *
+   * The bar is transparent until you scroll, so its text is drawn straight onto whatever
+   * is beneath it. On the homepage that is the navy hero and white reads correctly; every
+   * other route opens on #F7F5EF, where white-on-off-white is very nearly invisible —
+   * which is the bug. Once scrolled the header paints its own #0B1F3A behind itself, so
+   * white is right again everywhere and only the transparent state needs to differ.
+   *
+   * Keyed off the route rather than a prop so that this stays one component for every
+   * page, and so a new light route needs no wiring.
+   */
+  const onLightGround = !isScrolled && pathname !== "/";
+
+  const goToContact = () => {
+    setMobileMenuOpen(false);
+    router.push("/contact");
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -70,9 +97,13 @@ export const Header: React.FC = () => {
             <Link
               key={link.name}
               href={link.href}
-              className={`text-xs font-semibold uppercase tracking-wider transition-colors duration-300 ${isScrolled
-                  ? "text-white/90 hover:text-[#D4AF37]"
-                  : "text-white/85 hover:text-[#D4AF37]"
+              className={`text-xs font-semibold uppercase tracking-wider transition-colors duration-300 ${onLightGround
+                  ? // #B8860B on hover, not #D4AF37: the lighter gold is legible on navy
+                    // but washes out against an off-white ground.
+                    "text-[#0B1F3A] hover:text-[#B8860B]"
+                  : isScrolled
+                    ? "text-white/90 hover:text-[#D4AF37]"
+                    : "text-white/85 hover:text-[#D4AF37]"
                 }`}
             >
               {link.name}
@@ -85,6 +116,7 @@ export const Header: React.FC = () => {
           <Button
             variant="gold"
             size="sm"
+            onClick={goToContact}
             className="font-sans font-semibold tracking-wide text-[#0B1F3A] bg-[#B8860B] hover:bg-[#D4AF37] shadow-[0_0_20px_rgba(184,134,11,0.35)] hover:shadow-[0_0_25px_rgba(212,175,55,0.5)] transition-shadow text-xs py-1.5 px-4"
           >
             Get Featured
@@ -96,7 +128,9 @@ export const Header: React.FC = () => {
         <button
           type="button"
           onClick={() => setMobileMenuOpen(true)}
-          className={`lg:hidden p-1.5 rounded-md focus:outline-none transition-colors ${isScrolled ? "text-white hover:bg-white/10" : "text-white hover:bg-white/10"
+          className={`lg:hidden p-1.5 rounded-md focus:outline-none transition-colors ${onLightGround
+              ? "text-[#0B1F3A] hover:bg-[#0B1F3A]/10"
+              : "text-white hover:bg-white/10"
             }`}
           aria-label="Open navigation menu"
         >
@@ -162,7 +196,7 @@ export const Header: React.FC = () => {
                 variant="gold"
                 size="md"
                 fullWidth
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={goToContact}
                 className="font-sans font-semibold tracking-wide text-[#0B1F3A] bg-[#B8860B] hover:bg-[#D4AF37] shadow-md"
               >
                 Get Featured

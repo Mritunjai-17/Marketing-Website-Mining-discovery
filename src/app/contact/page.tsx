@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ContactHero, ContactInformation } from "@/components/contact";
+import { ContactPanel } from "@/components/contact";
 
 export const metadata: Metadata = {
   title: "Contact | Mining Discovery",
@@ -24,20 +24,13 @@ export const metadata: Metadata = {
  */
 export default function ContactPage() {
   return (
+    /*
+      The page is now a light ground carrying one card, rather than a full-bleed editorial
+      spread. #F7F5EF is the surface this route already used, kept so the page reads as the
+      same one it was.
+    */
     <div className="w-full bg-[#F7F5EF] font-sans text-[#1A1D21]">
-      {/*
-        Both sections hide their content in CSS before revealing it, so the server-rendered
-        HTML never flashes the finished layout before hydration. With no JS there is no reveal
-        — so the hidden state must not be what a reader is left looking at. Same override
-        /about and /services carry, and inert for everyone else: a <noscript> block's contents
-        are never parsed as markup when scripting is enabled.
-      */}
-      <noscript>
-        <style>{`[data-about-reveal],[data-about-rule-x],[data-about-rule-y],.about-mask__word{transform:none!important;opacity:1!important}`}</style>
-      </noscript>
-
-      <ContactHero />
-      <ContactInformation />
+      <ContactPanel />
     </div>
   );
 }

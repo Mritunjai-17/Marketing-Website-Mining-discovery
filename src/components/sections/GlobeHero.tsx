@@ -7,6 +7,7 @@ import { ArrowRight } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { HeroStarfield } from "@/components/sections/hero-layers/HeroStarfield";
+import { HeadlineUnderline } from "@/components/sections/hero-layers/HeadlineUnderline";
 import { FOCUS_ANCHOR_ID, GLOBE_FIT } from "@/components/ui/globe/EarthGlobe";
 import type {
   GlobeAnchor,
@@ -235,10 +236,23 @@ const TOUR = [
  * `rise` differs slightly per line so the stack opens up as it goes instead of travelling
  * as a rigid unit. All three sit inside the 80–120px brief.
  */
-const HEADLINE_LINES = [
+const HEADLINE_LINES: {
+  text: string;
+  start: number;
+  /**
+   * Leading run of `text` that carries the gold brushstroke, or absent for no stroke.
+   *
+   * A prefix rather than a flag because the stroke has to span the word and NOT the
+   * period after it: the render splits `text` here, wraps the first part so the stroke
+   * can size itself to it, and prints the remainder as plain text. Reading order is
+   * unchanged — the two runs are adjacent with no whitespace between them, so the DOM
+   * still reads "ignore." exactly as before.
+   */
+  underlineWord?: string;
+}[] = [
   { text: "Make your mining", start: 0.18 },
   { text: "story impossible to", start: 0.34 },
-  { text: "ignore.", start: 0.5 },
+  { text: "ignore.", start: 0.5, underlineWord: "ignore" },
 ];
 
 /**
@@ -287,18 +301,29 @@ const ENGAGE = 0.03;
 /**
  * How the sampled progress follows the true scroll position.
  *
- * This was a first-order lag, which can only ever decay toward the target — its velocity
- * jumps the instant the wheel moves, so a hard scroll still starts hard. A second-order
- * spring has to accelerate into the move and decelerate out of it, which is the weight
- * that reads as deliberate rather than as 1:1 scrubbing.
+ * THIS WAS DELIBERATELY LAGGY AND IS NOT ANY MORE. The previous values, 60/20, gave a
+ * time constant of 272ms and took 816ms to settle — the note here used to describe that
+ * as weight that "reads as deliberate rather than as 1:1 scrubbing". It is the same thing
+ * a reader feels as the globe being disconnected from the wheel: it accelerates into a
+ * move and coasts out of it a third of a second behind the page.
  *
- * Overdamped on purpose: zeta = 20 / (2 * sqrt(60)) = 1.29, so progress never overshoots
- * the scroll position and the tour cannot run past a stop and come back. The bounce lives
- * in ZOOM_SPRING instead, where it is a deliberate effect on one property.
+ * 480/44 is the same integrator tuned to track instead of trail. zeta = 44 / (2 *
+ * sqrt(480)) = 1.004, so it is still on the safe side of critical — progress can never
+ * overshoot the scroll position, and the tour cannot run past a stop and come back — but
+ * the time constant is 50ms and it is inside 5% in 150ms. At 60fps that is under three
+ * frames, which is short enough to read as locked to the scroll while still absorbing the
+ * frame-to-frame unevenness the raw position carries.
  *
- * Raise stiffness to track the wheel harder; lower it to soften further.
+ * WHY ANY FILTER AT ALL. Lenis already smooths the scroll position with its own lerp, so
+ * this is a second filter on an already-smooth signal — which is exactly why it must be
+ * fast. It earns its place only by absorbing sub-pixel unevenness and the odd long frame;
+ * anything slower is double-smoothing, and double-smoothing is the lag.
+ *
+ * Stability: explicit Euler with substepping needs h * damping < 2. At 60fps that is
+ * 0.0167 * 44 = 0.73, and the worst substep the cap allows before RESUME_GAP takes over
+ * is 0.0333 * 44 = 1.47. Both hold. Raising damping past ~110 would not.
  */
-const PROGRESS_SPRING = { stiffness: 60, damping: 20 };
+const PROGRESS_SPRING = { stiffness: 480, damping: 44 };
 /**
  * The zoom's own spring, and the only underdamped one.
  *
@@ -317,6 +342,13 @@ const ZOOM_SPRING = { stiffness: 90, damping: 14 };
  * play the whole skipped span back as a slide, so progress snaps instead.
  */
 const RESUME_GAP = 0.2;
+/**
+ * Milliseconds without a frame before the scroll listener takes over sampling.
+ *
+ * 100ms is ~6 frames at 60Hz and ~12 at 120Hz, so a running loop never trips it and a
+ * genuinely parked one is picked up within a tenth of a second.
+ */
+const SAMPLE_IDLE = 100;
 
 interface SpringState {
   value: number;
@@ -363,35 +395,6 @@ function stepSpring(
 const CURTAIN_START = 0.90;
 
 /**
- * The wipe: a layered fall of light down the gold family, deep at the top and resolving
- * into Stats at the foot.
- *
- * Every colour is a token already in @theme, and the depth comes from moving DOWN the
- * family rather than from adding one:
- *   #9E7208  --color-gold-hover, the darkest gold on the site. Carries the top.
- *   #B8860B  --color-gold. The rich body.
- *   #D4AF37  --color-gold-muted. The vivid band.
- *   #FAF5E8  --color-gold-light. Where it softens.
- *   #FBFBFA  Stats' own section background, verbatim from Stats.tsx.
- * Hue barely moves across those four (42deg to 46deg) — what changes is saturation and
- * lightness, which is what reads as depth rather than as a second colour.
- *
- * The stop POSITIONS are not arbitrary, and this is the part worth keeping straight. The
- * element is 130vh, bottom-anchored in a 100vh card, so its top 23.1% is clipped and the
- * card shows 23.1% to 100%. Screen position maps as `element% = 23.1 + p * 76.9`:
- *   24%  -> the very top of the screen        -> darkest (#9E7208)
- *   58%  -> 45% down the screen               -> most saturated (#D4AF37, opaque)
- *   74%  -> 66% down                          -> softening to cream
- *   90%  -> 87% down                          -> Stats' colour, and flat from there
- * Placed by screen position instead of by element position, the richest band lands mid
- * view rather than off the top edge, which is what a flat-looking version gets wrong.
- *
- * The flat #FBFBFA run at the foot is deliberate and load-bearing: the panel's bottom
- * edge and the card's bottom edge coincide, and Stats begins on the next pixel, so that
- * run is what makes the handoff seamless. Everything above 58% is translucent, so the
- * planet still reads through the rich part instead of being covered by it.
- */
-/**
  * The hero ground.
  *
  * #0D1B2A at the top is the navbar's scrolled-state navy, so the header pinning over
@@ -404,16 +407,61 @@ const HERO_NAVY = [
   "linear-gradient(180deg, #0D1B2A 0%, #0B1526 48%, #0A1128 100%)",
 ].join(" ");
 
+/**
+ * The wipe: the hero's navy rising and resolving into Stats' white.
+ *
+ * This used to be a fall of light down the gold family (#9E7208 -> #B8860B -> #D4AF37 ->
+ * #FAF5E8). It was the only gold wash on the page and, at 130vh, by far the largest use
+ * of the colour anywhere on the site — gold is an accent here, for a chapter number or a
+ * CTA, not a structural surface. Read against the navbar it looked like a decorative
+ * band inserted between two sections rather than one of them ending.
+ *
+ * The colours are now the brand navy resolving to Stats' own white:
+ *
+ *   #0B1F3A  the navbar's scrolled-state navy, verbatim from Header.tsx. Carries the top.
+ *   #36475D  the same navy, 18% of the way to white
+ *   #707B8B  42% - the cool slate mid-tone
+ *   #AEB5BD  68% - where it reads as light grey
+ *   #DEE1E3  88%
+ *   #FBFBFA  Stats' own section background, verbatim from Stats.tsx.
+ *
+ * Every mid-tone is a straight blend of those two endpoints, so the hue never leaves the
+ * navy and what changes is lightness alone. That is what keeps it reading as the page
+ * getting darker rather than as a second colour arriving.
+ *
+ * The stop POSITIONS are unchanged from the gold version, and this is the part worth
+ * keeping straight. The element is 130vh, bottom-anchored in a 100vh card, so its top
+ * 23.1% is clipped and the card shows 23.1% to 100%. Screen position maps as
+ * `element% = 23.1 + p * 76.9`:
+ *   24%  -> the very top of the screen        -> deepest navy
+ *   58%  -> 45% down the screen               -> opaque #0B1F3A
+ *   68-90% -> 58% to 87% down                 -> the ramp out through slate to grey
+ *   95%  -> 93% down                          -> Stats' colour, and flat from there
+ * Placed by screen position instead of by element position, the deep band lands mid view
+ * rather than off the top edge.
+ *
+ * The navy needs a longer run-out than the gold did: gold sits mid-luminance and was
+ * already halfway to white, where #0B1F3A is not, so the ramp gets four stops between
+ * 58% and 90% instead of one. Compressing it is what would put a visible edge back.
+ *
+ * The flat #FBFBFA run at the foot is deliberate and load-bearing: the panel's bottom
+ * edge and the card's bottom edge coincide, and Stats begins on the next pixel, so that
+ * run is what makes the handoff seamless. Everything above 58% is translucent, so the
+ * planet still reads through the deep part instead of being covered by it.
+ */
 const STATS_WIPE = [
   "linear-gradient(180deg,",
-  "rgba(212,175,55,0) 0%,",
-  "rgba(212,175,55,0.30) 8%,",
-  "rgba(184,134,11,0.65) 16%,",
-  "rgba(158,114,8,0.90) 24%,",
-  "rgba(184,134,11,0.95) 40%,",
-  "rgba(212,175,55,1) 58%,",
-  "#FAF5E8 74%,",
-  "#FBFBFA 90%,",
+  "rgba(11,31,58,0) 0%,",
+  "rgba(11,31,58,0.28) 8%,",
+  "rgba(11,31,58,0.62) 16%,",
+  "rgba(11,31,58,0.88) 24%,",
+  "rgba(11,31,58,0.96) 40%,",
+  "#0B1F3A 58%,",
+  "#36475D 68%,",
+  "#707B8B 76%,",
+  "#AEB5BD 84%,",
+  "#DEE1E3 90%,",
+  "#FBFBFA 95%,",
   "#FBFBFA 100%)",
 ].join(" ");
 
@@ -580,7 +628,7 @@ export const GlobeHero: React.FC = () => {
           lines[i],
           {
             // Percent of the line's OWN height, not pixels: 150% clears the mask at every
-            // size the clamp produces, from ~46px on a phone to ~83px at 1440.
+            // size the clamp produces, from ~37px on a phone to ~66px at 1440.
             yPercent: HEADLINE_RISE_PERCENT,
             opacity: 0,
             filter: `blur(${HEADLINE_BLUR}px)`,
@@ -736,14 +784,18 @@ export const GlobeHero: React.FC = () => {
     lastSampleRef.current = now;
 
     const progress = progressSpring.current;
-    if (gap <= 0 || gap > RESUME_GAP) {
+    if (gap > RESUME_GAP) {
       // Parked loop: snap, and kill the velocity with it. Integrating across the skipped
       // span would play it back as a slide, and a spring would ring on top of that.
       progress.value = target;
       progress.velocity = 0;
-    } else {
+    } else if (gap > 0) {
       stepSpring(progress, target, gap, PROGRESS_SPRING);
     }
+    // gap === 0 means a second call inside the same frame: leave the spring untouched.
+    // This used to fall into the snap branch above, so any duplicate sample jumped
+    // progress straight onto the raw scroll position — a visible hitch, and the more
+    // often the scroll listener fired the worse it got.
     const t = clamp(progress.value, 0, 1);
     progressRef.current = t;
 
@@ -878,10 +930,24 @@ export const GlobeHero: React.FC = () => {
     });
     observer.observe(range);
 
-    // The globe's render loop is what samples progress now. This only covers the gap
-    // where it is suspended — tab hidden, or the canvas scrolled out of view — so the
-    // hero is still correct the moment it comes back.
-    const onScroll = () => applyStage();
+    /*
+     * Fallback only, and the guard is what makes that true.
+     *
+     * The globe's render loop samples progress every frame. This listener exists for the
+     * case where that loop is suspended — tab hidden, or the canvas scrolled out of view
+     * — so the hero is correct the moment it comes back. Without the guard it also fired
+     * on every scroll event WHILE the loop was running, so the spring was integrated
+     * twice per frame with two different dt values, one of them near zero. That is not a
+     * smoothing filter any more; it is a filter being stepped at an irregular rate, which
+     * is precisely the stutter it was meant to remove.
+     *
+     * SAMPLE_IDLE is comfortably longer than a frame at any refresh rate this runs at, so
+     * while the loop is alive this does nothing at all.
+     */
+    const onScroll = () => {
+      if (performance.now() - lastSampleRef.current < SAMPLE_IDLE) return;
+      applyStage();
+    };
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", measureRange);
     return () => {
@@ -974,7 +1040,43 @@ export const GlobeHero: React.FC = () => {
       {/* Copy — normal flow, scrolls away before anything pins. */}
       <div
         ref={copyRef}
-        className="flex flex-col items-center px-6 pb-8 pt-[clamp(56px,calc(40vh-224px),112px)] text-center sm:px-10 sm:pt-[clamp(60px,calc(48vh-316px),132px)] lg:pt-[clamp(64px,calc(48vh-320px),160px)]"
+        /*
+          TOP PADDING IS THE ONLY THING HOLDING THE HEADLINE OFF THE NAVBAR.
+          The header is position:fixed, so it occupies no layout space — the hero starts at
+          y=0 underneath it and the bar overlays the first 68px (72px from sm up, where the
+          logo goes h-11 -> h-12). Every pixel of clearance has to come from here.
+
+          The floors are what changed most. They were 44/48/52px, all of them SHORTER than
+          the navbar, so on a short laptop the clamp bottomed out and the headline sat 20px
+          BEHIND the bar rather than merely close to it. Each floor now clears the navbar
+          plus a working margin, so the two can never overlap at any viewport.
+
+              1440x900   gap 16px -> 77px
+              1280x800   gap -20px -> 41px
+              1280x768   gap -20px -> 33px
+              1440x1080  gap 52px -> 105px
+
+          THE BOTTOM PADDING IS NOT SLACK. The globe range that follows is pulled up over
+          this block by -mt-5, and lg:-mt-6, and the sticky card inside it is opaque
+          (bg-[#0A1128]) and paints later in the tree — so it covers whatever it reaches.
+          The clearance under the buttons is therefore pb MINUS that negative margin, and
+          at pb-5 against lg:-mt-6 it was -4px: the card sat over the bottom 4px of the
+          CTAs. pb-8 puts it back to +8px on lg and +12px elsewhere. Any future trim to pb
+          has to stay above 24px or the buttons start being clipped again.
+
+          THE OTHER CONSTRAINT IS THE GLOBE, and it is what sets these numbers rather
+          than taste. Its position is pt + the copy block's height, so re-adding the
+          eyebrow would have pushed the planet down by exactly what the eyebrow costs:
+          11px of line plus its 16px gap to the headline, 27px from sm up. That is paid
+          back precisely — 15px off the padding here, and 4px each off the headline's gap
+          to the description, the description's gap to the buttons, and the block's own
+          bottom padding. The sum is zero: the globe shows the same 388px at 1440x900 and
+          the same 328px at 1280x768 as it did before the line came back.
+
+          So these three values are not free. Changing one without moving the eyebrow's own
+          spacing takes the difference straight out of the planet.
+        */
+        className="flex flex-col items-center px-6 pb-8 pt-[clamp(86px,calc(30vh-98px),132px)] text-center sm:px-10 sm:pt-[clamp(89px,calc(34vh-163px),149px)] lg:pt-[clamp(97px,calc(36vh-183px),169px)]"
       >
         {/*
           Eyebrow, headline, support, CTAs. The wrapper above is untouched - same padding,
@@ -1001,7 +1103,7 @@ export const GlobeHero: React.FC = () => {
           paragraph box. Reading order is unchanged: a screen reader still gets one
           continuous sentence.
         */}
-        <h1 className="hero-rise [animation-delay:160ms] mt-4 max-w-[1050px] font-geist text-[clamp(3rem,6vw,5.5rem)] font-bold uppercase leading-[0.96] tracking-[-0.02em] text-white sm:mt-5">
+        <h1 className="hero-rise [animation-delay:160ms] mt-2 max-w-[880px] font-geist text-[clamp(2.5rem,5vw,4.5rem)] font-bold uppercase leading-[0.92] tracking-[-0.02em] text-white sm:mt-2">
           {HEADLINE_LINES.map((line, index) => (
             /*
               The mask. overflow-hidden is what turns a slow drift into a line leaving:
@@ -1015,7 +1117,20 @@ export const GlobeHero: React.FC = () => {
             */
             <span
               key={line.text}
-              className="block overflow-hidden pb-[0.08em] -mb-[0.08em]"
+              className={
+                line.underlineWord
+                  ? /*
+                      The underlined line needs the SAME trick with more room: the stroke
+                      hangs below the line box and this span's overflow-hidden would cut
+                      it off at 0.08em. 0.2em clears the 8.1px the stroke needs (1.5px gap
+                      + 6.6px of ink) at the clamp's 48px floor, where the em is smallest.
+                      pb and -mb still cancel, so the h1's height is byte-for-byte what it
+                      was and the paragraph below does not move; the stroke simply paints
+                      into the 24px gap that was already there, keeping ~16px of daylight.
+                    */
+                    "block overflow-hidden pb-[0.26em] -mb-[0.26em]"
+                  : "block overflow-hidden pb-[0.08em] -mb-[0.08em]"
+              }
             >
               <span
                 ref={(el) => {
@@ -1023,13 +1138,30 @@ export const GlobeHero: React.FC = () => {
                 }}
                 className="block will-change-[transform,opacity,filter]"
               >
-                {line.text}
+                {line.underlineWord ? (
+                  <>
+                    {/*
+                      Wraps the word alone, so the stroke's 100% width is the word's width
+                      and not the line's. inline-block for the containing block only — no
+                      z-index, so no stacking context is created and the stroke paints in
+                      the headline's own order: over the starfield behind it, under the
+                      globe, pins and arcs that come later in the tree.
+                    */}
+                    <span className="relative inline-block">
+                      {line.underlineWord}
+                      <HeadlineUnderline />
+                    </span>
+                    {line.text.slice(line.underlineWord.length)}
+                  </>
+                ) : (
+                  line.text
+                )}
               </span>
             </span>
           ))}
         </h1>
 
-        <p className="hero-rise [animation-delay:260ms] mt-6 max-w-[600px] font-geist text-[clamp(1rem,1.35vw,1.25rem)] font-normal leading-[1.5] tracking-[-0.005em] text-[#B8BCC8] sm:mt-7">
+        <p className="hero-rise [animation-delay:260ms] mt-4 max-w-[560px] font-geist text-[clamp(0.95rem,1.2vw,1.125rem)] font-normal leading-[1.55] tracking-[-0.005em] text-[#B8BCC8] sm:mt-4">
           Mining Discovery combines industry media, digital marketing and investor-focused
           communication to put mining companies in front of the audiences that matter.
         </p>
@@ -1039,9 +1171,9 @@ export const GlobeHero: React.FC = () => {
           the commercial action, hairline outline for the browse - navy on white rather
           than the brief's white-on-dark, because this hero's ground is white.
         */}
-        <div className="hero-rise [animation-delay:360ms] mt-7 flex w-full flex-col items-stretch gap-3 sm:mt-8 sm:w-auto sm:flex-row sm:items-center sm:gap-4">
+        <div className="hero-rise [animation-delay:360ms] mt-5 flex w-full flex-col items-stretch gap-3 sm:mt-5 sm:w-auto sm:flex-row sm:items-center sm:gap-4">
           <Link
-            href="/#contact"
+            href="/contact"
             className="group inline-flex items-center justify-center gap-2 rounded-lg bg-[#B8860B] px-7 py-3.5 font-sans text-[13px] font-semibold uppercase tracking-[0.08em] text-[#0B1F3A] shadow-sm transition-colors duration-200 hover:bg-[#D4AF37] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B8860B] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A1128]"
           >
             Start a Campaign
@@ -1049,7 +1181,7 @@ export const GlobeHero: React.FC = () => {
           </Link>
 
           <Link
-            href="/#services"
+            href="/services"
             className="group inline-flex items-center justify-center gap-2 rounded-lg border border-white/25 px-7 py-3.5 font-sans text-[13px] font-semibold uppercase tracking-[0.08em] text-white transition-colors duration-200 hover:border-white/45 hover:bg-white/[0.06] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A1128]"
           >
             Explore Our Services

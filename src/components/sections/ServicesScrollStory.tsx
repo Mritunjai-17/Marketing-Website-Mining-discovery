@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
-import { Badge } from "@/components/ui/Badge";
+import { motion } from "framer-motion";
 import {
   Compass,
   Palette,
@@ -112,499 +111,485 @@ export const STAGE_4_CARDS: ServiceCardData[] = [
   },
 ];
 
+/**
+ * The services journey: four photographs, four chapters, one pinned track.
+ *
+ * REWRITTEN AWAY FROM A CARD DECK. What was here rendered each stage as a duplicated
+ * block carrying a gold "STAGE 01 // STAKE THE CLAIM" pill with a pulsing dot, two or
+ * three glassmorphism cards, and a video-player progress bar pinned to the bottom of the
+ * viewport. All of it read as UI sitting on top of a photograph rather than as a caption
+ * belonging to one. The photograph is now the section; the type annotates it.
+ *
+ * WHAT DRIVES IT. One rAF loop measures the track and derives the chapter from it — the
+ * same driver the homepage's frame sequence uses, for the same reason: it reads the rect
+ * every frame so it cannot hold a stale offset, and it is indifferent to Lenis owning the
+ * scroll. Nothing here is on a timer; the pulsing dot was the only autoplaying thing in
+ * the section and it is gone.
+ *
+ * WHERE THE TYPE SITS. Measured, not assumed — run scripts/analyze-service-images.mjs.
+ * Each photograph is scored for negative space the same way the mining frames are (dark
+ * 0.55 + smooth 0.45), per third:
+ *
+ *   01-survey   left 0.391  right 0.327  bottom 0.327   -> LEFT   (+0.063)
+ *   02-drill    left 0.466  right 0.442  bottom 0.494   -> BOTTOM (+0.028)
+ *   03-assay    left 0.261  right 0.339  bottom 0.295   -> RIGHT  (+0.044)
+ *   04-pit      left 0.419  right 0.297  bottom 0.320   -> LEFT   (+0.099)
+ *
+ * That is left / bottom / right / left. The brief asked for left / right / bottom / left;
+ * stages 2 and 3 are swapped because the photographs say so — 03-assay's left third is
+ * the busiest region in the whole set (0.261), so type on the left there lands squarely
+ * on the subject.
+ */
+
+/** Where a chapter's type sits. */
+type Zone = "left" | "right" | "bottom";
+
 interface StageData {
-  stageNum: string;
-  badge: string;
+  /** Two digits, shown as the chapter number. */
+  num: string;
+  /** The chapter name. Kept verbatim from the old badge, minus the "STAGE 0X //" prefix. */
+  label: string;
   title: string;
   description: string;
   imageSrc: string;
+  alt: string;
+  zone: Zone;
   cards: ServiceCardData[];
 }
 
 const STAGES: StageData[] = [
   {
-    stageNum: "01",
-    badge: "STAGE 01 // STAKE THE CLAIM",
+    num: "01",
+    label: "Stake the Claim",
     title: "Geological Survey & Identity",
-    description: "Laying the foundation with high-precision exploration surveying, market positioning, and core brand assets.",
+    description:
+      "Laying the foundation with high-precision exploration surveying, market positioning, and core brand assets.",
     imageSrc: "/services/01-survey.jpg",
+    alt: "Geological exploration survey rig",
+    zone: "left",
     cards: STAGE_1_CARDS,
   },
   {
-    stageNum: "02",
-    badge: "STAGE 02 // DRILL & REACH",
+    num: "02",
+    label: "Drill & Reach",
     title: "Exploration Drilling & Reach",
-    description: "Amplifying active drill rig milestones, core discoveries, and paid institutional investor campaigns.",
+    description:
+      "Amplifying active drill rig milestones, core discoveries, and paid institutional investor campaigns.",
     imageSrc: "/services/02-drill.jpg",
+    alt: "Active exploration drill rig",
+    zone: "bottom",
     cards: STAGE_2_CARDS,
   },
   {
-    stageNum: "03",
-    badge: "STAGE 03 // ASSAY & PROVE",
+    num: "03",
+    label: "Assay & Prove",
     title: "Assay Verification & PR",
-    description: "Broadcasting lab results, technical filings, CEO townhalls, and tier-1 financial press coverage.",
+    description:
+      "Broadcasting lab results, technical filings, CEO townhalls, and tier-1 financial press coverage.",
     imageSrc: "/services/03-assay.jpg",
+    alt: "Core sample assay laboratory",
+    zone: "right",
     cards: STAGE_3_CARDS,
   },
   {
-    stageNum: "04",
-    badge: "STAGE 04 // SMELT & SHIP",
+    num: "04",
+    label: "Smelt & Ship",
     title: "Commercial Production & Hub",
-    description: "Deploying enterprise corporate web hubs and mobile apps for continuous capital market engagement.",
+    description:
+      "Deploying enterprise corporate web hubs and mobile apps for continuous capital market engagement.",
     imageSrc: "/services/04-pit.jpg",
+    alt: "Open pit mine in commercial production",
+    zone: "left",
     cards: STAGE_4_CARDS,
   },
 ];
 
+/** The section's own ground, and the footer's, for the seam at the bottom. */
+const GROUND = "#0B1220";
+const FOOTER_GROUND = "#0B1F3A";
+
+/** Long, decelerating, no overshoot — the same curve the rest of the site moves on. */
+const EASE = [0.22, 1, 0.36, 1] as const;
+
+/** Each chapter drifts along its own axis. 24px, inside the brief's 20-40px. */
+const OFFSET: Record<Zone, { x: number; y: number }> = {
+  left: { x: -24, y: 0 },
+  right: { x: 24, y: 0 },
+  bottom: { x: 0, y: 24 },
+};
+
+/**
+ * Placement per zone. The base classes are the phone layout: at 390px there is no left
+ * or right negative space worth aiming at, so every chapter anchors low and the
+ * photograph keeps the top of the frame.
+ *
+ * The right zone clears 12vw rather than 8vw so it never runs into the chapter index
+ * pinned to the right edge.
+ */
+const PLACE: Record<Zone, string> = {
+  left: "items-end justify-start pb-[14vh] md:pb-[12vh] md:pl-[8vw]",
+  right:
+    "items-end justify-start pb-[14vh] md:items-center md:justify-end md:pr-[12vw] md:pb-[6vh]",
+  bottom: "items-end justify-start pb-[14vh] md:justify-start md:pl-[8vw] md:pb-[11vh]",
+};
+
+/**
+ * Localized scrims. Every chain reaches fully transparent well before the far edge, so
+ * the photograph keeps its real exposure across most of the frame and the darkening
+ * never closes into a rectangle behind the words.
+ */
+const SCRIM: Record<Zone, string> = {
+  left:
+    "linear-gradient(90deg, rgba(11,18,32,0.86) 0%, rgba(11,18,32,0.60) 20%, rgba(11,18,32,0.26) 42%, rgba(11,18,32,0) 64%)",
+  right:
+    "linear-gradient(270deg, rgba(11,18,32,0.86) 0%, rgba(11,18,32,0.60) 20%, rgba(11,18,32,0.26) 42%, rgba(11,18,32,0) 64%)",
+  bottom:
+    "linear-gradient(0deg, rgba(11,18,32,0.88) 0%, rgba(11,18,32,0.62) 22%, rgba(11,18,32,0.26) 46%, rgba(11,18,32,0) 68%)",
+};
+
+/** Keeps a thin glyph off a bright frame without reading as a glow. */
+const INK_SHADOW = "0 1px 12px rgba(11,18,32,0.70)";
+
+const chapterVariants = {
+  hidden: (offset: { x: number; y: number }) => ({
+    opacity: 0,
+    x: offset.x,
+    y: offset.y,
+  }),
+  visible: {
+    opacity: 1,
+    x: 0,
+    y: 0,
+    transition: { duration: 0.7, ease: EASE, staggerChildren: 0.07, delayChildren: 0.1 },
+  },
+};
+
+const lineVariants = {
+  hidden: { opacity: 0, y: 12 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } },
+};
+
 export const ServicesScrollStory: React.FC = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [isMobileOrReduced, setIsMobileOrReduced] = useState(false);
-  const [currentProgress, setCurrentProgress] = useState(0);
+  const containerRef = useRef<HTMLElement>(null);
+  const activeRef = useRef(0);
+
+  const [active, setActive] = useState(0);
+  const [compact, setCompact] = useState(false);
 
   useEffect(() => {
-    const checkMediaQuery = () => {
-      const isReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const isMobile = window.innerWidth < 1024;
-      setIsMobileOrReduced(isReduced || isMobile);
+    const check = () => {
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      setCompact(reduced || window.innerWidth < 1024);
     };
-
-    checkMediaQuery();
-    window.addEventListener("resize", checkMediaQuery);
-    return () => window.removeEventListener("resize", checkMediaQuery);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
   }, []);
 
-  // SINGLE USE_SCROLL HOOK SOURCE OF TRUTH (Requirement #1)
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"],
-  });
+  /*
+   * The driver. Measures the track every frame and derives the chapter from it — the
+   * same approach as the homepage sequence, and for the same reason: a cached scroll
+   * offset goes stale when the content above this section reflows, and this page's
+   * scrolling is owned by Lenis rather than by native scroll events alone.
+   */
+  const tick = useCallback(() => {
+    const node = containerRef.current;
+    if (!node) return;
 
-  useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    setCurrentProgress(latest);
-  });
+    const rect = node.getBoundingClientRect();
+    const viewport = window.innerHeight;
+    if (rect.bottom < 0 || rect.top > viewport) return;
 
-  // --- STAGE OPACITIES (Strict Non-Overlapping Sequential Crossfades) ---
-  // Stage 1: 0.00 -> 0.18 hold 1, 0.18 -> 0.25 fade to 0
-  const stage1Opacity = useTransform(scrollYProgress, [0.00, 0.18, 0.25], [1, 1, 0]);
+    const span = rect.height - viewport;
+    const raw = span > 0 ? -rect.top / span : 0;
+    const p = raw < 0 ? 0 : raw > 1 ? 1 : raw;
 
-  // Stage 2: 0.22 -> 0.27 fade in, 0.27 -> 0.43 hold 1, 0.43 -> 0.50 fade to 0
-  const stage2Opacity = useTransform(scrollYProgress, [0.22, 0.27, 0.43, 0.50], [0, 1, 1, 0]);
+    const next = Math.min(STAGES.length - 1, Math.floor(p * STAGES.length));
+    if (next !== activeRef.current) {
+      activeRef.current = next;
+      setActive(next);
+    }
+  }, []);
 
-  // Stage 3: 0.47 -> 0.52 fade in, 0.52 -> 0.68 hold 1, 0.68 -> 0.75 fade to 0
-  const stage3Opacity = useTransform(scrollYProgress, [0.47, 0.52, 0.68, 0.75], [0, 1, 1, 0]);
+  useEffect(() => {
+    if (compact) return;
+    let frame = requestAnimationFrame(function loop() {
+      tick();
+      frame = requestAnimationFrame(loop);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [compact, tick]);
 
-  // Stage 4: 0.72 -> 0.77 fade in, holds at 1 permanently (Requirement #3)
-  const stage4Opacity = useTransform(scrollYProgress, [0.72, 0.77], [0, 1]);
+  /* ----------------------------------------------------------------- chapter type */
 
-  // --- POINTER EVENTS SAFETY NET (Requirement #4) ---
-  const stage1Pointer = useTransform(stage1Opacity, (o) => (o < 0.05 ? "none" : "auto"));
-  const stage2Pointer = useTransform(stage2Opacity, (o) => (o < 0.05 ? "none" : "auto"));
-  const stage3Pointer = useTransform(stage3Opacity, (o) => (o < 0.05 ? "none" : "auto"));
-  const stage4Pointer = useTransform(stage4Opacity, (o) => (o < 0.05 ? "none" : "auto"));
+  const chapter = (stage: StageData, isActive: boolean) => (
+    <motion.div
+      key={stage.num}
+      custom={OFFSET[stage.zone]}
+      variants={chapterVariants}
+      initial="hidden"
+      animate={isActive ? "visible" : "hidden"}
+      aria-hidden={!isActive}
+      className={`absolute inset-0 flex px-6 md:px-0 ${PLACE[stage.zone]}`}
+      style={{ pointerEvents: isActive ? "auto" : "none" }}
+    >
+      <div className="w-full max-w-[460px]">
+        {/* Number, rule, chapter name on one line — the site's small-label pattern. */}
+        <motion.div variants={lineVariants} className="flex items-center gap-4">
+          <span className="font-mono text-[11px] tabular-nums text-[#D4AF37]/80">
+            {stage.num}
+          </span>
+          <span className="h-px w-10 bg-[#B8860B]/50" />
+          <p
+            className="font-mono text-[11px] font-semibold uppercase tracking-[0.22em] text-[#D4AF37]"
+            style={{ textShadow: INK_SHADOW }}
+          >
+            {stage.label}
+          </p>
+        </motion.div>
 
-  // --- KEN BURNS TRANSFORMS (GPU Composited scale + translate) ---
-  // Stage 1: Subtle zoom 1.0 -> 1.15, slow pan left-up
-  const stage1Scale = useTransform(scrollYProgress, [0.00, 0.25], [1.0, 1.15]);
-  const stage1X = useTransform(scrollYProgress, [0.00, 0.25], ["0%", "-3%"]);
-  const stage1Y = useTransform(scrollYProgress, [0.00, 0.25], ["0%", "-2%"]);
+        <motion.h2
+          variants={lineVariants}
+          className="mt-5 font-geist text-[clamp(1.5rem,2.2vw,2rem)] font-semibold leading-[1.25] tracking-[-0.035em] text-white"
+          style={{ textShadow: INK_SHADOW }}
+        >
+          {stage.title}
+        </motion.h2>
 
-  // Stage 2: Subtle zoom 1.0 -> 1.15, slow pan right-up
-  const stage2Scale = useTransform(scrollYProgress, [0.22, 0.50], [1.0, 1.15]);
-  const stage2X = useTransform(scrollYProgress, [0.22, 0.50], ["0%", "3%"]);
-  const stage2Y = useTransform(scrollYProgress, [0.22, 0.50], ["0%", "-2%"]);
+        <motion.p
+          variants={lineVariants}
+          className="mt-4 text-base font-normal leading-[1.6] text-[#B8BCC8] sm:text-[17px]"
+          style={{ textShadow: INK_SHADOW }}
+        >
+          {stage.description}
+        </motion.p>
 
-  // Stage 3: Subtle zoom 1.05 -> 1.18, slow pan left-down
-  const stage3Scale = useTransform(scrollYProgress, [0.47, 0.75], [1.05, 1.18]);
-  const stage3X = useTransform(scrollYProgress, [0.47, 0.75], ["0%", "-2%"]);
-  const stage3Y = useTransform(scrollYProgress, [0.47, 0.75], ["0%", "2%"]);
+        {/*
+          The services themselves. Nine cards became nine lines: name, discipline, link.
+          Each card's paragraph used to live inside a glass panel covering a third of the
+          photograph; at this size the names carry the information and the /services page
+          carries the detail.
+        */}
+        <motion.ul variants={lineVariants} className="mt-6 space-y-2.5">
+          {stage.cards.map((card) => (
+            <li key={card.id}>
+              <Link
+                href={card.href}
+                tabIndex={isActive ? 0 : -1}
+                className="group inline-flex items-baseline gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37] focus-visible:ring-offset-4 focus-visible:ring-offset-[#0B1220]"
+                style={{ textShadow: INK_SHADOW }}
+              >
+                <span className="h-px w-4 shrink-0 translate-y-[-4px] bg-[#B8860B]/50 transition-all duration-300 group-hover:w-7 group-hover:bg-[#D4AF37]" />
+                <span className="text-sm font-medium text-white/85 transition-colors duration-200 group-hover:text-white">
+                  {card.title}
+                </span>
+                <span className="font-mono text-[11px] text-white/40">
+                  {card.category}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </motion.ul>
 
-  // Stage 4: Subtle zoom 1.0 -> 1.15, slow pan right-down
-  const stage4Scale = useTransform(scrollYProgress, [0.72, 1.00], [1.0, 1.15]);
-  const stage4X = useTransform(scrollYProgress, [0.72, 1.00], ["0%", "3%"]);
-  const stage4Y = useTransform(scrollYProgress, [0.72, 1.00], ["0%", "-2%"]);
+        <motion.div variants={lineVariants} className="mt-7">
+          <Link
+            href="/services"
+            tabIndex={isActive ? 0 : -1}
+            className="group inline-flex items-center gap-2 rounded-md bg-[#B8860B] px-6 py-3 font-sans text-sm font-semibold text-[#0B1F3A] transition-colors duration-200 hover:bg-[#D4AF37] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B8860B] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B1220]"
+          >
+            Explore Our Services
+            <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+          </Link>
+        </motion.div>
+      </div>
+    </motion.div>
+  );
 
-  // --- CARD REVEAL TRANSFORMS (Reveals before stage crossfade out) ---
-  // Stage 1 Cards (Revealed by 0.14; stage 1 fade starts at 0.18)
-  const card1_1_opacity = useTransform(scrollYProgress, [0.00, 0.08], [0, 1]);
-  const card1_1_y = useTransform(scrollYProgress, [0.00, 0.08], ["50px", "0px"]);
+  /* ------------------------------------------------------------ compact / reduced */
 
-  const card1_2_opacity = useTransform(scrollYProgress, [0.06, 0.14], [0, 1]);
-  const card1_2_y = useTransform(scrollYProgress, [0.06, 0.14], ["50px", "0px"]);
-
-  // Stage 2 Cards (Revealed by 0.39; stage 2 fade starts at 0.43)
-  const card2_1_opacity = useTransform(scrollYProgress, [0.27, 0.31], [0, 1]);
-  const card2_1_y = useTransform(scrollYProgress, [0.27, 0.31], ["50px", "0px"]);
-
-  const card2_2_opacity = useTransform(scrollYProgress, [0.31, 0.35], [0, 1]);
-  const card2_2_y = useTransform(scrollYProgress, [0.31, 0.35], ["50px", "0px"]);
-
-  const card2_3_opacity = useTransform(scrollYProgress, [0.35, 0.39], [0, 1]);
-  const card2_3_y = useTransform(scrollYProgress, [0.35, 0.39], ["50px", "0px"]);
-
-  // Stage 3 Cards (Revealed by 0.64; stage 3 fade starts at 0.68)
-  const card3_1_opacity = useTransform(scrollYProgress, [0.52, 0.58], [0, 1]);
-  const card3_1_y = useTransform(scrollYProgress, [0.52, 0.58], ["50px", "0px"]);
-
-  const card3_2_opacity = useTransform(scrollYProgress, [0.58, 0.64], [0, 1]);
-  const card3_2_y = useTransform(scrollYProgress, [0.58, 0.64], ["50px", "0px"]);
-
-  // Stage 4 Cards (Revealed by 0.90; stage 4 holds)
-  const card4_1_opacity = useTransform(scrollYProgress, [0.77, 0.83], [0, 1]);
-  const card4_1_y = useTransform(scrollYProgress, [0.77, 0.83], ["50px", "0px"]);
-
-  const card4_2_opacity = useTransform(scrollYProgress, [0.83, 0.90], [0, 1]);
-  const card4_2_y = useTransform(scrollYProgress, [0.83, 0.90], ["50px", "0px"]);
-
-  // STATIC FALLBACK FOR MOBILE & REDUCED MOTION
-  if (isMobileOrReduced) {
+  if (compact) {
     return (
-      <section id="services" className="py-16 md:py-24 bg-[#0B1220] text-[#F5F1E8] font-sans border-b border-[#C89216]/20">
-        <div className="container-editorial">
-          <div className="text-center max-w-2xl mx-auto mb-16">
-            <Badge variant="gold" size="md" className="mb-3 uppercase tracking-[0.05em] text-[11px] bg-[#C89216]/20 text-[#E0B544] border border-[#C89216]/40">
-              Mining Media Services
-            </Badge>
-            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-normal text-white mb-4">
-              End-to-End Mining Communications
-            </h2>
-            <p className="text-sm sm:text-base text-[#D8D2C7]/85 leading-relaxed">
-              From initial exploration surveys to commercial production briefings, our integrated communications platform connects global mining issuers directly with capital markets.
-            </p>
-          </div>
-
-          {/* 4 Sequential Stage Sections for Mobile */}
-          <div className="flex flex-col gap-16">
-            {STAGES.map((stage) => (
-              <div key={stage.stageNum} className="flex flex-col gap-6">
-                <div className="relative h-64 rounded-xl overflow-hidden border border-[#C89216]/30 shadow-lg">
-                  <Image
-                    src={stage.imageSrc}
-                    alt={stage.title}
-                    fill
-                    className="object-cover"
-                    sizes="100vw"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0B1220] via-[#0B1220]/40 to-transparent" />
-                  <div className="absolute bottom-4 left-4 right-4">
-                    <span className="text-xs font-mono font-semibold text-[#E0B544] uppercase tracking-widest block mb-1">
-                      {stage.badge}
-                    </span>
-                    <h3 className="font-serif text-xl text-white">{stage.title}</h3>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {stage.cards.map((card) => (
-                    <StaticServiceCard key={card.id} card={card} />
-                  ))}
-                </div>
+      <section
+        id="services"
+        className="relative font-sans"
+        style={{ backgroundColor: GROUND }}
+      >
+        <div className="container-editorial flex flex-col gap-16 py-20">
+          {STAGES.map((stage) => (
+            <article key={stage.num}>
+              <div className="relative mb-6 h-56 w-full overflow-hidden sm:h-72">
+                <Image
+                  src={stage.imageSrc}
+                  alt={stage.alt}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                />
+                <div
+                  aria-hidden="true"
+                  className="absolute inset-0"
+                  style={{ background: SCRIM.bottom }}
+                />
               </div>
-            ))}
-          </div>
+
+              <div className="flex items-center gap-4">
+                <span className="font-mono text-[11px] tabular-nums text-[#D4AF37]/80">
+                  {stage.num}
+                </span>
+                <span className="h-px w-10 bg-[#B8860B]/50" />
+                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.22em] text-[#D4AF37]">
+                  {stage.label}
+                </p>
+              </div>
+
+              <h2 className="mt-5 font-geist text-[clamp(1.5rem,2.2vw,2rem)] font-semibold leading-[1.25] tracking-[-0.035em] text-white">
+                {stage.title}
+              </h2>
+              <p className="mt-4 text-base leading-[1.6] text-[#B8BCC8]">
+                {stage.description}
+              </p>
+
+              <ul className="mt-6 space-y-2.5">
+                {stage.cards.map((card) => (
+                  <li key={card.id}>
+                    <Link href={card.href} className="inline-flex items-baseline gap-3">
+                      <span className="h-px w-4 shrink-0 translate-y-[-4px] bg-[#B8860B]/50" />
+                      <span className="text-sm font-medium text-white/85">
+                        {card.title}
+                      </span>
+                      <span className="font-mono text-[11px] text-white/40">
+                        {card.category}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </article>
+          ))}
+
+          <Link
+            href="/services"
+            className="inline-flex w-fit items-center gap-2 rounded-md bg-[#B8860B] px-6 py-3 font-sans text-sm font-semibold text-[#0B1F3A]"
+          >
+            Explore Our Services
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       </section>
     );
   }
 
-  // DESKTOP SCROLL-JACKED STORY (500vh PINNED TRACK FOR REAL PHOTOGRAPHY KEN BURNS)
+  /* ------------------------------------------------------------------- the journey */
+
   return (
-    <section id="services" ref={containerRef} className="relative h-[500vh] bg-[#0B1220] text-[#F5F1E8] font-sans border-b border-[#C89216]/20">
-      {/* STICKY VIEWPORT CONTAINER */}
-      <div className="sticky top-0 h-screen overflow-hidden flex flex-col justify-center">
-
-        {/* =========================================================================
-            STAGE 01: STAKE THE CLAIM (Geological Survey Rig Photography)
-           ========================================================================= */}
-        <motion.div
-          className="absolute inset-0 z-0 overflow-hidden"
-          style={{ opacity: stage1Opacity, pointerEvents: stage1Pointer }}
-        >
+    <section
+      id="services"
+      ref={containerRef}
+      className="relative h-[500vh] font-sans"
+      style={{ backgroundColor: GROUND }}
+    >
+      <div className="sticky top-0 h-screen w-full overflow-hidden">
+        {/*
+          All four photographs mounted and cross-faded. No Ken Burns: the previous version
+          drifted and scaled each one to 1.15, which is the "premium template" move the
+          brief rules out, and with the type now anchored to measured negative space a
+          moving frame would slide the subject under the words.
+        */}
+        {STAGES.map((stage, index) => (
           <motion.div
-            className="absolute inset-0 w-full h-full"
-            style={{
-              scale: stage1Scale,
-              x: stage1X,
-              y: stage1Y,
-            }}
+            key={stage.num}
+            className="absolute inset-0"
+            initial={false}
+            animate={{ opacity: index === active ? 1 : 0 }}
+            transition={{ duration: 1.1, ease: EASE }}
           >
             <Image
-              src="/services/01-survey.jpg"
-              alt="Geological exploration survey rig"
+              src={stage.imageSrc}
+              alt={stage.alt}
               fill
-              priority
+              priority={index === 0}
               className="object-cover"
               sizes="100vw"
             />
           </motion.div>
+        ))}
 
-          {/* GRADIENT SCRIM FOR TEXT LEGIBILITY */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0B1220]/95 via-[#0B1220]/50 to-[#0B1220]/20 pointer-events-none" />
-          <div className="absolute inset-0 bg-radial-gradient from-transparent via-[#0B1220]/30 to-[#0B1220]/80 pointer-events-none" />
+        {/* A contrast floor, not a darkening. */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{ backgroundColor: "rgba(11,18,32,0.18)" }}
+        />
 
-          {/* STAGE CONTENT OVERLAY */}
-          <div className="relative z-20 container-editorial h-full flex flex-col justify-between py-20">
-            {/* Header HUD */}
-            <div>
-              <span className="inline-flex items-center gap-2 font-mono text-xs text-[#E0B544] uppercase tracking-widest bg-[#C89216]/20 border border-[#C89216]/40 px-4 py-1.5 rounded-full backdrop-blur-md mb-4">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#E0B544] animate-pulse" />
-                STAGE 01 // STAKE THE CLAIM
-              </span>
-              <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-white max-w-2xl leading-tight">
-                Geological Survey & Identity
-              </h2>
-            </div>
-
-            {/* Service Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
-              <motion.div style={{ opacity: card1_1_opacity, y: card1_1_y }}>
-                <AnimatedServiceCard card={STAGE_1_CARDS[0]} />
-              </motion.div>
-              <motion.div style={{ opacity: card1_2_opacity, y: card1_2_y }}>
-                <AnimatedServiceCard card={STAGE_1_CARDS[1]} />
-              </motion.div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* =========================================================================
-            STAGE 02: DRILL & REACH (Exploration Diamond Drill Rig Photography)
-           ========================================================================= */}
-        <motion.div
-          className="absolute inset-0 z-0 overflow-hidden"
-          style={{ opacity: stage2Opacity, pointerEvents: stage2Pointer }}
-        >
+        {/* Zone scrims — only the active chapter's is lit, so the shading travels. */}
+        {(Object.keys(SCRIM) as Zone[]).map((zone) => (
           <motion.div
-            className="absolute inset-0 w-full h-full"
-            style={{
-              scale: stage2Scale,
-              x: stage2X,
-              y: stage2Y,
-            }}
-          >
-            <Image
-              src="/services/02-drill.jpg"
-              alt="Active diamond drill rig operation"
-              fill
-              className="object-cover"
-              sizes="100vw"
-            />
-          </motion.div>
+            key={zone}
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0"
+            style={{ background: SCRIM[zone] }}
+            initial={false}
+            animate={{ opacity: STAGES[active].zone === zone ? 1 : 0 }}
+            transition={{ duration: 0.9, ease: EASE }}
+          />
+        ))}
 
-          {/* GRADIENT SCRIM FOR TEXT LEGIBILITY */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0B1220]/95 via-[#0B1220]/50 to-[#0B1220]/20 pointer-events-none" />
-          <div className="absolute inset-0 bg-radial-gradient from-transparent via-[#0B1220]/30 to-[#0B1220]/80 pointer-events-none" />
+        {/* Something for the fixed navbar to sit on. */}
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-28"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(11,18,32,0.72) 0%, rgba(11,18,32,0) 100%)",
+          }}
+        />
 
-          {/* STAGE CONTENT OVERLAY */}
-          <div className="relative z-20 container-editorial h-full flex flex-col justify-between py-20">
-            {/* Header HUD */}
-            <div>
-              <span className="inline-flex items-center gap-2 font-mono text-xs text-[#E0B544] uppercase tracking-widest bg-[#C89216]/20 border border-[#C89216]/40 px-4 py-1.5 rounded-full backdrop-blur-md mb-4">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#E0B544] animate-pulse" />
-                STAGE 02 // DRILL & REACH
+        <div className="absolute inset-0 z-20">
+          {STAGES.map((stage, index) => chapter(stage, index === active))}
+        </div>
+
+        {/*
+          Chapter index, right edge. Four numerals and a rule that grows beside the
+          current one — a table of contents, not a playhead. The bar it replaces was a
+          192px track with a percentage readout, which read as a video scrubber and told
+          the reader nothing about where they were in the story.
+        */}
+        <div className="absolute right-6 top-1/2 z-20 hidden -translate-y-1/2 flex-col gap-4 md:flex">
+          {STAGES.map((stage, index) => (
+            <div key={stage.num} className="flex items-center justify-end gap-3">
+              <span
+                className={`h-px bg-[#D4AF37] transition-all duration-500 ease-out ${
+                  index === active ? "w-6 opacity-100" : "w-0 opacity-0"
+                }`}
+              />
+              <span
+                className={`font-mono text-[11px] tabular-nums transition-colors duration-500 ${
+                  index === active ? "text-[#D4AF37]" : "text-white/35"
+                }`}
+              >
+                {stage.num}
               </span>
-              <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-white max-w-2xl leading-tight">
-                Exploration Drilling & Reach
-              </h2>
             </div>
-
-            {/* Service Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl">
-              <motion.div style={{ opacity: card2_1_opacity, y: card2_1_y }}>
-                <AnimatedServiceCard card={STAGE_2_CARDS[0]} compact />
-              </motion.div>
-              <motion.div style={{ opacity: card2_2_opacity, y: card2_2_y }}>
-                <AnimatedServiceCard card={STAGE_2_CARDS[1]} compact />
-              </motion.div>
-              <motion.div style={{ opacity: card2_3_opacity, y: card2_3_y }}>
-                <AnimatedServiceCard card={STAGE_2_CARDS[2]} compact />
-              </motion.div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* =========================================================================
-            STAGE 03: ASSAY & PROVE (Geological Core Sample Laboratory Photography)
-           ========================================================================= */}
-        <motion.div
-          className="absolute inset-0 z-0 overflow-hidden"
-          style={{ opacity: stage3Opacity, pointerEvents: stage3Pointer }}
-        >
-          <motion.div
-            className="absolute inset-0 w-full h-full"
-            style={{
-              scale: stage3Scale,
-              x: stage3X,
-              y: stage3Y,
-            }}
-          >
-            <Image
-              src="/services/03-assay.jpg"
-              alt="Geologist logging diamond drill core trays"
-              fill
-              className="object-cover"
-              sizes="100vw"
-            />
-          </motion.div>
-
-          {/* GRADIENT SCRIM FOR TEXT LEGIBILITY */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0B1220]/95 via-[#0B1220]/50 to-[#0B1220]/20 pointer-events-none" />
-          <div className="absolute inset-0 bg-radial-gradient from-transparent via-[#0B1220]/30 to-[#0B1220]/80 pointer-events-none" />
-
-          {/* STAGE CONTENT OVERLAY */}
-          <div className="relative z-20 container-editorial h-full flex flex-col justify-between py-20">
-            {/* Header HUD */}
-            <div>
-              <span className="inline-flex items-center gap-2 font-mono text-xs text-[#E0B544] uppercase tracking-widest bg-[#C89216]/20 border border-[#C89216]/40 px-4 py-1.5 rounded-full backdrop-blur-md mb-4">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#E0B544] animate-pulse" />
-                STAGE 03 // ASSAY & PROVE
-              </span>
-              <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-white max-w-2xl leading-tight">
-                Assay Verification & PR
-              </h2>
-            </div>
-
-            {/* Service Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
-              <motion.div style={{ opacity: card3_1_opacity, y: card3_1_y }}>
-                <AnimatedServiceCard card={STAGE_3_CARDS[0]} />
-              </motion.div>
-              <motion.div style={{ opacity: card3_2_opacity, y: card3_2_y }}>
-                <AnimatedServiceCard card={STAGE_3_CARDS[1]} />
-              </motion.div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* =========================================================================
-            STAGE 04: SMELT & SHIP (Massive Open-Pit Mine Photography)
-           ========================================================================= */}
-        <motion.div
-          className="absolute inset-0 z-0 overflow-hidden"
-          style={{ opacity: stage4Opacity, pointerEvents: stage4Pointer }}
-        >
-          <motion.div
-            className="absolute inset-0 w-full h-full"
-            style={{
-              scale: stage4Scale,
-              x: stage4X,
-              y: stage4Y,
-            }}
-          >
-            <Image
-              src="/services/04-pit.jpg"
-              alt="Massive open pit mine with haul trucks and terraces"
-              fill
-              className="object-cover"
-              sizes="100vw"
-            />
-          </motion.div>
-
-          {/* GRADIENT SCRIM FOR TEXT LEGIBILITY */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0B1220]/95 via-[#0B1220]/50 to-[#0B1220]/20 pointer-events-none" />
-          <div className="absolute inset-0 bg-radial-gradient from-transparent via-[#0B1220]/30 to-[#0B1220]/80 pointer-events-none" />
-
-          {/* STAGE CONTENT OVERLAY */}
-          <div className="relative z-20 container-editorial h-full flex flex-col justify-between py-20">
-            {/* Header HUD */}
-            <div>
-              <span className="inline-flex items-center gap-2 font-mono text-xs text-[#E0B544] uppercase tracking-widest bg-[#C89216]/20 border border-[#C89216]/40 px-4 py-1.5 rounded-full backdrop-blur-md mb-4">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#E0B544] animate-pulse" />
-                STAGE 04 // SMELT & SHIP
-              </span>
-              <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-white max-w-2xl leading-tight">
-                Commercial Production & Hub
-              </h2>
-            </div>
-
-            {/* Service Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
-              <motion.div style={{ opacity: card4_1_opacity, y: card4_1_y }}>
-                <AnimatedServiceCard card={STAGE_4_CARDS[0]} />
-              </motion.div>
-              <motion.div style={{ opacity: card4_2_opacity, y: card4_2_y }}>
-                <AnimatedServiceCard card={STAGE_4_CARDS[1]} />
-              </motion.div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* BOTTOM SCROLL PROGRESS INDICATOR BAR */}
-        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-30 flex items-center gap-3 bg-[#0B1220]/85 backdrop-blur-md px-6 py-2 rounded-full border border-[#C89216]/30 pointer-events-none">
-          <div className="w-48 h-1.5 bg-[#1E293B] rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-[#C89216] to-[#E0B544] transition-all duration-75"
-              style={{ width: `${Math.min(currentProgress * 100, 100)}%` }}
-            />
-          </div>
-          <span className="font-mono text-[11px] text-[#E0B544] font-semibold">
-            {Math.round(currentProgress * 100)}%
+          ))}
+          <span className="sr-only">
+            Chapter {active + 1} of {STAGES.length}
           </span>
         </div>
 
+        {/*
+          Seam into the footer. This section's ground is #0B1220 and the footer's is
+          #0B1F3A — close, but a straight join between two flat navies still shows as a
+          line. The entry seam is already handled from the other side, by the ramp at the
+          bottom of TrustedBy.
+        */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-24"
+          style={{
+            background: `linear-gradient(180deg, rgba(11,18,32,0) 0%, ${FOOTER_GROUND} 100%)`,
+          }}
+        />
       </div>
     </section>
   );
 };
 
-// --- ANIMATED SERVICE CARD COMPONENT ---
-const AnimatedServiceCard: React.FC<{ card: ServiceCardData; compact?: boolean }> = ({
-  card,
-  compact = false,
-}) => {
-  const IconComponent = card.icon;
-  return (
-    <div className={`group relative bg-[#0B1220]/85 backdrop-blur-md border border-[#C89216]/40 hover:border-[#E0B544] rounded-xl transition-all duration-300 hover:shadow-[0_0_30px_rgba(200,146,22,0.25)] font-sans ${compact ? "p-4 sm:p-5" : "p-6 sm:p-7"}`}>
-      <div className="flex items-center justify-between mb-3">
-        <div className="p-2.5 bg-[#C89216]/20 text-[#E0B544] rounded-lg group-hover:bg-[#C89216] group-hover:text-[#0B1220] transition-colors">
-          <IconComponent className="w-5 h-5" />
-        </div>
-        <span className="font-mono text-[9px] sm:text-[10px] font-semibold tracking-wider uppercase text-[#E0B544] bg-[#C89216]/15 px-2.5 py-0.5 rounded border border-[#C89216]/35">
-          {card.category}
-        </span>
-      </div>
-
-      <h3 className={`font-serif font-normal text-[#F5F1E8] group-hover:text-[#E0B544] transition-colors leading-snug mb-2 ${compact ? "text-base sm:text-lg" : "text-lg sm:text-xl"}`}>
-        {card.title}
-      </h3>
-
-      <p className={`font-sans text-[#D8D2C7]/85 leading-relaxed font-normal mb-4 ${compact ? "text-xs line-clamp-2" : "text-xs sm:text-sm"}`}>
-        {card.description}
-      </p>
-
-      <Link
-        href={card.href}
-        className="inline-flex items-center text-xs font-semibold uppercase tracking-wider text-[#E0B544] hover:text-white transition-colors"
-      >
-        Learn More
-        <ArrowRight className="w-3.5 h-3.5 ml-1.5 transform group-hover:translate-x-1 transition-transform" />
-      </Link>
-    </div>
-  );
-};
-
-// --- STATIC SERVICE CARD COMPONENT FOR MOBILE ---
-const StaticServiceCard: React.FC<{ card: ServiceCardData }> = ({ card }) => {
-  const IconComponent = card.icon;
-  return (
-    <div className="bg-[#0B1220]/90 border border-[#C89216]/35 rounded-xl p-6 flex flex-col justify-between font-sans">
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <div className="p-2.5 bg-[#C89216]/20 text-[#E0B544] rounded-lg">
-            <IconComponent className="w-5 h-5" />
-          </div>
-          <span className="font-mono text-[9px] font-semibold tracking-wider uppercase text-[#E0B544] bg-[#C89216]/15 px-2 py-0.5 rounded border border-[#C89216]/35">
-            {card.category}
-          </span>
-        </div>
-        <h4 className="font-serif text-lg text-[#F5F1E8] mb-2">{card.title}</h4>
-        <p className="text-xs text-[#D8D2C7]/85 leading-relaxed mb-4">{card.description}</p>
-      </div>
-      <Link
-        href={card.href}
-        className="inline-flex items-center text-xs font-semibold uppercase tracking-wider text-[#E0B544] hover:text-white transition-colors"
-      >
-        Learn More
-        <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
-      </Link>
-    </div>
-  );
-};
+export default ServicesScrollStory;

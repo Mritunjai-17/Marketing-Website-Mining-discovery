@@ -184,14 +184,23 @@ const ZONES: Record<StarfieldZone, ZoneConfig> = {
       "radial-gradient(ellipse 50% 40% at 50% 32%, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.35) 45%, #000 88%)",
     glow: null,
     /*
-     * Three patches, all outside the centred copy column. The headline runs to roughly
-     * x 13-87% across y 10-58%, so these sit hard left, hard right and low-centre, and
-     * the zone mask above dims whatever edge does creep inward to about a third.
+     * Four patches, all clear of the centred copy column. The headline runs to roughly
+     * x 13-87% across y 10-58%, so these sit hard left, hard right, in the thin band
+     * above the eyebrow, and low-centre — and the zone mask above dims whatever edge
+     * does creep inward to about a third.
+     *
+     * Sized against a numeric sweep of the stacked alphas, not by eye: over the band
+     * above COPY_FLOOR these carry >=2% alpha on 36% of the surface, mid-way through the
+     * brief's 30-40%, peaking at 13.8% (brief: 8-15%). Left and right sit roughly half
+     * off-canvas by design, which is what makes them read as wisps running off the edge
+     * rather than as blobs. Peak inside the headline column is 9.6% BEFORE the zone mask
+     * above takes it to about a third of that, so the copy's contrast is untouched.
      */
     nebula: [
-      "radial-gradient(38% 30% at 6% 22%, rgba(58,74,107,0.13) 0%, rgba(58,74,107,0.06) 45%, rgba(58,74,107,0) 72%),",
-      "radial-gradient(34% 26% at 96% 40%, rgba(58,74,107,0.12) 0%, rgba(58,74,107,0.05) 46%, rgba(58,74,107,0) 74%),",
-      "radial-gradient(44% 24% at 44% 78%, rgba(58,74,107,0.10) 0%, rgba(58,74,107,0.04) 48%, rgba(58,74,107,0) 76%)",
+      "radial-gradient(41% 32% at 2% 25%, rgba(58,74,107,0.14) 0%, rgba(58,74,107,0.07) 44%, rgba(58,74,107,0) 74%),",
+      "radial-gradient(37% 29% at 99% 41%, rgba(58,74,107,0.13) 0%, rgba(58,74,107,0.06) 45%, rgba(58,74,107,0) 74%),",
+      "radial-gradient(56% 12% at 50% 1%, rgba(58,74,107,0.11) 0%, rgba(58,74,107,0.04) 46%, rgba(58,74,107,0) 76%),",
+      "radial-gradient(42% 23% at 44% 79%, rgba(58,74,107,0.10) 0%, rgba(58,74,107,0.04) 48%, rgba(58,74,107,0) 76%)",
     ].join(" "),
   },
   stage: {
@@ -227,12 +236,15 @@ const ZONES: Record<StarfieldZone, ZoneConfig> = {
     /*
      * Two patches in the wedges of navy either side of the planet, plus a low band above
      * its crown. No text on this surface, so the only constraint is staying where the
-     * sphere is not.
+     * sphere is not — but that navy is a thin sliver, so these are much smaller than the
+     * copy band's. The limb is already inside x 9-91% by y 30%, and patches sized like
+     * the copy band's covered 96% of the visible navy, which reads as a flat tint rather
+     * than as cloud. Anchored on the very edges and pulled in to 33% coverage instead.
      */
     nebula: [
-      "radial-gradient(40% 32% at 4% 30%, rgba(58,74,107,0.14) 0%, rgba(58,74,107,0.06) 45%, rgba(58,74,107,0) 73%),",
-      "radial-gradient(36% 28% at 97% 26%, rgba(58,74,107,0.12) 0%, rgba(58,74,107,0.05) 46%, rgba(58,74,107,0) 74%),",
-      "radial-gradient(50% 16% at 50% 4%, rgba(58,74,107,0.10) 0%, rgba(58,74,107,0) 78%)",
+      "radial-gradient(24% 20% at 0% 30%, rgba(58,74,107,0.15) 0%, rgba(58,74,107,0.07) 44%, rgba(58,74,107,0) 70%),",
+      "radial-gradient(21% 17% at 100% 18%, rgba(58,74,107,0.13) 0%, rgba(58,74,107,0.06) 45%, rgba(58,74,107,0) 70%),",
+      "radial-gradient(36% 7% at 50% 0%, rgba(58,74,107,0.11) 0%, rgba(58,74,107,0.04) 46%, rgba(58,74,107,0) 72%)",
     ].join(" "),
   },
 };
@@ -441,9 +453,9 @@ export const HeroStarfield: React.FC<HeroStarfieldProps> = ({ zone }) => {
                 // shadow reads as a smudge. Sized off the star so it scales with it.
                 ...(star.hero
                   ? {
-                      boxShadow: `0 0 ${(star.size * 1.6).toFixed(1)}px ${(
-                        star.size * 0.35
-                      ).toFixed(1)}px ${star.color}66, 0 0 ${(star.size * 3.4).toFixed(
+                      boxShadow: `0 0 ${(star.size * 1.15).toFixed(1)}px ${(
+                        star.size * 0.3
+                      ).toFixed(1)}px ${star.color}66, 0 0 ${(star.size * 2.6).toFixed(
                         1
                       )}px ${star.color}2E`,
                     }

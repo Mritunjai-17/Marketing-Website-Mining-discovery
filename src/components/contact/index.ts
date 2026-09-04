@@ -3,5 +3,4 @@
  * the /about and /services ones are: nothing here is imported by any other route, and every
  * file carries its own "use client" boundary.
  */
-export * from "./ContactHero";
-export * from "./ContactInformation";
+export * from "./ContactPanel";

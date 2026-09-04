@@ -94,14 +94,14 @@ export const Footer: React.FC = () => {
         bar. Nothing here needs state, so this file stays a server component - the two
         wrappers below are the only client code involved.
       */}
-      <SectionReveal className="container-editorial py-10 md:py-16 lg:py-20">
+      <SectionReveal className="container-editorial py-8 md:py-10 lg:py-12">
         {/*
           Twelve columns rather than five. The brand block needs roughly a third to keep
           its description from wrapping into a narrow ribbon, and 4 + 2 + 2 + 2 + 2 gives
           it that while leaving the four link columns exactly equal — which is what
           repeat(4, 1fr) would have done had the brand not been in the same row.
         */}
-        <div className="grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-12">
+        <div className="grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-12">
           {/* Brand */}
           <RevealItem className="lg:col-span-4">
             <Link
@@ -178,7 +178,7 @@ export const Footer: React.FC = () => {
         </div>
 
         {/* Bottom bar */}
-        <RevealItem className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 sm:flex-row lg:mt-20">
+        <RevealItem className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 sm:flex-row lg:mt-10">
           <p className="text-xs font-normal text-[#F0F4F8]/65">
             © {new Date().getFullYear()} Mining Discovery. All Rights Reserved.
           </p>
