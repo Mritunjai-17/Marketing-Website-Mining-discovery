@@ -35,17 +35,23 @@ import {
  */
 
 /*
- * The headline as three authored lines, so the break after "mining" and after "companies"
- * is a decision rather than an accident of the current viewport width. Each line still
- * wraps on its own when the screen is too narrow to hold it — on a phone this reads as
- * five lines, and the reveal follows whatever the browser actually did (see the timeline
- * below), not what it did at 1440.
+ * The headline as two authored lines, so the break after "companies" is a decision rather
+ * than an accident of the current viewport width. Each line still wraps on its own when
+ * the screen is too narrow to hold it — on a phone this reads as four lines, and the
+ * reveal follows whatever the browser actually did (see the timeline below), not what it
+ * did at 1440.
+ *
+ * IT WAS THREE, WITH "companies" ALONE ON THE MIDDLE LINE. That was not a choice so much
+ * as a consequence: at the old clamp's 88px ceiling "We make mining companies" measures
+ * about 15.45em = 1360px, and container-editorial gives it 1152px, so the words could not
+ * share a line at any laptop width. The type scale below came down with this change, and
+ * the two now fall out evenly at 15.45em and 13.45em.
  *
  * Sentence case in the markup with `uppercase` in CSS, not caps in the string: the caps are
  * a typographic treatment, and some screen readers spell out an all-caps word letter by
  * letter when it is caps in the DOM.
  */
-const HEADLINE_LINES = ["We make mining", "companies", "impossible to ignore."];
+const HEADLINE_LINES = ["We make mining companies", "impossible to ignore."];
 
 /** Where the CTA sends the reader. The section it names lives in services/page.tsx. */
 const NEXT_SECTION_ID = "capabilities";
@@ -163,7 +169,7 @@ export const ServicesHero: React.FC = () => {
             the desktop composition is untouched, and browsers without it simply wrap the
             way they did before.
           */
-          className="mt-8 text-balance font-geist text-[clamp(2.5rem,6.5vw,5.5rem)] font-black uppercase leading-[0.94] tracking-[-0.035em] text-[#0B1F3A]"
+          className="mt-8 text-balance font-geist text-[clamp(2.5rem,5.6vw,4.5rem)] font-black uppercase leading-[0.94] tracking-[-0.035em] text-[#0B1F3A]"
         >
           {HEADLINE_LINES.map((line) => (
             <span key={line} className="block">

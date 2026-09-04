@@ -68,10 +68,10 @@ const WALL: Array<{ name: string; place: string; size: Size }> = [
  * crops that margin away, which makes the artwork itself larger without scaling the file up
  * or distorting a single logo. TrustedBy.tsx on the homepage carries the same note.
  */
-const SIZE: Record<Size, { width: string; cell: string; rest: string }> = {
-  sm: { width: "max-w-[150px]", cell: "h-[92px]", rest: "opacity-45" },
-  md: { width: "max-w-[200px]", cell: "h-[116px]", rest: "opacity-55" },
-  lg: { width: "max-w-[260px]", cell: "h-[150px]", rest: "opacity-70" },
+const SIZE: Record<Size, { width: string; cell: string }> = {
+  sm: { width: "max-w-[150px]", cell: "h-[92px]" },
+  md: { width: "max-w-[200px]", cell: "h-[116px]" },
+  lg: { width: "max-w-[260px]", cell: "h-[150px]" },
 };
 
 const HEADING_LINES = ["Trusted by companies", "shaping the future of mining."];
@@ -86,16 +86,15 @@ const byName = (name: string): TrustedBrand | undefined =>
  * One mark. Falls back to a text wordmark if the file 404s or is renamed upstream, so a
  * withdrawn logo degrades to the company's name rather than to a hole in the wall.
  */
-const BrandMark: React.FC<{ brand: TrustedBrand; width: string; rest: string }> = ({
+const BrandMark: React.FC<{ brand: TrustedBrand; width: string }> = ({
   brand,
   width,
-  rest,
 }) => {
   const [available, setAvailable] = useState(true);
 
   if (!available) {
     return (
-      <span className={`text-center font-sans text-sm font-semibold tracking-tight text-[#57595E] ${rest}`}>
+      <span className="text-center font-sans text-sm font-semibold tracking-tight text-[#57595E]">
         {brand.name}
       </span>
     );
@@ -111,7 +110,7 @@ const BrandMark: React.FC<{ brand: TrustedBrand; width: string; rest: string }> 
        * its height, so a height cap shrinks the CANVAS and takes the mark down with it.
        * h-auto keeps the aspect ratio exactly — nothing here is stretched or distorted.
        */
-      className={`h-auto w-full ${width} object-contain grayscale transition-all duration-300 ease-out hover:scale-[1.04] hover:opacity-100 hover:grayscale-0 ${rest}`}
+      className={`h-auto w-full ${width} object-contain transition-all duration-300 ease-out hover:scale-[1.04]`}
       /*
        * The files are RGB on a #FFFFFF ground with no alpha, so without this every mark
        * paints a white tile onto the ivory. multiply maps white onto the backdrop exactly and
@@ -261,7 +260,7 @@ export const ServicesTrustedBrands: React.FC = () => {
                  */
                 className={`flex items-center justify-center overflow-hidden bg-[#F7F5EF] ${SIZE[size].cell} ${place} ${HIDDEN_RISE}`}
               >
-                <BrandMark brand={brand} width={SIZE[size].width} rest={SIZE[size].rest} />
+                <BrandMark brand={brand} width={SIZE[size].width} />
               </div>
             );
           })}
@@ -279,7 +278,7 @@ export const ServicesTrustedBrands: React.FC = () => {
             <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-8">
               {marqueeBrands.map((brand) => (
                 <div key={brand.name} className="flex h-[100px] w-[150px] items-center justify-center overflow-hidden bg-[#F7F5EF]">
-                  <BrandMark brand={brand} width="max-w-[170px]" rest="opacity-55" />
+                  <BrandMark brand={brand} width="max-w-[170px]" />
                 </div>
               ))}
             </div>
@@ -297,7 +296,7 @@ export const ServicesTrustedBrands: React.FC = () => {
                   key={brand.name}
                   className="flex h-[100px] w-[178px] shrink-0 items-center justify-center overflow-hidden bg-[#F7F5EF] px-4"
                 >
-                  <BrandMark brand={brand} width="max-w-[170px]" rest="opacity-50" />
+                  <BrandMark brand={brand} width="max-w-[170px]" />
                 </div>
               ))}
               <div aria-hidden="true" className="flex items-center">
@@ -306,7 +305,7 @@ export const ServicesTrustedBrands: React.FC = () => {
                     key={`${brand.name}-repeat`}
                     className="flex h-[100px] w-[178px] shrink-0 items-center justify-center overflow-hidden bg-[#F7F5EF] px-4"
                   >
-                    <BrandMark brand={brand} width="max-w-[170px]" rest="opacity-50" />
+                    <BrandMark brand={brand} width="max-w-[170px]" />
                   </div>
                 ))}
               </div>

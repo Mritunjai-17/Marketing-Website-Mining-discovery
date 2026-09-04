@@ -87,7 +87,7 @@ const CompanyLogo: React.FC<{ company: Company }> = ({ company }) => {
 
   if (!logoAvailable) {
     return (
-      <span className="text-center font-sans text-base font-semibold tracking-tight text-[#57595E] opacity-70 transition-opacity duration-300 ease-out group-hover:opacity-100">
+      <span className="text-center font-sans text-base font-semibold tracking-tight text-[#57595E] transition-opacity duration-300 ease-out">
         {company.name}
       </span>
     );
@@ -111,7 +111,7 @@ const CompanyLogo: React.FC<{ company: Company }> = ({ company }) => {
        * wide and ~43px tall. max-w caps it where a cell is wider than the artwork can
        * usefully fill (a two-column phone layout).
        */
-      className="h-auto w-full max-w-[220px] object-contain opacity-70 grayscale transition-all duration-300 ease-out group-hover:opacity-100 group-hover:grayscale-0"
+      className="h-auto w-full max-w-[220px] object-contain transition-all duration-300 ease-out"
       /*
        * The files have no alpha channel — colour type 2, RGB, on a #FFFFFF ground. Left
        * alone, filling the cell would paint 27 white tiles onto the section's #F4F4F2.
@@ -159,7 +159,7 @@ export const TrustedBy: React.FC = () => {
           */}
           <motion.h2
             variants={itemVariants}
-            className="font-geist text-[clamp(3rem,8vw,7.5rem)] font-black uppercase leading-[0.86] tracking-[-0.035em] text-[#0B1F3A]"
+            className="font-geist text-[clamp(2.25rem,5vw,4rem)] font-black uppercase leading-[0.95] tracking-[-0.035em] text-[#0B1F3A]"
           >
             <span className="block">Featured</span>
             <span className="ml-[0.14em] block">Companies</span>

@@ -240,19 +240,18 @@ const HEADLINE_LINES: {
   text: string;
   start: number;
   /**
-   * Leading run of `text` that carries the gold brushstroke, or absent for no stroke.
+   * The word inside `text` that carries the gold brushstroke, or absent for no stroke.
    *
-   * A prefix rather than a flag because the stroke has to span the word and NOT the
-   * period after it: the render splits `text` here, wraps the first part so the stroke
-   * can size itself to it, and prints the remainder as plain text. Reading order is
-   * unchanged — the two runs are adjacent with no whitespace between them, so the DOM
-   * still reads "ignore." exactly as before.
+   * A word rather than a flag because the stroke has to span it and NOT the period after
+   * it. The render splits `text` at the word's last occurrence and prints the three runs
+   * adjacent with no whitespace between them, so the DOM still reads the line exactly as
+   * written. It used to assume a prefix, which only held while "ignore." was a line of
+   * its own; the word now sits at the end of a longer line.
    */
   underlineWord?: string;
 }[] = [
-  { text: "Make your mining", start: 0.18 },
-  { text: "story impossible to", start: 0.34 },
-  { text: "ignore.", start: 0.5, underlineWord: "ignore" },
+  { text: "Make your mining story", start: 0.18 },
+  { text: "impossible to ignore.", start: 0.36, underlineWord: "ignore" },
 ];
 
 /**
@@ -277,7 +276,7 @@ const STAGE_COUNT = TOUR.length;
  * 165 puts the range at 7 x 165 = 1155vh, of which 1055vh is actual travel once the
  * sticky card's own viewport is subtracted.
  */
-const STAGE_VH = 165;
+const STAGE_VH = 220;
 
 /** Scale held at every stop, so each continent gets the same treatment. */
 const STOP_ZOOM = 2.8;
@@ -288,14 +287,21 @@ const TRAVEL_ZOOM = 1.55;
  * this stop, past DEPART it has started leaving for the next; the span between is the
  * held stop. The two halves of a hop straddle a stage boundary and meet at its centre.
  *
- * So the dwell is not an added pause — it is the majority of every stage, and always was.
- * Narrowed from 0.18/0.82 to 0.13/0.87, which takes the moving part of a stage from 36%
- * to 26% and the held part from 64% to 74%. Against the longer STAGE_VH that is a hop
- * with ~19% more scroll behind it and a dwell with ~91% more, so the globe both travels
- * more slowly and rests visibly longer once it arrives.
+ * WIDENED BACK OUT, and this is the change that stops the tour reading as a series of
+ * jumps. At 0.13/0.87 only 26% of a stage was in motion: the globe sat still for
+ * three-quarters of the scroll and then swung a whole continent in the remaining quarter,
+ * which is fast angular movement however smooth the interpolation underneath it is.
+ *
+ * 0.22/0.78 puts 44% of a stage in motion. Paired with STAGE_VH at 220 that is 97vh of
+ * scroll behind each hop against 43vh before — 2.26x the distance for the same rotation,
+ * so the globe turns at 44% of its old angular speed.
+ *
+ * The dwell is deliberately unchanged in absolute terms: 56% of 220vh is 123vh, against
+ * 74% of 165vh which was 122vh. The stops rest exactly as long as they did; all of the
+ * new distance went into the travel between them.
  */
-const STAGE_ARRIVE = 0.13;
-const STAGE_DEPART = 0.87;
+const STAGE_ARRIVE = 0.22;
+const STAGE_DEPART = 0.78;
 /** Progress over which the globe hands off from free drift to the tour. */
 const ENGAGE = 0.03;
 /**
@@ -307,12 +313,18 @@ const ENGAGE = 0.03;
  * a reader feels as the globe being disconnected from the wheel: it accelerates into a
  * move and coasts out of it a third of a second behind the page.
  *
- * 480/44 is the same integrator tuned to track instead of trail. zeta = 44 / (2 *
- * sqrt(480)) = 1.004, so it is still on the safe side of critical — progress can never
- * overshoot the scroll position, and the tour cannot run past a stop and come back — but
- * the time constant is 50ms and it is inside 5% in 150ms. At 60fps that is under three
- * frames, which is short enough to read as locked to the scroll while still absorbing the
- * frame-to-frame unevenness the raw position carries.
+ * 84/18.3 sits between the two extremes this has been tuned to. zeta = 18.3 / (2 *
+ * sqrt(84)) = 0.998 — critical to three decimals, so progress still cannot overshoot the
+ * scroll position and the tour cannot run past a stop and come back.
+ *
+ * The time constant is 109ms. That is the ease: flick the wheel and the globe leans into
+ * the move and settles out of it rather than snapping onto the new position, trailing a
+ * fast scroll by about 29ms. Move slowly and 29ms is below the threshold of noticing, so
+ * it tracks the wheel precisely. The three tunings this has had, for the record:
+ *
+ *   60/20    tau 272ms, trails 106ms   too slow - reads as disconnected from the page
+ *   480/44   tau  50ms, trails   1ms   locked on, but no ease into a fast scroll at all
+ *   84/18.3  tau 109ms, trails  29ms   eases under a flick, exact under a slow drag
  *
  * WHY ANY FILTER AT ALL. Lenis already smooths the scroll position with its own lerp, so
  * this is a second filter on an already-smooth signal — which is exactly why it must be
@@ -320,10 +332,10 @@ const ENGAGE = 0.03;
  * anything slower is double-smoothing, and double-smoothing is the lag.
  *
  * Stability: explicit Euler with substepping needs h * damping < 2. At 60fps that is
- * 0.0167 * 44 = 0.73, and the worst substep the cap allows before RESUME_GAP takes over
- * is 0.0333 * 44 = 1.47. Both hold. Raising damping past ~110 would not.
+ * 0.0167 * 18.3 = 0.31, and the worst substep the cap allows before RESUME_GAP takes over
+ * is 0.0333 * 18.3 = 0.61. Both hold comfortably.
  */
-const PROGRESS_SPRING = { stiffness: 480, damping: 44 };
+const PROGRESS_SPRING = { stiffness: 84, damping: 18.3 };
 /**
  * The zoom's own spring, and the only underdamped one.
  *
@@ -1056,6 +1068,16 @@ export const GlobeHero: React.FC = () => {
               1280x768   gap -20px -> 33px
               1440x1080  gap 52px -> 105px
 
+          BELOW sm THE HEADLINE RUNS ON ITS OWN CLAMP. At the desktop scale's 40px floor
+          the three written lines do not fit a phone's measure — "story impossible to" is
+          about 12.4em of uppercase Playfair, which needs 272px at 320 wide and has 272px
+          to live in only up to ~21px. So each line wrapped in two and the headline became
+          five rows, which pushed the globe down to 30px of visible planet on a 320x568
+          screen. 6.5vw between 1.3rem and 2.5rem keeps all three lines unwrapped from 320
+          up, and hands the globe back 126px there and 117px at 375. The sm: clamp is the
+          old one unchanged, and 6.5vw reaches 2.5rem just as sm takes over, so the two
+          meet at 40px with no step.
+
           THE BOTTOM PADDING IS NOT SLACK. The globe range that follows is pulled up over
           this block by -mt-5, and lg:-mt-6, and the sticky card inside it is opaque
           (bg-[#0A1128]) and paints later in the tree — so it covers whatever it reaches.
@@ -1103,8 +1125,14 @@ export const GlobeHero: React.FC = () => {
           paragraph box. Reading order is unchanged: a screen reader still gets one
           continuous sentence.
         */}
-        <h1 className="hero-rise [animation-delay:160ms] mt-2 max-w-[880px] font-geist text-[clamp(2.5rem,5vw,4.5rem)] font-bold uppercase leading-[0.92] tracking-[-0.02em] text-white sm:mt-2">
-          {HEADLINE_LINES.map((line, index) => (
+        <h1 className="hero-rise [animation-delay:160ms] mt-2 max-w-[1040px] font-geist text-[clamp(1.2rem,6vw,2.5rem)] font-bold uppercase leading-[0.92] sm:text-[clamp(2.5rem,5vw,4.5rem)] tracking-[-0.02em] text-white sm:mt-2">
+          {HEADLINE_LINES.map((line, index) => {
+            // Where the underlined word starts, so the line can be printed as three runs.
+            const at = line.underlineWord
+              ? line.text.lastIndexOf(line.underlineWord)
+              : -1;
+
+            return (
             /*
               The mask. overflow-hidden is what turns a slow drift into a line leaving:
               the span slides up behind this edge and is simply gone, while the lines
@@ -1128,7 +1156,7 @@ export const GlobeHero: React.FC = () => {
                       was and the paragraph below does not move; the stroke simply paints
                       into the 24px gap that was already there, keeping ~16px of daylight.
                     */
-                    "block overflow-hidden pb-[0.26em] -mb-[0.26em]"
+                    "block overflow-hidden pb-[0.45em] -mb-[0.45em] sm:pb-[0.26em] sm:-mb-[0.26em]"
                   : "block overflow-hidden pb-[0.08em] -mb-[0.08em]"
               }
             >
@@ -1138,8 +1166,9 @@ export const GlobeHero: React.FC = () => {
                 }}
                 className="block will-change-[transform,opacity,filter]"
               >
-                {line.underlineWord ? (
+                {line.underlineWord && at >= 0 ? (
                   <>
+                    {line.text.slice(0, at)}
                     {/*
                       Wraps the word alone, so the stroke's 100% width is the word's width
                       and not the line's. inline-block for the containing block only — no
@@ -1151,17 +1180,18 @@ export const GlobeHero: React.FC = () => {
                       {line.underlineWord}
                       <HeadlineUnderline />
                     </span>
-                    {line.text.slice(line.underlineWord.length)}
+                    {line.text.slice(at + line.underlineWord.length)}
                   </>
                 ) : (
                   line.text
                 )}
               </span>
             </span>
-          ))}
+            );
+          })}
         </h1>
 
-        <p className="hero-rise [animation-delay:260ms] mt-4 max-w-[560px] font-geist text-[clamp(0.95rem,1.2vw,1.125rem)] font-normal leading-[1.55] tracking-[-0.005em] text-[#B8BCC8] sm:mt-4">
+        <p className="hero-rise [animation-delay:260ms] mt-4 max-w-[740px] font-geist text-[clamp(0.95rem,1.2vw,1.125rem)] font-normal leading-[1.55] tracking-[-0.005em] text-[#B8BCC8] sm:mt-4">
           Mining Discovery combines industry media, digital marketing and investor-focused
           communication to put mining companies in front of the audiences that matter.
         </p>

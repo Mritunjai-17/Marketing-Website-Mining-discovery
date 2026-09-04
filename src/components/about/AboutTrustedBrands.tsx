@@ -59,7 +59,7 @@ const BrandLogo: React.FC<{ brand: TrustedBrand }> = ({ brand }) => {
        * down with it in both directions. Filling the width and letting the cell clip the
        * white margin is what puts the mark at a readable size.
        */
-      className="h-auto w-full max-w-[160px] object-contain opacity-70 grayscale transition-all duration-300 ease-out hover:opacity-100 hover:grayscale-0"
+      className="h-auto w-full max-w-[160px] object-contain transition-all duration-300 ease-out"
       /*
        * The files have no alpha channel — RGB on a #FFFFFF ground — so without this every
        * cell would paint a white tile. multiply maps white onto the backdrop exactly and
