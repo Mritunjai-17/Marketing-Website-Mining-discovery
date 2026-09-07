@@ -157,12 +157,22 @@ export const earthFragmentShader = /* glsl */ `
     color += vec3(0.52, 0.64, 0.78) * specular * uSpecularStrength;
 
     // --- Limb haze on the sphere itself -------------------------------------------
-    float fresnel = pow(1.0 - max(dot(N, V), 0.0), 2.8);
+    // Exponent raised 2.8 -> 5.0. At 2.8 the haze still carried 12% of its weight at
+    // 0.85 of the disc radius and 3% at 0.7, which over a surface this dark is a broad
+    // blue veil lying across most of the visible cap rather than a rim. At 5.0 the same
+    // radii see 2.4% and 0.2%: the term collapses onto the last few percent of the
+    // silhouette and is gone everywhere else, which is where an atmosphere actually is.
+    float fresnel = pow(1.0 - max(dot(N, V), 0.0), 5.0);
     color += uHazeColor * fresnel * (0.35 + 0.65 * daylight) * uHazeStrength;
 
     // The limb also thins out: fading alpha toward the silhouette keeps the sphere from
     // ending on a hard cut-out edge against the white card.
-    float edgeSoftening = mix(0.72, 1.0, 1.0 - fresnel);
+    // Floor raised 0.72 -> 0.88. That 28% of transparency at the silhouette was there
+    // to stop the sphere ending on a hard cut-out edge against a WHITE card; against the
+    // #0A1128 the hero actually uses it does the opposite job, letting the backdrop bleed
+    // through the limb and dissolving the one edge the planet is read by. Kept short of
+    // 1.0 so the boundary is still resolved rather than aliased.
+    float edgeSoftening = mix(0.88, 1.0, 1.0 - fresnel);
 
     gl_FragColor = vec4(color, uOpacity * edgeSoftening);
 

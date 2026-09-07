@@ -87,7 +87,25 @@ export const Header: React.FC = () => {
             width={220}
             height={85}
             priority
-            className="h-11 sm:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-102"
+            /*
+             * h-14 with -my-1.5, and the negative margin is the whole trick.
+             *
+             * This image is the tallest thing in the bar, so it is what sets the row
+             * height and therefore the header's: 44px of logo inside py-3 is the 69px
+             * header. Taking h-11 to h-14 on its own would have carried the navbar up to
+             * 81px with it.
+             *
+             * Flex sizes a line by its items' MARGIN boxes, so -1.5 (-6px top and bottom)
+             * hands back exactly the 12px the extra height took: the image draws at 56px
+             * and still occupies 44px of layout. The 6px it spills on each side lands in
+             * the header's own padding, and the header is overflow: visible, so nothing
+             * clips. 56/44 is +27% - inside the 25-35% asked for - and w-auto keeps the
+             * 480x212 aspect, so the width follows from 99.7px to ~126.8px on its own.
+             *
+             * Reset at sm, where the logo was already at its intended 48px and the bar is
+             * not the one under review.
+             */
+            className="h-14 -my-1.5 sm:h-12 sm:my-0 w-auto object-contain transition-transform duration-300 group-hover:scale-102"
           />
         </Link>
 

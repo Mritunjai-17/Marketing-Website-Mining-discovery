@@ -121,70 +121,104 @@ function noiseSize(mapWidth: number) {
 }
 
 /**
- * Latitude-banded terrain palette: ice, tundra, boreal, arid, tropic, ice.
+ * Land palette. Latitude-banded, but the bands now carry luminance only.
  *
- * Deliberately muted and mid-toned. The sphere is composited semi-transparently over a
- * white card, which already lifts everything several stops, so a saturated palette here
- * would wash out to pastel while a dark one would fight the airy look.
+ * EARTH AT NIGHT, so the biome colouring is gone. A night map has no tundra, no boreal
+ * and no tropic: the sun is not on this face, and what little the land shows is the same
+ * dark blue everywhere, a shade above the water and no more. The previous pass ran a
+ * green/ochre biome ramp through here, which rendered to rgb(36,47,37) — a legible
+ * OLIVE continent, and the single largest reason the sphere read as a lit daytime globe
+ * with lights stuck on it rather than as a planet at night.
+ *
+ * Still solved back through the shader rather than picked by eye. The material
+ * desaturates by uDesaturate, multiplies by (uAmbient + uSunIntensity) = 1.19, applies
+ * ACES at 1.06 exposure and converts to sRGB, so an authored hex and the pixel it
+ * becomes are far apart. At uDesaturate 0.06 the stops below land between rgb(20,30,50)
+ * and rgb(34,48,72): roughly twice the hero's #0A1128 backdrop and twice the ocean, so a
+ * coastline reads, while staying far under the city lights so those stay the brightest
+ * thing on the sphere.
+ *
+ * The poles are the lightest stops, not because of ice cover — paintIceCaps handles that
+ * separately — but because a continent that darkens uniformly toward both silhouettes
+ * loses its edge against the ocean exactly where limb darkening is already taking it.
  */
 function terrainGradient(ctx: CanvasRenderingContext2D, h: number) {
   const g = ctx.createLinearGradient(0, 0, 0, h);
-  // The same latitude bands as the day palette - ice, tundra, boreal, arid, tropic - in
-  // a night key.
   //
-  // These values are SOLVED BACK THROUGH THE SHADER, not picked by eye. The material
-  // desaturates by 0.16, multiplies by (uAmbient + uSunIntensity) = 1.19, applies ACES
-  // at 1.06 exposure and converts to sRGB, so an authored hex and the pixel it becomes
-  // are far apart down here. The first night pass was authored by eye and landed with
-  // unlit land at 1.07x the hero background - which is to say invisible, and a direct
-  // miss on the "visible but subtle landmass shading" this is supposed to show.
-  //
-  // Each stop below renders to roughly 1.5-1.6x the background and 1.4-1.6x the ocean,
-  // which is what makes a coastline read at all, while staying far under the city
-  // lights so they remain the brightest thing on the sphere.
-  g.addColorStop(0.0, "#393F41");
-  g.addColorStop(0.06, "#343A38");
-  g.addColorStop(0.14, "#313833");
-  g.addColorStop(0.26, "#2C372D");
-  g.addColorStop(0.36, "#35362B");
-  g.addColorStop(0.44, "#393629");
-  g.addColorStop(0.52, "#2A352A");
-  g.addColorStop(0.6, "#2C372D");
-  g.addColorStop(0.68, "#35362B");
-  g.addColorStop(0.78, "#2A352A");
-  g.addColorStop(0.88, "#313833");
-  g.addColorStop(1.0, "#393F41");
+  // Pulled toward blue and away from grey, and — the point of this pass — held UP while
+  // the ocean went down. Land now renders rgb(14,30,48) to rgb(24,45,68) against water at
+  // rgb(6,14,26): a luma ratio of 2.5x where the previous pair managed 1.9x. That ratio
+  // is what makes a coastline legible without drawing one, which is the whole trick here,
+  // since an actual stroked outline around every landmass is the thing that reads as a
+  // map rather than as a photograph.
+  g.addColorStop(0.0, "#243547");
+  g.addColorStop(0.06, "#223343");
+  g.addColorStop(0.14, "#203040");
+  g.addColorStop(0.26, "#1F2E3F");
+  g.addColorStop(0.36, "#1D2C3C");
+  g.addColorStop(0.44, "#1B2A39");
+  g.addColorStop(0.52, "#1E2D3D");
+  g.addColorStop(0.6, "#1F2E3F");
+  g.addColorStop(0.68, "#1D2C3C");
+  g.addColorStop(0.78, "#1E2D3D");
+  g.addColorStop(0.88, "#203040");
+  g.addColorStop(1.0, "#243547");
   return g;
 }
 
-/** Soft blue-grey ocean, lighter toward the poles. */
+/** Near-black navy ocean, barely lifted toward the poles. */
 function oceanGradient(ctx: CanvasRenderingContext2D, h: number) {
   const g = ctx.createLinearGradient(0, 0, 0, h);
-  // Dark navy, lifted toward the poles. Also solved through the shader: the previous
-  // values rendered to 3,4,10 sRGB, which is DARKER than the #0A1128 hero background -
-  // the centre of the globe read as a hole punched in the page rather than as an unlit
-  // ocean. These land just above it, so the disc is present without ever being lit.
-  g.addColorStop(0.0, "#1F2631");
-  g.addColorStop(0.16, "#1B222D");
-  g.addColorStop(0.5, "#181E29");
-  g.addColorStop(0.84, "#1B222D");
-  g.addColorStop(1.0, "#1F2631");
+  // Also solved through the shader, and against one hard floor: the #0A1128 hero
+  // backdrop this sphere is drawn over. An ocean darker than the page renders as a hole
+  // punched in it rather than as unlit water, so mid-latitude water lands at rgb(10,15,28)
+  // — level with the backdrop in luminance but cooler and bluer, which is what lets the
+  // disc read as water without ever reading as lit. The old stops carried a grey cast
+  // that showed up against the new land; these are the same values pulled toward blue.
+  //
+  // Taken down another stop and flattened. Two separate notes:
+  //
+  // DARKER. Mid-latitude water now renders rgb(6,14,26) against the #0A1128 backdrop's
+  // rgb(10,17,40) — for the first time the ocean sits BELOW the page it is drawn on, so
+  // it recedes into it instead of reading as a lit blue disc. The earlier worry about
+  // the globe becoming "a hole punched in the page" is answered by the limb and the
+  // lights rather than by keeping the water bright: an ocean that is visibly lit at
+  // night is the single thing that stops this reading as a night map.
+  //
+  // FLATTER. The pole-to-equator spread is cut from 8 luma to 4. A visible vertical
+  // ramp across the water is a gradient, and a gradient reads as a lighting effect
+  // painted onto a sphere; the real thing is near-uniform black with local texture,
+  // which the noise pass below now supplies instead.
+  g.addColorStop(0.0, "#131E2A");
+  g.addColorStop(0.16, "#121C28");
+  g.addColorStop(0.5, "#0F1924");
+  g.addColorStop(0.84, "#121C28");
+  g.addColorStop(1.0, "#131E2A");
   return g;
 }
 
-/** Soft white polar caps blended over both land and sea ice. */
+/**
+ * Polar caps, as a faint cool wash rather than white ice.
+ *
+ * Cut to roughly a third of their previous alpha. At 0.34 they were the brightest
+ * non-light pixels anywhere on the sphere, and against oceans that are now near-black
+ * that reads as two lamps at the poles — the one thing a night map never shows, since
+ * the winter pole is the darkest place on the planet and the summer one is off frame.
+ * Kept rather than removed: a trace of cap is what stops Greenland and Antarctica from
+ * vanishing into the water entirely.
+ */
 function paintIceCaps(ctx: CanvasRenderingContext2D, w: number, h: number) {
   const north = ctx.createLinearGradient(0, 0, 0, h * 0.1);
-  north.addColorStop(0, "rgba(168,186,204,0.34)");
-  north.addColorStop(0.45, "rgba(168,186,204,0.15)");
-  north.addColorStop(1, "rgba(168,186,204,0)");
+  north.addColorStop(0, "rgba(146,170,204,0.12)");
+  north.addColorStop(0.45, "rgba(146,170,204,0.05)");
+  north.addColorStop(1, "rgba(146,170,204,0)");
   ctx.fillStyle = north;
   ctx.fillRect(0, 0, w, h * 0.1);
 
   const south = ctx.createLinearGradient(0, h, 0, h * 0.87);
-  south.addColorStop(0, "rgba(174,192,210,0.36)");
-  south.addColorStop(0.5, "rgba(174,192,210,0.17)");
-  south.addColorStop(1, "rgba(174,192,210,0)");
+  south.addColorStop(0, "rgba(150,174,208,0.13)");
+  south.addColorStop(0.5, "rgba(150,174,208,0.06)");
+  south.addColorStop(1, "rgba(150,174,208,0)");
   ctx.fillStyle = south;
   ctx.fillRect(0, h * 0.87, w, h * 0.13);
 }
@@ -266,8 +300,14 @@ function tintNightLights(img: HTMLImageElement, w: number, h: number): HTMLCanva
   ctx.imageSmoothingQuality = "high";
   ctx.drawImage(img, 0, 0, w, h);
 
+  // Deepened from #FFC05C. The shader desaturates the whole albedo before lighting, so
+  // the authored tint is not what lands on screen: at the old value a full-brightness
+  // city core rendered rgb(234,213,165), a pale cream with barely any hue left in it.
+  // This one renders rgb(239,200,118) — sodium-vapour gold, which is what the lights
+  // actually photograph as from orbit — while the dimmer 90-odd percent of the raster
+  // falls away into warm amber underneath it.
   ctx.globalCompositeOperation = "multiply";
-  ctx.fillStyle = "#FFC05C";
+  ctx.fillStyle = "#FFA83C";
   ctx.fillRect(0, 0, w, h);
 
   return out;
@@ -341,6 +381,54 @@ const POPULATION_CENTRES: Array<{ lat: number; lng: number; r: number; i: number
   { lat: 7.0, lng: -73.0, r: 6, i: 0.6 }, // northern andes
   { lat: -33.8, lng: 151.0, r: 4, i: 0.7 }, // sydney
   { lat: -37.8, lng: 145.0, r: 3.5, i: 0.65 }, // melbourne
+
+  /*
+   * SECOND TIER. Everything above is a first-magnitude region; these are the smaller
+   * ones, and they are here because a map with only the first tier has a characteristic
+   * failure — the great regions read correctly and everything between them is empty in a
+   * way the real planet never is. Poland, the Maghreb, central Chile and the Australian
+   * capitals are not Tokyo, but they are not the Sahara either, and it is the middle of
+   * that range that makes the distribution look inhabited rather than sampled.
+   *
+   * Deliberately capped at i 0.75 and mostly well under it, so nothing here can compete
+   * with the first tier: the hierarchy is major region > urban region > settlement, and
+   * these occupy the bottom two rungs. Radii are smaller too — a second-tier region is a
+   * city and its surroundings, not a corridor.
+   */
+  // North America
+  { lat: 45.5, lng: -73.6, r: 4, i: 0.6 }, // st lawrence
+  { lat: 28.0, lng: -81.5, r: 4.5, i: 0.6 }, // florida
+  { lat: 47.5, lng: -122.3, r: 3.5, i: 0.55 }, // pacific northwest
+  { lat: 39.7, lng: -105.0, r: 3, i: 0.4 }, // front range
+  // South America
+  { lat: -33.5, lng: -70.7, r: 3.5, i: 0.6 }, // central chile
+  { lat: -8.0, lng: -35.5, r: 5, i: 0.5 }, // north-east brazil
+  { lat: -12.0, lng: -77.0, r: 3, i: 0.55 }, // peruvian coast
+  { lat: 10.5, lng: -67.0, r: 4, i: 0.5 }, // venezuela
+  // Europe
+  { lat: 52.0, lng: 19.5, r: 5, i: 0.6 }, // poland and central europe
+  { lat: 50.0, lng: 31.0, r: 5, i: 0.55 }, // ukraine
+  { lat: 44.0, lng: 21.0, r: 4.5, i: 0.5 }, // balkans
+  { lat: 59.3, lng: 17.5, r: 4, i: 0.45 }, // southern scandinavia
+  // North Africa and the Middle East
+  { lat: 36.5, lng: 3.0, r: 5, i: 0.6 }, // maghreb coast
+  { lat: 33.5, lng: -7.0, r: 4, i: 0.55 }, // atlantic morocco
+  { lat: 32.5, lng: 35.5, r: 4, i: 0.65 }, // the levant
+  { lat: 33.3, lng: 44.4, r: 4.5, i: 0.6 }, // mesopotamia
+  // South and East Asia
+  { lat: 24.9, lng: 67.0, r: 3.5, i: 0.6 }, // karachi
+  { lat: 7.5, lng: 80.5, r: 3, i: 0.5 }, // sri lanka
+  { lat: 30.6, lng: 104.1, r: 5, i: 0.75 }, // sichuan basin
+  { lat: 42.0, lng: 124.0, r: 5, i: 0.6 }, // north-east china
+  { lat: 23.8, lng: 121.0, r: 2.5, i: 0.6 }, // taiwan
+  // South-east Asia
+  { lat: 14.6, lng: 121.0, r: 3.5, i: 0.65 }, // luzon
+  { lat: 21.0, lng: 105.8, r: 3.5, i: 0.6 }, // red river delta
+  { lat: 3.0, lng: 102.5, r: 4, i: 0.6 }, // malaya and singapore
+  // Australia
+  { lat: -27.5, lng: 153.0, r: 2.5, i: 0.5 }, // brisbane
+  { lat: -31.9, lng: 115.9, r: 2.5, i: 0.45 }, // perth
+  { lat: -34.9, lng: 138.6, r: 2, i: 0.4 }, // adelaide
 ];
 
 /**
@@ -472,8 +560,13 @@ function paintDayMap(
   ctx.fillRect(0, 0, w, h);
 
   ctx.save();
+  // Raised from 0.12 as the water went dark. This is the pass that keeps the ocean from
+  // becoming a flat black silhouette: overlay against a dark base multiplies where the
+  // noise falls below mid-grey and lifts where it rises above, so it varies the surface
+  // in both directions rather than just tinting it. With the base this dark, 0.12 was no
+  // longer resolving to anything visible.
   ctx.globalCompositeOperation = "overlay";
-  ctx.globalAlpha = 0.12;
+  ctx.globalAlpha = 0.18;
   ctx.drawImage(
     createFractalNoise(noise.w, noise.h, { seed: 90210, octaves: 4, lo: 96, hi: 190, falloff: 0.3 }),
     0,
@@ -519,13 +612,78 @@ function paintDayMap(
   const lights = nightLights
     ? tintNightLights(nightLights, w, h)
     : createCityLights(noise.w, noise.h, 5150);
+
+  /*
+   * The settlement tier, and only when the raster is already carrying the map.
+   *
+   * On the fallback path this same generator IS the light layer, so compositing it a
+   * second time there would simply double its own brightness and change nothing about
+   * where the lights are — hence the null.
+   */
+  const settlements = nightLights ? createCityLights(noise.w, noise.h, 5150) : null;
+  //
+  // The two alphas are swapped relative to each other from the previous pass: the blurred
+  // halo drops from 0.85 to 0.5 and the sharp cores go from 0.9 to full. The halo was
+  // authored against olive land, where it had to do the work of separating a light from
+  // the ground under it; against near-black land it needs none of that, and at 0.85 it
+  // fused neighbouring towns into continent-sized glows — the "large glowing dots" look
+  // rather than the field of individual pinpricks the real map shows. Cutting the halo
+  // and taking the cores up trades bloom for count.
   ctx.globalCompositeOperation = "lighter";
+
+  /*
+   * REGIONAL TIER, and this one is a correction rather than an addition.
+   *
+   * Cutting the halo from 0.85 to 0.36 in the previous pass did what it was meant to —
+   * neighbouring towns stopped fusing into continent-sized glows — but it also took the
+   * faint end of the map down with the fused end, and the faint end is most of the
+   * inhabited world. Black Marble is not bright cores on black; it is bright cores
+   * inside a much larger, much dimmer wash of small towns, roads and coastal strips, and
+   * with that wash gone the land between the great regions went to nothing.
+   *
+   * A wide, very low blur restores it without undoing the fix: at three times the radius
+   * and under half the alpha it spreads far enough to read as regional light rather than
+   * as a halo belonging to any one city, and it is far too dim to fuse anything.
+   */
+  ctx.filter = `blur(${Math.max(2, Math.round(7 * unit))}px)`;
+  ctx.globalAlpha = 0.16;
+  ctx.drawImage(lights, 0, 0, w, h);
+
+  // City halo and cores, unchanged.
   ctx.filter = `blur(${Math.max(1, Math.round(2.5 * unit))}px)`;
-  ctx.globalAlpha = 0.85;
+  ctx.globalAlpha = 0.36;
   ctx.drawImage(lights, 0, 0, w, h);
   ctx.filter = "none";
-  ctx.globalAlpha = 0.9;
+  ctx.globalAlpha = 1.0;
   ctx.drawImage(lights, 0, 0, w, h);
+
+  /*
+   * SETTLEMENT TIER. Small, irregular, population-weighted clusters laid over the raster.
+   *
+   * Additive, which is what keeps the hierarchy intact for free: over a Tokyo or a Rhine
+   * the raster underneath is already at or near clipping, so this contributes nothing
+   * visible there. It only resolves where the surface is dark — which is precisely the
+   * land that was reading as empty — so the tier cannot brighten a major city and cannot
+   * flatten the contrast between one and its surroundings.
+   *
+   * It is not scatter. Every cluster is a threshold on the same fBm the rest of this file
+   * uses, weighted by POPULATION_CENTRES, so the shapes are filamentary and the placement
+   * is settlement geography; the generator's own 0.06 baseline is all that reaches genuinely
+   * empty land, and at these alphas that resolves to about one part in eighty — a few
+   * isolated points across a continental interior, not a glow on it.
+   *
+   * Held to roughly a fifth of the raster's own weight so a new light is always dimmer
+   * than an existing city.
+   */
+  if (settlements) {
+    ctx.filter = `blur(${Math.max(1, Math.round(1.5 * unit))}px)`;
+    ctx.globalAlpha = 0.12;
+    ctx.drawImage(settlements, 0, 0, w, h);
+    ctx.filter = "none";
+    ctx.globalAlpha = 0.22;
+    ctx.drawImage(settlements, 0, 0, w, h);
+  }
+
   ctx.restore();
 
   // Coastlines and administrative borders
@@ -534,13 +692,19 @@ function paintDayMap(
   ctx.beginPath();
   path(land);
   ctx.lineWidth = 1.1 * unit;
-  ctx.strokeStyle = "rgba(150,178,196,0.20)";
+  // Cooled and dimmed. Against near-black water the old blue-grey at 0.20 drew a
+  // continuous lit outline around every landmass, which is a map convention, not
+  // something a satellite sees. At 0.13 it survives as a hint of edge where land meets
+  // water and disappears everywhere the lights already define the coast.
+  ctx.strokeStyle = "rgba(132,164,204,0.13)";
   ctx.stroke();
 
   ctx.beginPath();
   path(borders);
   ctx.lineWidth = 0.8 * unit;
-  ctx.strokeStyle = "rgba(255,255,255,0.035)";
+  // Halved. Administrative borders are the most "HUD" thing on the sphere and the least
+  // physical; on a darker surface the old 0.035 had started to read as deliberate.
+  ctx.strokeStyle = "rgba(255,255,255,0.018)";
   ctx.stroke();
   ctx.restore();
 

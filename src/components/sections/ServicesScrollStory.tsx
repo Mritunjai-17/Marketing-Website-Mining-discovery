@@ -412,7 +412,24 @@ export const ServicesScrollStory: React.FC = () => {
       <section
         id="services"
         className="relative font-sans"
-        style={{ backgroundColor: GROUND }}
+        /*
+         * FOOTER_GROUND, not GROUND, and only on this branch.
+         *
+         * The journey branch below sits on GROUND (#0B1220) and dissolves into the
+         * footer's #0B1F3A with the seam at the bottom of its sticky viewport. This
+         * branch returns before any of that exists, so it was ending on a flat #0B1220
+         * butting straight into the footer - two flat navies one step apart, which is
+         * exactly the horizontal line a seam is there to prevent. Below 1024px that was
+         * the last thing on the page.
+         *
+         * Taking the ground itself to the footer's colour removes the join rather than
+         * hiding it: there is no longer a boundary to blend, so this branch needs no seam
+         * of its own. It also happens to soften the join at the OTHER end - the ramp at
+         * the bottom of TrustedBy is still mid-transition where it meets this section, and
+         * #0B1F3A is nearer that grey than #0B1220 was, so the step there drops from 141
+         * to 102 in summed channel distance.
+         */
+        style={{ backgroundColor: FOOTER_GROUND }}
       >
         <div className="container-editorial flex flex-col gap-16 py-20">
           {STAGES.map((stage) => (

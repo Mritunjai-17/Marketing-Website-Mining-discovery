@@ -278,10 +278,8 @@ const STAGE_COUNT = TOUR.length;
  */
 const STAGE_VH = 220;
 
-/** Scale held at every stop, so each continent gets the same treatment. */
+/** Scale held for the whole tour: reached once on engage, then never changed again. */
 const STOP_ZOOM = 2.8;
-/** Scale at the midpoint of a hop, so the globe pulls back to travel and dives back in. */
-const TRAVEL_ZOOM = 1.55;
 /**
  * Where inside a stage the hop happens. Up to ARRIVE the globe is still settling onto
  * this stop, past DEPART it has started leaving for the next; the span between is the
@@ -549,9 +547,10 @@ function stageAt(progress: number): StageState {
     index: hop > 0.5 ? to : from,
     lat: a.lat + (b.lat - a.lat) * eased,
     lng: lerpLongitude(a.lng, b.lng, eased),
-    // sin() puts the shallowest point of the dip exactly at the hop's midpoint and
-    // returns to STOP_ZOOM at both ends, so consecutive stages join without a step.
-    zoom: STOP_ZOOM - (STOP_ZOOM - TRAVEL_ZOOM) * Math.sin(Math.PI * eased),
+    // Held flat for the whole tour. The zoom happens once, on engage; after that a hop is
+    // pure rotation — only lat/lng move, so the globe's size on screen never changes again
+    // and consecutive stages have nothing to step between.
+    zoom: STOP_ZOOM,
   };
 }
 

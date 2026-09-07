@@ -404,6 +404,20 @@ export const About: React.FC = () => {
    */
   const progress = useMotionValue(0);
   const entryT = useMotionValue(1);
+  /*
+   * THE HANDOVER, which is a different quantity from progress and has to be.
+   *
+   * progress is hard-clamped to 1 at the moment the sticky child unpins - and the child
+   * is one viewport tall, so the track still has a full viewport of scroll left after
+   * that, during which the child slides up and out. Anything driven by progress is
+   * therefore frozen for that last viewport.
+   *
+   * This measures the slide instead: rect.bottom runs from one viewport down to zero as
+   * the section leaves, so 1 - bottom/viewport is 0 the instant the pin releases and 1
+   * when the section is gone. Viewport-relative by construction, so it behaves the same
+   * at any window height rather than needing a px threshold per breakpoint.
+   */
+  const handoff = useMotionValue(0);
 
   // In on the approach, out on the way through; the mirror image on the far side.
   /*
@@ -421,7 +435,31 @@ export const About: React.FC = () => {
     );
   });
 
-  const exitOpacity = useTransform(progress, [0.88, 1], [0, 1]);
+  /*
+   * THE WAY OUT, moved off progress and onto the handover — which is the whole fix for
+   * the empty band between this section and FEATURED COMPANIES.
+   *
+   * The band was never a spacer and never excess height: measured, this section is 6838px
+   * on a 924px viewport with exactly one child, and the gap to the next section is 0px.
+   * It was this sheet's TIMING. Driven by progress, the wash reached full opacity at the
+   * instant the pin released, which is the instant the section still has one whole
+   * viewport of slide-out left — so that entire last viewport was an opaque #F4F4F2 field
+   * with the finished artwork sealed underneath it and the next section not yet risen.
+   * A full screen of nothing, and shortening the track could not have fixed it: the
+   * slide-out is one child-height no matter how tall the track is, so a shorter track
+   * would have moved the void earlier and sped the sequence up on the way.
+   *
+   * On the handover it runs during the slide-out instead. The pinned phase now ends on
+   * the artwork at full strength, and the dissolve plays over the first 40% of the slide
+   * — about 370px at this viewport — while FEATURED COMPANIES is already rising into the
+   * lower half of the screen. Same sheet, same colour, same gradient, same end state; it
+   * simply happens while something else is arriving rather than in front of a void.
+   *
+   * 0.4 rather than the full slide: the sheet has to be solid before the section's own
+   * bottom edge climbs far enough up the screen to be read as an edge, or the join
+   * against the next section shows as a line. Complete by 40%, it is covered.
+   */
+  const exitOpacity = useTransform(handoff, [0, 0.4], [0, 1]);
   const scrollYProgress = progress;
 
   // Parallax. Both tiny, and in opposite directions, which is all it takes to separate
@@ -689,6 +727,13 @@ export const About: React.FC = () => {
 
       if (progress.get() !== p) progress.set(p);
 
+      // Zero for the whole pinned phase (rect.bottom is below the fold there), then
+      // 0 -> 1 across the slide-out. Same rect, same frame, so it cannot disagree with
+      // progress about where the section is.
+      const leaving = 1 - rect.bottom / viewport;
+      const h = leaving < 0 ? 0 : leaving > 1 ? 1 : leaving;
+      if (handoff.get() !== h) handoff.set(h);
+
       const wanted = Math.round(p * (TOTAL_FRAMES - 1));
       if (wanted !== targetRef.current) {
         targetRef.current = wanted;
@@ -726,7 +771,7 @@ export const About: React.FC = () => {
 
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [reducedMotion, near, entryT, progress, draw]);
+  }, [reducedMotion, near, entryT, progress, handoff, draw]);
 
   /* ------------------------------------------------------------- resize + teardown */
 

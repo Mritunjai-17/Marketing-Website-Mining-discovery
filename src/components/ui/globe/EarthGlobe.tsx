@@ -377,19 +377,20 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
       uniforms: {
         uColor: { value: new THREE.Color("#8FB3D9") },
         uSunDirection: { value: sunDirection },
-        // 0.38, up from 0.34. Paired with the deeper limb darkening on the surface below:
-        // the two are one adjustment, not two. Taking the surface down at the silhouette
-        // and bringing the haze that sits over it up separates the shell from the ball,
-        // and it is that separation — not brightness — that reads as atmosphere. Held
-        // well under the point where the band becomes a glow in its own right.
-        uStrength: { value: 0.38 },
+        // 0.22. The shell and the surface's own limb darkening are one adjustment, not
+        // two: taking the surface down at the silhouette and laying the haze over it is
+        // what separates shell from ball, and it is that separation — not brightness —
+        // that reads as atmosphere. Cut from 0.38 as the planet went dark, because the
+        // same alpha over a near-black limb is a far larger fraction of the pixel; at the
+        // old value the shell had become the brightest thing on the globe's edge.
+        uStrength: { value: 0.22 },
         uLimb: { value: Math.sqrt(1 - 1 / (ATMOSPHERE_RADIUS * ATMOSPHERE_RADIUS)) },
-        // Lower falloff spreads the haze further in from the limb, so the lit edge is a
-        // soft band rather than a thin bright line at horizon scale. Eased from 9 to 8.2:
-        // the card crops the sphere near its crown, so a band concentrated tight on the
-        // limb spends most of itself off screen, and reaching ~10% further in is what
-        // puts the softness where the framing can actually show it.
-        uInnerFalloff: { value: 8.2 },
+        // Higher falloff pulls the shell back onto the limb. Raised from 8.2 to 14: the
+        // earlier value deliberately spread the band inward so the cropped framing could
+        // show it, but spread inward is exactly what a halo is, and the brief here is a
+        // rim that supports the silhouette rather than one that sits on top of it. At 14
+        // the shell is effectively gone by a tenth of the way in from the edge.
+        uInnerFalloff: { value: 14.0 },
       },
       transparent: true,
       depthWrite: false,
@@ -1045,20 +1046,36 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
             // Relief is the only depth cue left once the tour zooms past the silhouette,
             // so terrain has to carry it at close range.
             uReliefStrength: { value: 0.45 },
-            uHazeStrength: { value: 0.34 },
+            // The haze that sits on the sphere itself, just inside the silhouette,
+            // separate from the atmosphere shell. Eased back with the surface it lies over:
+            // the same 0.34 of blue over a near-black limb is a far larger fraction of the
+            // pixel than it was over the old lit-looking one.
+            uHazeStrength: { value: 0.1 },
             // Full opacity: at 0.74 a quarter of the white band bled through every pixel
             // and flattened the shading before it reached the screen.
             uOpacity: { value: 1.0 },
-            uDesaturate: { value: 0.16 },
-            uSpecularStrength: { value: 0.55 },
-            // 0.44, up from 0.38. The single most effective dial for making the sphere
-            // read as a sphere on a white ground, because it is the one cue that survives
-            // the tour's magnification: a terminator can rotate off screen and a specular
-            // glint can miss the visible cap, but the falloff toward the silhouette is
-            // present in every frame at every zoom. Raised only to the point where the
-            // limb still holds legible surface detail — past ~0.55 the edge goes to mud
-            // and the coastlines there stop reading.
-            uLimbDarkening: { value: 0.44 },
+            // 0.06, down from 0.16. This dial runs over the WHOLE albedo, city lights
+            // included, so it was doing two jobs at once: muting a green biome ramp that
+            // no longer exists, and quietly draining the hue out of the night lights on
+            // its way past. With the land now authored blue there is nothing left to mute,
+            // and the lights keep the gold they were tinted with. Not taken to zero — a
+            // few percent still holds the brightest cores back from going fully saturated.
+            uDesaturate: { value: 0.06 },
+            // Sun glint on water, cut to a fifth. It is a daylight cue: a specular
+            // highlight is the sun's own reflection, and there is no sun on this face any
+            // more. At 0.55 it put a blue-white smear across the ocean that fought the
+            // near-black water harder than anything else in the frame. Left non-zero
+            // because it slides as the planet turns, and that motion is a curvature cue
+            // nothing else in the shader provides.
+            uSpecularStrength: { value: 0.1 },
+            // 0.36, down from 0.44. This is the one sphericality cue that survives the
+            // tour's magnification — a terminator can rotate off screen and a specular
+            // glint can miss the visible cap, but the falloff toward the silhouette is in
+            // every frame at every zoom — so it is kept, not removed. Lowered because at
+            // 0.44 the surface lost nearly half its value before reaching the edge, and
+            // against a backdrop this dark that is land fading out well before the
+            // silhouette instead of at it.
+            uLimbDarkening: { value: 0.36 },
             // The sunset band. Written as a hex so three converts it out of sRGB the
             // same way uHazeColor above is converted, which puts it in the linear space
             // the shader adds it in; the linear triple it lands on is ~(0.55, 0.34, 0.15)
@@ -1090,7 +1107,15 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
           uniforms: {
             uCloudMap: { value: cloudTexture },
             uSunDirection: { value: sunDirection },
-            uOpacity: { value: isSmallViewport ? 0.4 : 0.5 },
+            // From 0.5 to 0.09, and worth being precise about why this one matters more
+            // than its size suggests: the cloud sheet is pure white and covers the WHOLE
+            // disc, so unlike the surface haze and the atmosphere shell — both of which
+            // fall off toward the limb — it is the only term that lifts the CENTRE of the
+            // planet. At 0.5 its thickest coverage laid ~40% white over the ocean, and at
+            // 0.2 still ~16%: that was the milky wash, more than any other single source.
+            // The system is untouched and clouds still break up the surface; they simply
+            // no longer dominate the thing they are drawn over.
+            uOpacity: { value: isSmallViewport ? 0.07 : 0.09 },
           },
           transparent: true,
           depthWrite: false,
