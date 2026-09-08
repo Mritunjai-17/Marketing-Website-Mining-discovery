@@ -20,23 +20,18 @@
   --color-muted-text: #57595E;
 
   /*
-   * Playfair Display is the site's display face, on its 400-900 variable axis.
-   *
-   * --font-serif and --font-geist both alias it rather than being collapsed into one
-   * token: they mark two different roles - editorial pull-quotes and display headings -
-   * and keeping the seam is what lets either move to another face later without
-   * touching eighty-odd call sites.
-   *
-   * Body copy, nav, buttons and every unclassed element deliberately stay on
-   * --font-sans (Inter). Playfair is a high-contrast Didone whose hairlines break up
-   * below roughly 14px, and this site sets 107 classes at <=13px, most of them
-   * uppercase with positive tracking - its worst case.
+   * Typography Architecture for Mining Discovery:
+   * --font-geist: High-impact modern grotesque (Geist) for bold display titles, uppercase hero headers, and architectural statements.
+   * --font-display: Display headings default to Geist for powerful, crisp modern agency feel.
+   * --font-sans: Ultra-legible workhorse (Inter) for body copy, navigation, buttons, and UI components.
+   * --font-serif: Editorial serif (Playfair Display) for journalism quotes, long-form editorial headers, and prestige highlights.
+   * --font-mono: Precision terminal mono (Geist Mono / IBM Plex Mono) for coordinates, numbers, dates, and globe badges.
    */
-  --font-display: var(--font-display-custom), "Playfair Display", Georgia, "Times New Roman", serif;
-  --font-serif: var(--font-display);
-  --font-geist: var(--font-display);
+  --font-geist: var(--font-geist-sans), "Geist", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: var(--font-geist);
   --font-sans: var(--font-sans-custom), "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: var(--font-mono-custom), "IBM Plex Mono", monospace;
+  --font-serif: var(--font-display-custom), "Playfair Display", Georgia, "Times New Roman", serif;
+  --font-mono: var(--font-geist-mono), var(--font-mono-custom), "IBM Plex Mono", monospace;
 
   --max-width-editorial: 1200px;
 }

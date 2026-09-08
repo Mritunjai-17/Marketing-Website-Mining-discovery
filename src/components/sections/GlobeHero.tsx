@@ -1165,7 +1165,7 @@ export const GlobeHero: React.FC = () => {
           adds a scroll listener, and nothing here holds a transform that could become a
           containing block for the sticky globe frame below.
         */}
-        <p className="hero-rise [animation-delay:60ms] font-mono text-[10px] font-semibold uppercase leading-none tracking-[0.2em] text-[#D4AF37] sm:text-[11px] sm:tracking-[0.22em]">
+        <p className="hero-rise [animation-delay:60ms] font-mono text-xs sm:text-[13px] md:text-sm font-semibold uppercase leading-none tracking-[0.16em] sm:tracking-[0.18em] text-[#D4AF37]">
           Mining Media <span aria-hidden="true">&times;</span> Marketing{" "}
           <span aria-hidden="true">&times;</span> Investor Reach
         </p>
@@ -1182,7 +1182,7 @@ export const GlobeHero: React.FC = () => {
           paragraph box. Reading order is unchanged: a screen reader still gets one
           continuous sentence.
         */}
-        <h1 className="hero-rise [animation-delay:160ms] mt-2 max-w-[1040px] font-geist text-[clamp(1.2rem,6vw,2.5rem)] font-bold uppercase leading-[0.92] sm:text-[clamp(2.5rem,5vw,4.5rem)] tracking-[-0.02em] text-white sm:mt-2">
+        <h1 className="hero-rise [animation-delay:160ms] mt-6 max-w-[1040px] font-geist text-[clamp(1.2rem,6vw,2.5rem)] font-bold uppercase leading-[0.92] sm:text-[clamp(2.5rem,5vw,4.5rem)] tracking-[-0.02em] text-white sm:mt-7">
           {HEADLINE_LINES.map((line, index) => {
             // Where the underlined word starts, so the line can be printed as three runs.
             const at = line.underlineWord
@@ -1248,7 +1248,7 @@ export const GlobeHero: React.FC = () => {
           })}
         </h1>
 
-        <p className="hero-rise [animation-delay:260ms] mt-4 max-w-[740px] font-geist text-[clamp(0.95rem,1.2vw,1.125rem)] font-normal leading-[1.55] tracking-[-0.005em] text-[#B8BCC8] sm:mt-4">
+        <p className="hero-rise [animation-delay:260ms] mt-6 max-w-[740px] font-geist text-[clamp(0.95rem,1.2vw,1.125rem)] font-normal leading-[1.6] tracking-[-0.005em] text-[#B8BCC8] sm:mt-7">
           Mining Discovery combines industry media, digital marketing and investor-focused
           communication to put mining companies in front of the audiences that matter.
         </p>
@@ -1258,7 +1258,7 @@ export const GlobeHero: React.FC = () => {
           the commercial action, hairline outline for the browse - navy on white rather
           than the brief's white-on-dark, because this hero's ground is white.
         */}
-        <div className="hero-rise [animation-delay:360ms] mt-5 flex w-full flex-col items-stretch gap-3 sm:mt-5 sm:w-auto sm:flex-row sm:items-center sm:gap-4">
+        <div className="hero-rise [animation-delay:360ms] mt-6 flex w-full flex-col items-stretch gap-3 sm:mt-7 sm:w-auto sm:flex-row sm:items-center sm:gap-4">
           <Link
             href="/contact"
             className="group inline-flex items-center justify-center gap-2 rounded-lg bg-[#B8860B] px-7 py-3.5 font-sans text-[13px] font-semibold uppercase tracking-[0.08em] text-[#0B1F3A] shadow-sm transition-colors duration-200 hover:bg-[#D4AF37] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B8860B] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A1128]"
