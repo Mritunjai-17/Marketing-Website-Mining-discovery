@@ -96,10 +96,16 @@ const HERO_ARCS: GlobeArc[] = [
   { id: "na-eu", fromId: "north-america", toId: "europe", phase: 0.0, onMobile: true },
   { id: "eu-as", fromId: "europe", toId: "asia", phase: 0.09 },
   { id: "na-sa", fromId: "north-america", toId: "south-america", phase: 0.17 },
+  { id: "sa-br", fromId: "south-america", toId: "brazil", phase: 0.24, onMobile: true },
   { id: "eu-af", fromId: "europe", toId: "africa", phase: 0.31, onMobile: true },
+  { id: "eu-ca", fromId: "europe", toId: "central-asia", phase: 0.14 },
+  { id: "ca-as", fromId: "central-asia", toId: "asia", phase: 0.35, onMobile: true },
   { id: "af-as", fromId: "africa", toId: "asia", phase: 0.39 },
+  { id: "br-af", fromId: "brazil", toId: "africa", phase: 0.44 },
   { id: "sa-af", fromId: "south-america", toId: "africa", phase: 0.48, onMobile: true },
+  { id: "as-sea", fromId: "asia", toId: "southeast-asia", phase: 0.53, onMobile: true },
   { id: "as-au", fromId: "asia", toId: "australia", phase: 0.58, onMobile: true },
+  { id: "sea-au", fromId: "southeast-asia", toId: "australia", phase: 0.62, onMobile: true },
   { id: "eu-au", fromId: "europe", toId: "australia", phase: 0.66, onMobile: true },
   { id: "af-au", fromId: "africa", toId: "australia", phase: 0.83 },
   { id: "na-au", fromId: "north-america", toId: "australia", phase: 0.91 },
@@ -218,11 +224,13 @@ const PIN_PULSE: PinPulseStyle[] = [
 const TOUR = [
   "north-america",
   "south-america",
+  "brazil",
   "europe",
   "africa",
+  "central-asia",
   "asia",
   "australia",
-  "antarctica",
+  "southeast-asia",
 ] as const;
 
 /**
@@ -269,37 +277,21 @@ const STAGE_COUNT = TOUR.length;
 /**
  * Viewport heights of scroll each continent owns.
  *
- * This is the primary pacing dial. It buys time without touching a single easing curve:
- * every fraction below is a fraction OF a stage, so lengthening the stage stretches the
- * hop and the dwell together and the sequence keeps its shape exactly.
- *
- * 165 puts the range at 7 x 165 = 1155vh, of which 1055vh is actual travel once the
- * sticky card's own viewport is subtracted.
+/**
+ * Viewport heights of scroll each location owns.
+ * 100 puts each location on exactly "one scroll distance" (100vh per stop).
  */
-const STAGE_VH = 220;
+const STAGE_VH = 100;
 
 /** Scale held for the whole tour: reached once on engage, then never changed again. */
 const STOP_ZOOM = 2.8;
 /**
  * Where inside a stage the hop happens. Up to ARRIVE the globe is still settling onto
  * this stop, past DEPART it has started leaving for the next; the span between is the
- * held stop. The two halves of a hop straddle a stage boundary and meet at its centre.
- *
- * WIDENED BACK OUT, and this is the change that stops the tour reading as a series of
- * jumps. At 0.13/0.87 only 26% of a stage was in motion: the globe sat still for
- * three-quarters of the scroll and then swung a whole continent in the remaining quarter,
- * which is fast angular movement however smooth the interpolation underneath it is.
- *
- * 0.22/0.78 puts 44% of a stage in motion. Paired with STAGE_VH at 220 that is 97vh of
- * scroll behind each hop against 43vh before — 2.26x the distance for the same rotation,
- * so the globe turns at 44% of its old angular speed.
- *
- * The dwell is deliberately unchanged in absolute terms: 56% of 220vh is 123vh, against
- * 74% of 165vh which was 122vh. The stops rest exactly as long as they did; all of the
- * new distance went into the travel between them.
+ * held stop. 0.25/0.75 provides a crisp 50% dwell at each location and smooth 50% transition.
  */
-const STAGE_ARRIVE = 0.22;
-const STAGE_DEPART = 0.78;
+const STAGE_ARRIVE = 0.25;
+const STAGE_DEPART = 0.75;
 /** Progress over which the globe hands off from free drift to the tour. */
 const ENGAGE = 0.03;
 /**
@@ -402,7 +394,7 @@ function stepSpring(
  * page height added. Lower it to begin earlier still — 0.876 is the floor, where the wipe
  * would start on top of the final zoom rather than after it.
  */
-const CURTAIN_START = 0.90;
+const CURTAIN_START = 0.94;
 
 /**
  * The hero ground.
@@ -565,6 +557,53 @@ function clamp(v: number, lo: number, hi: number) {
   return Math.min(Math.max(v, lo), hi);
 }
 
+/**
+ * Computes opacity weight [0..1] for a marker during the scroll tour.
+ * One scroll distance illuminates one location:
+ * - When dwelling on location i, location i is 1.0, others are 0.0.
+ * - When hopping to location i+1, location i fades out and location i+1 fades in.
+ * - Active/hovered marker always retains 1.0.
+ */
+function getTourVisibility(
+  anchorId: string,
+  progress: number,
+  activeId: string | null,
+): number {
+  if (activeId === anchorId) return 1;
+
+  const f = clamp(progress, 0, 1) * STAGE_COUNT;
+  const index = Math.min(Math.floor(f), STAGE_COUNT - 1);
+  const u = f - index;
+
+  let from = index;
+  let to = index;
+  let hop = 0;
+
+  if (u < STAGE_ARRIVE && index > 0) {
+    from = index - 1;
+    to = index;
+    hop = 0.5 + 0.5 * (u / STAGE_ARRIVE);
+  } else if (u > STAGE_DEPART && index < STAGE_COUNT - 1) {
+    from = index;
+    to = index + 1;
+    hop = 0.5 * ((u - STAGE_DEPART) / (1 - STAGE_DEPART));
+  }
+
+  const fromSiteId = TOUR[from];
+  const toSiteId = TOUR[to];
+
+  if (anchorId === fromSiteId && anchorId === toSiteId) {
+    return 1;
+  }
+  if (anchorId === fromSiteId) {
+    return clamp(1 - hop, 0, 1);
+  }
+  if (anchorId === toSiteId) {
+    return clamp(hop, 0, 1);
+  }
+  return 0;
+}
+
 export const GlobeHero: React.FC = () => {
   const rangeRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -589,6 +628,8 @@ export const GlobeHero: React.FC = () => {
   const [metrics, setMetrics] = useState<Metrics>({ boxSize: 0, boxTop: 0 });
   const [ready, setReady] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const activeIdRef = useRef<string | null>(null);
+  activeIdRef.current = activeId;
 
   // --- Headline exit ---------------------------------------------------------------
   /**
@@ -699,6 +740,8 @@ export const GlobeHero: React.FC = () => {
   const stageIndexRef = useRef(0);
   const engagedRef = useRef(false);
   const [stageIndex, setStageIndex] = useState(0);
+  const [isTouring, setIsTouring] = useState(false);
+  const touringRef = useRef(false);
   const [reduceMotion, setReduceMotion] = useState(false);
 
   // Reused across frames so collision resolution allocates nothing per tick.
@@ -832,6 +875,12 @@ export const GlobeHero: React.FC = () => {
     if (stop !== stageIndexRef.current) {
       stageIndexRef.current = stop;
       setStageIndex(stop);
+    }
+
+    const touring = t > 0.015 && t < CURTAIN_START;
+    if (touring !== touringRef.current) {
+      touringRef.current = touring;
+      setIsTouring(touring);
     }
 
     const engage = smoothstep(0, ENGAGE, t);
@@ -979,6 +1028,11 @@ export const GlobeHero: React.FC = () => {
     // so it has to run before any focus exists too, or the tour could never engage.
     applyStage();
 
+    const t = progressRef.current;
+    const isEngaged = engagedRef.current;
+    const currentActiveId = activeIdRef.current;
+    const engage = smoothstep(0, ENGAGE, t);
+
     for (const anchor of projected) {
       const el = markerRefs.current.get(anchor.id);
       if (!el) continue;
@@ -987,7 +1041,11 @@ export const GlobeHero: React.FC = () => {
       const bottomFade = clamp((maxY - anchor.y) / fadeY, 0, 1);
       const leftFade = clamp((anchor.x - minX) / fadeX, 0, 1);
       const rightFade = clamp((maxX - anchor.x) / fadeX, 0, 1);
-      const opacity = anchor.opacity * bottomFade * leftFade * rightFade;
+
+      // In scroll tour: each scroll distance illuminates its corresponding location
+      const rawTourVis = getTourVisibility(anchor.id, t, currentActiveId);
+      const tourVis = isEngaged ? (1 - engage) * 1 + engage * rawTourVis : 1;
+      const opacity = anchor.opacity * bottomFade * leftFade * rightFade * tourVis;
 
       const style = el.style;
       if (opacity <= 0.01) {
@@ -1270,6 +1328,30 @@ export const GlobeHero: React.FC = () => {
               }}
             />
 
+            {/* Tour Location HUD Indicator - illuminates the active location on each scroll */}
+            <div
+              className={`pointer-events-none absolute top-6 sm:top-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2.5 sm:gap-3 px-3.5 py-1.5 sm:px-4.5 sm:py-2 rounded-full bg-[#0B1F3A]/90 border border-[#D4AF37]/40 backdrop-blur-md shadow-[0_4px_24px_rgba(0,0,0,0.6)] transition-all duration-300 ${
+                ready && isTouring
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 -translate-y-3 pointer-events-none"
+              }`}
+            >
+              <span className="flex h-2 w-2 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D4AF37] opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#D4AF37]" />
+              </span>
+              <span className="font-mono text-[10px] sm:text-[11px] font-semibold text-[#D4AF37] tracking-wider">
+                0{stageIndex + 1} / 0{TOUR.length}
+              </span>
+              <span className="h-3 w-px bg-white/25" />
+              <span className="font-sans text-[11px] sm:text-[12px] font-bold text-white uppercase tracking-[0.08em]">
+                {TOUR_SITES[stageIndex]?.country ?? ""}
+              </span>
+              <span className="hidden sm:inline font-mono text-[10px] text-[#D4AF37]/85 uppercase">
+                • {TOUR_SITES[stageIndex]?.region ?? ""}
+              </span>
+            </div>
+
             {/* Layer 2 + 3 — globe, clouds and atmosphere */}
             <div
               ref={globeBoxRef}
@@ -1333,14 +1415,15 @@ export const GlobeHero: React.FC = () => {
                       style={{
                         transform:
                           "translate3d(var(--mx, -9999px), var(--my, -9999px), 0) scale(var(--unzoom, 1))",
+                        zIndex: isActive ? 30 : 10,
                       }}
                       className="absolute left-0 top-0"
                     >
-                      {/* Pin — 44px hit target centred on the geographic point */}
+                      {/* Pin — hit target centred on the geographic point */}
                       <button
                         type="button"
                         aria-label={`${site.region}, ${site.country}. ${site.detail}.`}
-                        className="absolute left-0 top-0 grid h-11 w-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B8860B] focus-visible:ring-offset-2"
+                        className="group absolute left-0 top-0 grid h-11 w-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B8860B] focus-visible:ring-offset-2"
                         onPointerEnter={() => setActiveId(site.id)}
                         onPointerLeave={() => setActiveId((id) => (id === site.id ? null : id))}
                         onFocus={() => setActiveId(site.id)}
@@ -1357,14 +1440,43 @@ export const GlobeHero: React.FC = () => {
                           style={pulse}
                           aria-hidden="true"
                         />
-                      </button>
 
-                      {/*
-                        No visible text label. The region, country and detail live only in
-                        the pin's aria-label above: the globe is meant to read as surface,
-                        atmosphere, dots and arcs, and a rendered name on the sphere read
-                        as a stray artefact rather than as a caption.
-                      */}
+                        {/* Delicate stem connector from dot to label */}
+                        <span
+                          className={`absolute left-1/2 -translate-x-1/2 top-[27px] w-px h-[7px] pointer-events-none transition-all duration-200 ${
+                            isActive
+                              ? "bg-gradient-to-b from-[#D4AF37] to-[#D4AF37]/60"
+                              : "bg-gradient-to-b from-[#D4AF37]/75 to-[#D4AF37]/20 group-hover:from-[#D4AF37] group-hover:to-[#D4AF37]/50"
+                          }`}
+                          aria-hidden="true"
+                        />
+
+                        {/* Location Name Pill Badge */}
+                        <span
+                          className={`absolute left-1/2 top-[34px] -translate-x-1/2 flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full border backdrop-blur-md transition-all duration-200 whitespace-nowrap shadow-lg ${
+                            isActive
+                              ? "bg-[#0B1F3A]/95 border-[#D4AF37] shadow-[0_0_16px_rgba(212,175,55,0.45)] scale-105"
+                              : "bg-[#0B1F3A]/85 border-[#D4AF37]/35 hover:border-[#D4AF37]/70 group-hover:border-[#D4AF37]/80 group-hover:bg-[#0B1F3A]/95 shadow-[0_2px_8px_rgba(0,0,0,0.5)]"
+                          }`}
+                        >
+                          <span
+                            className={`h-1.5 w-1.5 rounded-full transition-colors duration-200 ${
+                              isActive
+                                ? "bg-[#D4AF37] shadow-[0_0_6px_#D4AF37]"
+                                : "bg-[#D4AF37]/80 group-hover:bg-[#D4AF37]"
+                            }`}
+                            aria-hidden="true"
+                          />
+                          <span className="font-sans text-[9.5px] sm:text-[11px] font-semibold uppercase tracking-[0.07em] text-white">
+                            {site.id === "antarctica" ? "Antarctica" : site.country}
+                          </span>
+                          {isActive && (
+                            <span className="text-[8.5px] sm:text-[9.5px] font-mono font-medium tracking-wider uppercase text-[#D4AF37]">
+                              • {site.region}
+                            </span>
+                          )}
+                        </span>
+                      </button>
                     </div>
                   );
                 })}
