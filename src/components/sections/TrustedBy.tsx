@@ -411,6 +411,23 @@ export const TrustedBy: React.FC = () => {
         screen. It now trails the word by one gap.
       */}
       <SectionReveal className="container-editorial mb-6 md:mb-9">
+        {/*
+          The bridge line. WHO WE ARE ends on the footage, this says what that footage
+          was in aid of, and FEATURED COMPANIES then names the proof — three beats of one
+          argument instead of two unrelated blocks.
+
+          Classes are Stats' eyebrow verbatim, not a new style: that is the established
+          label treatment for a light section on this page, and reusing it is what keeps
+          this a bridge rather than a second heading. It sits in container-editorial
+          alongside the h2, so all three lines share one left margin.
+        */}
+        <motion.p
+          variants={itemVariants}
+          className="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-[#B8860B] md:mb-4"
+        >
+          Trusted across the global mining industry
+        </motion.p>
+
         <div className="flex items-end justify-start gap-4 sm:gap-6">
           {/*
             motion.h2 and motion.svg, both on the shared itemVariants. Neither carries a
@@ -432,11 +449,23 @@ export const TrustedBy: React.FC = () => {
 
             The bottom margin is the baseline correction, and it has to be in the HEADING's
             scale, not the arrow's: an em on this element resolves against the inherited
-            16px, not against the h2's clamp, so the old mb-[0.1em] was buying 1.6px and
-            the arrow was sitting on the line BOX's floor rather than on the text baseline.
-            Geist's descender plus this line's negative half-leading puts that floor about
-            0.17em of the heading's size below the baseline, hence a clamp built from the
-            same 8vw curve the heading uses.
+            16px, not against the h2's clamp, so a plain mb-[0.1em] buys 1.6px and the
+            arrow sits on the line BOX's floor rather than on the text baseline. Hence a
+            clamp built from the same vw curve the heading uses.
+
+            THE NUMBER WAS OVERSHOOTING, which is what made the arrow read as detached.
+            The correction has to clear the gap between the line box's floor and the
+            baseline (~13px at 1440) but PAY BACK the empty run inside the viewBox below
+            the ink — the paths stop at y=38 of 48, so a fifth of the box, ~15px, is
+            already blank. The two very nearly cancel, and the old clamp's 19.4px was
+            spent on top of that: measured at 1440 the ink finished 17px ABOVE the
+            heading's baseline and started 21px above its cap line, so the arrow floated
+            clear of the word instead of belonging to it. At ~3px the ink bottom lands on
+            the baseline and the ink top lands on the cap line — the arrow occupies
+            exactly the heading's optical block and reads as part of the phrase.
+
+            Everything about the arrow ITSELF is untouched: same viewBox, same two paths,
+            same 4.25 stroke, same colour, same size clamp. Only where it sits changed.
 
             Stroke scales with the box (no non-scaling-stroke, deliberately) so the arrow
             keeps its proportions as it grows; 4.25 units holds its weight against a 900.
@@ -451,7 +480,7 @@ export const TrustedBy: React.FC = () => {
             strokeWidth="4.25"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="mb-[clamp(0.5rem,1.35vw,1.25rem)] h-[clamp(2rem,4.8vw,4.5rem)] w-auto shrink-0"
+            className="mb-[clamp(0.1rem,0.22vw,0.2rem)] h-[clamp(2rem,4.8vw,4.5rem)] w-auto shrink-0"
           >
             {/* shaft, top-right to bottom-left */}
             <path d="M40 8 10 38" />
@@ -467,7 +496,16 @@ export const TrustedBy: React.FC = () => {
         running edge to edge reads as a field the page is passing through. The heading
         above keeps its container, so the section still starts on the editorial margin.
       */}
-      <SectionReveal className="tb-marquee flex flex-col gap-5 md:gap-6">
+      {/*
+        gap on a single-column flex container, so this is the vertical space between the
+        two marquee rows and nothing else — there is no second column for it to open up,
+        and the horizontal space between cards is --tb-gap inside the track, untouched.
+
+        20/24px read as two rows of one block; 40/48px lets each row be seen as its own
+        band. The mobile:desktop ratio is unchanged at 0.83, which keeps the gap the same
+        fraction of a card's height at both sizes (0.55 against 72px, 0.53 against 90px).
+      */}
+      <SectionReveal className="tb-marquee flex flex-col gap-10 md:gap-12">
         <style dangerouslySetInnerHTML={{ __html: MARQUEE_CSS }} />
         <motion.div variants={itemVariants}>
           <MarqueeRow row={ROW_ONE} label="Featured companies, first row" />

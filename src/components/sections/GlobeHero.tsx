@@ -8,7 +8,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { HeroStarfield } from "@/components/sections/hero-layers/HeroStarfield";
 import { HeadlineUnderline } from "@/components/sections/hero-layers/HeadlineUnderline";
-import { FOCUS_ANCHOR_ID, GLOBE_FIT } from "@/components/ui/globe/EarthGlobe";
+import { GLOBE_FIT } from "@/components/ui/globe/EarthGlobe";
 import type {
   GlobeAnchor,
   GlobeArc,
@@ -283,8 +283,6 @@ const STAGE_COUNT = TOUR.length;
  */
 const STAGE_VH = 100;
 
-/** Scale held for the whole tour: reached once on engage, then never changed again. */
-const STOP_ZOOM = 2.8;
 /**
  * Where inside a stage the hop happens. Up to ARRIVE the globe is still settling onto
  * this stop, past DEPART it has started leaving for the next; the span between is the
@@ -326,18 +324,6 @@ const ENGAGE = 0.03;
  * is 0.0333 * 18.3 = 0.61. Both hold comfortably.
  */
 const PROGRESS_SPRING = { stiffness: 84, damping: 18.3 };
-/**
- * The zoom's own spring, and the only underdamped one.
- *
- * zeta = 14 / (2 * sqrt(90)) = 0.738, and peak overshoot of a step response is
- * exp(-pi * zeta / sqrt(1 - zeta^2)) = 0.03 — a 3% pass beyond the target scale before it
- * settles. During a hop the target is moving and the spring simply trails it; the
- * overshoot only appears where the target stops changing, which is the arrival at a stop.
- * That is the settle, and it costs nothing at rest because the spring latches exactly.
- *
- * Set damping to 2 * sqrt(stiffness) = 18.97 to remove the bounce and keep the easing.
- */
-const ZOOM_SPRING = { stiffness: 90, damping: 14 };
 /**
  * A frame gap longer than this means the loop was parked — tab hidden, or the globe
  * scrolled out of view and its render loop suspended. Damping across that gap would
@@ -501,11 +487,14 @@ interface StageState {
   index: number;
   lat: number;
   lng: number;
-  zoom: number;
 }
 
 /**
- * Resolves scroll progress into an aim point and a zoom.
+ * Resolves scroll progress into an aim point.
+ *
+ * The tour is rotation only: a stage carries a latitude and a longitude and nothing
+ * else. There is deliberately no scale, no camera distance and no element offset in it —
+ * the globe is mounted in one place and turns under a fixed camera.
  *
  * Progress is cut into STAGE_COUNT equal stages, one per continent. Inside a stage the
  * globe sits on that continent, then hands over to the next across the boundary; the
@@ -539,10 +528,6 @@ function stageAt(progress: number): StageState {
     index: hop > 0.5 ? to : from,
     lat: a.lat + (b.lat - a.lat) * eased,
     lng: lerpLongitude(a.lng, b.lng, eased),
-    // Held flat for the whole tour. The zoom happens once, on engage; after that a hop is
-    // pure rotation — only lat/lng move, so the globe's size on screen never changes again
-    // and consecutive stages have nothing to step between.
-    zoom: STOP_ZOOM,
   };
 }
 
@@ -712,22 +697,19 @@ export const GlobeHero: React.FC = () => {
    */
   const progressRef = useRef(0);
   /**
-   * Progress and zoom as sprung values rather than as raw scroll readings. Refs, and
-   * mutated in place: these change every frame and must never re-render the tree.
+   * Progress as a sprung value rather than as a raw scroll reading. A ref, and mutated
+   * in place: it changes every frame and must never re-render the tree.
    */
   const progressSpring = useRef<SpringState>({ value: 0, velocity: 0 });
-  const zoomSpring = useRef<SpringState>({ value: 1, velocity: 0 });
 
   /** Aim target handed to the globe; mutated in place, never triggers a render. */
   const focusRef = useRef<GlobeFocus | null>(null);
-  /** Where the aim actually landed this frame, reported by the projection. */
-  const aimPointRef = useRef<{ x: number; y: number } | null>(null);
   /**
-   * Where the aimed coordinate lands, and where it should land, in the canvas box's
-   * pixel space. `centre` is the middle of the sphere's projected disc; `visible` is
-   * the middle of the slice the card actually shows.
+   * The extra pitch that lifts an aimed coordinate off the centre of the projected disc
+   * and into the slice the card actually shows. A rotation of the sphere, so it changes
+   * the globe's orientation and never its framing.
    */
-  const geometryRef = useRef({ centre: 0, visibleY: 0, tiltBias: 0 });
+  const geometryRef = useRef({ tiltBias: 0 });
   /**
    * The range's document-space top and its travel, cached so progress can be sampled
    * from window.scrollY every frame. Reading scrollY is free; a getBoundingClientRect
@@ -780,8 +762,6 @@ export const GlobeHero: React.FC = () => {
       //   slotHeight/2 below it, so the gap to close is (sphereSize - slotHeight)/2,
       //   which as a fraction of the radius is 1 - slotHeight/sphereSize.
       geometryRef.current = {
-        centre: boxSize / 2,
-        visibleY: -boxTop + s.height / 2,
         tiltBias: Math.asin(clamp(1 - s.height / sphereSize, 0, 0.995)),
       };
       setMetrics({ boxSize, boxTop });
@@ -810,18 +790,22 @@ export const GlobeHero: React.FC = () => {
 
   /**
    * Writes the tour state for the current scroll progress: where the globe is aimed,
-   * how far it is zoomed, and how the markers should read.
+   * and how the markers should read.
    *
-   * Only `transform` and `opacity` are touched here — nothing that can trigger layout.
-   * The globe is aimed by rotating the sphere itself rather than by panning the element,
-   * which is what lets a stop like Antarctica be reached at all: it never enters the
-   * visible crop under free rotation, so no CSS transform could have found it.
+   * THE GLOBE'S FRAMING IS NOT ANIMATED HERE, AND MUST NOT BE. Its box position and size
+   * come from `metrics`, which only ever changes on resize, and its camera lives in
+   * EarthGlobe at a fixed distance. Scroll drives the sphere's ORIENTATION and nothing
+   * else: the element is never translated and never scaled, so the planet holds the exact
+   * position, size and crop it has on the first frame for the whole tour.
+   *
+   * This also used to magnify the box to STOP_ZOOM and re-centre the aimed coordinate
+   * under it, which is what read as the globe leaping forward and sliding sideways on the
+   * first scroll. Rotation alone still reaches every stop — including Antarctica, which no
+   * CSS transform could have found, because the sphere turns the point onto the near face
+   * rather than the viewport chasing it.
    */
   const applyStage = useCallback(() => {
-    const box = globeBoxRef.current;
-    if (!box || reduceMotionRef.current) return;
-
-    const layer = markerLayerRef.current;
+    if (reduceMotionRef.current) return;
 
     // --- Sample and damp -------------------------------------------------------------
     // Progress is read here, inside the frame that is about to draw, rather than being
@@ -886,77 +870,28 @@ export const GlobeHero: React.FC = () => {
     const engage = smoothstep(0, ENGAGE, t);
 
     if (engage <= 0) {
-      // Back at the very top: hand the globe back to its free drift and every property
-      // back to the classes, so the entry reveal behaves as if the tour did not exist.
+      // Back at the very top: hand the globe back to its free drift, so the entry reveal
+      // behaves as if the tour did not exist. Nothing to undo on the element itself —
+      // the tour writes no styles to it.
       focusRef.current = null;
       engagedRef.current = false;
-      // Rest the zoom spring too. Leaving stored velocity here means scrolling back down
-      // re-enters the tour mid-bounce, which reads as a glitch rather than as a settle.
-      zoomSpring.current.value = 1;
-      zoomSpring.current.velocity = 0;
-      box.style.transitionProperty = "";
-      box.style.transform = "";
-      box.style.opacity = "";
-      layer?.style.removeProperty("--unzoom");
       return;
     }
 
     const stage = stageAt(t);
-    const { centre, visibleY, tiltBias } = geometryRef.current;
+    const { tiltBias } = geometryRef.current;
 
+    // The one thing scroll drives. tiltBias is a pitch applied to the sphere, not to the
+    // camera or to the element: it lifts the aimed coordinate from the centre of the
+    // projected disc — which the horizon framing puts below the card's floor — up into the
+    // visible slice, by turning the globe. Framing is untouched by it.
     focusRef.current = { lat: stage.lat, lng: stage.lng, tiltBias, weight: engage };
 
-    // Scale eases in from 1 alongside the aim, so engaging the tour is one continuous
-    // move rather than a snap to STOP_ZOOM.
-    //
-    // That target then goes through a spring rather than to the element directly. Two
-    // things come out of it: the magnification accelerates and decelerates instead of
-    // tracking scroll rigidly, and because the spring is slightly underdamped it passes
-    // ~3% beyond the target at an arrival and settles back — the stop lands rather than
-    // stopping dead. Mid-hop the target is still moving and the spring just trails it,
-    // so the overshoot only ever appears where the motion actually ends.
-    const targetScale = 1 + (stage.zoom - 1) * engage;
-    if (gap > 0 && gap <= RESUME_GAP) {
-      stepSpring(zoomSpring.current, targetScale, gap, ZOOM_SPRING);
-    } else {
-      zoomSpring.current.value = targetScale;
-      zoomSpring.current.velocity = 0;
-    }
-    // Floored just above 1: the overshoot is upward at an arrival, but on the way back
-    // out of the tour the spring can dip under 1 and briefly shrink the globe.
-    const scale = Math.max(1, zoomSpring.current.value);
-
-    // Pin the aimed point at the middle of the visible slice and zoom around it.
-    //
-    // P is where the aim actually landed, reported by the projection rather than assumed
-    // — the axial roll swings the tilt-bias offset sideways, so the aimed point is not on
-    // the vertical centre line, and at STOP_ZOOM that error would carry it off screen.
-    // Scaling happens about the element's own centre O, so:
-    //   position = O + d + scale·(P - O), and we want P + (C - P)·engage
-    //   =>  d = (P - O)·(1 - scale) + (C - P)·engage
-    // which is identity at engage 0 and lands P exactly on C at engage 1.
-    //
-    // transform-origin is deliberately left at its default: in Tailwind v4 the box's
-    // -translate-x-1/2 and its reveal scale are the standalone translate/scale
-    // properties, which apply before transform and share its origin.
-    const aim = aimPointRef.current;
-    const px = aim ? aim.x : centre;
-    const py = aim ? aim.y : visibleY;
-    const dx = (px - centre) * (1 - scale) + (centre - px) * engage;
-    const dy = (py - centre) * (1 - scale) + (visibleY - py) * engage;
-
-    if (!engagedRef.current) {
-      // The reveal's 1400ms ease covers opacity; leaving it on would smear every scroll
-      // frame through it instead of tracking the wheel. It has finished by now.
-      box.style.transitionProperty = "none";
-      engagedRef.current = true;
-    }
-    box.style.transform = `translate3d(${dx.toFixed(2)}px, ${dy.toFixed(2)}px, 0) scale(${scale.toFixed(4)})`;
-    box.style.opacity = "";
-
-    // Pins ride inside the scaled box, which is what keeps them glued to their landmass.
-    // This cancels the magnification on the pin art so a marker keeps its designed size.
-    layer?.style.setProperty("--unzoom", (1 / scale).toFixed(4));
+    // No transform is written to the box, by design. See the note on this callback:
+    // position, size, crop and camera distance are all fixed for the whole tour, and the
+    // markers therefore need no counter-scale either — they sit in an unscaled box and
+    // keep the size they were designed at.
+    engagedRef.current = true;
   }, []);
 
   useEffect(() => {
@@ -1020,10 +955,11 @@ export const GlobeHero: React.FC = () => {
   const handleProject = useCallback((projected: ProjectedAnchor[]) => {
     const { maxY, minX, maxX, fadeX, fadeY } = layoutRef.current;
 
-    // The aim point drifts while the globe swings onto a new stop, so the zoom has to be
-    // re-pinned every frame, not only when the scroll position changes.
-    const aim = projected.find((a) => a.id === FOCUS_ANCHOR_ID);
-    if (aim) aimPointRef.current = { x: aim.x, y: aim.y };
+    // The projection also reports where the focus point landed (FOCUS_ANCHOR_ID). Nothing
+    // reads it any more: it existed to re-pin the tour's zoom about that point every
+    // frame, and there is no zoom to pin. It has no marker element, so the loop below
+    // skips it.
+    //
     // Unconditional: this is the per-frame heartbeat that samples the scroll position,
     // so it has to run before any focus exists too, or the tour could never engage.
     applyStage();
@@ -1413,8 +1349,11 @@ export const GlobeHero: React.FC = () => {
                         markerRefs.current.set(site.id, el);
                       }}
                       style={{
+                        // Position only. The counter-scale that used to sit here existed
+                        // to cancel the tour's magnification of the globe box; the box is
+                        // never scaled now, so a pin is already at its designed size.
                         transform:
-                          "translate3d(var(--mx, -9999px), var(--my, -9999px), 0) scale(var(--unzoom, 1))",
+                          "translate3d(var(--mx, -9999px), var(--my, -9999px), 0)",
                         zIndex: isActive ? 30 : 10,
                       }}
                       className="absolute left-0 top-0"

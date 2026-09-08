@@ -62,7 +62,8 @@ const SHOW_FRAME_DEBUG = false;
  * sequence still advances faster than the display refreshes it.
  */
 const SOURCES = {
-  wide: { dir: "w1280", step: 1 },
+  wide: { dir: "w1920", step: 1 },
+  medium: { dir: "w1280", step: 1 },
   narrow: { dir: "w720", step: 2 },
 } as const;
 
@@ -436,30 +437,39 @@ export const About: React.FC = () => {
   });
 
   /*
-   * THE WAY OUT, moved off progress and onto the handover — which is the whole fix for
-   * the empty band between this section and FEATURED COMPANIES.
+   * THE WAY OUT.
    *
-   * The band was never a spacer and never excess height: measured, this section is 6838px
-   * on a 924px viewport with exactly one child, and the gap to the next section is 0px.
-   * It was this sheet's TIMING. Driven by progress, the wash reached full opacity at the
-   * instant the pin released, which is the instant the section still has one whole
-   * viewport of slide-out left — so that entire last viewport was an opaque #F4F4F2 field
-   * with the finished artwork sealed underneath it and the next section not yet risen.
-   * A full screen of nothing, and shortening the track could not have fixed it: the
-   * slide-out is one child-height no matter how tall the track is, so a shorter track
-   * would have moved the void earlier and sped the sequence up on the way.
+   * WHAT THIS USED TO BE, and why the void was still there. A full-bleed sheet of
+   * EXIT_SURFACE over the whole sticky frame, faded in across the first 40% of the
+   * slide-out. Timing it to the handover stopped it covering the artwork during the
+   * pin, but it could not fix the shape of the thing: once opaque, the sheet IS a
+   * screen-tall rectangle of flat #F4F4F2, so the entire part of the viewport the
+   * section still occupied read as blank paper. Measured at 1440x900, that left ~440px
+   * of empty field between the last of the footage and the FEATURED COMPANIES heading.
+   * Any full-frame wash has this failure mode: it removes the picture in order to
+   * arrive at the next section's colour.
    *
-   * On the handover it runs during the slide-out instead. The pinned phase now ends on
-   * the artwork at full strength, and the dissolve plays over the first 40% of the slide
-   * — about 370px at this viewport — while FEATURED COMPANIES is already rising into the
-   * lower half of the screen. Same sheet, same colour, same gradient, same end state; it
-   * simply happens while something else is arriving rather than in front of a void.
+   * WHAT IT IS NOW. The same colour and the same handover timing, but a band at the
+   * BOTTOM EDGE of the frame rather than a sheet over all of it — see the element for
+   * the geometry. The footage stays at full strength for the whole slide-out and simply
+   * travels up the screen; only its bottom edge feathers into the surface the next
+   * section is already painting. There is no blank field left to sit in, because the
+   * picture is never taken away.
    *
-   * 0.4 rather than the full slide: the sheet has to be solid before the section's own
-   * bottom edge climbs far enough up the screen to be read as an edge, or the join
-   * against the next section shows as a line. Complete by 40%, it is covered.
+   * The ramp is short now for the same reason it used to be long. A screen-tall sheet
+   * had to be given 40% of the slide so it did not pop; a band only ~140px tall has to
+   * be SOLID almost immediately instead. Until it is, its own bottom is a partial wash
+   * over dark footage sitting directly on the next section's flat #F4F4F2, and that
+   * difference is a visible line — measured at 0.05 it was still readable a third of the
+   * way through the ramp.
+   *
+   * 0.02 is about 18px of scrolling at this viewport. It is not a switch — it is still
+   * interpolated, so there is nothing to pop — but the whole of it happens while the
+   * join is inside the bottom 18px of the screen, which is to say while there is nothing
+   * to see. handoff is exactly 0 for the entire pinned phase, so the band cannot touch
+   * the footage before the section starts to leave.
    */
-  const exitOpacity = useTransform(handoff, [0, 0.4], [0, 1]);
+  const exitOpacity = useTransform(handoff, [0, 0.02], [0, 1]);
   const scrollYProgress = progress;
 
   // Parallax. Both tiny, and in opposite directions, which is all it takes to separate
@@ -477,7 +487,18 @@ export const About: React.FC = () => {
 
     const pick = () => {
       setReducedMotion(motionQuery.matches);
-      const next = window.innerWidth < 768 ? SOURCES.narrow : SOURCES.wide;
+      const w = window.innerWidth;
+      const dpr = window.devicePixelRatio || 1;
+      // Mobile portrait screens (height ~800px-950px with 2x-3x DPR = ~2400px physical height)
+      // require high-resolution landscape frames (w1280 or w1920) so object-fit: cover
+      // doesn't cause heavy upscale blurriness.
+      let next: Source = SOURCES.wide;
+      if (w < 768) {
+        next = dpr >= 2.5 ? SOURCES.wide : SOURCES.medium;
+      } else if (w < 1280) {
+        next = SOURCES.medium;
+      }
+
       if (next.dir !== currentDir) {
         currentDir = next.dir;
         setSource(next);
@@ -550,6 +571,8 @@ export const About: React.FC = () => {
 
     // No clearRect: the frame covers the box, and clearing first is what produces a
     // one-frame flash of transparency on a slow paint.
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
     ctx.drawImage(img, x, y, w, h);
     ctx.restore();
 
@@ -1096,17 +1119,31 @@ export const About: React.FC = () => {
         />
 
         {/*
-          The way out. The same dissolve mirrored: solid at the BOTTOM, so the next
-          section's surface rises into the frame from below and meets its own real
-          background with nothing between them.
+          The way out: the footage dissolving into the next section's own surface across
+          the last ~140px of itself, so the two read as one continuous page rather than
+          as a picture that ends and a white section that starts.
+
+          ANCHORED TO THE FRAME'S BOTTOM, WHICH IS THE SECTION'S BOTTOM. The sticky child
+          is one viewport tall and cannot travel past its section's bottom edge, so from
+          the moment the pin releases the two edges are the same line — the line where
+          TrustedBy's #F4F4F2 begins. A band sitting on it therefore lands the fade
+          exactly on the join, with no offset to keep in sync by hand.
+
+          The stops are weighted late (nothing until 38%, still only 78% at 72%) so the
+          top of the band is imperceptible against the footage and the colour arrives in
+          the last third. An even ramp over the same distance reads as a grey haze laid
+          over the picture; this reads as the picture running out.
+
+          96px on mobile against 140px on desktop, because the band is a fraction of a
+          much shorter screen there — the same fade, proportioned to what it crosses.
         */}
         <motion.div
           aria-hidden="true"
           style={{
             opacity: exitOpacity,
-            background: `linear-gradient(0deg, ${EXIT_SURFACE} 0%, ${EXIT_SURFACE} 38%, rgba(244,244,242,0.86) 100%)`,
+            background: `linear-gradient(180deg, rgba(244,244,242,0) 0%, rgba(244,244,242,0.35) 38%, rgba(244,244,242,0.78) 72%, ${EXIT_SURFACE} 100%)`,
           }}
-          className="pointer-events-none absolute inset-0 z-40"
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-40 h-24 md:h-[140px]"
         />
       </div>
     </section>

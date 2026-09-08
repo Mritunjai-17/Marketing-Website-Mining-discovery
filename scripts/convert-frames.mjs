@@ -1,115 +1,91 @@
 /**
- * Encodes the About section's scroll sequence from PNG to WebP, at two widths.
+ * Encodes the About section's 1080p scroll sequence from JPEG to WebP.
  *
- * WHY THIS EXISTS
+ * Source: src/mining_discovery_300_frames_1080p/ (frame_001.jpg .. frame_300.jpg)
  *
- * The sequence shipped as 300 PNGs at 1280x720, 287 MB in total, and the section
- * requested every one of them on mount. WebP at these quality settings holds the same
- * frame in roughly 4% of the bytes, which is the difference between a section that can
- * preload sensibly and one that cannot.
- *
- * The PNGs are left exactly where they are. This only writes new directories:
- *
- *   public/frames/about-sequence/            <- untouched PNG originals
- *   public/frames/about-sequence/w1280/      <- desktop WebP
- *   public/frames/about-sequence/w720/       <- mobile WebP
- *
- * Idempotent: a frame whose .webp already exists and is newer than its .png is skipped,
- * so re-running after adding or re-exporting a few frames only does the work that moved.
- * Pass --force to re-encode everything.
- *
- *   node scripts/convert-frames.mjs [--force]
+ * Output targets:
+ *   1. src/mining_discovery_frames_30fps/   <- 1080p WebP (frame_0000.webp .. frame_0299.webp)
+ *   2. public/frames/about-sequence/w1920/   <- 1920w WebP for crisp 1080p desktop display
+ *   3. public/frames/about-sequence/w1280/   <- 1280w WebP for tablet/medium displays
+ *   4. public/frames/about-sequence/w720/    <- 720w WebP for mobile displays
  */
 
-import { mkdir, readdir, stat, writeFile } from "node:fs/promises";
+import { mkdir, readdir, rm, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import sharp from "sharp";
 
-const SRC = "public/frames/about-sequence";
+const SRC_DIR = "src/mining_discovery_300_frames_1080p";
+const TARGET_30FPS_DIR = "src/mining_discovery_frames_30fps";
+const PUBLIC_ABOUT_DIR = "public/frames/about-sequence";
 
-/**
- * Two variants, not three. 1280 is the source width, so the desktop set is a re-encode
- * rather than a resize; 720 is the mobile set, chosen because a 3x phone showing a
- * ~400px-wide canvas is already oversampled at that width.
- *
- * Quality 78/70 came from a sweep on frames 0, 150 and 299 - the darkest, the busiest
- * and the last. Below about 70 the dust and the rock face start to band in the shadows,
- * which is exactly where this footage lives.
- */
 const VARIANTS = [
-  { dir: "w1280", width: 1280, quality: 78 },
-  { dir: "w720", width: 720, quality: 70 },
+  { dir: TARGET_30FPS_DIR, width: null, quality: 88 }, // 1080p native
+  { dir: path.join(PUBLIC_ABOUT_DIR, "w1920"), width: 1920, quality: 90 }, // Desktop crisp 1080p
+  { dir: path.join(PUBLIC_ABOUT_DIR, "w1280"), width: 1280, quality: 85 }, // Tablet
+  { dir: path.join(PUBLIC_ABOUT_DIR, "w720"), width: 720, quality: 80 },   // Mobile
 ];
 
-/** Encode this many frames at once. Enough to saturate the cores, not enough to thrash. */
 const CONCURRENCY = 8;
 
-const force = process.argv.includes("--force");
-
 async function main() {
-  if (!existsSync(SRC)) {
-    console.error(`Source directory not found: ${SRC}`);
+  if (!existsSync(SRC_DIR)) {
+    console.error(`Source directory not found: ${SRC_DIR}`);
     process.exit(1);
   }
 
-  const frames = (await readdir(SRC))
-    .filter((f) => f.endsWith(".png"))
-    .sort();
+  const files = (await readdir(SRC_DIR))
+    .filter((f) => /\.(jpe?g|png|webp)$/i.test(f))
+    .sort((a, b) => {
+      const numA = parseInt(a.match(/\d+/)?.[0] || "0", 10);
+      const numB = parseInt(b.match(/\d+/)?.[0] || "0", 10);
+      return numA - numB;
+    });
 
-  if (frames.length === 0) {
-    console.error(`No PNG frames in ${SRC}`);
+  if (files.length === 0) {
+    console.error(`No source frame files found in ${SRC_DIR}`);
     process.exit(1);
   }
 
-  console.log(`${frames.length} source frames`);
+  console.log(`Found ${files.length} source frames in ${SRC_DIR}`);
 
   for (const variant of VARIANTS) {
-    const outDir = path.join(SRC, variant.dir);
-    await mkdir(outDir, { recursive: true });
+    await mkdir(variant.dir, { recursive: true });
+  }
 
-    let written = 0;
-    let skipped = 0;
-    let bytes = 0;
-
-    // A sliding window rather than Promise.all over all 300: sharp holds the decoded
-    // bitmap while it encodes, and 300 concurrent 1280x720 buffers is a memory spike
-    // for no throughput gain.
+  for (const variant of VARIANTS) {
+    console.log(`Processing variant target: ${variant.dir}...`);
     let cursor = 0;
-    const workers = Array.from({ length: CONCURRENCY }, async () => {
-      while (cursor < frames.length) {
-        const frame = frames[cursor++];
-        const src = path.join(SRC, frame);
-        const out = path.join(outDir, frame.replace(/\.png$/, ".webp"));
+    let written = 0;
+    let totalBytes = 0;
 
-        if (!force && existsSync(out)) {
-          const [a, b] = await Promise.all([stat(src), stat(out)]);
-          if (b.mtimeMs >= a.mtimeMs) {
-            skipped += 1;
-            bytes += b.size;
-            continue;
-          }
+    const workers = Array.from({ length: CONCURRENCY }, async () => {
+      while (cursor < files.length) {
+        const index = cursor++;
+        const srcFile = files[index];
+        const srcPath = path.join(SRC_DIR, srcFile);
+        const outName = `frame_${String(index).padStart(4, "0")}.webp`;
+        const outPath = path.join(variant.dir, outName);
+
+        let pipeline = sharp(srcPath);
+        if (variant.width) {
+          pipeline = pipeline.resize({ width: variant.width, withoutEnlargement: true });
         }
 
-        const buf = await sharp(src)
-          .resize({ width: variant.width, withoutEnlargement: true })
-          .webp({ quality: variant.quality, effort: 5 })
-          .toBuffer();
-
-        await writeFile(out, buf);
+        const buf = await pipeline.webp({ quality: variant.quality, effort: 5 }).toBuffer();
+        await writeFile(outPath, buf);
         written += 1;
-        bytes += buf.length;
+        totalBytes += buf.length;
       }
     });
 
     await Promise.all(workers);
-
     console.log(
-      `  ${variant.dir}: ${written} encoded, ${skipped} up to date, ` +
-        `${(bytes / 1024 / 1024).toFixed(1)} MB total ` +
-        `(${(bytes / frames.length / 1024).toFixed(0)} KB average)`
+      `  -> Done: ${written} files written, ${(totalBytes / 1024 / 1024).toFixed(2)} MB total`
     );
   }
+
+  console.log("Frame conversion complete!");
 }
 
 main().catch((err) => {

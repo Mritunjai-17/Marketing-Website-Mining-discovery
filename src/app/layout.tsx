@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter, IBM_Plex_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { Header, Footer, SmoothScroll } from "@/components/layout";
+import MiningAICHatWidget from "@/components/ui/MiningAICHatWidget";
 
 const geistSans = Geist({
   subsets: ["latin"],
@@ -59,6 +60,7 @@ export default function RootLayout({
           <main className="flex-1">{children}</main>
           <Footer />
         </SmoothScroll>
+        <MiningAICHatWidget />
       </body>
     </html>
   );

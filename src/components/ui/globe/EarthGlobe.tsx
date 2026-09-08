@@ -328,6 +328,21 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     }
 
     const isSmallViewport = window.matchMedia("(max-width: 767px)").matches;
+    /**
+     * A phone held sideways is still a phone, and isSmallViewport is a WIDTH test.
+     * A 844x390 handset reports false there, so it took the DESKTOP drawing-buffer
+     * budget: 4064 square rather than 3048, 63MB against 35MB of GPU memory, on the
+     * weakest hardware the site runs on — and which of the two it got depended only on
+     * the orientation the page happened to load in, since this is read once at mount.
+     * No desktop or tablet viewport is under 500 CSS pixels tall, so the height test
+     * catches handsets in landscape and nothing else.
+     *
+     * Deliberately NOT folded into isSmallViewport. That flag decides which arcs draw,
+     * which texture loads and how the haze reads — appearance — and this must decide
+     * buffer size alone, so no viewport renders a different picture than it does today.
+     */
+    const isCompactDevice =
+      isSmallViewport || window.matchMedia("(max-height: 500px)").matches;
     // Live, not a snapshot. The preference can be toggled while the page is open — on
     // Windows it rides the "animation effects" system switch — and a globe that keeps
     // spinning after the user has asked it to stop is the failure this guards against.
@@ -655,31 +670,28 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
       // would allocate an enormous framebuffer. Cap the longest drawing-buffer edge; the
       // globe is smooth-gradient heavy and holds up well below 2x.
       //
-      // ZOOM_HEADROOM is why the ratio is not simply capped at devicePixelRatio. The tour
-      // magnifies this element with a CSS scale(), so its on-screen size at a stop is far
-      // larger than the size measured here — and a buffer sized to the *resting* box has
-      // no detail left to supply once it is stretched, which is what read as blur at 2-3x.
-      // On a 1x display the old cap made the buffer exactly the CSS size, so every pixel
-      // of the zoom was pure upscale. Rendering above the device ratio is normally waste;
-      // here it is the whole point.
-      // ZOOM_HEADROOM now names the tour's real maximum (STOP_ZOOM = 2.8) rather than a
-      // token 1.6: at a stop the element is magnified 2.8x, so a buffer that wants to be
-      // 1:1 on screen there has to hold 2.8 buffer pixels per CSS pixel. It is an ask,
-      // not a promise — ratioCap below is what actually binds on a box this large.
-      const ZOOM_HEADROOM = 2.8;
+      // SUPERSAMPLE is why the ratio is not simply capped at devicePixelRatio. It was
+      // sized for a tour that magnified this element with a CSS scale() — a buffer sized
+      // to the resting box had no detail left once it was stretched, which read as blur.
+      // The tour no longer scales anything: the globe holds one fixed size, so this is now
+      // plain supersampling of a smooth-gradient sphere whose limb and terminator are the
+      // parts that show aliasing first. Kept at its existing value so the planet renders
+      // exactly as sharp as it does today. It is an ask, not a promise — ratioCap below is
+      // what actually binds on a box this large.
+      const SUPERSAMPLE = 2.8;
       // Longest drawing-buffer edge. Raised from 4096; the depth buffer dropped above
       // pays for it, so total framebuffer memory is roughly unchanged. Clamped by what
       // the driver will really allocate — past maxTextureSize the buffer is silently
       // clamped or the context is lost, and that is a blank globe rather than a soft one.
       const driverCap = renderer.capabilities.maxTextureSize || 4096;
-      const maxEdge = Math.min(isSmallViewport ? 3200 : 5760, driverCap);
+      const maxEdge = Math.min(isCompactDevice ? 3200 : 5760, driverCap);
       const ratioCap = maxEdge / Math.max(width, height);
       renderer.setPixelRatio(
         Math.max(
           1,
           Math.min(
-            (window.devicePixelRatio || 1) * ZOOM_HEADROOM,
-            isSmallViewport ? 3 : 4,
+            (window.devicePixelRatio || 1) * SUPERSAMPLE,
+            isCompactDevice ? 3 : 4,
             ratioCap
           )
         )

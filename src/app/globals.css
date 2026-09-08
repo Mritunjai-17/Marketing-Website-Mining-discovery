@@ -388,3 +388,793 @@ nextjs-portal,
     translate: none;
   }
 }
+
+/* ============================================================
+   CHATBOT WIDGET STYLES (EXACT MATCH TO MINING_ASSISTENT DESIGN)
+============================================================ */
+
+.chat-button-new {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  height: 54px;
+  padding: 0 22px;
+  border: none;
+  border-radius: 30px;
+  background: linear-gradient(135deg, #071426 0%, #102844 100%);
+  color: #ffffff;
+  box-shadow: 0 12px 35px rgba(7, 20, 38, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  z-index: 1000;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.chat-button-new:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 17px 42px rgba(7, 20, 38, 0.34);
+}
+
+.chat-icon {
+  color: #D4AF37;
+  font-size: 18px;
+}
+
+.chat-window-new {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  width: 390px;
+  height: 600px;
+  background: #ffffff;
+  border-radius: 20px;
+  overflow: hidden;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(7, 20, 38, 0.08);
+  box-shadow: 0 24px 60px rgba(5, 20, 38, 0.20), 0 8px 24px rgba(5, 20, 38, 0.08);
+  animation: chatbot-open 0.25s ease-out;
+}
+
+@keyframes chatbot-open {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.chat-header-new {
+  position: relative;
+  height: 76px;
+  min-height: 76px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: radial-gradient(circle at 90% 100%, rgba(45, 76, 115, 0.55), transparent 38%), linear-gradient(135deg, #061426 0%, #0a1d34 60%, #071426 100%);
+  color: #ffffff;
+}
+
+.chat-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.chat-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.chat-logo img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.chat-brand-text strong {
+  display: block;
+  margin: 0 0 3px;
+  color: #ffffff;
+  font-size: 16.5px;
+  line-height: 1.1;
+  font-weight: 700;
+}
+
+.chat-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 11px;
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
+
+/* The mark that opens the line. Gold, and the same glyph the launcher already uses. */
+.chat-status-mark {
+  color: #d4af37;
+  font-size: 10px;
+  line-height: 1;
+}
+
+.chat-status-role {
+  color: rgba(255, 255, 255, 0.82);
+  font-weight: 600;
+}
+
+/*
+ * Sits immediately before the word it qualifies. No pulse: a status light that breathes
+ * reads as something needing attention, and this one is only ever reporting good news.
+ */
+.online-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #7cb342;
+  box-shadow: 0 0 0 2px rgba(124, 179, 66, 0.18);
+}
+
+.status-separator {
+  opacity: 0.3;
+}
+
+.chat-close-button {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  cursor: pointer;
+  opacity: 0.85;
+  transition: opacity 0.2s ease;
+}
+
+.chat-close-button:hover {
+  opacity: 1;
+}
+
+.chat-messages-new {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  padding: 16px;
+  background: #f6f6f4;
+}
+
+.welcome-screen {
+  display: flex;
+  flex-direction: column;
+}
+
+.welcome-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 16px 20px;
+  border: 1px solid rgba(7, 20, 38, 0.05);
+  box-shadow: 0 4px 16px rgba(7, 20, 38, 0.03);
+  margin-bottom: 20px;
+}
+
+.welcome-card p {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: #0c1e38;
+  font-weight: 500;
+}
+
+.welcome-card .welcome-title {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #071426;
+}
+
+.welcome-card .welcome-lede {
+  margin-top: 6px;
+  color: #56657a;
+  font-weight: 500;
+}
+
+.message-new {
+  display: flex;
+  margin-bottom: 14px;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+/*
+ * A question and its answer are one exchange, so they sit closer to each other than to
+ * the next exchange. That is the whole of the vertical-rhythm fix: 14px between turns,
+ * 8px inside one.
+ */
+.message-new.user + .message-new.bot {
+  margin-top: -6px;
+}
+
+.message-new:last-child {
+  margin-bottom: 0;
+}
+
+.message-new.bot {
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.message-new.user {
+  justify-content: flex-end;
+}
+
+.user-message-bubble {
+  background: #b5852d;
+  color: #ffffff;
+  font-weight: 500;
+  padding: 11px 16px;
+  /* Softer, with the corner nearest its own side drawn in: the standard cue for "mine". */
+  border-radius: 18px 18px 6px 18px;
+  max-width: 85%;
+  font-size: 13.5px;
+  line-height: 1.5;
+  /* A pasted ticker or URL must not push the bubble past the panel. */
+  overflow-wrap: anywhere;
+  box-shadow: 0 1px 2px rgba(181, 133, 45, 0.18), 0 6px 16px rgba(181, 133, 45, 0.14);
+}
+
+.bot-message-wrapper {
+  width: 100%;
+}
+
+.bot-answer {
+  width: 100%;
+  padding: 15px 17px;
+  border-radius: 18px 18px 18px 6px;
+  background: #ffffff;
+  border: 1px solid rgba(7, 20, 38, 0.07);
+  /* Two very short shadows rather than one broad one: it lifts off the page without
+     the card acquiring visual weight of its own. */
+  box-shadow: 0 1px 2px rgba(7, 20, 38, 0.04), 0 6px 18px rgba(7, 20, 38, 0.04);
+  color: #16283f;
+  font-size: 13.5px;
+  line-height: 1.62;
+  overflow-wrap: anywhere;
+}
+
+.message-sources {
+  margin-top: 14px;
+  padding-top: 11px;
+  border-top: 1px solid rgba(7, 20, 38, 0.07);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.source-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 5px 10px;
+  background: #faf7f0;
+  border: 1px solid #e6d6b6;
+  border-radius: 7px;
+  color: #a4762a;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+/* A long publication name shortens rather than widening the row past the card. */
+.source-link-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.source-link-icon {
+  width: 11px;
+  height: 11px;
+  flex: 0 0 auto;
+  opacity: 0.6;
+}
+
+.source-link:hover {
+  background: #f6efe0;
+  border-color: #c79738;
+  color: #8f6620;
+}
+
+.source-link:hover .source-link-icon {
+  opacity: 1;
+}
+
+.suggestions-container {
+  margin-top: 4px;
+}
+
+.suggestions-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #071426;
+  margin-bottom: 14px;
+}
+
+.suggestions-title .sparkle-icon {
+  color: #d4af37;
+  font-size: 15px;
+}
+
+.suggestion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.suggestion-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+.suggestion-card:hover {
+  border-color: #d4af37;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(212, 175, 55, 0.15);
+}
+
+.suggestion-icon {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.suggestion-icon.gold {
+  background: #faf4e6;
+  color: #c99832;
+}
+
+/* Navy, not the blue this was: it was the one colour on the panel from outside the
+   Mining Discovery palette. */
+.suggestion-icon.company {
+  background: #eef1f5;
+  color: #24405f;
+}
+
+.suggestion-icon.news {
+  background: #faf4e6;
+  color: #c99832;
+}
+
+.suggestion-text {
+  flex: 1;
+}
+
+.suggestion-text strong {
+  display: block;
+  font-size: 13.5px;
+  color: #071426;
+  font-weight: 700;
+}
+
+.suggestion-text span {
+  display: block;
+  font-size: 11.5px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.suggestion-arrow {
+  color: #d4af37;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.chat-input-new {
+  padding: 14px 16px 18px;
+  background: #ffffff;
+  border-top: 1px solid #f1f5f9;
+}
+
+.chat-input-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1.5px solid #dcbf85;
+  border-radius: 9999px;
+  padding: 4px 6px 4px 18px;
+  box-shadow: 0 1px 3px rgba(7, 20, 38, 0.04);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+/* The gold only comes fully up when the field is actually being used. */
+.chat-input-inner:focus-within {
+  border-color: #c79738;
+  box-shadow: 0 0 0 3px rgba(199, 151, 56, 0.14);
+}
+
+.chat-input-inner textarea {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  resize: none;
+  font-size: 13.5px;
+  color: #071426;
+  padding-top: 6px;
+}
+
+.chat-input-inner textarea::placeholder {
+  color: #94a3b8;
+}
+
+.send-button {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border: none;
+  border-radius: 50%;
+  background: #c79738;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.send-button:hover:not(:disabled) {
+  background: #d4af37;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(199, 151, 56, 0.3);
+}
+
+.send-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.send-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/*
+ * The searching state. Same loading branch, dressed as a status line rather than as three
+ * full stops: the mark, what it is doing, and three dots that fill in turn.
+ *
+ * It is a card like the answer it becomes, so the reply does not appear to jump out of a
+ * bare line. The surface stays put and only its contents change.
+ */
+.searching-animation {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 15px;
+  border-radius: 18px 18px 18px 6px;
+  background: #ffffff;
+  border: 1px solid rgba(7, 20, 38, 0.07);
+  box-shadow: 0 1px 2px rgba(7, 20, 38, 0.04);
+  color: #56657a;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.searching-mark {
+  color: #d4af37;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.searching-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.searching-dots i {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #c79738;
+  opacity: 0.28;
+  animation: searching-dot 1.25s ease-in-out infinite;
+}
+
+.searching-dots i:nth-child(2) {
+  animation-delay: 0.16s;
+}
+
+.searching-dots i:nth-child(3) {
+  animation-delay: 0.32s;
+}
+
+/* Opacity only. Nothing moves, nothing grows, nothing glows. */
+@keyframes searching-dot {
+  0%,
+  70%,
+  100% {
+    opacity: 0.28;
+  }
+  35% {
+    opacity: 1;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Assistant answer typography.
+
+   The answer is markdown rendered by marked, dropped into the page as HTML — and
+   Tailwind's preflight had stripped every margin, bullet and list indent off it. So a
+   reply with a lead-in, two bullets and a closing line rendered as five identical
+   unspaced lines with no bullets at all: correct content, unreadable shape. Nothing
+   below touches how that HTML is produced; it only gives the tags marked emits somewhere
+   to stand.
+------------------------------------------------------------------ */
+
+.bot-answer-content > *:first-child {
+  margin-top: 0;
+}
+
+.bot-answer-content > *:last-child {
+  margin-bottom: 0;
+}
+
+.bot-answer-content p {
+  margin: 0 0 9px;
+}
+
+.bot-answer-content strong {
+  font-weight: 700;
+  color: #071426;
+}
+
+/* Restated rather than inherited: preflight sets list-style to none on every list. */
+.bot-answer-content ul,
+.bot-answer-content ol {
+  margin: 0 0 9px;
+  padding-left: 17px;
+}
+
+.bot-answer-content ul {
+  list-style: disc outside;
+}
+
+.bot-answer-content ol {
+  list-style: decimal outside;
+}
+
+.bot-answer-content li {
+  margin-bottom: 3px;
+}
+
+.bot-answer-content li::marker {
+  color: #c79738;
+}
+
+.bot-answer-content h1,
+.bot-answer-content h2,
+.bot-answer-content h3,
+.bot-answer-content h4 {
+  margin: 14px 0 6px;
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  color: #071426;
+}
+
+.bot-answer-content a {
+  color: #a4762a;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+
+.bot-answer-content code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: #f4f2ed;
+  font-size: 12px;
+  color: #16283f;
+}
+
+/* Wide output scrolls inside its own block; the panel itself never scrolls sideways. */
+.bot-answer-content pre {
+  margin: 0 0 9px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f6f6f4;
+  overflow-x: auto;
+}
+
+.bot-answer-content pre code {
+  padding: 0;
+  background: none;
+}
+
+.bot-answer-content blockquote {
+  margin: 0 0 9px;
+  padding-left: 10px;
+  border-left: 2px solid #e6d6b6;
+  color: #56657a;
+}
+
+.bot-answer-content hr {
+  margin: 12px 0;
+  border: 0;
+  border-top: 1px solid rgba(7, 20, 38, 0.08);
+}
+
+.bot-answer-content table {
+  display: block;
+  width: 100%;
+  margin: 0 0 9px;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.bot-answer-content th,
+.bot-answer-content td {
+  padding: 5px 9px;
+  border: 1px solid rgba(7, 20, 38, 0.08);
+  text-align: left;
+}
+
+.bot-answer-content th {
+  background: #f6f6f4;
+  font-weight: 700;
+  color: #071426;
+}
+
+/* ------------------------------------------------------------------
+   Message entrance. A short fade and a 4px rise, once, on arrival — enough that a reply
+   reads as having arrived rather than having always been there. No bounce, no scale.
+------------------------------------------------------------------ */
+
+.message-new {
+  animation: chat-message-in 0.26s ease-out both;
+}
+
+@keyframes chat-message-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/*
+ * Everything that moves in this panel is optional. Under reduced motion the searching
+ * dots hold at full strength — still three dots, still legible as "working", just not
+ * animated — and messages appear without the rise.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .chat-window-new,
+  .message-new {
+    animation: none;
+  }
+
+  .searching-dots i {
+    animation: none;
+    opacity: 0.85;
+  }
+
+  .send-button:hover:not(:disabled),
+  .suggestion-card:hover,
+  .chat-button-new:hover {
+    transform: none;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Responsive. Both queries below fire ONLY at sizes where the fixed 390x600 panel is
+   actually clipped by the viewport; every larger size keeps today's geometry exactly.
+
+   Measured before the fix, with the panel at right:24px / bottom:24px:
+     430x932   left  16   fits
+     412x915   left  -2   clipped
+     375x812   left -39   clipped
+     320x568   left -94 and top -56: the header, the logo and the close button were all
+               off-screen, so the panel could not even be dismissed.
+------------------------------------------------------------------ */
+
+/* 390 of panel plus its 24px gutter needs 414px of viewport. */
+@media (max-width: 420px) {
+  .chat-window-new {
+    left: 12px;
+    right: 12px;
+    width: auto;
+  }
+
+  .chat-messages-new {
+    padding: 14px;
+  }
+
+  /*
+   * The status line was breaking mid-phrase at 320 — 'AI Mining Assistant' wrapped and
+   * pushed the online mark onto its own row, which made the header read as broken rather
+   * than as tight. min-width:0 lets the brand column actually shrink inside the flex
+   * header, and the role then holds on one line at the narrower size.
+   */
+  .chat-brand,
+  .chat-brand-text {
+    min-width: 0;
+  }
+
+  .chat-brand-text strong {
+    font-size: 15.5px;
+  }
+
+  .chat-status {
+    gap: 4px;
+    font-size: 10.5px;
+  }
+
+  .chat-status-role {
+    white-space: nowrap;
+  }
+
+  /* The launcher pulls in with it so it cannot sit under a rounded screen corner. */
+  .chat-button-new {
+    right: 16px;
+    bottom: 16px;
+  }
+}
+
+/* 600 of panel plus its gutter needs 624px of viewport height — this is also every
+   handset in landscape. Anchoring the top lets the panel take what height there is. */
+@media (max-height: 640px) {
+  .chat-window-new {
+    top: 12px;
+    height: auto;
+  }
+}
