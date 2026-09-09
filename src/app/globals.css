@@ -186,23 +186,17 @@ nextjs-portal,
   width: var(--pin-dot, 9px);
   height: var(--pin-dot, 9px);
   border-radius: 9999px;
-  /*
-   * Off-centre highlight running to a darker gold at the base. On a 9px bead this is not
-   * read as a gradient — it is read as the thing being lit from above, which is the whole
-   * difference between a bead and a flat circle.
-   */
   background: radial-gradient(
-    circle at 36% 32%,
-    #f6e3a0 0%,
-    #d4af37 52%,
-    #a97c15 100%
+    circle at 35% 35%,
+    #ffffff 0%,
+    #fff3b5 25%,
+    #ffc837 55%,
+    #c49015 100%
   );
   box-shadow:
-    /* Dark rim: contact with the surface, so the bead sits ON the globe, not over it. */
-    0 0 0 1px rgba(9, 17, 32, 0.55),
-    /* The glow. 6px blur at 0.7 — the top of the brief's range, because it is competing
-       with the city lights already burning on the map underneath. */
-    0 0 6px 2px rgba(212, 175, 55, 0.7);
+    0 0 0 1px rgba(255, 235, 170, 0.7),
+    0 0 8px 3px rgba(255, 205, 55, 0.95),
+    0 0 16px 5px rgba(212, 175, 55, 0.55);
   animation: globePinDot var(--pin-period, 2.6s) ease-in-out var(--pin-delay, 0s) infinite;
   transition:
     box-shadow 200ms ease,
@@ -213,26 +207,29 @@ nextjs-portal,
 
 /*
  * The tour's current stop, and the hovered marker: the one marker the section is pointing
- * at, lifted to a brighter gold with a wider glow so it separates from the resting set.
+ * at, lifted to an incandescent gold sparkle with a wide radiant bloom.
  */
 .globe-pin-dot--active {
   background: radial-gradient(
-    circle at 36% 32%,
-    #fff4cf 0%,
-    #e7c65a 50%,
-    #d4af37 100%
+    circle at 35% 35%,
+    #ffffff 0%,
+    #fffbee 25%,
+    #ffd700 60%,
+    #e5a712 100%
   );
   box-shadow:
-    0 0 0 1px rgba(9, 17, 32, 0.6),
-    0 0 12px 4px rgba(212, 175, 55, 0.85);
+    0 0 0 2px rgba(255, 255, 255, 0.9),
+    0 0 16px 6px rgba(255, 215, 0, 1),
+    0 0 32px 10px rgba(212, 175, 55, 0.75);
 }
 
 .globe-pin-ring {
   position: absolute;
-  width: var(--pin-ring, 12px);
-  height: var(--pin-ring, 12px);
+  width: var(--pin-ring, 14px);
+  height: var(--pin-ring, 14px);
   border-radius: 9999px;
-  border: 1px solid rgba(212, 175, 55, 0.6);
+  border: 1.5px solid rgba(255, 215, 0, 0.85);
+  box-shadow: 0 0 10px 2px rgba(255, 200, 50, 0.7);
   animation: globePinRing var(--pin-period, 2.6s) ease-out var(--pin-delay, 0s) infinite;
   transition:
     border-color 200ms ease,

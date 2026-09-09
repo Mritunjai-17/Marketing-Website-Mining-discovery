@@ -37,16 +37,11 @@ export const Header: React.FC = () => {
   /*
    * Whether the header is currently sitting on a light page ground.
    *
-   * The bar is transparent until you scroll, so its text is drawn straight onto whatever
-   * is beneath it. On the homepage that is the navy hero and white reads correctly; every
-   * other route opens on #F7F5EF, where white-on-off-white is very nearly invisible —
-   * which is the bug. Once scrolled the header paints its own #0B1F3A behind itself, so
-   * white is right again everywhere and only the transparent state needs to differ.
-   *
-   * Keyed off the route rather than a prop so that this stays one component for every
-   * page, and so a new light route needs no wiring.
+   * When not scrolled, the page ground is light across all routes (including the
+   * light sky hero on the homepage), so dark navy text reads correctly. Once scrolled,
+   * the header paints its own #0B1F3A background behind itself, so white text is used.
    */
-  const onLightGround = !isScrolled && pathname !== "/";
+  const onLightGround = !isScrolled;
 
   const goToContact = () => {
     setMobileMenuOpen(false);

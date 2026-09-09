@@ -6,9 +6,8 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { HeroStarfield } from "@/components/sections/hero-layers/HeroStarfield";
 import { HeadlineUnderline } from "@/components/sections/hero-layers/HeadlineUnderline";
-import { GLOBE_FIT } from "@/components/ui/globe/EarthGlobe";
+import { FOCUS_ANCHOR_ID, GLOBE_FIT } from "@/components/ui/globe/EarthGlobe";
 import type {
   GlobeAnchor,
   GlobeArc,
@@ -96,17 +95,17 @@ const HERO_ARCS: GlobeArc[] = [
   { id: "na-eu", fromId: "north-america", toId: "europe", phase: 0.0, onMobile: true },
   { id: "eu-as", fromId: "europe", toId: "asia", phase: 0.09 },
   { id: "na-sa", fromId: "north-america", toId: "south-america", phase: 0.17 },
-  { id: "sa-br", fromId: "south-america", toId: "brazil", phase: 0.24, onMobile: true },
+  { id: "na-br", fromId: "north-america", toId: "brazil", phase: 0.23 },
   { id: "eu-af", fromId: "europe", toId: "africa", phase: 0.31, onMobile: true },
-  { id: "eu-ca", fromId: "europe", toId: "central-asia", phase: 0.14 },
-  { id: "ca-as", fromId: "central-asia", toId: "asia", phase: 0.35, onMobile: true },
+  { id: "eu-ca", fromId: "europe", toId: "central-asia", phase: 0.35 },
   { id: "af-as", fromId: "africa", toId: "asia", phase: 0.39 },
   { id: "br-af", fromId: "brazil", toId: "africa", phase: 0.44 },
   { id: "sa-af", fromId: "south-america", toId: "africa", phase: 0.48, onMobile: true },
-  { id: "as-sea", fromId: "asia", toId: "southeast-asia", phase: 0.53, onMobile: true },
-  { id: "as-au", fromId: "asia", toId: "australia", phase: 0.58, onMobile: true },
-  { id: "sea-au", fromId: "southeast-asia", toId: "australia", phase: 0.62, onMobile: true },
-  { id: "eu-au", fromId: "europe", toId: "australia", phase: 0.66, onMobile: true },
+  { id: "ca-as", fromId: "central-asia", toId: "asia", phase: 0.53 },
+  { id: "as-se", fromId: "asia", toId: "southeast-asia", phase: 0.56 },
+  { id: "as-au", fromId: "asia", toId: "australia", phase: 0.62, onMobile: true },
+  { id: "eu-au", fromId: "europe", toId: "australia", phase: 0.68, onMobile: true },
+  { id: "se-au", fromId: "southeast-asia", toId: "australia", phase: 0.76, onMobile: true },
   { id: "af-au", fromId: "africa", toId: "australia", phase: 0.83 },
   { id: "na-au", fromId: "north-america", toId: "australia", phase: 0.91 },
 ];
@@ -161,13 +160,13 @@ const SILHOUETTE_STOP = GLOBE_FIT * 100;
 const HALO_OUTER_STOP = SILHOUETTE_STOP + 5.5;
 const ATMOSPHERE_HALO = [
   "radial-gradient(circle closest-side at 50% 50%,",
-  `rgba(143,179,217,0) ${SILHOUETTE_STOP - 8}%,`,
-  `rgba(150,187,224,0.07) ${SILHOUETTE_STOP - 3.5}%,`,
-  `rgba(163,199,233,0.26) ${SILHOUETTE_STOP - 0.4}%,`,
-  `rgba(178,210,240,0.34) ${SILHOUETTE_STOP + 0.7}%,`,
-  `rgba(163,199,233,0.20) ${SILHOUETTE_STOP + 1.8}%,`,
-  `rgba(150,187,224,0.08) ${SILHOUETTE_STOP + 3.4}%,`,
-  `rgba(143,179,217,0) ${HALO_OUTER_STOP}%)`,
+  `rgba(255,225,160,0) ${SILHOUETTE_STOP - 6}%,`,
+  `rgba(255,210,130,0.12) ${SILHOUETTE_STOP - 2.5}%,`,
+  `rgba(255,195,95,0.42) ${SILHOUETTE_STOP - 0.3}%,`,
+  `rgba(255,210,120,0.52) ${SILHOUETTE_STOP + 0.7}%,`,
+  `rgba(255,225,150,0.28) ${SILHOUETTE_STOP + 1.8}%,`,
+  `rgba(255,235,180,0.10) ${SILHOUETTE_STOP + 3.5}%,`,
+  `rgba(255,245,210,0) ${HALO_OUTER_STOP}%)`,
 ].join(" ");
 
 /**
@@ -217,6 +216,18 @@ const PIN_PULSE: PinPulseStyle[] = [
   { "--pin-period": "2.05s", "--pin-delay": "1.38s" },
 ];
 
+/** Shimmering gold sparkles in the sky */
+const SKY_GOLD_SPARKLES = [
+  { top: "22%", left: "9%", size: 14, delay: "0s", duration: "3.2s" },
+  { top: "35%", left: "5%", size: 18, delay: "1.1s", duration: "2.8s" },
+  { top: "18%", right: "11%", size: 16, delay: "0.6s", duration: "3.5s" },
+  { top: "30%", right: "6%", size: 21, delay: "1.8s", duration: "3.0s" },
+  { top: "52%", left: "15%", size: 13, delay: "0.9s", duration: "2.5s" },
+  { top: "62%", right: "17%", size: 15, delay: "1.4s", duration: "3.1s" },
+  { top: "14%", left: "26%", size: 10, delay: "2.1s", duration: "2.7s" },
+  { top: "15%", right: "24%", size: 12, delay: "0.4s", duration: "3.3s" },
+];
+
 /**
  * Order the tour visits. One entry per continent, matched to MINING_SITES by id, and
  * the scroll range is split into this many equal stages.
@@ -224,13 +235,11 @@ const PIN_PULSE: PinPulseStyle[] = [
 const TOUR = [
   "north-america",
   "south-america",
-  "brazil",
   "europe",
   "africa",
-  "central-asia",
   "asia",
   "australia",
-  "southeast-asia",
+  "antarctica",
 ] as const;
 
 /**
@@ -277,19 +286,37 @@ const STAGE_COUNT = TOUR.length;
 /**
  * Viewport heights of scroll each continent owns.
  *
-/**
- * Viewport heights of scroll each location owns.
- * 100 puts each location on exactly "one scroll distance" (100vh per stop).
+ * This is the primary pacing dial. It buys time without touching a single easing curve:
+ * every fraction below is a fraction OF a stage, so lengthening the stage stretches the
+ * hop and the dwell together and the sequence keeps its shape exactly.
+ *
+ * 165 puts the range at 7 x 165 = 1155vh, of which 1055vh is actual travel once the
+ * sticky card's own viewport is subtracted.
  */
-const STAGE_VH = 100;
+const STAGE_VH = 220;
 
+/** Scale held for the whole tour: reached once on engage, then never changed again. */
+const STOP_ZOOM = 2.8;
 /**
  * Where inside a stage the hop happens. Up to ARRIVE the globe is still settling onto
  * this stop, past DEPART it has started leaving for the next; the span between is the
- * held stop. 0.25/0.75 provides a crisp 50% dwell at each location and smooth 50% transition.
+ * held stop. The two halves of a hop straddle a stage boundary and meet at its centre.
+ *
+ * WIDENED BACK OUT, and this is the change that stops the tour reading as a series of
+ * jumps. At 0.13/0.87 only 26% of a stage was in motion: the globe sat still for
+ * three-quarters of the scroll and then swung a whole continent in the remaining quarter,
+ * which is fast angular movement however smooth the interpolation underneath it is.
+ *
+ * 0.22/0.78 puts 44% of a stage in motion. Paired with STAGE_VH at 220 that is 97vh of
+ * scroll behind each hop against 43vh before — 2.26x the distance for the same rotation,
+ * so the globe turns at 44% of its old angular speed.
+ *
+ * The dwell is deliberately unchanged in absolute terms: 56% of 220vh is 123vh, against
+ * 74% of 165vh which was 122vh. The stops rest exactly as long as they did; all of the
+ * new distance went into the travel between them.
  */
-const STAGE_ARRIVE = 0.25;
-const STAGE_DEPART = 0.75;
+const STAGE_ARRIVE = 0.22;
+const STAGE_DEPART = 0.78;
 /** Progress over which the globe hands off from free drift to the tour. */
 const ENGAGE = 0.03;
 /**
@@ -324,6 +351,18 @@ const ENGAGE = 0.03;
  * is 0.0333 * 18.3 = 0.61. Both hold comfortably.
  */
 const PROGRESS_SPRING = { stiffness: 84, damping: 18.3 };
+/**
+ * The zoom's own spring, and the only underdamped one.
+ *
+ * zeta = 14 / (2 * sqrt(90)) = 0.738, and peak overshoot of a step response is
+ * exp(-pi * zeta / sqrt(1 - zeta^2)) = 0.03 — a 3% pass beyond the target scale before it
+ * settles. During a hop the target is moving and the spring simply trails it; the
+ * overshoot only appears where the target stops changing, which is the arrival at a stop.
+ * That is the settle, and it costs nothing at rest because the spring latches exactly.
+ *
+ * Set damping to 2 * sqrt(stiffness) = 18.97 to remove the bounce and keep the easing.
+ */
+const ZOOM_SPRING = { stiffness: 90, damping: 14 };
 /**
  * A frame gap longer than this means the loop was parked — tab hidden, or the globe
  * scrolled out of view and its render loop suspended. Damping across that gap would
@@ -380,76 +419,20 @@ function stepSpring(
  * page height added. Lower it to begin earlier still — 0.876 is the floor, where the wipe
  * would start on top of the final zoom rather than after it.
  */
-const CURTAIN_START = 0.94;
+const CURTAIN_START = 0.90;
+
 
 /**
- * The hero ground.
- *
- * #0D1B2A at the top is the navbar's scrolled-state navy, so the header pinning over
- * the hero produces no colour step; it settles to #0A1128 lower down. The radial pool
- * sits at bottom-centre because that is where the planet sits in the horizon framing —
- * it is depth under the limb, not a second hue. Nothing here is outside the navy range.
- */
-const HERO_NAVY = [
-  "radial-gradient(130% 90% at 50% 100%, rgba(17,40,71,0.55) 0%, rgba(10,17,40,0) 62%),",
-  "linear-gradient(180deg, #0D1B2A 0%, #0B1526 48%, #0A1128 100%)",
-].join(" ");
-
-/**
- * The wipe: the hero's navy rising and resolving into Stats' white.
- *
- * This used to be a fall of light down the gold family (#9E7208 -> #B8860B -> #D4AF37 ->
- * #FAF5E8). It was the only gold wash on the page and, at 130vh, by far the largest use
- * of the colour anywhere on the site — gold is an accent here, for a chapter number or a
- * CTA, not a structural surface. Read against the navbar it looked like a decorative
- * band inserted between two sections rather than one of them ending.
- *
- * The colours are now the brand navy resolving to Stats' own white:
- *
- *   #0B1F3A  the navbar's scrolled-state navy, verbatim from Header.tsx. Carries the top.
- *   #36475D  the same navy, 18% of the way to white
- *   #707B8B  42% - the cool slate mid-tone
- *   #AEB5BD  68% - where it reads as light grey
- *   #DEE1E3  88%
- *   #FBFBFA  Stats' own section background, verbatim from Stats.tsx.
- *
- * Every mid-tone is a straight blend of those two endpoints, so the hue never leaves the
- * navy and what changes is lightness alone. That is what keeps it reading as the page
- * getting darker rather than as a second colour arriving.
- *
- * The stop POSITIONS are unchanged from the gold version, and this is the part worth
- * keeping straight. The element is 130vh, bottom-anchored in a 100vh card, so its top
- * 23.1% is clipped and the card shows 23.1% to 100%. Screen position maps as
- * `element% = 23.1 + p * 76.9`:
- *   24%  -> the very top of the screen        -> deepest navy
- *   58%  -> 45% down the screen               -> opaque #0B1F3A
- *   68-90% -> 58% to 87% down                 -> the ramp out through slate to grey
- *   95%  -> 93% down                          -> Stats' colour, and flat from there
- * Placed by screen position instead of by element position, the deep band lands mid view
- * rather than off the top edge.
- *
- * The navy needs a longer run-out than the gold did: gold sits mid-luminance and was
- * already halfway to white, where #0B1F3A is not, so the ramp gets four stops between
- * 58% and 90% instead of one. Compressing it is what would put a visible edge back.
- *
- * The flat #FBFBFA run at the foot is deliberate and load-bearing: the panel's bottom
- * edge and the card's bottom edge coincide, and Stats begins on the next pixel, so that
- * run is what makes the handoff seamless. Everything above 58% is translucent, so the
- * planet still reads through the deep part instead of being covered by it.
+ * The wipe: the hero's light sky ground softly resolving into Stats' #FBFBFA.
  */
 const STATS_WIPE = [
   "linear-gradient(180deg,",
-  "rgba(11,31,58,0) 0%,",
-  "rgba(11,31,58,0.28) 8%,",
-  "rgba(11,31,58,0.62) 16%,",
-  "rgba(11,31,58,0.88) 24%,",
-  "rgba(11,31,58,0.96) 40%,",
-  "#0B1F3A 58%,",
-  "#36475D 68%,",
-  "#707B8B 76%,",
-  "#AEB5BD 84%,",
-  "#DEE1E3 90%,",
-  "#FBFBFA 95%,",
+  "rgba(250,247,242,0) 0%,",
+  "rgba(250,247,242,0.25) 12%,",
+  "rgba(250,247,242,0.65) 28%,",
+  "rgba(250,247,242,0.92) 48%,",
+  "#FAF7F2 64%,",
+  "#FBFBFA 88%,",
   "#FBFBFA 100%)",
 ].join(" ");
 
@@ -487,14 +470,11 @@ interface StageState {
   index: number;
   lat: number;
   lng: number;
+  zoom: number;
 }
 
 /**
- * Resolves scroll progress into an aim point.
- *
- * The tour is rotation only: a stage carries a latitude and a longitude and nothing
- * else. There is deliberately no scale, no camera distance and no element offset in it —
- * the globe is mounted in one place and turns under a fixed camera.
+ * Resolves scroll progress into an aim point and a zoom.
  *
  * Progress is cut into STAGE_COUNT equal stages, one per continent. Inside a stage the
  * globe sits on that continent, then hands over to the next across the boundary; the
@@ -528,6 +508,10 @@ function stageAt(progress: number): StageState {
     index: hop > 0.5 ? to : from,
     lat: a.lat + (b.lat - a.lat) * eased,
     lng: lerpLongitude(a.lng, b.lng, eased),
+    // Held flat for the whole tour. The zoom happens once, on engage; after that a hop is
+    // pure rotation — only lat/lng move, so the globe's size on screen never changes again
+    // and consecutive stages have nothing to step between.
+    zoom: STOP_ZOOM,
   };
 }
 
@@ -540,53 +524,6 @@ interface Metrics {
 
 function clamp(v: number, lo: number, hi: number) {
   return Math.min(Math.max(v, lo), hi);
-}
-
-/**
- * Computes opacity weight [0..1] for a marker during the scroll tour.
- * One scroll distance illuminates one location:
- * - When dwelling on location i, location i is 1.0, others are 0.0.
- * - When hopping to location i+1, location i fades out and location i+1 fades in.
- * - Active/hovered marker always retains 1.0.
- */
-function getTourVisibility(
-  anchorId: string,
-  progress: number,
-  activeId: string | null,
-): number {
-  if (activeId === anchorId) return 1;
-
-  const f = clamp(progress, 0, 1) * STAGE_COUNT;
-  const index = Math.min(Math.floor(f), STAGE_COUNT - 1);
-  const u = f - index;
-
-  let from = index;
-  let to = index;
-  let hop = 0;
-
-  if (u < STAGE_ARRIVE && index > 0) {
-    from = index - 1;
-    to = index;
-    hop = 0.5 + 0.5 * (u / STAGE_ARRIVE);
-  } else if (u > STAGE_DEPART && index < STAGE_COUNT - 1) {
-    from = index;
-    to = index + 1;
-    hop = 0.5 * ((u - STAGE_DEPART) / (1 - STAGE_DEPART));
-  }
-
-  const fromSiteId = TOUR[from];
-  const toSiteId = TOUR[to];
-
-  if (anchorId === fromSiteId && anchorId === toSiteId) {
-    return 1;
-  }
-  if (anchorId === fromSiteId) {
-    return clamp(1 - hop, 0, 1);
-  }
-  if (anchorId === toSiteId) {
-    return clamp(hop, 0, 1);
-  }
-  return 0;
 }
 
 export const GlobeHero: React.FC = () => {
@@ -613,8 +550,6 @@ export const GlobeHero: React.FC = () => {
   const [metrics, setMetrics] = useState<Metrics>({ boxSize: 0, boxTop: 0 });
   const [ready, setReady] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const activeIdRef = useRef<string | null>(null);
-  activeIdRef.current = activeId;
 
   // --- Headline exit ---------------------------------------------------------------
   /**
@@ -697,19 +632,22 @@ export const GlobeHero: React.FC = () => {
    */
   const progressRef = useRef(0);
   /**
-   * Progress as a sprung value rather than as a raw scroll reading. A ref, and mutated
-   * in place: it changes every frame and must never re-render the tree.
+   * Progress and zoom as sprung values rather than as raw scroll readings. Refs, and
+   * mutated in place: these change every frame and must never re-render the tree.
    */
   const progressSpring = useRef<SpringState>({ value: 0, velocity: 0 });
+  const zoomSpring = useRef<SpringState>({ value: 1, velocity: 0 });
 
   /** Aim target handed to the globe; mutated in place, never triggers a render. */
   const focusRef = useRef<GlobeFocus | null>(null);
+  /** Where the aim actually landed this frame, reported by the projection. */
+  const aimPointRef = useRef<{ x: number; y: number } | null>(null);
   /**
-   * The extra pitch that lifts an aimed coordinate off the centre of the projected disc
-   * and into the slice the card actually shows. A rotation of the sphere, so it changes
-   * the globe's orientation and never its framing.
+   * Where the aimed coordinate lands, and where it should land, in the canvas box's
+   * pixel space. `centre` is the middle of the sphere's projected disc; `visible` is
+   * the middle of the slice the card actually shows.
    */
-  const geometryRef = useRef({ tiltBias: 0 });
+  const geometryRef = useRef({ centre: 0, visibleY: 0, tiltBias: 0 });
   /**
    * The range's document-space top and its travel, cached so progress can be sampled
    * from window.scrollY every frame. Reading scrollY is free; a getBoundingClientRect
@@ -722,8 +660,6 @@ export const GlobeHero: React.FC = () => {
   const stageIndexRef = useRef(0);
   const engagedRef = useRef(false);
   const [stageIndex, setStageIndex] = useState(0);
-  const [isTouring, setIsTouring] = useState(false);
-  const touringRef = useRef(false);
   const [reduceMotion, setReduceMotion] = useState(false);
 
   // Reused across frames so collision resolution allocates nothing per tick.
@@ -762,6 +698,8 @@ export const GlobeHero: React.FC = () => {
       //   slotHeight/2 below it, so the gap to close is (sphereSize - slotHeight)/2,
       //   which as a fraction of the radius is 1 - slotHeight/sphereSize.
       geometryRef.current = {
+        centre: boxSize / 2,
+        visibleY: -boxTop + s.height / 2,
         tiltBias: Math.asin(clamp(1 - s.height / sphereSize, 0, 0.995)),
       };
       setMetrics({ boxSize, boxTop });
@@ -790,22 +728,18 @@ export const GlobeHero: React.FC = () => {
 
   /**
    * Writes the tour state for the current scroll progress: where the globe is aimed,
-   * and how the markers should read.
+   * how far it is zoomed, and how the markers should read.
    *
-   * THE GLOBE'S FRAMING IS NOT ANIMATED HERE, AND MUST NOT BE. Its box position and size
-   * come from `metrics`, which only ever changes on resize, and its camera lives in
-   * EarthGlobe at a fixed distance. Scroll drives the sphere's ORIENTATION and nothing
-   * else: the element is never translated and never scaled, so the planet holds the exact
-   * position, size and crop it has on the first frame for the whole tour.
-   *
-   * This also used to magnify the box to STOP_ZOOM and re-centre the aimed coordinate
-   * under it, which is what read as the globe leaping forward and sliding sideways on the
-   * first scroll. Rotation alone still reaches every stop — including Antarctica, which no
-   * CSS transform could have found, because the sphere turns the point onto the near face
-   * rather than the viewport chasing it.
+   * Only `transform` and `opacity` are touched here — nothing that can trigger layout.
+   * The globe is aimed by rotating the sphere itself rather than by panning the element,
+   * which is what lets a stop like Antarctica be reached at all: it never enters the
+   * visible crop under free rotation, so no CSS transform could have found it.
    */
   const applyStage = useCallback(() => {
-    if (reduceMotionRef.current) return;
+    const box = globeBoxRef.current;
+    if (!box || reduceMotionRef.current) return;
+
+    const layer = markerLayerRef.current;
 
     // --- Sample and damp -------------------------------------------------------------
     // Progress is read here, inside the frame that is about to draw, rather than being
@@ -861,37 +795,80 @@ export const GlobeHero: React.FC = () => {
       setStageIndex(stop);
     }
 
-    const touring = t > 0.015 && t < CURTAIN_START;
-    if (touring !== touringRef.current) {
-      touringRef.current = touring;
-      setIsTouring(touring);
-    }
-
     const engage = smoothstep(0, ENGAGE, t);
 
     if (engage <= 0) {
-      // Back at the very top: hand the globe back to its free drift, so the entry reveal
-      // behaves as if the tour did not exist. Nothing to undo on the element itself —
-      // the tour writes no styles to it.
+      // Back at the very top: hand the globe back to its free drift and every property
+      // back to the classes, so the entry reveal behaves as if the tour did not exist.
       focusRef.current = null;
       engagedRef.current = false;
+      // Rest the zoom spring too. Leaving stored velocity here means scrolling back down
+      // re-enters the tour mid-bounce, which reads as a glitch rather than as a settle.
+      zoomSpring.current.value = 1;
+      zoomSpring.current.velocity = 0;
+      box.style.transitionProperty = "";
+      box.style.transform = "";
+      box.style.opacity = "";
+      layer?.style.removeProperty("--unzoom");
       return;
     }
 
     const stage = stageAt(t);
-    const { tiltBias } = geometryRef.current;
+    const { centre, visibleY, tiltBias } = geometryRef.current;
 
-    // The one thing scroll drives. tiltBias is a pitch applied to the sphere, not to the
-    // camera or to the element: it lifts the aimed coordinate from the centre of the
-    // projected disc — which the horizon framing puts below the card's floor — up into the
-    // visible slice, by turning the globe. Framing is untouched by it.
     focusRef.current = { lat: stage.lat, lng: stage.lng, tiltBias, weight: engage };
 
-    // No transform is written to the box, by design. See the note on this callback:
-    // position, size, crop and camera distance are all fixed for the whole tour, and the
-    // markers therefore need no counter-scale either — they sit in an unscaled box and
-    // keep the size they were designed at.
-    engagedRef.current = true;
+    // Scale eases in from 1 alongside the aim, so engaging the tour is one continuous
+    // move rather than a snap to STOP_ZOOM.
+    //
+    // That target then goes through a spring rather than to the element directly. Two
+    // things come out of it: the magnification accelerates and decelerates instead of
+    // tracking scroll rigidly, and because the spring is slightly underdamped it passes
+    // ~3% beyond the target at an arrival and settles back — the stop lands rather than
+    // stopping dead. Mid-hop the target is still moving and the spring just trails it,
+    // so the overshoot only ever appears where the motion actually ends.
+    const targetScale = 1 + (stage.zoom - 1) * engage;
+    if (gap > 0 && gap <= RESUME_GAP) {
+      stepSpring(zoomSpring.current, targetScale, gap, ZOOM_SPRING);
+    } else {
+      zoomSpring.current.value = targetScale;
+      zoomSpring.current.velocity = 0;
+    }
+    // Floored just above 1: the overshoot is upward at an arrival, but on the way back
+    // out of the tour the spring can dip under 1 and briefly shrink the globe.
+    const scale = Math.max(1, zoomSpring.current.value);
+
+    // Pin the aimed point at the middle of the visible slice and zoom around it.
+    //
+    // P is where the aim actually landed, reported by the projection rather than assumed
+    // — the axial roll swings the tilt-bias offset sideways, so the aimed point is not on
+    // the vertical centre line, and at STOP_ZOOM that error would carry it off screen.
+    // Scaling happens about the element's own centre O, so:
+    //   position = O + d + scale·(P - O), and we want P + (C - P)·engage
+    //   =>  d = (P - O)·(1 - scale) + (C - P)·engage
+    // which is identity at engage 0 and lands P exactly on C at engage 1.
+    //
+    // transform-origin is deliberately left at its default: in Tailwind v4 the box's
+    // -translate-x-1/2 and its reveal scale are the standalone translate/scale
+    // properties, which apply before transform and share its origin.
+    const aim = aimPointRef.current;
+    const px = aim ? aim.x : centre;
+    const py = aim ? aim.y : visibleY;
+    const dx = (px - centre) * (1 - scale) + (centre - px) * engage;
+    const dy = (py - centre) * (1 - scale) + (visibleY - py) * engage;
+
+    if (!engagedRef.current) {
+      // The reveal's 1400ms ease covers opacity; leaving it on would smear every scroll
+      // frame through it instead of tracking the wheel. It has finished by now.
+      box.style.transitionProperty = "none";
+      engagedRef.current = true;
+    }
+    box.style.transform = `translate3d(${dx.toFixed(2)}px, ${dy.toFixed(2)}px, 0) scale(${scale.toFixed(4)})`;
+    box.style.opacity = "";
+
+    // Pins ride inside the scaled box, which is what keeps them glued to their landmass.
+    // This cancels the magnification on the pin art so a marker keeps its designed size.
+    layer?.style.setProperty("--unzoom", (1 / scale).toFixed(4));
   }, []);
 
   useEffect(() => {
@@ -955,19 +932,13 @@ export const GlobeHero: React.FC = () => {
   const handleProject = useCallback((projected: ProjectedAnchor[]) => {
     const { maxY, minX, maxX, fadeX, fadeY } = layoutRef.current;
 
-    // The projection also reports where the focus point landed (FOCUS_ANCHOR_ID). Nothing
-    // reads it any more: it existed to re-pin the tour's zoom about that point every
-    // frame, and there is no zoom to pin. It has no marker element, so the loop below
-    // skips it.
-    //
+    // The aim point drifts while the globe swings onto a new stop, so the zoom has to be
+    // re-pinned every frame, not only when the scroll position changes.
+    const aim = projected.find((a) => a.id === FOCUS_ANCHOR_ID);
+    if (aim) aimPointRef.current = { x: aim.x, y: aim.y };
     // Unconditional: this is the per-frame heartbeat that samples the scroll position,
     // so it has to run before any focus exists too, or the tour could never engage.
     applyStage();
-
-    const t = progressRef.current;
-    const isEngaged = engagedRef.current;
-    const currentActiveId = activeIdRef.current;
-    const engage = smoothstep(0, ENGAGE, t);
 
     for (const anchor of projected) {
       const el = markerRefs.current.get(anchor.id);
@@ -977,11 +948,7 @@ export const GlobeHero: React.FC = () => {
       const bottomFade = clamp((maxY - anchor.y) / fadeY, 0, 1);
       const leftFade = clamp((anchor.x - minX) / fadeX, 0, 1);
       const rightFade = clamp((maxX - anchor.x) / fadeX, 0, 1);
-
-      // In scroll tour: each scroll distance illuminates its corresponding location
-      const rawTourVis = getTourVisibility(anchor.id, t, currentActiveId);
-      const tourVis = isEngaged ? (1 - engage) * 1 + engage * rawTourVis : 1;
-      const opacity = anchor.opacity * bottomFade * leftFade * rightFade * tourVis;
+      const opacity = anchor.opacity * bottomFade * leftFade * rightFade;
 
       const style = el.style;
       if (opacity <= 0.01) {
@@ -1014,32 +981,73 @@ export const GlobeHero: React.FC = () => {
   // creates a containing block for it. The heading, subtitle and globe each keep their
   // own entrance, so the effect survives without the wrapper's.
   return (
-    <section className="relative isolate w-full bg-[#0D1B2A]">
-      {/*
-        isolate is load-bearing, not decoration. position:relative with z-index:auto does
-        NOT open a stacking context, so the -z-10 starfield below was painting underneath
-        this section's own background colour and was invisible. isolation:isolate makes
-        this element a stacking context, which puts its background first and the
-        negative-z layer on top of it, while still keeping it under the in-flow copy.
-      */}
-      {/*
-        The hero ground behind the copy. Flat #0D1B2A rather than the full ramp: this
-        section is STAGE_COUNT * STAGE_VH tall, so a gradient here would stretch over
-        roughly twelve thousand pixels and the copy would see only its first sliver.
-        Flat also means the seam where the sticky card's top edge meets it is invisible,
-        because the card's ramp starts on this exact value.
-
-        The starfield is pinned to the first viewport for the same reason the old
-        backdrop was — across the full band it would be a scattering of dust. -z-10 is
-        load-bearing: an absolutely positioned layer at auto z-index paints ABOVE the
-        in-flow copy below it, so a positive or default z-index here would lay stars over
-        the headline.
-      */}
+    <section className="relative isolate w-full bg-[#FAF7F2]">
+      {/* Single Unified Light Sky & Soft Clouds Background */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-screen"
+        className="pointer-events-none sticky top-0 -mb-[100vh] h-screen w-full -z-10 overflow-hidden"
       >
-        <HeroStarfield zone="copy" />
+        <div
+          className="absolute inset-0 bg-cover bg-bottom bg-no-repeat"
+          style={{
+            backgroundImage: "url('/images/hero-light-sky.jpg')",
+          }}
+        />
+        {/* Soft, natural light sun glow over the right horizon (toned down from yellow) */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute right-[-5%] sm:right-[5%] lg:right-[10%] bottom-[15%] sm:bottom-[22%] w-[450px] sm:w-[650px] h-[450px] sm:h-[650px] rounded-full"
+          style={{
+            background:
+              "radial-gradient(circle, rgba(255,250,230,0.30) 0%, rgba(255,245,215,0.14) 35%, rgba(255,245,225,0.04) 60%, transparent 75%)",
+            filter: "blur(30px)",
+          }}
+        />
+        {/* Subtle, soft ambient light wash */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(130% 80% at 50% 100%, rgba(255,250,240,0.18) 0%, rgba(250,247,242,0) 70%)",
+          }}
+        />
+
+        {/* Floating delicate gold sparkle stars */}
+        <svg className="absolute inset-0 w-0 h-0 pointer-events-none" aria-hidden="true">
+          <defs>
+            <radialGradient id="goldSparkleGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#FFFFFF" stopOpacity="1" />
+              <stop offset="30%" stopColor="#FFF2B0" stopOpacity="0.95" />
+              <stop offset="65%" stopColor="#FFC837" stopOpacity="0.85" />
+              <stop offset="100%" stopColor="#B8860B" stopOpacity="0" />
+            </radialGradient>
+          </defs>
+        </svg>
+        {SKY_GOLD_SPARKLES.map((s, i) => (
+          <div
+            key={i}
+            aria-hidden="true"
+            className="pointer-events-none absolute animate-pulse"
+            style={{
+              top: s.top,
+              left: s.left,
+              right: s.right,
+              width: s.size,
+              height: s.size,
+              animationDelay: s.delay,
+              animationDuration: s.duration,
+              filter: "drop-shadow(0 0 5px rgba(255,200,50,0.85))",
+            }}
+          >
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <path
+                d="M12 0 C12 7 17 12 24 12 C17 12 12 17 12 24 C12 17 7 12 0 12 C7 12 12 7 12 0 Z"
+                fill="url(#goldSparkleGrad)"
+              />
+            </svg>
+          </div>
+        ))}
       </div>
 
       {/* Copy — normal flow, scrolls away before anything pins. */}
@@ -1073,7 +1081,7 @@ export const GlobeHero: React.FC = () => {
 
           THE BOTTOM PADDING IS NOT SLACK. The globe range that follows is pulled up over
           this block by -mt-5, and lg:-mt-6, and the sticky card inside it is opaque
-          (bg-[#0A1128]) and paints later in the tree — so it covers whatever it reaches.
+          and paints later in the tree — so it covers whatever it reaches.
           The clearance under the buttons is therefore pb MINUS that negative margin, and
           at pb-5 against lg:-mt-6 it was -4px: the card sat over the bottom 4px of the
           CTAs. pb-8 puts it back to +8px on lg and +12px elsewhere. Any future trim to pb
@@ -1101,7 +1109,7 @@ export const GlobeHero: React.FC = () => {
           adds a scroll listener, and nothing here holds a transform that could become a
           containing block for the sticky globe frame below.
         */}
-        <p className="hero-rise [animation-delay:60ms] font-mono text-xs sm:text-[13px] md:text-sm font-semibold uppercase leading-none tracking-[0.16em] sm:tracking-[0.18em] text-[#D4AF37]">
+        <p className="hero-rise [animation-delay:60ms] font-mono text-[10px] font-semibold uppercase leading-none tracking-[0.2em] text-[#B8860B] sm:text-[11px] sm:tracking-[0.22em]">
           Mining Media <span aria-hidden="true">&times;</span> Marketing{" "}
           <span aria-hidden="true">&times;</span> Investor Reach
         </p>
@@ -1118,7 +1126,7 @@ export const GlobeHero: React.FC = () => {
           paragraph box. Reading order is unchanged: a screen reader still gets one
           continuous sentence.
         */}
-        <h1 className="hero-rise [animation-delay:160ms] mt-6 max-w-[1040px] font-geist text-[clamp(1.2rem,6vw,2.5rem)] font-bold uppercase leading-[0.92] sm:text-[clamp(2.5rem,5vw,4.5rem)] tracking-[-0.02em] text-white sm:mt-7">
+        <h1 className="hero-rise [animation-delay:160ms] mt-2 max-w-[1040px] font-geist text-[clamp(1.2rem,6vw,2.5rem)] font-bold uppercase leading-[0.92] sm:text-[clamp(2.5rem,5vw,4.5rem)] tracking-[-0.02em] text-[#0B1F3A] sm:mt-2">
           {HEADLINE_LINES.map((line, index) => {
             // Where the underlined word starts, so the line can be printed as three runs.
             const at = line.underlineWord
@@ -1184,20 +1192,19 @@ export const GlobeHero: React.FC = () => {
           })}
         </h1>
 
-        <p className="hero-rise [animation-delay:260ms] mt-6 max-w-[740px] font-geist text-[clamp(0.95rem,1.2vw,1.125rem)] font-normal leading-[1.6] tracking-[-0.005em] text-[#B8BCC8] sm:mt-7">
+        <p className="hero-rise [animation-delay:260ms] mt-4 max-w-[740px] font-geist text-[clamp(0.95rem,1.2vw,1.125rem)] font-normal leading-[1.55] tracking-[-0.005em] text-[#4A5568] sm:mt-4">
           Mining Discovery combines industry media, digital marketing and investor-focused
           communication to put mining companies in front of the audiences that matter.
         </p>
 
         {/*
           CTA row. Full-width stacked on phones, side by side from 640px. Gold solid for
-          the commercial action, hairline outline for the browse - navy on white rather
-          than the brief's white-on-dark, because this hero's ground is white.
+          the commercial action, hairline outline for the browse - dark navy on white.
         */}
-        <div className="hero-rise [animation-delay:360ms] mt-6 flex w-full flex-col items-stretch gap-3 sm:mt-7 sm:w-auto sm:flex-row sm:items-center sm:gap-4">
+        <div className="hero-rise [animation-delay:360ms] mt-5 flex w-full flex-col items-stretch gap-3 sm:mt-5 sm:w-auto sm:flex-row sm:items-center sm:gap-4">
           <Link
             href="/contact"
-            className="group inline-flex items-center justify-center gap-2 rounded-lg bg-[#B8860B] px-7 py-3.5 font-sans text-[13px] font-semibold uppercase tracking-[0.08em] text-[#0B1F3A] shadow-sm transition-colors duration-200 hover:bg-[#D4AF37] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B8860B] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A1128]"
+            className="group inline-flex items-center justify-center gap-2 rounded-lg bg-[#A87E2C] px-7 py-3.5 font-sans text-[13px] font-semibold uppercase tracking-[0.08em] text-white shadow-sm transition-colors duration-200 hover:bg-[#8F6B24] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A87E2C] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF7F2]"
           >
             Start a Campaign
             <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -1205,7 +1212,7 @@ export const GlobeHero: React.FC = () => {
 
           <Link
             href="/services"
-            className="group inline-flex items-center justify-center gap-2 rounded-lg border border-white/25 px-7 py-3.5 font-sans text-[13px] font-semibold uppercase tracking-[0.08em] text-white transition-colors duration-200 hover:border-white/45 hover:bg-white/[0.06] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A1128]"
+            className="group inline-flex items-center justify-center gap-2 rounded-lg border border-[#0B1F3A]/20 bg-white/40 backdrop-blur-xs px-7 py-3.5 font-sans text-[13px] font-semibold uppercase tracking-[0.08em] text-[#0B1F3A] transition-colors duration-200 hover:border-[#0B1F3A]/50 hover:bg-white/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0B1F3A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF7F2]"
           >
             Explore Our Services
             <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -1229,8 +1236,7 @@ export const GlobeHero: React.FC = () => {
         */}
         <div
           ref={cardRef}
-          className="sticky top-0 h-screen w-full overflow-hidden bg-[#0A1128]"
-          style={{ background: HERO_NAVY }}
+          className="sticky top-0 h-screen w-full overflow-hidden bg-transparent"
         >
           {/*
             The globe slot is now the whole pinned viewport rather than the leftovers
@@ -1239,54 +1245,6 @@ export const GlobeHero: React.FC = () => {
             to break out of any more — the copy's gutters are on the block above.
           */}
           <div ref={slotRef} className="relative h-full w-full">
-            {/*
-              The card is opaque and covers the section behind it, so it carries its own
-              copy of the starfield. This is the field the globe actually sits against for
-              the whole pinned tour. z-0, first in the slot, so it stays under the wash
-              below and under the globe box's z-10.
-            */}
-            <div className="absolute inset-0 z-0">
-              <HeroStarfield zone="stage" />
-            </div>
-
-            {/*
-              The tonal floor that seats the planet: a cool navy wash rising from the
-              card's bottom edge, kept under the globe box's z-10 so it can only ever
-              show around the limb. Purely a background layer - the globe, its halo and
-              its metrics are all untouched by it.
-            */}
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 z-0"
-              style={{
-                background:
-                  "radial-gradient(120% 72% at 50% 100%, rgba(11,31,58,0.05) 0%, rgba(11,31,58,0.021) 44%, rgba(11,31,58,0) 72%)",
-              }}
-            />
-
-            {/* Tour Location HUD Indicator - illuminates the active location on each scroll */}
-            <div
-              className={`pointer-events-none absolute top-6 sm:top-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2.5 sm:gap-3 px-3.5 py-1.5 sm:px-4.5 sm:py-2 rounded-full bg-[#0B1F3A]/90 border border-[#D4AF37]/40 backdrop-blur-md shadow-[0_4px_24px_rgba(0,0,0,0.6)] transition-all duration-300 ${
-                ready && isTouring
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 -translate-y-3 pointer-events-none"
-              }`}
-            >
-              <span className="flex h-2 w-2 relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D4AF37] opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#D4AF37]" />
-              </span>
-              <span className="font-mono text-[10px] sm:text-[11px] font-semibold text-[#D4AF37] tracking-wider">
-                0{stageIndex + 1} / 0{TOUR.length}
-              </span>
-              <span className="h-3 w-px bg-white/25" />
-              <span className="font-sans text-[11px] sm:text-[12px] font-bold text-white uppercase tracking-[0.08em]">
-                {TOUR_SITES[stageIndex]?.country ?? ""}
-              </span>
-              <span className="hidden sm:inline font-mono text-[10px] text-[#D4AF37]/85 uppercase">
-                • {TOUR_SITES[stageIndex]?.region ?? ""}
-              </span>
-            </div>
 
             {/* Layer 2 + 3 — globe, clouds and atmosphere */}
             <div
@@ -1349,20 +1307,16 @@ export const GlobeHero: React.FC = () => {
                         markerRefs.current.set(site.id, el);
                       }}
                       style={{
-                        // Position only. The counter-scale that used to sit here existed
-                        // to cancel the tour's magnification of the globe box; the box is
-                        // never scaled now, so a pin is already at its designed size.
                         transform:
-                          "translate3d(var(--mx, -9999px), var(--my, -9999px), 0)",
-                        zIndex: isActive ? 30 : 10,
+                          "translate3d(var(--mx, -9999px), var(--my, -9999px), 0) scale(var(--unzoom, 1))",
                       }}
                       className="absolute left-0 top-0"
                     >
-                      {/* Pin — hit target centred on the geographic point */}
+                      {/* Pin — 44px hit target centred on the geographic point */}
                       <button
                         type="button"
                         aria-label={`${site.region}, ${site.country}. ${site.detail}.`}
-                        className="group absolute left-0 top-0 grid h-11 w-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B8860B] focus-visible:ring-offset-2"
+                        className="absolute left-0 top-0 grid h-11 w-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B8860B] focus-visible:ring-offset-2"
                         onPointerEnter={() => setActiveId(site.id)}
                         onPointerLeave={() => setActiveId((id) => (id === site.id ? null : id))}
                         onFocus={() => setActiveId(site.id)}
@@ -1379,43 +1333,14 @@ export const GlobeHero: React.FC = () => {
                           style={pulse}
                           aria-hidden="true"
                         />
-
-                        {/* Delicate stem connector from dot to label */}
-                        <span
-                          className={`absolute left-1/2 -translate-x-1/2 top-[27px] w-px h-[7px] pointer-events-none transition-all duration-200 ${
-                            isActive
-                              ? "bg-gradient-to-b from-[#D4AF37] to-[#D4AF37]/60"
-                              : "bg-gradient-to-b from-[#D4AF37]/75 to-[#D4AF37]/20 group-hover:from-[#D4AF37] group-hover:to-[#D4AF37]/50"
-                          }`}
-                          aria-hidden="true"
-                        />
-
-                        {/* Location Name Pill Badge */}
-                        <span
-                          className={`absolute left-1/2 top-[34px] -translate-x-1/2 flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full border backdrop-blur-md transition-all duration-200 whitespace-nowrap shadow-lg ${
-                            isActive
-                              ? "bg-[#0B1F3A]/95 border-[#D4AF37] shadow-[0_0_16px_rgba(212,175,55,0.45)] scale-105"
-                              : "bg-[#0B1F3A]/85 border-[#D4AF37]/35 hover:border-[#D4AF37]/70 group-hover:border-[#D4AF37]/80 group-hover:bg-[#0B1F3A]/95 shadow-[0_2px_8px_rgba(0,0,0,0.5)]"
-                          }`}
-                        >
-                          <span
-                            className={`h-1.5 w-1.5 rounded-full transition-colors duration-200 ${
-                              isActive
-                                ? "bg-[#D4AF37] shadow-[0_0_6px_#D4AF37]"
-                                : "bg-[#D4AF37]/80 group-hover:bg-[#D4AF37]"
-                            }`}
-                            aria-hidden="true"
-                          />
-                          <span className="font-sans text-[9.5px] sm:text-[11px] font-semibold uppercase tracking-[0.07em] text-white">
-                            {site.id === "antarctica" ? "Antarctica" : site.country}
-                          </span>
-                          {isActive && (
-                            <span className="text-[8.5px] sm:text-[9.5px] font-mono font-medium tracking-wider uppercase text-[#D4AF37]">
-                              • {site.region}
-                            </span>
-                          )}
-                        </span>
                       </button>
+
+                      {/*
+                        No visible text label. The region, country and detail live only in
+                        the pin's aria-label above: the globe is meant to read as surface,
+                        atmosphere, dots and arcs, and a rendered name on the sphere read
+                        as a stray artefact rather than as a caption.
+                      */}
                     </div>
                   );
                 })}

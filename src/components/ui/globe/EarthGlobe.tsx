@@ -192,20 +192,14 @@ const ARC_PULSE_TRAVEL = 0.22;
 /** Exponential rate the emphasis eases toward its target. */
 const ARC_EMPHASIS_EASE = 4.5;
 /** Resting alpha of the hairline, before emphasis. Thinned on small viewports. */
-const ARC_OPACITY = 0.5;
-const ARC_OPACITY_COMPACT = 0.4;
+const ARC_OPACITY = 0.85;
+const ARC_OPACITY_COMPACT = 0.70;
 
 /**
- * Arc endpoint nodes.
- *
- * uSize is the sprite's full width in CSS px, not the dot's radius: the visible core is
- * the inner 36% of it (see the fragment shader), so 20 here puts the core at a ~3.6px
- * radius with the remaining width spent on the glow falloff. Sizing the sprite to the
- * core instead would leave the halo nowhere to render and the node would read as a hard
- * pixel.
+ * Arc endpoint nodes: shiny starburst sparkle points.
  */
-const ARC_NODE_SIZE = 20;
-const ARC_NODE_OPACITY = 0.95;
+const ARC_NODE_SIZE = 34;
+const ARC_NODE_OPACITY = 1.0;
 /** Pulse periods, in seconds. Spread across the brief's 2-3s so no two nodes share one. */
 const ARC_NODE_PERIOD_MIN = 2.0;
 const ARC_NODE_PERIOD_SPAN = 1.0;
@@ -510,15 +504,13 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         if (sinAngle < 1e-4) continue;
 
         const lift = ARC_LIFT_BASE + ARC_LIFT_SPAN * (angle / Math.PI);
-        const positions = new Float32Array((ARC_SEGMENTS + 1) * 3);
-        const ts = new Float32Array(ARC_SEGMENTS + 1);
-        const point = new THREE.Vector3();
+        const curvePoints: THREE.Vector3[] = [];
 
         for (let i = 0; i <= ARC_SEGMENTS; i += 1) {
           const t = i / ARC_SEGMENTS;
           // Spherical interpolation, so the path is the great circle between the two
           // regions rather than a chord through the planet reprojected onto it.
-          point
+          const pt = new THREE.Vector3()
             .copy(a)
             .multiplyScalar(Math.sin((1 - t) * angle) / sinAngle)
             .addScaledVector(b, Math.sin(t * angle) / sinAngle)
@@ -527,29 +519,22 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
             // leaves and rejoins the surface tangentially instead of stepping off it.
             .multiplyScalar(ARC_RADIUS + lift * Math.sin(Math.PI * t));
 
-          positions[i * 3] = point.x;
-          positions[i * 3 + 1] = point.y;
-          positions[i * 3 + 2] = point.z;
-          ts[i] = t;
+          curvePoints.push(pt);
         }
 
-        const geometry = new THREE.BufferGeometry();
-        geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-        geometry.setAttribute("aT", new THREE.BufferAttribute(ts, 1));
+        const curve = new THREE.CatmullRomCurve3(curvePoints);
+        // Ultra-fine, hair-thin glowing dark gold lines
+        const tubeRadius = isSmallViewport ? 0.00075 : 0.00095;
+        const geometry = new THREE.TubeGeometry(curve, 96, tubeRadius, 5, false);
 
         const material = new THREE.ShaderMaterial({
           vertexShader: arcVertexShader,
           fragmentShader: arcFragmentShader,
           uniforms: {
-            // The darkest gold on the site, at low alpha. A subdued accent rather than a
-            // new colour, and dark enough to hold against both the ocean and the lit
-            // land the line has to cross.
-            uColor: { value: new THREE.Color("#D4AF37") },
-            // The pulse is the one place the brighter gold appears, and only over the
-            // ~5% of the line the head covers.
-            uPulseColor: { value: new THREE.Color("#D4AF37") },
+            uColor: { value: new THREE.Color("#B27300") },
+            uPulseColor: { value: new THREE.Color("#E89B17") },
             uOpacity: {
-              value: isSmallViewport ? ARC_OPACITY_COMPACT : ARC_OPACITY,
+              value: 0.98,
             },
             uEmphasis: { value: 0 },
             uPulse: { value: -1 },
@@ -558,9 +543,10 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
           transparent: true,
           depthWrite: false,
           depthTest: false,
+          side: THREE.DoubleSide,
         });
 
-        const line = new THREE.Line(geometry, material);
+        const line = new THREE.Mesh(geometry, material);
         line.renderOrder = 5;
         // The arc is a fixed shape in the earth's frame; only its parent ever moves.
         line.matrixAutoUpdate = false;
@@ -618,7 +604,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         vertexShader: arcNodeVertexShader,
         fragmentShader: arcNodeFragmentShader,
         uniforms: {
-          uColor: { value: new THREE.Color("#D4AF37") },
+          uColor: { value: new THREE.Color("#FFC837") },
           uOpacity: { value: ARC_NODE_OPACITY },
           uSize: { value: ARC_NODE_SIZE },
           uPixelRatio: { value: renderer.getPixelRatio() },
@@ -815,6 +801,70 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     const sunRestX = sunDirection.x;
     const sunRestZ = sunDirection.z;
 
+    // --- Hand / Mouse 360-degree drag rotation ----------------------------------
+    let isPointerDown = false;
+    let pointerStartX = 0;
+    let pointerStartY = 0;
+    let pointerLastX = 0;
+    let pointerLastY = 0;
+    let pointerVelocityX = 0;
+    let pointerVelocityY = 0;
+    let lastPointerTime = 0;
+    let userPitch = 0;
+
+    const onPointerDown = (e: PointerEvent) => {
+      if (e.button !== 0 && e.pointerType === "mouse") return;
+      isPointerDown = true;
+      try {
+        canvas.setPointerCapture(e.pointerId);
+      } catch {}
+      canvas.style.cursor = "grabbing";
+      pointerStartX = e.clientX;
+      pointerStartY = e.clientY;
+      pointerLastX = e.clientX;
+      pointerLastY = e.clientY;
+      pointerVelocityX = 0;
+      pointerVelocityY = 0;
+      lastPointerTime = performance.now();
+    };
+
+    const onPointerMove = (e: PointerEvent) => {
+      if (!isPointerDown) return;
+      const now = performance.now();
+      const dt = Math.max((now - lastPointerTime) / 1000, 0.001);
+      lastPointerTime = now;
+
+      const dx = e.clientX - pointerLastX;
+      const dy = e.clientY - pointerLastY;
+      pointerLastX = e.clientX;
+      pointerLastY = e.clientY;
+
+      const instantVx = dx / dt;
+      const instantVy = dy / dt;
+      pointerVelocityX = pointerVelocityX * 0.35 + instantVx * 0.65;
+      pointerVelocityY = pointerVelocityY * 0.35 + instantVy * 0.65;
+
+      const w = width || canvas.clientWidth || 800;
+      const sens = (Math.PI * 2.2) / w;
+
+      freeYaw += dx * sens;
+      userPitch = Math.max(-0.75, Math.min(0.75, userPitch - dy * sens * 0.6));
+    };
+
+    const onPointerUp = (e: PointerEvent) => {
+      if (!isPointerDown) return;
+      isPointerDown = false;
+      try {
+        canvas.releasePointerCapture(e.pointerId);
+      } catch {}
+      canvas.style.cursor = "grab";
+    };
+
+    canvas.addEventListener("pointerdown", onPointerDown);
+    canvas.addEventListener("pointermove", onPointerMove);
+    canvas.addEventListener("pointerup", onPointerUp);
+    canvas.addEventListener("pointercancel", onPointerUp);
+
     const renderFrame = (delta: number) => {
       if (delta > 0) {
         const target = speedScaleRef.current;
@@ -840,6 +890,24 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         sunDirection.z = -sunRestX * sin + sunRestZ * cos;
 
         arcClock += delta;
+      }
+
+      // Inertia after hand release
+      if (!isPointerDown && delta > 0) {
+        if (Math.abs(pointerVelocityX) > 5) {
+          const w = width || canvas.clientWidth || 800;
+          const sens = (Math.PI * 2.2) / w;
+          freeYaw += pointerVelocityX * sens * delta;
+          pointerVelocityX *= Math.exp(-delta * 3.2);
+        } else {
+          pointerVelocityX = 0;
+        }
+
+        if (Math.abs(userPitch) > 0.001) {
+          userPitch *= Math.exp(-delta * 1.5);
+        } else {
+          userPitch = 0;
+        }
       }
 
       // --- Arcs ---------------------------------------------------------------------
@@ -880,18 +948,19 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
 
       const focus = focusSourceRef.current?.current ?? null;
       const weight = focus ? Math.min(Math.max(focus.weight, 0), 1) : 0;
+      const effectiveWeight = isPointerDown ? 0 : weight;
 
-      if (weight > 0 && focus) {
+      if (effectiveWeight > 0 && focus) {
         // Ry brings the target's meridian round to face the camera, Rx lifts its
         // latitude to the centre of the disc, and tiltBias then pushes it up into the
         // slice of sphere the container actually shows.
         const aimYaw = THREE.MathUtils.degToRad(-(focus.lng + 90));
         const aimPitch = THREE.MathUtils.degToRad(focus.lat) - focus.tiltBias;
-        earth.rotation.y = freeYaw + shortestAngle(freeYaw, aimYaw) * weight;
-        tiltGroup.rotation.x = VIEW_PITCH + (aimPitch - VIEW_PITCH) * weight;
+        earth.rotation.y = freeYaw + shortestAngle(freeYaw, aimYaw) * effectiveWeight;
+        tiltGroup.rotation.x = VIEW_PITCH + (aimPitch - VIEW_PITCH) * effectiveWeight + userPitch;
       } else {
         earth.rotation.y = freeYaw;
-        tiltGroup.rotation.x = VIEW_PITCH;
+        tiltGroup.rotation.x = VIEW_PITCH + userPitch;
       }
       clouds.rotation.y = earth.rotation.y + cloudLead;
 
@@ -1174,6 +1243,10 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
       cloudPlaceholder.dispose();
       earthMaterial?.dispose();
       cloudMaterial?.dispose();
+      canvas.removeEventListener("pointerdown", onPointerDown);
+      canvas.removeEventListener("pointermove", onPointerMove);
+      canvas.removeEventListener("pointerup", onPointerUp);
+      canvas.removeEventListener("pointercancel", onPointerUp);
       dayTexture?.dispose();
       maskTexture?.dispose();
       cloudTexture?.dispose();
@@ -1181,7 +1254,14 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     };
   }, [initialLongitude]);
 
-  return <canvas ref={canvasRef} className={className} style={style} aria-hidden="true" />;
+  return (
+    <canvas
+      ref={canvasRef}
+      className={className}
+      style={{ ...style, cursor: "grab", touchAction: "none" }}
+      aria-hidden="true"
+    />
+  );
 };
 
 export default EarthGlobe;
