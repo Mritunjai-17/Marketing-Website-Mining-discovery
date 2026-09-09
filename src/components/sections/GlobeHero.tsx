@@ -295,8 +295,22 @@ const STAGE_COUNT = TOUR.length;
  */
 const STAGE_VH = 220;
 
-/** Scale held for the whole tour: reached once on engage, then never changed again. */
-const STOP_ZOOM = 2.8;
+/**
+ * Scale held for the whole tour. 1 = the globe never changes size.
+ *
+ * This was 2.8, magnified in over the first ENGAGE of scroll: the planet arrived at its
+ * entry size, then grew to nearly three times it on the first wheel notch and stayed
+ * there. The tour is meant to read as scrolling *through* mining locations, not as flying
+ * into them, so the sphere now holds exactly the size it has when the section starts and
+ * scroll drives orientation alone.
+ *
+ * Left as a named constant rather than stripped out because it is the one dial the whole
+ * magnification hangs off: `stageAt` reports it, `targetScale` interpolates engage toward
+ * it, and at 1 every one of those terms collapses to identity — including the
+ * zoom-about-the-aim-point correction in `dx`/`dy`, which carries a (1 - scale) factor,
+ * and `--unzoom`, which is 1/scale. Nothing downstream needed changing.
+ */
+const STOP_ZOOM = 1;
 /**
  * Where inside a stage the hop happens. Up to ARRIVE the globe is still settling onto
  * this stop, past DEPART it has started leaving for the next; the span between is the
@@ -821,12 +835,11 @@ export const GlobeHero: React.FC = () => {
     // Scale eases in from 1 alongside the aim, so engaging the tour is one continuous
     // move rather than a snap to STOP_ZOOM.
     //
-    // That target then goes through a spring rather than to the element directly. Two
-    // things come out of it: the magnification accelerates and decelerates instead of
-    // tracking scroll rigidly, and because the spring is slightly underdamped it passes
-    // ~3% beyond the target at an arrival and settles back — the stop lands rather than
-    // stopping dead. Mid-hop the target is still moving and the spring just trails it,
-    // so the overshoot only ever appears where the motion actually ends.
+    // That target then goes through a spring rather than to the element directly, which
+    // gave the magnification its ease and its ~3% settle at an arrival. With STOP_ZOOM at
+    // 1 the target is a constant 1, so the spring latches on the first frame and this
+    // whole path is identity — the aim still moves, the size no longer does. The spring
+    // is left wired up because it is what a non-1 STOP_ZOOM would need again.
     const targetScale = 1 + (stage.zoom - 1) * engage;
     if (gap > 0 && gap <= RESUME_GAP) {
       stepSpring(zoomSpring.current, targetScale, gap, ZOOM_SPRING);
@@ -848,13 +861,30 @@ export const GlobeHero: React.FC = () => {
     //   =>  d = (P - O)·(1 - scale) + (C - P)·engage
     // which is identity at engage 0 and lands P exactly on C at engage 1.
     //
+    // HORIZONTALLY THAT SECOND TERM IS GONE. The sphere is mounted on a fixed point: it
+    // may turn under the camera, but its centre must not slide across the viewport, and
+    // (C - P)·engage was sliding it — a standing -130px at 1440 wide, ramped in over the
+    // first 3% of scroll, which read as the globe sidling left the moment you scrolled.
+    // The aim lands wherever the rotation puts it now, and since that offset measured
+    // identical at every stop, every marker is framed the same way rather than each one
+    // dragging the planet somewhere new.
+    //
+    // What is left on x, (P - O)·(1 - scale), is not a pan: it is the compensation that
+    // keeps the aimed point still while the box scales about its own centre. At
+    // STOP_ZOOM 1 it is exactly 0 every frame; it is retained so raising STOP_ZOOM again
+    // magnifies about the marker instead of shoving it off screen.
+    //
+    // y keeps both terms. The vertical offset is what lifts the aim off the disc's centre
+    // and into the middle of the visible slice — the framing that makes a marker visible
+    // at all in a horizon crop, not a sideways drift.
+    //
     // transform-origin is deliberately left at its default: in Tailwind v4 the box's
     // -translate-x-1/2 and its reveal scale are the standalone translate/scale
     // properties, which apply before transform and share its origin.
     const aim = aimPointRef.current;
     const px = aim ? aim.x : centre;
     const py = aim ? aim.y : visibleY;
-    const dx = (px - centre) * (1 - scale) + (centre - px) * engage;
+    const dx = (px - centre) * (1 - scale);
     const dy = (py - centre) * (1 - scale) + (visibleY - py) * engage;
 
     if (!engagedRef.current) {

@@ -1,0 +1,459 @@
+/*
+ * Company Journey — one continuous scroll-driven road scene.
+ *
+ * The whole layout hangs off a single line: --road-y, the road's centreline as a
+ * percentage of the pinned viewport. The year block is anchored above it and the story
+ * block below it, both by that one variable, so the year → marker → road → story stack
+ * can never invert no matter where the scene has travelled to. Horizontal movement is
+ * done entirely in transforms from the component; nothing here positions a milestone.
+ */
+
+.section {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #F7F4ED;
+  color: #171613;
+
+  --road-y: 56%;
+  /* Half the gold outer stroke below — the road's visual half-thickness. */
+  --road-half: 48px;
+  /* Vertical run of the marker: stem plus dot, from the year down to the road. */
+  --marker-h: 54px;
+  /* Width of one milestone column; the year and story centre inside it. */
+  --col-w: min(720px, 86vw);
+}
+
+/* ------------------------------------------------------------------ intro / outro */
+
+.intro {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 6rem 1.5rem 3rem;
+  text-align: center;
+}
+
+.eyebrow {
+  display: inline-block;
+  margin-bottom: 0.75rem;
+  color: #B8924A;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+}
+
+.introTitle {
+  /* Primary editorial navy, not the section's gold: at this size gold competes with the
+     accents instead of leading them. Gold stays the accent — eyebrow, year, road edge —
+     and this heading joins the site's dark display typography. Scoped to this rule only,
+     deliberately not shared with .eyebrow. */
+  color: #142A46;
+  font-family: var(--font-geist, var(--font-display, sans-serif));
+  font-size: clamp(2rem, 4.4vw, 3.25rem);
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.outro {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 4rem 1.5rem 6rem;
+  text-align: center;
+}
+
+.outroHeadline {
+  margin-bottom: 0.75rem;
+  color: #B8924A;
+  font-family: var(--font-geist, var(--font-display, sans-serif));
+  font-size: clamp(1rem, 1.6vw, 1.25rem);
+  line-height: 1.35;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.outroCopy {
+  max-width: 650px;
+  margin: 0 auto;
+  color: #68645B;
+  font-family: var(--font-serif, Georgia, serif);
+  font-size: 0.9375rem;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* ---------------------------------------------------------------- scroll + viewport */
+
+/*
+ * The journey's length. Four transitions at ~120vh each plus the viewport itself: long
+ * enough that a single transition takes a deliberate scroll rather than a flick, short
+ * enough that the section does not outstay its welcome.
+ */
+.scrollArea {
+  position: relative;
+  height: 580vh;
+}
+
+.viewport {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #F7F4ED;
+}
+
+.stage {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* Only for the first paint, once measurement lands. Travel is never eased here. */
+  transition: opacity 0.4s ease;
+}
+
+/* ------------------------------------------------------------------------- the road */
+
+/*
+ * Width, height and top come from the component (they depend on the measured span).
+ * This layer only ever receives a horizontal translate.
+ */
+.road {
+  position: absolute;
+  left: 0;
+  will-change: transform;
+  filter: drop-shadow(0 16px 26px rgba(23, 22, 19, 0.1));
+}
+
+.roadSvg {
+  display: block;
+  overflow: visible;
+}
+
+/*
+ * Stroke widths are in user units, and the SVG is rendered 1:1 with its viewBox, so
+ * these are literal pixels. Outer gold minus inner charcoal leaves a 10px gold edge
+ * either side of the surface.
+ */
+.roadEdge {
+  fill: none;
+  stroke: #B8924A;
+  stroke-width: 96;
+  stroke-linecap: round;
+}
+
+.roadSurface {
+  fill: none;
+  stroke: #343331;
+  stroke-width: 76;
+  stroke-linecap: round;
+}
+
+.roadCentreLine {
+  fill: none;
+  stroke: #D8D2C5;
+  stroke-width: 6;
+  stroke-dasharray: 34 30;
+  stroke-linecap: butt;
+  opacity: 0.85;
+}
+
+/* -------------------------------------------------------------- the milestone track */
+
+/*
+ * The mask sits on this static wrapper rather than on the moving track: a mask applies
+ * in its own element's coordinate space, so putting it on the transformed track would
+ * drag the fade along with the content. Here it stays welded to the viewport edges, and
+ * the road — outside this wrapper — keeps its full contrast right off the screen.
+ */
+.trackMask {
+  position: absolute;
+  inset: 0;
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    #000 13%,
+    #000 87%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    #000 13%,
+    #000 87%,
+    transparent 100%
+  );
+}
+
+.milestoneTrack {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+
+/* `left` is set per milestone by the component: (PAD + index) × span. */
+.milestone {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: var(--col-w);
+}
+
+/* ------------------------------------------------------------- above the road: year */
+
+/*
+ * Anchored by its bottom edge to the road, which is what keeps the relationship fixed:
+ * `bottom` here is the distance from the viewport floor up to the road's top surface,
+ * plus the marker's run. transform-origin at the bottom means the scale applied during
+ * travel radiates upward, away from the road, so the marker stays planted on it.
+ */
+.yearBlock {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  bottom: calc(100% - var(--road-y) + var(--road-half) + var(--marker-h));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform-origin: bottom center;
+  will-change: transform, opacity;
+}
+
+.year {
+  font-family: var(--font-geist, var(--font-display, sans-serif));
+  font-size: clamp(3.4rem, min(9.5vw, 16vh), 10.5rem);
+  line-height: 0.84;
+  font-weight: 900;
+  letter-spacing: -0.045em;
+  color: #B8924A;
+  user-select: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.marker {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  /* Runs from under the year to 9px past the road's top edge, so the dot straddles it. */
+  height: calc(var(--marker-h) + 9px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translateX(-50%);
+}
+
+.markerStem {
+  flex: 1;
+  width: 2px;
+  background: linear-gradient(to bottom, rgba(184, 146, 74, 0), #B8924A);
+}
+
+.markerDot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: #B8924A;
+  border: 3px solid #F7F4ED;
+  box-sizing: border-box;
+}
+
+/* ----------------------------------------------------------- below the road: story */
+
+.detailBlock {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  top: calc(var(--road-y) + var(--road-half) + 2.5rem);
+  text-align: center;
+  transform-origin: top center;
+  will-change: transform, opacity;
+}
+
+.label {
+  margin-bottom: 0.75rem;
+  color: #B8924A;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+.storyTitle {
+  margin-bottom: 0.85rem;
+  color: #171613;
+  font-family: var(--font-geist, var(--font-display, sans-serif));
+  font-size: clamp(1.05rem, 1.75vw, 1.6rem);
+  line-height: 1.25;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+
+.storyText {
+  max-width: 560px;
+  margin: 0 auto;
+  color: #4A4740;
+  font-family: var(--font-sans, sans-serif);
+  font-size: clamp(0.95rem, 1.15vw, 1.0625rem);
+  line-height: 1.6;
+}
+
+/* ------------------------------------------------------------------------- progress */
+
+.rail {
+  position: absolute;
+  left: 50%;
+  bottom: 2rem;
+  width: min(680px, 74vw);
+  height: 2px;
+  transform: translateX(-50%);
+  background-color: rgba(184, 146, 74, 0.18);
+}
+
+.railFill {
+  width: 100%;
+  height: 100%;
+  background-color: #B8924A;
+  transform: scaleX(0);
+  transform-origin: left center;
+  will-change: transform;
+}
+
+/* ------------------------------------------------------------------ short viewports */
+
+/*
+ * Laptop-height windows: pull the road line up and tighten the marker so the year still
+ * clears the top of the frame and the story still clears the progress hairline. The
+ * stack itself is untouched — only the space between its parts.
+ */
+@media (min-width: 768px) and (max-height: 780px) {
+  .section {
+    --road-y: 54%;
+    --marker-h: 42px;
+  }
+
+  .detailBlock {
+    top: calc(var(--road-y) + var(--road-half) + 1.75rem);
+  }
+
+  .rail {
+    bottom: 1.25rem;
+  }
+}
+
+/* --------------------------------------------------------------------------- mobile */
+
+@media (max-width: 767px) {
+  .section {
+    /* Higher road line than desktop: a phone frame is tall, and centring the road
+       leaves the year stranded halfway down the screen. */
+    --road-y: 46%;
+    --road-half: 30px;
+    --marker-h: 34px;
+    --col-w: min(84vw, 440px);
+  }
+
+  .intro {
+    padding: 4rem 1.5rem 2rem;
+  }
+
+  .outro {
+    padding: 3rem 1.5rem 4rem;
+  }
+
+  /* Shorter journey: the same five milestones, less scrolling to get through them. */
+  .scrollArea {
+    height: 460vh;
+  }
+
+  .roadEdge {
+    stroke-width: 60;
+  }
+
+  .roadSurface {
+    stroke-width: 46;
+  }
+
+  .roadCentreLine {
+    stroke-width: 4;
+    stroke-dasharray: 20 18;
+  }
+
+  .year {
+    font-size: clamp(3.25rem, 22vw, 6.5rem);
+  }
+
+  .marker {
+    height: calc(var(--marker-h) + 7px);
+  }
+
+  .markerDot {
+    width: 14px;
+    height: 14px;
+    border-width: 2px;
+  }
+
+  .detailBlock {
+    top: calc(var(--road-y) + var(--road-half) + 1.75rem);
+  }
+
+  .rail {
+    bottom: 1.25rem;
+    width: 78vw;
+  }
+}
+
+/* ------------------------------------------------------------------ reduced motion */
+
+/*
+ * A second, statically laid out copy of the same milestones lives in the markup and is
+ * swapped in here. Doing it in CSS rather than from a hook means there is no first-paint
+ * flash of the travelling scene, and `display: none` keeps the hidden copy out of the
+ * accessibility tree, so the text is never announced twice.
+ */
+.staticJourney {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scrollArea {
+    display: none;
+  }
+
+  .staticJourney {
+    display: block;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 1rem 1.5rem 2rem;
+  }
+
+  .staticItem {
+    padding: 2.5rem 0;
+    text-align: center;
+  }
+
+  .staticItem .year {
+    font-size: clamp(3rem, 9vw, 5rem);
+  }
+
+  /* A short length of the same road, standing in for the moving one. */
+  .staticRoad {
+    height: 28px;
+    margin: 1.25rem auto 1.75rem;
+    border: 5px solid #B8924A;
+    border-radius: 14px;
+    background-color: #343331;
+    background-image: repeating-linear-gradient(
+      to right,
+      #D8D2C5 0 16px,
+      transparent 16px 32px
+    );
+    background-size: 100% 4px;
+    background-position: center;
+    background-repeat: no-repeat;
+    box-sizing: border-box;
+  }
+}

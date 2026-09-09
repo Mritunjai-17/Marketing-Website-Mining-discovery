@@ -112,13 +112,33 @@ export const ImpactCards: React.FC = () => {
 
     // Angle configuration for circular orbit:
     // Cards start rotated on a circular ring and scroll from left to right as the user scrolls
+
+    /*
+     * Where the sweep stops.
+     *
+     * It used to run to +1.3 rad. The last card (index 0) sits at -1.08 rad within the
+     * ring, so it reached dead centre at progress 0.915 and then spent the final 8.5% of
+     * the pin drifting 0.22 rad past centre — the card had visibly arrived and then kept
+     * moving. Ending the sweep on that card's centre makes progress 1 the true end state.
+     *
+     * SWEEP_END is derived from the card count rather than hard-coded so adding a card
+     * still lands the last one centred, and the pin distance is scaled by the same ratio
+     * as the shortened arc: 2.38 / 2200 is the identical radians-per-pixel the section
+     * already had, so every card sits exactly where it did before at any given scroll
+     * offset. Only the trailing overshoot is gone.
+     */
+    const SWEEP_START = -1.3;
+    const SWEEP_END = ((numCards - 1) / 2) * 0.72;
+    const SWEEP = SWEEP_END - SWEEP_START;
+    const PIN_DISTANCE = Math.round(2200 * (SWEEP / 2.6));
+
     const ctx = gsap.context(() => {
       // Pin the section and drive circular revolution from left to right
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: section,
           start: "top top",
-          end: "+=2200",
+          end: `+=${PIN_DISTANCE}`,
           pin: true,
           scrub: 1.1,
           invalidateOnRefresh: true,
@@ -135,8 +155,8 @@ export const ImpactCards: React.FC = () => {
             const radiusZ = isDesktop ? 450 : 300;
 
             // Total revolution angle: moving cards continuously from left to right
-            // p = 0 to 1 sweeps through approx 160 degrees
-            const baseSweep = (p - 0.5) * 2.6; // from -1.3 rad to +1.3 rad
+            // p = 0 to 1 sweeps at the same rate as before, ending on the last card's centre
+            const baseSweep = SWEEP_START + p * SWEEP; // from -1.3 rad to +1.08 rad
 
             cards.forEach((card, i) => {
               // Evenly space cards along circular arc

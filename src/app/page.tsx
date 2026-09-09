@@ -4,6 +4,7 @@
 // WorldMapHero, which statically imports the world-atlas TopoJSON and would land in this
 // page's bundle even though nothing here renders it.
 import { GlobeHero } from "@/components/sections/GlobeHero";
+import { CompanyJourney } from "@/components/sections/CompanyJourney/CompanyJourney";
 import { ImpactCards } from "@/components/sections/ImpactCards";
 import { Stats } from "@/components/sections/Stats";
 import { About } from "@/components/sections/About";
@@ -18,6 +19,11 @@ export default function Home() {
     <div className="relative min-h-screen overflow-x-clip bg-[#F2F2F0]">
       {/* ROTATING HEMISPHERE HERO */}
       <GlobeHero />
+
+      {/* COMPANY JOURNEY - SECTION 02 */}
+      <div className="relative z-20">
+        <CompanyJourney />
+      </div>
 
       {/* FOUR IMPACT STAT CARDS (EXACT SCREENSHOT DESIGN) */}
       <div className="relative z-20">
