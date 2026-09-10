@@ -1,0 +1,888 @@
+/*
+ * The immersive service story — a full-viewport chapter sequence, not a modal.
+ *
+ * One sticky stage holds every chapter stacked in the same place, and scrolling the
+ * overlay moves a single position value through them. That is the same construction the
+ * /services journey uses, for the same reason: a chapter leaves by receding into depth
+ * while the next comes forward out of it, so the whole thing reads as one environment
+ * rather than a stack of screens.
+ *
+ * Scoped names only; nothing here reaches outside the overlay.
+ */
+
+.stRoot {
+  position: fixed;
+  inset: 0;
+  /* Above the header (50) and the site's chat launcher (1000/1001). */
+  z-index: 1200;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  background-color: #11110F;
+  color: #F7F4ED;
+
+  --st-gold: #B8924A;
+  --st-gold-bright: #D4AF62;
+  --st-cream: #F7F4ED;
+  --st-hairline: rgba(247, 244, 237, 0.13);
+  --st-muted: rgba(247, 244, 237, 0.6);
+}
+
+/* Height is written by the component; this is only the pre-measure state. */
+.stTrack {
+  position: relative;
+  width: 100%;
+}
+
+.stStage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  width: 100%;
+  overflow: hidden;
+  /* The camera the chapters recede into. */
+  perspective: 1500px;
+}
+
+/* ------------------------------------------------------------------------ chrome */
+
+.stLabel {
+  position: fixed;
+  top: clamp(1.1rem, 2.6vh, 2.1rem);
+  left: clamp(1.25rem, 3vw, 3rem);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: rgba(247, 244, 237, 0.55);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.stLabelNum {
+  color: var(--st-gold-bright);
+}
+
+.stClose {
+  position: fixed;
+  top: clamp(1rem, 2.5vh, 2rem);
+  right: clamp(1rem, 3vw, 3rem);
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  /* Past the 44px touch target on every size. */
+  padding: 0.85rem 1.15rem;
+  background-color: rgba(17, 17, 15, 0.82);
+  backdrop-filter: blur(6px);
+  border: 1px solid var(--st-hairline);
+  border-radius: 999px;
+  color: var(--st-cream);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.3s ease, color 0.3s ease;
+}
+
+.stClose:hover,
+.stClose:focus-visible {
+  border-color: var(--st-gold-bright);
+  color: var(--st-gold-bright);
+}
+
+.stCloseIcon {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+/* A hairline that fills as the story is read. Reinforcement, not navigation. */
+.stProgress {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  height: 1px;
+  background-color: rgba(247, 244, 237, 0.1);
+  pointer-events: none;
+}
+
+.stProgressFill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background-color: var(--st-gold);
+  transform: scaleX(0);
+  transform-origin: left center;
+  will-change: transform;
+}
+
+/* ----------------------------------------------------------------------- chapter */
+
+/* The hero — the approved first screen. Still absolutely placed on the stage, but it is
+   now the only thing of its kind: everything after it is a state, not another chapter. */
+.stChapter {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: clamp(5rem, 11vh, 7.5rem) clamp(1.25rem, 5vw, 5rem)
+    clamp(3rem, 7vh, 5rem);
+  will-change: transform, opacity;
+}
+
+.stInner {
+  position: relative;
+  width: 100%;
+  max-width: 1400px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+/* The two halves move on slightly different curves, so a chapter's picture and its
+   words separate as it leaves rather than sliding away as one slab. */
+.stMedia,
+.stType {
+  will-change: transform, opacity;
+}
+
+.stMedia {
+  position: relative;
+  overflow: hidden;
+  background-color: #16150F;
+}
+
+.stMediaImg {
+  object-fit: cover;
+  object-position: center;
+}
+
+.stMediaScrim {
+  position: absolute;
+  inset: 0;
+}
+
+/* ------------------------------------------------------------------ type elements */
+
+.stEyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  color: var(--st-gold);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+}
+
+.stEyebrowRule {
+  display: block;
+  width: 2rem;
+  height: 1px;
+  flex-shrink: 0;
+  background-color: var(--st-gold);
+}
+
+.stNum {
+  display: block;
+  margin-bottom: clamp(0.6rem, 1.6vh, 1rem);
+  color: var(--st-gold-bright);
+  font-family: var(--font-mono, monospace);
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.stTitle {
+  margin: clamp(1rem, 2.6vh, 1.75rem) 0 0;
+  color: var(--st-cream);
+  font-family: var(--font-geist, sans-serif);
+  font-size: clamp(2rem, 6.4vw, 5.5rem);
+  font-weight: 600;
+  line-height: 0.94;
+  letter-spacing: -0.045em;
+  text-transform: uppercase;
+}
+
+.stTitle span {
+  display: block;
+}
+
+.stStatement {
+  margin: clamp(1.1rem, 2.8vh, 1.85rem) 0 0;
+  max-width: 26ch;
+  color: var(--st-cream);
+  font-family: var(--font-sans, sans-serif);
+  font-size: clamp(1.0625rem, 1.7vw, 1.5rem);
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.stBody {
+  margin: clamp(0.9rem, 2.2vh, 1.5rem) 0 0;
+  max-width: 34rem;
+  color: var(--st-muted);
+  font-family: var(--font-sans, sans-serif);
+  font-size: clamp(0.875rem, 1.05vw, 1rem);
+  line-height: 1.75;
+}
+
+.stNote {
+  margin: clamp(1.5rem, 3vh, 2.25rem) 0 0;
+  max-width: 40rem;
+  color: rgba(247, 244, 237, 0.42);
+  font-family: var(--font-sans, sans-serif);
+  font-size: 0.75rem;
+  line-height: 1.65;
+}
+
+/* ------------------------------------------------------------- intro composition */
+
+.stIntro {
+  display: grid;
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  width: 100%;
+  align-items: center;
+}
+
+.stIntro .stMedia {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+}
+
+/* ----------------------------------------------------------- service composition */
+
+.stSplit {
+  display: grid;
+  gap: clamp(1.5rem, 4vw, 4rem);
+  width: 100%;
+  align-items: center;
+}
+
+.stSplit .stMedia {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+}
+
+/* ----------------------------------------------------------- network composition */
+
+/* Centred, stacked: the words then the motif, so it reads differently from every
+   other chapter in the story. */
+.stNetwork {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1.5rem, 4vh, 3rem);
+  width: 100%;
+  text-align: center;
+}
+
+.stNetwork .stEyebrow {
+  justify-content: center;
+}
+
+.stNetwork .stBody {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.stNetwork .stNetworkArt {
+  max-width: min(30rem, 70%);
+}
+
+.stNetworkArt {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.stNetLine {
+  fill: none;
+  stroke: rgba(184, 146, 74, 0.55);
+  stroke-width: 1;
+}
+
+.stNetNode {
+  fill: rgba(212, 175, 98, 0.9);
+}
+
+.stNetCore {
+  fill: none;
+  stroke: rgba(212, 175, 98, 0.85);
+  stroke-width: 1.5;
+}
+
+.stNetRing {
+  fill: none;
+  stroke: rgba(247, 244, 237, 0.14);
+  stroke-width: 1;
+}
+
+/* ----------------------------------------------------------- pillars composition */
+
+.stPillars {
+  display: grid;
+  gap: clamp(2rem, 5vw, 4rem);
+  width: 100%;
+  align-items: center;
+}
+
+.stPillarList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stPillar {
+  display: flex;
+  align-items: baseline;
+  gap: clamp(0.8rem, 2vw, 1.6rem);
+  padding: clamp(0.7rem, 1.8vh, 1.15rem) 0;
+  border-top: 1px solid var(--st-hairline);
+}
+
+.stPillar:last-child {
+  border-bottom: 1px solid var(--st-hairline);
+}
+
+.stPillarIndex {
+  flex-shrink: 0;
+  color: var(--st-gold);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+}
+
+.stPillarName {
+  color: var(--st-cream);
+  font-family: var(--font-geist, sans-serif);
+  font-size: clamp(1.0625rem, 2.4vw, 1.875rem);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.stSubLabel {
+  display: block;
+  margin: clamp(1.5rem, 3.5vh, 2.5rem) 0 0.9rem;
+  color: var(--st-gold);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+}
+
+.stSubList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.75rem;
+}
+
+.stSubItem {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: rgba(247, 244, 237, 0.85);
+  font-family: var(--font-sans, sans-serif);
+  font-size: clamp(0.8125rem, 1vw, 0.9375rem);
+}
+
+.stSubRule {
+  display: block;
+  width: 0.8rem;
+  height: 1px;
+  flex-shrink: 0;
+  background-color: rgba(184, 146, 74, 0.85);
+}
+
+/* ----------------------------------------------------------- figures composition */
+
+.stFigures {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  margin-top: clamp(1.75rem, 4vh, 3rem);
+  width: 100%;
+}
+
+.stFigure {
+  border-top: 1px solid var(--st-hairline);
+  padding-top: clamp(0.85rem, 2vh, 1.35rem);
+}
+
+.stFigureValue {
+  display: block;
+  color: var(--st-cream);
+  font-family: var(--font-serif, Georgia, serif);
+  font-size: clamp(2rem, 5vw, 4rem);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.stFigureLabel {
+  display: block;
+  margin-top: 0.65rem;
+  color: var(--st-muted);
+  font-family: var(--font-sans, sans-serif);
+  font-size: clamp(0.75rem, 0.95vw, 0.875rem);
+  line-height: 1.5;
+}
+
+/* ------------------------------------------------------------- outro composition */
+
+.stOutro {
+  width: 100%;
+  text-align: center;
+}
+
+.stOutro .stEyebrow,
+.stOutro .stSubList {
+  justify-content: center;
+}
+
+.stOutro .stBody {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.stActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: clamp(2rem, 5vh, 3.25rem);
+}
+
+.stAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.9rem;
+  background: none;
+  border: 1px solid rgba(184, 146, 74, 0.55);
+  border-radius: 999px;
+  color: var(--st-gold-bright);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+.stAction:hover,
+.stAction:focus-visible {
+  background-color: var(--st-gold);
+  border-color: var(--st-gold);
+  color: #11110F;
+}
+
+.stActionIcon {
+  width: 0.9rem;
+  height: 0.9rem;
+  transition: transform 0.2s ease;
+}
+
+.stAction:hover .stActionIcon,
+.stAction:focus-visible .stActionIcon {
+  transform: translateX(3px);
+}
+
+/* The next category, named but not yet navigable — this prototype covers 01 only. */
+.stNextHint {
+  margin-top: clamp(1.75rem, 4vh, 2.75rem);
+  color: rgba(247, 244, 237, 0.3);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+/* ===================================================================== one stage ===
+ *
+ * The frame is the whole stage; what changes is where it is CROPPED to. Every state's
+ * rect becomes a clip-path inset, so the same photograph is reshaped from the intro's
+ * right column into a full bleed, a side panel and a strip — never replaced, and never
+ * stretched, because the picture inside the crop only ever scales uniformly.
+ */
+
+.igFrame {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background-color: #16150F;
+  will-change: clip-path, transform;
+}
+
+/* A square big enough to cover any crop. Its size is written by the component; being
+   square is what makes "cover this rect" a single uniform scale. */
+.igFrameImg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  will-change: transform;
+}
+
+.igDim {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(10, 9, 7, 0.92);
+  opacity: 0;
+  will-change: opacity;
+}
+
+.igNet {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  will-change: opacity, transform;
+}
+
+.igNetArt {
+  width: min(46vw, 34rem);
+  height: auto;
+  overflow: visible;
+}
+
+/* Holds the intro's media box open so the frame can be measured against it. The frame is
+   cropped to exactly this rect at the start of the timeline, which is what keeps the
+   approved first screen pixel-identical. */
+.igAnchor {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+}
+
+.igHeroItem {
+  will-change: transform, opacity;
+}
+
+/* --------------------------------------------------------------- supporting states */
+
+.igState {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  z-index: 10;
+  box-sizing: border-box;
+  padding: clamp(5rem, 11vh, 7.5rem) clamp(1.25rem, 5vw, 5rem) clamp(3rem, 7vh, 5rem);
+  opacity: 0;
+  pointer-events: none;
+  will-change: clip-path, transform, opacity;
+}
+
+.igStateInner {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/*
+ * Supporting scale, deliberately. These are chapters of Investor Growth, not seven more
+ * heroes competing with it — the service name stays the largest thing in the experience.
+ */
+.igHeading {
+  margin: clamp(0.8rem, 2vh, 1.25rem) 0 0;
+  color: var(--st-cream);
+  font-family: var(--font-geist, sans-serif);
+  font-size: clamp(1.5rem, 3.4vw, 2.75rem);
+  font-weight: 600;
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  max-width: 18ch;
+}
+
+/* The frame stops at 90% of the stage in this state, so the type has to sit above that
+   line rather than on the stage floor, or it reads as falling out of the picture. */
+.igLower {
+  align-items: flex-end;
+  justify-content: flex-start;
+  padding-bottom: clamp(5rem, 15vh, 9.5rem);
+}
+
+.igLower .igStateInner {
+  max-width: 44rem;
+  margin-left: 0;
+}
+
+.igCentre {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.igCentre .igStateInner {
+  max-width: 46rem;
+}
+
+.igCentre .stEyebrow {
+  justify-content: center;
+}
+
+.igCentre .igHeading,
+.igCentre .stBody {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.igLeft {
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.igLeft .igStateInner {
+  max-width: 40rem;
+  margin-left: 0;
+}
+
+.igPanel {
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.igPanel .igStateInner {
+  max-width: min(46%, 34rem);
+  margin-left: 0;
+}
+
+.igFigures {
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.igFigures .igStateInner {
+  max-width: 62rem;
+  margin-left: 0;
+}
+
+.igBack {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: clamp(1.5rem, 3.5vh, 2.25rem);
+  padding: 0.9rem 1.6rem;
+  background: none;
+  border: 1px solid rgba(184, 146, 74, 0.55);
+  border-radius: 999px;
+  color: var(--st-gold-bright);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+.igBack:hover,
+.igBack:focus-visible {
+  background-color: var(--st-gold);
+  border-color: var(--st-gold);
+  color: #11110F;
+}
+
+@media (max-width: 1023px) {
+  .igPanel .igStateInner,
+  .igLower .igStateInner,
+  .igLeft .igStateInner {
+    max-width: none;
+  }
+
+  .igHeading {
+    font-size: clamp(1.375rem, 6.4vw, 2.25rem);
+  }
+
+  .igNetArt {
+    width: min(74vw, 22rem);
+  }
+}
+
+/* ------------------------------------------------------------------- wide screens */
+
+@media (min-width: 1024px) {
+  .stIntro,
+  .stSplit,
+  .stPillars {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  /* Media first in the source for the intro so the open animation can reach it, so the
+     column order is set here rather than by markup order. */
+  .stIntro .stMediaCol {
+    order: 2;
+  }
+
+  .stSideLeft .stMediaCol {
+    order: 1;
+  }
+
+  .stSideLeft .stTypeCol {
+    order: 2;
+  }
+
+  .stSideRight .stMediaCol {
+    order: 2;
+  }
+
+  .stSideRight .stTypeCol {
+    order: 1;
+  }
+
+  .stFigures {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* ------------------------------------------------------------------ narrow screens */
+
+@media (max-width: 1023px) {
+  .stIntro .stMedia,
+  .stSplit .stMedia {
+    aspect-ratio: 16 / 10;
+    max-height: 34vh;
+  }
+
+  .stTitle {
+    font-size: clamp(1.875rem, 9vw, 3rem);
+  }
+
+  .stStatementScene .stTitle {
+    font-size: clamp(2rem, 11vw, 3.5rem);
+  }
+}
+
+@media (max-width: 639px) {
+  .stChapter {
+    /* Clears the site-wide chat launcher, which sits over this overlay's lower right. */
+    padding-bottom: 5rem;
+  }
+
+  .stFigures {
+    gap: 1.25rem 1.5rem;
+  }
+}
+
+/* ------------------------------------------------------------------ reduced motion */
+
+/*
+ * No stage, no depth, no scroll driver — the same chapters become one long readable
+ * document. The component skips its driver entirely in this mode, so nothing writes an
+ * inline transform that would need overriding.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .stTrack {
+    height: auto !important;
+  }
+
+  .igFrame {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    clip-path: none !important;
+  }
+
+  .igFrameImg {
+    position: absolute;
+    inset: 0;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+  }
+
+  .igNet,
+  .igAnchor {
+    display: none;
+  }
+
+  .igState {
+    position: relative;
+    inset: auto;
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+    pointer-events: auto !important;
+    padding-top: clamp(2.5rem, 7vh, 4rem);
+    padding-bottom: clamp(2.5rem, 7vh, 4rem);
+    border-top: 1px solid var(--st-hairline);
+  }
+
+  .stStage {
+    position: relative;
+    height: auto;
+    overflow: visible;
+    perspective: none;
+  }
+
+  .stChapter {
+    position: relative;
+    inset: auto;
+    min-height: 0;
+    padding-top: clamp(3rem, 8vh, 5rem);
+    padding-bottom: clamp(3rem, 8vh, 5rem);
+    border-top: 1px solid var(--st-hairline);
+  }
+
+  .stChapter:first-child {
+    border-top: 0;
+    padding-top: clamp(5rem, 12vh, 8rem);
+  }
+
+  .stInner {
+    height: auto;
+  }
+
+  .stStatementScene {
+    height: auto;
+  }
+
+  .stStatementScene .stMedia {
+    position: relative;
+    inset: auto;
+    aspect-ratio: 16 / 9;
+    margin-bottom: 2rem;
+  }
+
+  .stProgress {
+    display: none;
+  }
+}
+
+/* -------------------------------------------------------------------------- focus */
+
+.stRoot :focus-visible {
+  outline: 2px solid var(--st-gold-bright);
+  outline-offset: 3px;
+}

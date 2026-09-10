@@ -78,7 +78,15 @@ type Source = (typeof SOURCES)[keyof typeof SOURCES];
  * pane IS the previous section's colour, so there is no edge to see; it then dissolves
  * to reveal footage that was already being drawn underneath it the whole time.
  */
-const ENTRY_SURFACE = "#FBFBFA";
+/*
+ * ENTRY_SURFACE follows whatever section is above this one, and that changed: Services
+ * now sits between Market Influence & Reach and this section, so the pixel above the
+ * join is the dark end of its outro ramp rather than Stats' near-white. Left at #FBFBFA
+ * the bridge painted a white band across the top of the footage on the way in — the
+ * exact seam it exists to prevent, only inverted. #050C18 is this section's own ground,
+ * which is also where Services' ramp lands, so the join has nothing to show.
+ */
+const ENTRY_SURFACE = "#050C18";
 const EXIT_SURFACE = "#F4F4F2";
 
 /*
@@ -432,7 +440,9 @@ export const About: React.FC = () => {
     const solid = ramp * BRIDGE_SOLID;
     return (
       `linear-gradient(180deg, ${ENTRY_SURFACE} 0px, ${ENTRY_SURFACE} ${solid.toFixed(1)}px, ` +
-      `rgba(251,251,250,0) ${ramp.toFixed(1)}px)`
+      // The transparent stop is ENTRY_SURFACE at zero alpha, not a generic transparent:
+      // it has to be the same colour or the ramp fades through the wrong hue.
+      `rgba(5,12,24,0) ${ramp.toFixed(1)}px)`
     );
   });
 

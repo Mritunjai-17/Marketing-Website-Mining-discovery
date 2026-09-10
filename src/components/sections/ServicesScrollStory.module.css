@@ -1,0 +1,653 @@
+/*
+ * Our Services - four chapters travelling through one pinned frame.
+ *
+ * The section is three parts in normal flow: a handoff ramp that carries Market
+ * Influence's near-white ground down into this section's dark one, an editorial intro,
+ * and then the pinned viewport the four service cards move through. Everything that
+ * moves is a transform on a single card element, so a chapter's number, descriptor,
+ * title, statement, capabilities and photograph are one object that cannot come apart.
+ *
+ * Scoped names only - imported by ServicesScrollStory.tsx and nothing else.
+ */
+
+.svcSection {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #11110F;
+  color: #FCFBF8;
+
+  /* The card's preferred height. Its width comes from the aspect ratio, and .svcCard
+     caps the height at the room the stage actually has, so a short window shrinks the
+     card instead of clipping it. */
+  --svc-card-h: clamp(320px, 66vh, 680px);
+
+  --svc-gold: #B8924A;
+  --svc-gold-bright: #D4AF62;
+  --svc-cream: #FCFBF8;
+  --svc-panel: #191815;
+  --svc-hairline: rgba(252, 251, 248, 0.11);
+  --svc-muted: rgba(252, 251, 248, 0.58);
+}
+
+/* ---------------------------------------------------------------- handoff / outro */
+
+/*
+ * The seam from Market Influence & Reach. It starts on that section's exact ground
+ * (#FBFBFA) so there is no edge to see, and arrives at this section's ground before any
+ * content begins - the dark environment is established by scrolling into it rather than
+ * by a cut. Nothing in Market Influence itself is touched.
+ */
+.svcHandoff {
+  height: clamp(180px, 26vh, 300px);
+  background: linear-gradient(
+    180deg,
+    #FBFBFA 0%,
+    #EDE9E0 10%,
+    #9A9286 30%,
+    #4A443C 52%,
+    #221E1A 74%,
+    #11110F 100%
+  );
+}
+
+/*
+ * The seam out. The section that follows opens on #050C18 and pulls itself 64px up into
+ * this one, so the ramp lands on that colour and the overlap has nothing to cover.
+ */
+.svcOutro {
+  height: 160px;
+  background: linear-gradient(180deg, #11110F 0%, #0B0E14 55%, #050C18 100%);
+}
+
+/* ------------------------------------------------------------------------- intro */
+
+.svcIntro {
+  position: relative;
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: clamp(2rem, 6vh, 4.5rem) clamp(1.5rem, 5vw, 3.5rem) clamp(4rem, 12vh, 8rem);
+  text-align: center;
+}
+
+/* Each line of the masthead, revealed on the scrub. */
+.svcIntroItem {
+  will-change: transform, opacity;
+}
+
+.svcEyebrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  color: var(--svc-gold);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+.svcEyebrowRule {
+  display: block;
+  width: 2rem;
+  height: 1px;
+  background-color: var(--svc-gold);
+}
+
+/*
+ * Geist, not the editorial serif: Our Impact's masthead is the serif one, and these two
+ * dark chapters sit close enough together on the page that they need distinct voices.
+ * Three lines, set as blocks, so the break is the design rather than the window width.
+ */
+.svcHeadline {
+  margin: clamp(1.25rem, 3vh, 2rem) 0 0;
+  color: var(--svc-cream);
+  font-family: var(--font-geist, sans-serif);
+  font-size: clamp(1.75rem, 4.2vw, 3.25rem);
+  font-weight: 600;
+  line-height: 1.06;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+}
+
+.svcHeadline span {
+  display: block;
+}
+
+.svcLede {
+  margin: clamp(1.1rem, 2.6vh, 1.75rem) auto 0;
+  max-width: 36rem;
+  color: var(--svc-muted);
+  font-family: var(--font-sans, sans-serif);
+  font-size: clamp(0.875rem, 1.15vw, 1rem);
+  line-height: 1.7;
+}
+
+.svcScrollCue {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  margin-top: clamp(1.75rem, 5vh, 3rem);
+  color: rgba(252, 251, 248, 0.4);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.svcScrollCueRule {
+  display: block;
+  width: 1px;
+  height: 2.25rem;
+  background: linear-gradient(180deg, var(--svc-gold) 0%, rgba(184, 146, 74, 0) 100%);
+}
+
+/* -------------------------------------------------------------- pinned viewport */
+
+.svcViewport {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100vh;
+  height: 100svh;
+  box-sizing: border-box;
+  padding: clamp(5.25rem, 10vh, 7rem) clamp(1.25rem, 4vw, 3.5rem) clamp(1.5rem, 3vh, 2.5rem);
+  overflow: hidden;
+}
+
+/* A single warm pool of light behind the active card so the frame has a centre. */
+.svcGlow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle 1000px at 50% 52%,
+    rgba(184, 146, 74, 0.12) 0%,
+    rgba(17, 17, 15, 0) 66%
+  );
+}
+
+.svcHead {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+/* ---------------------------------------------------------------- progress index */
+
+.svcProgress {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+/* Six numerals and five rules, so the rules give way first on a narrow screen rather
+   than the numbers wrapping. */
+@media (max-width: 900px) {
+  .svcProgress {
+    gap: 0.4rem;
+  }
+}
+
+.svcProgressStep {
+  color: rgba(252, 251, 248, 0.28);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  transition: color 0.4s ease;
+}
+
+.svcProgressStepActive {
+  color: var(--svc-gold-bright);
+}
+
+.svcProgressLine {
+  position: relative;
+  display: block;
+  width: clamp(1.5rem, 3.5vw, 3rem);
+  height: 1px;
+  background-color: rgba(252, 251, 248, 0.14);
+  overflow: hidden;
+}
+
+.svcProgressFill {
+  position: absolute;
+  inset: 0;
+  background-color: var(--svc-gold);
+  transform: scaleX(0);
+  transform-origin: left center;
+  will-change: transform;
+}
+
+/* ------------------------------------------------------------------------- stage */
+
+.svcStage {
+  position: relative;
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
+  margin: clamp(0.75rem, 2vh, 1.5rem) 0;
+  /* The travelling neighbours are clipped here rather than reaching the page. */
+  overflow: hidden;
+}
+
+/*
+ * The camera the categories orbit in front of.
+ *
+ * Their size used to be a flat `scale`, which reads as a picture being resized rather
+ * than a card standing further away. With a perspective here the component can express
+ * distance as a real translateZ, and two things follow for free: the card foreshortens
+ * correctly, and an off-centre one drifts toward the vanishing point as it recedes.
+ * preserve-3d keeps the cards in this space instead of flattening them into it.
+ */
+.svcTrack {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  perspective: 1600px;
+  transform-style: preserve-3d;
+}
+
+.svcCard {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  /* Height first, width from the ratio: the card takes the room the stage has and no
+     more, so it stays dominant on a tall window and simply gets smaller on a short one. */
+  /* 82%, not 100%: the arc needs somewhere to bow. The apex card sits above centre
+     and its neighbours fall below it, and both ends of that curve have to stay inside
+     the stage — a card filling the full height would leave the path nowhere to go. */
+  height: min(var(--svc-card-h), 82%);
+  aspect-ratio: 158 / 100;
+  max-width: 72vw;
+  display: flex;
+  box-sizing: border-box;
+  border: 1px solid var(--svc-hairline);
+  border-radius: 14px;
+  overflow: hidden;
+  background-color: var(--svc-panel);
+  /* Centring lives in the transform, which is what GSAP drives - it writes
+     xPercent/yPercent -50 alongside x/y, so the two never fight. */
+  transform: translate(-50%, -50%);
+  will-change: transform, opacity;
+}
+
+/*
+ * Before GSAP's first write: chapter 01 on centre, the rest parked forward and to the
+ * right, so the first paint already matches the start of the scroll rather than showing
+ * four stacked cards. GSAP overwrites all of it on the trigger's first refresh.
+ */
+.svcCard[data-index="1"] {
+  transform: translate(-50%, -50%) translate(88%, 26%) rotate(4deg) scale(0.86);
+}
+
+.svcCard[data-index="2"],
+.svcCard[data-index="3"],
+.svcCard[data-index="4"],
+.svcCard[data-index="5"] {
+  transform: translate(-50%, -50%) translate(176%, 26%) rotate(4deg) scale(0.86);
+  opacity: 0;
+}
+
+.svcCard[data-index="1"] .svcCardVeil {
+  opacity: 0.62;
+}
+
+/*
+ * How a chapter recedes.
+ *
+ * Not element opacity: two overlapping cards at 0.7 each show through one another, and
+ * the frame turns to soup exactly at the crossover, which is the moment the movement is
+ * meant to be most legible. A veil in the chapter's own colour darkens it toward the
+ * ground instead, so a receded card stays solid and its photograph stays crisp. Element
+ * opacity is left to do one job — taking a card out entirely once it is off-frame.
+ */
+.svcCardVeil {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background-color: #11110F;
+  opacity: 0;
+}
+
+/* --------------------------------------------------------------------- card media */
+
+.svcCardMedia {
+  position: relative;
+  flex: 0 0 65%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.svcCardImage {
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Enough shading under the number and descriptor to hold them, and nothing more. */
+.svcCardMediaScrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 9, 7, 0.72) 0%,
+    rgba(10, 9, 7, 0.28) 34%,
+    rgba(10, 9, 7, 0.06) 62%,
+    rgba(10, 9, 7, 0.34) 100%
+  );
+}
+
+.svcCardMediaHead {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: clamp(1rem, 2.2vh, 1.6rem) clamp(1.1rem, 2vw, 1.75rem);
+}
+
+.svcCardNum {
+  color: var(--svc-gold-bright);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  font-variant-numeric: tabular-nums;
+}
+
+.svcCardNumRule {
+  display: block;
+  width: 1.75rem;
+  height: 1px;
+  background-color: rgba(184, 146, 74, 0.6);
+  flex-shrink: 0;
+}
+
+.svcCardDescriptor {
+  color: rgba(252, 251, 248, 0.9);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+/* --------------------------------------------------------------------- card panel */
+
+.svcCardPanel {
+  flex: 1 1 35%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: clamp(1.1rem, 2.6vh, 2rem) clamp(1.1rem, 1.8vw, 1.85rem);
+}
+
+/*
+ * Geist rather than the editorial serif, because the category names are now set as
+ * two-line all-caps statements — the same voice as this section's own masthead, and the
+ * role the site's type scale already assigns to Geist ("uppercase headers, architectural
+ * statements"). No new family enters the page.
+ */
+.svcCardTitle {
+  margin: 0;
+  color: var(--svc-cream);
+  font-family: var(--font-geist, sans-serif);
+  font-size: clamp(1.25rem, 3vh, 2rem);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+
+.svcCardTitle span {
+  display: block;
+}
+
+.svcCardText {
+  margin: clamp(0.6rem, 1.4vh, 0.9rem) 0 0;
+  color: var(--svc-muted);
+  font-family: var(--font-sans, sans-serif);
+  font-size: clamp(0.75rem, 1.5vh, 0.875rem);
+  line-height: 1.6;
+}
+
+.svcCardCaps {
+  margin: clamp(0.9rem, 2vh, 1.4rem) 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--svc-hairline);
+}
+
+.svcCardCap {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: clamp(0.34rem, 0.9vh, 0.55rem) 0;
+  border-bottom: 1px solid var(--svc-hairline);
+  color: rgba(252, 251, 248, 0.86);
+  font-family: var(--font-sans, sans-serif);
+  font-size: clamp(0.6875rem, 1.4vh, 0.8125rem);
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.svcCardCapRule {
+  display: block;
+  width: 0.75rem;
+  height: 1px;
+  flex-shrink: 0;
+  background-color: rgba(184, 146, 74, 0.75);
+}
+
+/* --------------------------------------------------------------------------- CTA */
+
+.svcFoot {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+  min-height: 3rem;
+}
+
+.svcCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.85rem 1.6rem;
+  border: 1px solid rgba(184, 146, 74, 0.5);
+  border-radius: 999px;
+  color: var(--svc-gold-bright);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+.svcCta:hover,
+.svcCta:focus-visible {
+  background-color: var(--svc-gold);
+  border-color: var(--svc-gold);
+  color: #11110F;
+}
+
+.svcCtaIcon {
+  width: 0.9rem;
+  height: 0.9rem;
+  transition: transform 0.2s ease;
+}
+
+.svcCta:hover .svcCtaIcon,
+.svcCta:focus-visible .svcCtaIcon {
+  transform: translateX(3px);
+}
+
+/* ------------------------------------------------------------- reduced motion copy */
+
+/*
+ * A second, statically laid out copy of the same four chapters lives in the markup and
+ * is swapped in here - the same approach Company Journey and Our Impact use. Doing the
+ * swap in CSS means no first-paint flash of the travelling stage, and `display: none`
+ * keeps whichever copy is hidden out of the accessibility tree.
+ */
+.svcStatic {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .svcScrollArea {
+    display: none;
+  }
+
+  .svcStatic {
+    display: block;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 clamp(1.5rem, 5vw, 3.5rem) clamp(4rem, 10vh, 7rem);
+  }
+
+  .svcStaticItem {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 2.5rem;
+    border: 1px solid var(--svc-hairline);
+    border-radius: 14px;
+    overflow: hidden;
+    background-color: var(--svc-panel);
+  }
+
+  .svcStaticItem .svcCardMedia {
+    flex: none;
+    height: 260px;
+  }
+
+  .svcStaticFoot {
+    display: flex;
+    justify-content: center;
+    margin-top: 3rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) and (min-width: 900px) {
+  .svcStaticItem {
+    flex-direction: row;
+  }
+
+  .svcStaticItem .svcCardMedia {
+    flex: 0 0 58%;
+    height: 340px;
+  }
+
+  .svcStaticItem .svcCardPanel {
+    flex: 1 1 42%;
+  }
+}
+
+/* ------------------------------------------------------------------- below 1024px */
+
+/*
+ * The side-by-side split has no room left here, so the card becomes a stack: photograph
+ * over panel. The previous/active/next relationship is unchanged - only the axis it
+ * travels on changes, and that is decided in the component. The breakpoint is 1200
+ * rather than 1024 because that is where two cards abreast stop fitting, which is the
+ * thing that actually decides it.
+ */
+@media (max-width: 1199px) {
+  .svcSection {
+    --svc-card-h: clamp(340px, 62vh, 620px);
+  }
+
+  .svcCard {
+    flex-direction: column;
+    aspect-ratio: 88 / 100;
+    /* Travel is vertical here and the arc bows sideways, so the room it needs is
+       horizontal — hence a narrower card than the stage rather than a shorter one. */
+    height: min(var(--svc-card-h), 100%);
+    max-width: 78vw;
+  }
+
+  /*
+   * The panel takes the height its own content needs and the photograph takes the rest,
+   * rather than both taking a fixed share. A fixed share is what clipped the last
+   * capability on a short phone: the card shrinks with the viewport but the four lines
+   * of type inside it do not. This way the split lands near the 65/35 the composition
+   * wants on a roomy card and gives up image height only where there is no other way.
+   */
+  .svcCardMedia {
+    flex: 1 1 auto;
+    min-height: 42%;
+  }
+
+  .svcCardPanel {
+    flex: 0 0 auto;
+    justify-content: flex-start;
+  }
+}
+
+/* -------------------------------------------------------------------- below 640px */
+
+@media (max-width: 639px) {
+  .svcSection {
+    --svc-card-h: clamp(300px, 56vh, 500px);
+  }
+
+  .svcCard {
+    max-width: 76vw;
+  }
+
+  /* Tighter type so four capabilities plus a title and a statement still fit the panel
+     on a 667px-tall phone. */
+  .svcCardPanel {
+    padding: 0.8rem 0.95rem 0.9rem;
+  }
+
+  .svcCardTitle {
+    font-size: clamp(1.0625rem, 2.4vh, 1.375rem);
+  }
+
+  .svcCardText {
+    margin-top: 0.4rem;
+    font-size: 0.75rem;
+    line-height: 1.5;
+  }
+
+  .svcCardCaps {
+    margin-top: 0.65rem;
+  }
+
+  .svcCardCap {
+    padding: 0.3rem 0;
+    font-size: 0.75rem;
+  }
+
+  /* Extra floor so the CTA clears the site-wide "Ask AI" launcher, which is fixed 28px
+     from the bottom-right and reaches the centre of a phone-width screen. */
+  .svcViewport {
+    padding-bottom: 5.75rem;
+  }
+
+  .svcProgressLine {
+    width: 0.9rem;
+  }
+
+  .svcCta {
+    padding: 0.75rem 1.15rem;
+    font-size: 0.625rem;
+    letter-spacing: 0.16em;
+  }
+}

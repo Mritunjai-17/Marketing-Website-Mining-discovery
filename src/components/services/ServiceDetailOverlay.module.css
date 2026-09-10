@@ -1,0 +1,363 @@
+/*
+ * The service detail overlay — a full-viewport chapter, not a modal.
+ *
+ * It covers everything including the header and the chat launcher, scrolls on its own
+ * while the page behind it is held still, and takes its palette straight from the route
+ * it opens over. Scoped names only; nothing here reaches outside the overlay.
+ */
+
+.sdRoot {
+  position: fixed;
+  inset: 0;
+  /* Above the header (50) and the site's chat launcher (1000/1001). */
+  z-index: 1200;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  background-color: #11110F;
+  color: #F7F4ED;
+
+  --sd-gold: #B8924A;
+  --sd-gold-bright: #D4AF62;
+  --sd-cream: #F7F4ED;
+  --sd-hairline: rgba(247, 244, 237, 0.13);
+  --sd-muted: rgba(247, 244, 237, 0.6);
+}
+
+/* The panel the open animation moves; the root stays put so scrolling is unaffected. */
+.sdPanel {
+  min-height: 100%;
+  will-change: transform, opacity;
+}
+
+/* ------------------------------------------------------------------------- close */
+
+.sdClose {
+  position: fixed;
+  top: clamp(1rem, 2.5vh, 2rem);
+  right: clamp(1rem, 3vw, 3rem);
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  /* Comfortably past the 44px touch target on every size. */
+  padding: 0.85rem 1.15rem;
+  background-color: rgba(17, 17, 15, 0.82);
+  backdrop-filter: blur(6px);
+  border: 1px solid var(--sd-hairline);
+  border-radius: 999px;
+  color: var(--sd-cream);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.3s ease, color 0.3s ease;
+}
+
+.sdClose:hover,
+.sdClose:focus-visible {
+  border-color: var(--sd-gold-bright);
+  color: var(--sd-gold-bright);
+}
+
+.sdCloseIcon {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+/* ------------------------------------------------------------------------ layout */
+
+.sdInner {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: clamp(4.5rem, 12vh, 8rem) clamp(1.25rem, 5vw, 5rem)
+    clamp(4rem, 12vh, 8rem);
+}
+
+/*
+ * Two columns on a wide screen: the identity stays put on the left while the detail
+ * scrolls past it on the right. One column below that, in reading order, rather than the
+ * same grid squeezed narrower.
+ */
+.sdGrid {
+  display: grid;
+  gap: clamp(2.5rem, 6vw, 5rem);
+}
+
+@media (min-width: 1024px) {
+  .sdGrid {
+    grid-template-columns: minmax(0, 38%) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .sdIdentity {
+    position: sticky;
+    top: clamp(4.5rem, 12vh, 8rem);
+  }
+}
+
+/* ---------------------------------------------------------------------- identity */
+
+.sdNum {
+  display: block;
+  color: var(--sd-gold-bright);
+  font-family: var(--font-mono, monospace);
+  font-size: clamp(2.5rem, 7vw, 5rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.sdCategory {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: clamp(0.85rem, 2vh, 1.4rem);
+  color: var(--sd-gold);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+}
+
+.sdCategoryRule {
+  display: block;
+  width: 2rem;
+  height: 1px;
+  flex-shrink: 0;
+  background-color: var(--sd-gold);
+}
+
+.sdHeadline {
+  margin: clamp(1.25rem, 3vh, 2rem) 0 0;
+  color: var(--sd-cream);
+  font-family: var(--font-geist, sans-serif);
+  font-size: clamp(1.75rem, 4.4vw, 3.25rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+}
+
+.sdIntro {
+  margin: clamp(1.25rem, 3vh, 2rem) 0 0;
+  max-width: 32rem;
+  color: var(--sd-muted);
+  font-family: var(--font-sans, sans-serif);
+  font-size: clamp(0.9375rem, 1.1vw, 1.0625rem);
+  line-height: 1.75;
+}
+
+.sdMedia {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  margin-top: clamp(2rem, 5vh, 3rem);
+  overflow: hidden;
+  background-color: #16150F;
+}
+
+.sdMediaImg {
+  object-fit: cover;
+  object-position: center;
+}
+
+/* ---------------------------------------------------------------------- sections */
+
+.sdSection {
+  padding-top: clamp(2.25rem, 5vh, 3.5rem);
+  border-top: 1px solid var(--sd-hairline);
+}
+
+.sdSection + .sdSection {
+  margin-top: clamp(2.25rem, 5vh, 3.5rem);
+}
+
+.sdSectionLabel {
+  display: block;
+  margin-bottom: clamp(1.1rem, 2.6vh, 1.75rem);
+  color: var(--sd-gold);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+}
+
+/* --------------------------------------------------------------- what we do */
+
+.sdWork {
+  margin: 0 0 clamp(1.5rem, 3.5vh, 2.5rem);
+}
+
+.sdWork:last-child {
+  margin-bottom: 0;
+}
+
+.sdWorkTitle {
+  margin: 0;
+  color: var(--sd-cream);
+  font-family: var(--font-geist, sans-serif);
+  font-size: clamp(1.125rem, 1.9vw, 1.5rem);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.sdWorkBody {
+  margin: 0.7rem 0 0;
+  max-width: 40rem;
+  color: var(--sd-muted);
+  font-family: var(--font-sans, sans-serif);
+  font-size: clamp(0.875rem, 1vw, 0.9375rem);
+  line-height: 1.75;
+}
+
+/* -------------------------------------------------------------- capabilities */
+
+.sdList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sdListItem {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: clamp(0.6rem, 1.4vh, 0.85rem) 0;
+  border-bottom: 1px solid var(--sd-hairline);
+  color: rgba(247, 244, 237, 0.9);
+  font-family: var(--font-sans, sans-serif);
+  font-size: clamp(0.8125rem, 1vw, 0.9375rem);
+  font-weight: 500;
+}
+
+.sdListItem:first-child {
+  border-top: 1px solid var(--sd-hairline);
+}
+
+.sdListRule {
+  display: block;
+  width: 0.9rem;
+  height: 1px;
+  flex-shrink: 0;
+  background-color: rgba(184, 146, 74, 0.85);
+}
+
+/* ------------------------------------------------------------------- proof */
+
+.sdFigures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: clamp(1.25rem, 3vw, 2.5rem);
+}
+
+.sdFigureValue {
+  display: block;
+  color: var(--sd-cream);
+  font-family: var(--font-serif, Georgia, serif);
+  font-size: clamp(1.75rem, 3.4vw, 2.75rem);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.sdFigureLabel {
+  display: block;
+  margin-top: 0.6rem;
+  color: var(--sd-muted);
+  font-family: var(--font-sans, sans-serif);
+  font-size: clamp(0.75rem, 0.9vw, 0.8125rem);
+  line-height: 1.5;
+}
+
+.sdNote {
+  margin: clamp(1.5rem, 3vh, 2rem) 0 0;
+  max-width: 38rem;
+  color: rgba(247, 244, 237, 0.42);
+  font-family: var(--font-sans, sans-serif);
+  font-size: 0.75rem;
+  line-height: 1.65;
+}
+
+/* ---------------------------------------------------------------- platform */
+
+.sdPlatformTitle {
+  margin: 0 0 1rem;
+  color: var(--sd-cream);
+  font-family: var(--font-sans, sans-serif);
+  font-size: clamp(0.9375rem, 1.1vw, 1.0625rem);
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+/* --------------------------------------------------------------------- CTA */
+
+.sdCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: clamp(2.5rem, 6vh, 4rem);
+  padding: 1rem 2rem;
+  border: 1px solid rgba(184, 146, 74, 0.55);
+  border-radius: 999px;
+  color: var(--sd-gold-bright);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+.sdCta:hover,
+.sdCta:focus-visible {
+  background-color: var(--sd-gold);
+  border-color: var(--sd-gold);
+  color: #11110F;
+}
+
+.sdCtaIcon {
+  width: 0.9rem;
+  height: 0.9rem;
+  transition: transform 0.2s ease;
+}
+
+.sdCta:hover .sdCtaIcon,
+.sdCta:focus-visible .sdCtaIcon {
+  transform: translateX(4px);
+}
+
+/* ------------------------------------------------------------------ reveals */
+
+/*
+ * Sections start held down and are released as they come into view. The from-state lives
+ * here so the component can set it once, and is cleared entirely under reduced motion —
+ * a reader who has asked for no animation gets the finished page.
+ */
+.sdReveal {
+  will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sdReveal {
+    opacity: 1 !important;
+    transform: none !important;
+    will-change: auto;
+  }
+}
+
+/* -------------------------------------------------------------------- focus */
+
+.sdRoot :focus-visible {
+  outline: 2px solid var(--sd-gold-bright);
+  outline-offset: 3px;
+}

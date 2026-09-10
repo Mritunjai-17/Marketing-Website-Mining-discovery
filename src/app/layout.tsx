@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Inter, IBM_Plex_Mono, Playfair_Display } from "next/
 import "./globals.css";
 import { Header, Footer, SmoothScroll } from "@/components/layout";
 import MiningAICHatWidget from "@/components/ui/MiningAICHatWidget";
+import CustomCursor from "@/components/ui/CustomCursor";
 
 const geistSans = Geist({
   subsets: ["latin"],
@@ -61,6 +62,7 @@ export default function RootLayout({
           <Footer />
         </SmoothScroll>
         <MiningAICHatWidget />
+        <CustomCursor />
       </body>
     </html>
   );

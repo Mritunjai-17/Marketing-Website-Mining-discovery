@@ -35,10 +35,16 @@ export default function Home() {
       <div className="relative z-20">
         <Stats />
       </div>
+      {/*
+        Services sits here, directly after Market Influence & Reach, so the page reads
+        story → proof → reach → capability → trust → action. It carries its own seams at
+        both ends: a ramp down from Stats' near-white ground at the top, and a ramp to
+        About's #050C18 at the bottom for About's -mt-16 to land on.
+      */}
+      <ServicesScrollStory />
       {/* The header and footer both link to #about; this is what they resolve to. */}
       <About />
       <TrustedBy />
-      <ServicesScrollStory />
     </div>
   );
 }

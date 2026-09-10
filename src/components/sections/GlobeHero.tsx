@@ -267,9 +267,9 @@ const HEADLINE_LINES: {
    */
   underlineWord?: string;
 }[] = [
-  { text: "Make your mining story", start: 0.18 },
-  { text: "impossible to ignore.", start: 0.36, underlineWord: "ignore" },
-];
+    { text: "Make your mining story", start: 0.18 },
+    { text: "impossible to ignore.", start: 0.36, underlineWord: "ignore" },
+  ];
 
 /**
  * How far a line travels, as a percentage of its own height. Past 100 it is fully behind
@@ -293,7 +293,7 @@ const STAGE_COUNT = TOUR.length;
  * 165 puts the range at 7 x 165 = 1155vh, of which 1055vh is actual travel once the
  * sticky card's own viewport is subtracted.
  */
-const STAGE_VH = 220;
+const STAGE_VH = 100;
 
 /**
  * Scale held for the whole tour. 1 = the globe never changes size.
@@ -1164,21 +1164,21 @@ export const GlobeHero: React.FC = () => {
               : -1;
 
             return (
-            /*
-              The mask. overflow-hidden is what turns a slow drift into a line leaving:
-              the span slides up behind this edge and is simply gone, while the lines
-              under it have not started.
-
-              pb/-mb cancel each other, so the box is taller than the glyphs by a hair
-              without moving anything: the line box at leading-[0.96] is shorter than the
-              type it holds, and without that slack the mask would shave the tops of the
-              caps at rest.
-            */
-            <span
-              key={line.text}
-              className={
-                line.underlineWord
-                  ? /*
+              /*
+                The mask. overflow-hidden is what turns a slow drift into a line leaving:
+                the span slides up behind this edge and is simply gone, while the lines
+                under it have not started.
+  
+                pb/-mb cancel each other, so the box is taller than the glyphs by a hair
+                without moving anything: the line box at leading-[0.96] is shorter than the
+                type it holds, and without that slack the mask would shave the tops of the
+                caps at rest.
+              */
+              <span
+                key={line.text}
+                className={
+                  line.underlineWord
+                    ? /*
                       The underlined line needs the SAME trick with more room: the stroke
                       hangs below the line box and this span's overflow-hidden would cut
                       it off at 0.08em. 0.2em clears the 8.1px the stroke needs (1.5px gap
@@ -1188,36 +1188,36 @@ export const GlobeHero: React.FC = () => {
                       into the 24px gap that was already there, keeping ~16px of daylight.
                     */
                     "block overflow-hidden pb-[0.45em] -mb-[0.45em] sm:pb-[0.26em] sm:-mb-[0.26em]"
-                  : "block overflow-hidden pb-[0.08em] -mb-[0.08em]"
-              }
-            >
-              <span
-                ref={(el) => {
-                  lineRefs.current[index] = el;
-                }}
-                className="block will-change-[transform,opacity,filter]"
+                    : "block overflow-hidden pb-[0.08em] -mb-[0.08em]"
+                }
               >
-                {line.underlineWord && at >= 0 ? (
-                  <>
-                    {line.text.slice(0, at)}
-                    {/*
+                <span
+                  ref={(el) => {
+                    lineRefs.current[index] = el;
+                  }}
+                  className="block will-change-[transform,opacity,filter]"
+                >
+                  {line.underlineWord && at >= 0 ? (
+                    <>
+                      {line.text.slice(0, at)}
+                      {/*
                       Wraps the word alone, so the stroke's 100% width is the word's width
                       and not the line's. inline-block for the containing block only — no
                       z-index, so no stacking context is created and the stroke paints in
                       the headline's own order: over the starfield behind it, under the
                       globe, pins and arcs that come later in the tree.
                     */}
-                    <span className="relative inline-block">
-                      {line.underlineWord}
-                      <HeadlineUnderline />
-                    </span>
-                    {line.text.slice(at + line.underlineWord.length)}
-                  </>
-                ) : (
-                  line.text
-                )}
+                      <span className="relative inline-block">
+                        {line.underlineWord}
+                        <HeadlineUnderline />
+                      </span>
+                      {line.text.slice(at + line.underlineWord.length)}
+                    </>
+                  ) : (
+                    line.text
+                  )}
+                </span>
               </span>
-            </span>
             );
           })}
         </h1>
@@ -1342,6 +1342,17 @@ export const GlobeHero: React.FC = () => {
                       }}
                       className="absolute left-0 top-0"
                     >
+                      {/* Location Name Label — small, elegant badge above the marker */}
+                      <span
+                        className={`pointer-events-none absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider shadow-xs backdrop-blur-xs transition-all duration-200 ${
+                          isActive
+                            ? "bg-[#0B1F3A] text-[#FFD700] border border-[#B8860B]/60 shadow-[0_0_8px_rgba(184,134,11,0.3)] opacity-100 scale-105"
+                            : "bg-[#0B1F3A]/80 text-[#FAF7F2] border border-white/10 opacity-90"
+                        }`}
+                      >
+                        {site.country}
+                      </span>
+
                       {/* Pin — 44px hit target centred on the geographic point */}
                       <button
                         type="button"
@@ -1364,13 +1375,6 @@ export const GlobeHero: React.FC = () => {
                           aria-hidden="true"
                         />
                       </button>
-
-                      {/*
-                        No visible text label. The region, country and detail live only in
-                        the pin's aria-label above: the globe is meant to read as surface,
-                        atmosphere, dots and arcs, and a rendered name on the sphere read
-                        as a stray artefact rather than as a caption.
-                      */}
                     </div>
                   );
                 })}

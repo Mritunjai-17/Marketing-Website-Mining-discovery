@@ -1,0 +1,480 @@
+/*
+ * Our Impact - a dark, scroll-driven results showcase.
+ *
+ * The whole section is one pinned viewport. Everything inside it is laid out once and
+ * never re-laid-out: the four result cards sit stacked in the centre of `.impactStage`
+ * and are moved only with transform/opacity from the component, so the scrub costs
+ * nothing but compositing. The stage clips, which is what keeps the travelling cards
+ * from ever widening the page on a narrow screen.
+ *
+ * Scoped names only - this file is imported by ImpactCards.tsx and nothing else.
+ */
+
+.impactSection {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #11110F;
+  color: #F7F4ED;
+
+  /* One card's geometry, in one place: the card's width and the JS step distance both
+     derive from it. It is only the card's *preferred* height — .impactCard caps it at
+     the room the stage actually has, so a short viewport shrinks the card instead of
+     clipping it. */
+  --impact-card-h: clamp(300px, 56vh, 560px);
+
+  --impact-gold: #B8924A;
+  --impact-cream: #F7F4ED;
+  --impact-muted: rgba(247, 244, 237, 0.62);
+  --impact-hairline: rgba(247, 244, 237, 0.12);
+}
+
+/*
+ * A single warm pool of light behind the active card, so the dark ground has a centre
+ * rather than reading as a flat black block after the Company Journey's off-white.
+ *
+ * It lives inside the pinned viewport, not on the section: on the section it would sit in
+ * normal flow and drift upward past the fixed card for the whole length of the pin.
+ */
+.impactGlow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle 900px at 50% 58%, rgba(184, 146, 74, 0.13) 0%, rgba(17, 17, 15, 0) 68%),
+    radial-gradient(circle 700px at 50% 0%, rgba(247, 244, 237, 0.05) 0%, rgba(17, 17, 15, 0) 70%);
+}
+
+/* ------------------------------------------------------------------ pinned viewport */
+
+.impactViewport {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100vh;
+  height: 100svh;
+  box-sizing: border-box;
+  padding: clamp(5rem, 10vh, 7.25rem) 0 clamp(1.5rem, 3.5vh, 2.5rem);
+  overflow: hidden;
+}
+
+/* ------------------------------------------------------------------ intro */
+
+/*
+ * Centred, because the showcase below it is centred: a left-aligned masthead over a
+ * centre-stage card left the right-hand kicker stranded in open space.
+ */
+.impactIntro {
+  /* Positioned only so it paints above .impactGlow, which is positioned too. */
+  position: relative;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 clamp(1.5rem, 4vw, 3.5rem);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: clamp(0.9rem, 2vh, 1.4rem);
+  flex-shrink: 0;
+}
+
+.impactIntroCopy {
+  position: relative;
+  max-width: 44rem;
+}
+
+.impactEyebrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 0.65rem;
+  color: var(--impact-gold);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.impactEyebrowRule {
+  display: block;
+  width: 1.75rem;
+  height: 1px;
+  background-color: var(--impact-gold);
+}
+
+.impactHeadline {
+  margin: 0;
+  color: var(--impact-cream);
+  font-family: var(--font-serif, Georgia, serif);
+  font-size: clamp(1.75rem, 3.4vw, 2.75rem);
+  font-weight: 400;
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+}
+
+.impactLede {
+  margin: 0.7rem auto 0;
+  max-width: 34rem;
+  color: var(--impact-muted);
+  font-family: var(--font-sans, sans-serif);
+  font-size: clamp(0.8125rem, 1.1vw, 0.9375rem);
+  line-height: 1.65;
+}
+
+.impactIntroAside {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.impactKicker {
+  color: rgba(247, 244, 237, 0.45);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* ------------------------------------------------------------------ arrow buttons */
+
+.impactArrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  border: 1px solid rgba(184, 146, 74, 0.45);
+  border-radius: 999px;
+  color: var(--impact-gold);
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+.impactArrow:hover,
+.impactArrow:focus-visible {
+  background-color: var(--impact-gold);
+  border-color: var(--impact-gold);
+  color: #11110F;
+}
+
+.impactArrowIcon {
+  width: 1rem;
+  height: 1rem;
+  transition: transform 0.2s ease;
+}
+
+.impactArrow:hover .impactArrowIcon,
+.impactArrow:focus-visible .impactArrowIcon {
+  transform: translateX(2px);
+}
+
+/* ------------------------------------------------------------------ stage / cards */
+
+.impactStage {
+  position: relative;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 0;
+  /* The travelling neighbours are clipped here rather than allowed to reach the page. */
+  overflow: hidden;
+}
+
+.impactTrack {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.impactCard {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  /* Height first, width from the ratio: the card takes the room the stage has and no
+     more, so it stays dominant on a tall window and simply gets smaller on a short one. */
+  height: min(var(--impact-card-h), 100%);
+  aspect-ratio: 74 / 100;
+  max-width: 84vw;
+  /* Centring lives in the transform, which is also what GSAP drives — it writes
+     xPercent/yPercent -50 alongside x/y, so the two never fight. */
+  transform: translate(-50%, -50%);
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid var(--impact-hairline);
+  background-color: #16150F;
+  will-change: transform, opacity;
+  transform-origin: center center;
+}
+
+/*
+ * Before GSAP's first write: card 01 centred, the rest parked off to the right, so the
+ * very first paint already matches the scroll's start state instead of showing four
+ * stacked cards. GSAP overwrites all of this on the trigger's first refresh.
+ */
+.impactCard[data-index="1"] {
+  transform: translate(-50%, -50%) translateX(100%) scale(0.82);
+  opacity: 0.35;
+}
+
+.impactCard[data-index="2"] {
+  transform: translate(-50%, -50%) translateX(200%) scale(0.82);
+  opacity: 0;
+}
+
+.impactCard[data-index="3"] {
+  transform: translate(-50%, -50%) translateX(300%) scale(0.82);
+  opacity: 0;
+}
+
+.impactCardMedia {
+  position: absolute;
+  inset: 0;
+}
+
+.impactCardImage {
+  object-fit: cover;
+  object-position: center;
+}
+
+.impactCardScrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(10, 9, 7, 0.28) 0%,
+    rgba(10, 9, 7, 0.62) 45%,
+    rgba(8, 8, 6, 0.94) 100%
+  );
+}
+
+.impactCardBody {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  box-sizing: border-box;
+  padding: clamp(1.15rem, 2.2vh, 1.75rem);
+}
+
+.impactCardIndex {
+  color: rgba(247, 244, 237, 0.7);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+}
+
+.impactCardFoot {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: auto;
+}
+
+.impactCardBadge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  margin-bottom: clamp(0.6rem, 1.4vh, 1rem);
+  border: 1px solid rgba(247, 244, 237, 0.25);
+  border-radius: 10px;
+  color: rgba(247, 244, 237, 0.92);
+}
+
+.impactCardBadge svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.impactValue {
+  display: block;
+  color: var(--impact-cream);
+  font-family: var(--font-serif, Georgia, serif);
+  font-size: clamp(2rem, 4.6vh, 2.75rem);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  /* Tabular figures so the count-up cannot jitter the copy beneath it. */
+  font-variant-numeric: tabular-nums;
+}
+
+.impactCardTitle {
+  margin: 0.55rem 0 0.35rem;
+  color: var(--impact-cream);
+  font-family: var(--font-sans, sans-serif);
+  font-size: clamp(0.95rem, 2vh, 1.0625rem);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.impactCardText {
+  margin: 0 0 clamp(0.75rem, 1.8vh, 1.15rem);
+  max-width: 94%;
+  color: rgba(247, 244, 237, 0.68);
+  font-family: var(--font-sans, sans-serif);
+  font-size: clamp(0.75rem, 1.6vh, 0.8125rem);
+  line-height: 1.55;
+}
+
+.impactCardArrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid rgba(247, 244, 237, 0.3);
+  border-radius: 999px;
+  color: var(--impact-cream);
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.impactCardArrow:hover,
+.impactCardArrow:focus-visible {
+  background-color: var(--impact-cream);
+  border-color: var(--impact-cream);
+  color: #11110F;
+}
+
+.impactCardArrow:hover .impactArrowIcon,
+.impactCardArrow:focus-visible .impactArrowIcon {
+  transform: translateX(2px);
+}
+
+/* ------------------------------------------------------------------ progress */
+
+.impactProgress {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
+  margin-top: clamp(0.75rem, 2vh, 1.5rem);
+  padding: 0 1.5rem;
+}
+
+.impactProgressStep {
+  color: rgba(247, 244, 237, 0.3);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  transition: color 0.35s ease;
+}
+
+.impactProgressStepActive {
+  color: var(--impact-gold);
+}
+
+.impactProgressLine {
+  position: relative;
+  display: block;
+  width: clamp(2rem, 5vw, 3.75rem);
+  height: 1px;
+  background-color: rgba(247, 244, 237, 0.14);
+  overflow: hidden;
+}
+
+.impactProgressFill {
+  position: absolute;
+  inset: 0;
+  background-color: var(--impact-gold);
+  transform: scaleX(0);
+  transform-origin: left center;
+  will-change: transform;
+}
+
+/* ------------------------------------------------------------------ static fallback */
+
+/*
+ * A second, statically laid out copy of the same four results lives in the markup and is
+ * swapped in under reduced motion - the same approach the Company Journey uses. Doing the
+ * swap in CSS means no first-paint flash of the travelling stage, and `display: none`
+ * keeps whichever copy is hidden out of the accessibility tree.
+ */
+.impactStatic {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .impactScrollArea {
+    display: none;
+  }
+
+  .impactStatic {
+    display: block;
+    position: relative;
+    z-index: 1;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: clamp(4rem, 9vh, 6rem) clamp(1.5rem, 4vw, 3.5rem);
+  }
+
+  /* Matches the animated masthead, which is centred. */
+  .impactStatic .impactIntroCopy {
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  /* In the animated masthead this sits in its own row; here it is a paragraph and needs
+     the gap the flex gap was providing. */
+  .impactStatic .impactKicker {
+    display: block;
+    margin: 1.25rem 0 0;
+  }
+
+  .impactStaticGrid {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2.5rem;
+  }
+
+  .impactStaticItem {
+    position: relative;
+    height: 400px;
+    border: 1px solid var(--impact-hairline);
+    border-radius: 18px;
+    overflow: hidden;
+    background-color: #16150F;
+  }
+}
+
+/* ------------------------------------------------------------------ narrow screens */
+
+@media (max-width: 639px) {
+  .impactSection {
+    --impact-card-h: clamp(280px, 48vh, 440px);
+  }
+
+  /* Extra floor so the progress line clears the site-wide "Ask AI" launcher, which is
+     fixed 28px from the bottom-right and reaches the centre of a phone-width screen. */
+  .impactViewport {
+    padding-bottom: 5.75rem;
+  }
+
+  .impactCard {
+    /* Narrow screens get a slightly squarer card so the copy inside still has room. */
+    aspect-ratio: 78 / 100;
+    max-width: 78vw;
+  }
+
+  .impactProgressLine {
+    width: 1.75rem;
+  }
+}

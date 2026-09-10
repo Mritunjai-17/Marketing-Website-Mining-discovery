@@ -6,371 +6,434 @@ import Link from "next/link";
 import { ArrowRight, Users, Mail, Share2, User } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import styles from "./ImpactCards.module.css";
 
-interface CardSpec {
+interface ImpactResult {
   number: string;
-  badgeIcon: React.ElementType;
+  icon: React.ElementType;
+  /** The exact string that must be on screen once the count-up settles. */
   value: string;
+  /** What the count-up runs to; `format` turns it back into `value` at the end. */
+  countTo: number;
+  prefix: string;
+  suffix: string;
   title: string;
   subtitle: string;
-  bgImage: string;
+  image: string;
   link: string;
-  // Deep gradient overlay reproducing the exact look from the screenshot
-  cardGradient: string;
-  borderHover: string;
-  extraOverlay?: React.ReactNode;
 }
 
-const CARDS: CardSpec[] = [
+const RESULTS: ImpactResult[] = [
   {
     number: "01",
-    badgeIcon: Users,
+    icon: Users,
     value: "+120%",
+    countTo: 120,
+    prefix: "+",
+    suffix: "%",
     title: "Qualified Leads",
     subtitle: "Generated through a targeted digital campaign.",
-    bgImage: "/cards/bg_card_1.jpg",
+    image: "/cards/bg_card_1.jpg",
     link: "/contact",
-    cardGradient: "from-black/10 via-[#1A1208]/70 to-[#0A0704]/98",
-    borderHover: "group-hover:border-[#D4AF37]",
-    extraOverlay: (
-      <svg
-        className="absolute top-8 right-6 w-36 h-20 pointer-events-none opacity-95"
-        viewBox="0 0 140 70"
-        fill="none"
-      >
-        <path
-          d="M 5 60 Q 40 45 70 35 T 130 10"
-          stroke="rgba(255, 255, 255, 0.95)"
-          strokeWidth="1.75"
-          strokeDasharray="3 3"
-        />
-        <circle cx="130" cy="10" r="4.5" fill="#FFFFFF" />
-      </svg>
-    ),
   },
   {
     number: "02",
-    badgeIcon: Mail,
+    icon: Mail,
     value: "+35%",
+    countTo: 35,
+    prefix: "+",
+    suffix: "%",
     title: "Newsletter Subscriptions",
     subtitle: "Growth in newsletter subscriptions.",
-    bgImage: "/cards/bg_card_2.jpg",
+    image: "/cards/bg_card_2.jpg",
     link: "/contact",
-    cardGradient: "from-black/15 via-[#0E1620]/70 to-[#06090D]/98",
-    borderHover: "group-hover:border-[#7AA9D2]",
   },
   {
     number: "03",
-    badgeIcon: Share2,
+    icon: Share2,
     value: "+50%",
+    countTo: 50,
+    prefix: "+",
+    suffix: "%",
     title: "Social Media Engagement",
     subtitle: "Increase in social media engagement.",
-    bgImage: "/cards/bg_card_3.jpg",
+    image: "/cards/bg_card_3.jpg",
     link: "/contact",
-    cardGradient: "from-black/10 via-[#0B1A28]/70 to-[#040A10]/98",
-    borderHover: "group-hover:border-[#4B9CD3]",
   },
   {
     number: "04",
-    badgeIcon: User,
+    icon: User,
     value: "12,000+",
+    countTo: 12000,
+    prefix: "",
+    suffix: "+",
     title: "Substack Subscribers",
     subtitle: "Building a global audience of mining professionals.",
-    bgImage: "/cards/bg_card_4.jpg",
+    image: "/cards/bg_card_4.jpg",
     link: "/contact",
-    cardGradient: "from-black/15 via-[#18130E]/70 to-[#0A0806]/98",
-    borderHover: "group-hover:border-[#E5A855]",
-    extraOverlay: (
-      <div className="absolute top-6 right-6 bg-black/60 backdrop-blur-md rounded-xl p-3 border border-white/20 flex flex-col gap-1.5 shadow-xl">
-        <span className="text-[13px] font-bold text-white leading-none">12,000+</span>
-        <span className="text-[9px] text-white/75 tracking-wider">Subscribers</span>
-        <div className="flex -space-x-1.5 mt-0.5">
-          <div className="w-5 h-5 rounded-full bg-[#E5A855] border border-black/40 flex items-center justify-center text-[8px] font-bold text-black">M</div>
-          <div className="w-5 h-5 rounded-full bg-[#3B82F6] border border-black/40 flex items-center justify-center text-[8px] font-bold text-white">D</div>
-          <div className="w-5 h-5 rounded-full bg-[#10B981] border border-black/40 flex items-center justify-center text-[8px] font-bold text-white">J</div>
-          <div className="w-5 h-5 rounded-full bg-[#8B5CF6] border border-black/40 flex items-center justify-center text-[8px] font-bold text-white">R</div>
-        </div>
-      </div>
-    ),
   },
 ];
 
+const LAST = RESULTS.length - 1;
+
+/*
+ * The scrub is expressed in "units", where one unit is one result travelling into the
+ * centre. UNITS is what maps scroll progress onto that scale:
+ *
+ *   pos = clamp(progress * UNITS - LEAD, 0, LAST)
+ *
+ * LEAD is a short hold at the top of the pin so 01 is genuinely *the active card* for a
+ * moment before it starts moving away, rather than beginning to leave on the first pixel
+ * of scroll. Everything after it is one unit per transition, which puts pos exactly at
+ * LAST when progress hits 1 — the final card lands on centre at the same instant the pin
+ * releases, so there is no dead scroll and no drift after 04 has arrived.
+ */
+const LEAD = 0.35;
+const UNITS = LEAD + LAST;
+
+const clamp = (v: number, min: number, max: number) =>
+  v < min ? min : v > max ? max : v;
+
+const format = (result: ImpactResult, n: number) =>
+  `${result.prefix}${Math.round(n).toLocaleString("en-US")}${result.suffix}`;
+
 export const ImpactCards: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);
-  const orbitStageRef = useRef<HTMLDivElement>(null);
-  const [scrollProgress, setScrollProgress] = useState(0);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const fillRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const valueRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const activeRef = useRef(0);
+
+  const [activeIndex, setActiveIndex] = useState(0);
+  // Gates the count-up so the numbers animate when the section is reached rather than
+  // silently finishing while it is still far below the fold.
+  const [inView, setInView] = useState(false);
 
   useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
     gsap.registerPlugin(ScrollTrigger);
 
     const section = sectionRef.current;
-    const stage = orbitStageRef.current;
-    if (!section || !stage) return;
-
-    const cards = gsap.utils.toArray<HTMLElement>(".orbit-card", stage);
-    const numCards = cards.length;
-
-    // Angle configuration for circular orbit:
-    // Cards start rotated on a circular ring and scroll from left to right as the user scrolls
-
-    /*
-     * Where the sweep stops.
-     *
-     * It used to run to +1.3 rad. The last card (index 0) sits at -1.08 rad within the
-     * ring, so it reached dead centre at progress 0.915 and then spent the final 8.5% of
-     * the pin drifting 0.22 rad past centre — the card had visibly arrived and then kept
-     * moving. Ending the sweep on that card's centre makes progress 1 the true end state.
-     *
-     * SWEEP_END is derived from the card count rather than hard-coded so adding a card
-     * still lands the last one centred, and the pin distance is scaled by the same ratio
-     * as the shortened arc: 2.38 / 2200 is the identical radians-per-pixel the section
-     * already had, so every card sits exactly where it did before at any given scroll
-     * offset. Only the trailing overshoot is gone.
-     */
-    const SWEEP_START = -1.3;
-    const SWEEP_END = ((numCards - 1) / 2) * 0.72;
-    const SWEEP = SWEEP_END - SWEEP_START;
-    const PIN_DISTANCE = Math.round(2200 * (SWEEP / 2.6));
+    const viewport = viewportRef.current;
+    const track = trackRef.current;
+    if (!section || !viewport || !track) return;
 
     const ctx = gsap.context(() => {
-      // Pin the section and drive circular revolution from left to right
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: section,
-          start: "top top",
-          end: `+=${PIN_DISTANCE}`,
-          pin: true,
-          scrub: 1.1,
-          invalidateOnRefresh: true,
-          onUpdate: (self) => {
-            const p = self.progress;
-            setScrollProgress(p);
+      const cards = gsap.utils.toArray<HTMLElement>(`.${styles.impactCard}`, track);
+      if (!cards.length) return;
 
-            // Circular orbit projection:
-            // Radius of the circle (orbiting around the user's field of view)
-            const isDesktop = window.innerWidth >= 1024;
-            const isTablet = window.innerWidth >= 640;
-            const radiusX = isDesktop ? 620 : isTablet ? 460 : 320;
-            const radiusY = isDesktop ? 180 : 120;
-            const radiusZ = isDesktop ? 450 : 300;
+      /*
+       * Measured, not hard-coded: `step` is how far a card travels per transition and it
+       * is derived from the card's own laid-out width, so the CSS clamp that sizes the
+       * card is the single source of truth at every breakpoint. `per` is how much scroll
+       * one transition costs; `drop` gives the off-centre cards a small vertical settle
+       * on narrow screens, where the horizontal room to read depth is thin.
+       */
+      const metrics = { step: 0, drop: 0, per: 560 };
 
-            // Total revolution angle: moving cards continuously from left to right
-            // p = 0 to 1 sweeps at the same rate as before, ending on the last card's centre
-            const baseSweep = SWEEP_START + p * SWEEP; // from -1.3 rad to +1.08 rad
+      const measure = () => {
+        const w = cards[0].offsetWidth;
+        const vw = window.innerWidth;
+        if (vw >= 1024) {
+          metrics.step = w * 1.04;
+          metrics.drop = 0;
+          metrics.per = 560;
+        } else if (vw >= 640) {
+          metrics.step = w * 0.94;
+          metrics.drop = 12;
+          metrics.per = 480;
+        } else {
+          metrics.step = w * 0.8;
+          metrics.drop = 20;
+          metrics.per = 400;
+        }
+      };
 
-            cards.forEach((card, i) => {
-              // Evenly space cards along circular arc
-              const cardOffset = (i - (numCards - 1) / 2) * 0.72;
-              const angle = baseSweep + cardOffset;
+      const render = (pos: number) => {
+        for (let i = 0; i < cards.length; i++) {
+          // Signed distance from the centre: negative once a card has been passed.
+          const d = i - pos;
+          const near = Math.min(Math.abs(d), 1);
+          const far = Math.min(Math.abs(d), 2);
 
-              // 3D coordinates on the circular cylinder / sphere
-              const x = Math.sin(angle) * radiusX;
-              const z = Math.cos(angle) * radiusZ - radiusZ;
-              // Arc curvature for Y to create an elegant parabolic / circular saucer dip
-              const y = (1 - Math.cos(angle)) * radiusY * 0.45;
+          gsap.set(cards[i], {
+            // The card is anchored at the stage's centre point; these two carry the
+            // centring that the stylesheet's own transform does before GSAP takes over.
+            xPercent: -50,
+            yPercent: -50,
+            x: d * metrics.step,
+            y: Math.abs(d) * metrics.drop,
+            // 1 -> 0.82 over the first unit of travel, then held: the card recedes
+            // rather than shrinking away to nothing.
+            scale: 1 - near * 0.18,
+            // A previous card carries a slightly negative tilt, the next one a positive
+            // one, so the pair reads as travelling through the frame, not sliding on rails.
+            rotation: clamp(d, -1, 1) * 3,
+            // 1 -> 0.35 across the first unit, then out to 0 across the second, which is
+            // what stops a third card from muddying the frame behind the neighbours.
+            opacity: far <= 1 ? 1 - near * 0.65 : 0.35 * (2 - far),
+            zIndex: Math.round(100 - far * 20),
+            // Only the card on centre is interactive; the receded ones must not swallow
+            // a click meant for the active one.
+            pointerEvents: near < 0.5 ? "auto" : "none",
+          });
+        }
 
-              // Tangential card rotation (faces toward center of circle)
-              const rotY = (angle * 180) / Math.PI * 0.75;
-              // Gentle natural banking tilt (-4 to +4 deg)
-              const rotZ = Math.sin(angle) * 5;
+        for (let i = 0; i < fillRefs.current.length; i++) {
+          const fill = fillRefs.current[i];
+          if (fill) fill.style.transform = `scaleX(${clamp(pos - i, 0, 1)})`;
+        }
 
-              // Scale & opacity based on front-to-back position
-              const depthFactor = (z + radiusZ) / radiusZ; // ~0 (far back) to ~1 (front)
-              const scale = 0.86 + depthFactor * 0.16; // 0.86 to 1.02
-              const opacity = 0.55 + depthFactor * 0.45;
+        const active = clamp(Math.round(pos), 0, LAST);
+        if (active !== activeRef.current) {
+          activeRef.current = active;
+          setActiveIndex(active);
+        }
+      };
 
-              // Z-index reflects depth so closest card is on top
-              const zIndex = Math.round(depthFactor * 100);
+      const posFor = (progress: number) => clamp(progress * UNITS - LEAD, 0, LAST);
 
-              gsap.set(card, {
-                x,
-                y,
-                z,
-                rotateY: rotY,
-                rotateZ: rotZ,
-                scale,
-                opacity,
-                zIndex,
-              });
-            });
-          },
+      ScrollTrigger.create({
+        trigger: viewport,
+        start: "top top",
+        end: () => `+=${Math.round(UNITS * metrics.per)}`,
+        pin: viewport,
+        pinSpacing: true,
+        scrub: 0.8,
+        invalidateOnRefresh: true,
+        onRefreshInit: measure,
+        onRefresh: (self) => {
+          measure();
+          render(posFor(self.progress));
         },
+        onUpdate: (self) => render(posFor(self.progress)),
       });
+
+      ScrollTrigger.create({
+        trigger: section,
+        start: "top 80%",
+        once: true,
+        onEnter: () => setInView(true),
+      });
+
+      measure();
+      render(0);
     }, section);
 
     return () => ctx.revert();
   }, []);
 
-  return (
-    <section
-      ref={sectionRef}
-      className="relative w-full bg-[#FAF7F2] text-[#1A1D21] overflow-hidden border-b border-[#E5E4DE] select-none"
-    >
-      {/* Warm sunlight vignette overlay matching the exact hero / card background */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10"
-        style={{
-          background:
-            "radial-gradient(circle 900px at 50% 25%, rgba(255, 245, 225, 0.6) 0%, rgba(250, 247, 242, 1) 75%)",
-        }}
-      />
+  // Count-up on the card that has just arrived. Deliberately short and eased out: a
+  // quick settle, not a dashboard ticker. The final write is the literal string.
+  useEffect(() => {
+    if (!inView) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-      <div className="h-screen w-full flex flex-col justify-between pt-12 pb-8 sm:pt-16 sm:pb-12">
-        {/* Top Header Block - Identical to screenshot typography */}
-        <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 flex flex-col sm:flex-row sm:items-end justify-between gap-6 shrink-0 z-20">
-          <div className="flex flex-col items-start gap-2.5 max-w-2xl">
-            {/* Eyebrow */}
-            <div className="flex items-center gap-3">
-              <div className="w-7 h-[2px] bg-[#B8860B]" />
-              <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-[#B8860B]">
-                OUR IMPACT
+    const el = valueRefs.current[activeIndex];
+    const result = RESULTS[activeIndex];
+    if (!el || !result) return;
+
+    const counter = { v: 0 };
+    const tween = gsap.to(counter, {
+      v: result.countTo,
+      duration: 0.8,
+      ease: "power2.out",
+      onUpdate: () => {
+        el.textContent = format(result, counter.v);
+      },
+      onComplete: () => {
+        el.textContent = result.value;
+      },
+    });
+
+    return () => {
+      tween.kill();
+      el.textContent = result.value;
+    };
+  }, [activeIndex, inView]);
+
+  return (
+    <section ref={sectionRef} className={styles.impactSection}>
+      <div className={styles.impactScrollArea}>
+        <div ref={viewportRef} className={styles.impactViewport}>
+          <div aria-hidden="true" className={styles.impactGlow} />
+
+          {/* ---------------------------------------------------------- intro */}
+          <div className={styles.impactIntro}>
+            <div className={styles.impactIntroCopy}>
+              <span className={styles.impactEyebrow}>
+                <span aria-hidden="true" className={styles.impactEyebrowRule} />
+                Our Impact
               </span>
+
+              <h2 className={styles.impactHeadline}>Marketing That Delivers Results</h2>
+
+              <p className={styles.impactLede}>
+                Through strategic media, creative campaigns and investor engagement, we turn
+                visibility into measurable growth.
+              </p>
             </div>
 
-            {/* Headline */}
-            <h2 className="font-serif text-3xl sm:text-4xl lg:text-[48px] font-normal text-[#0B1F3A] leading-[1.08] tracking-[-0.015em]">
-              Marketing That Delivers Results
-            </h2>
-
-            {/* Subheading */}
-            <p className="font-sans text-xs sm:text-sm text-[#57595E] leading-relaxed max-w-xl">
-              Through strategic media, creative campaigns and investor engagement, we turn visibility into measurable growth.
-            </p>
+            <div className={styles.impactIntroAside}>
+              <span className={styles.impactKicker}>Real campaigns. Tangible outcomes.</span>
+              <Link
+                href="/services"
+                aria-label="View all campaigns and outcomes"
+                className={styles.impactArrow}
+              >
+                <ArrowRight className={styles.impactArrowIcon} />
+              </Link>
+            </div>
           </div>
 
-          {/* Real campaigns pill link with arrow */}
-          <div className="flex items-center gap-3 self-start sm:self-end">
-            <span className="font-mono text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.18em] text-[#71717A]">
-              REAL CAMPAIGNS. TANGIBLE OUTCOMES.
-            </span>
-            <Link
-              href="/services"
-              aria-label="View all campaigns and outcomes"
-              className="w-10 h-10 rounded-full border border-[#B8860B]/40 hover:border-[#B8860B] hover:bg-[#B8860B] text-[#B8860B] hover:text-white transition-all duration-300 flex items-center justify-center shadow-xs group"
-            >
-              <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
-            </Link>
-          </div>
-        </div>
-
-        {/* 3D Circular Orbit Carousel Stage */}
-        <div
-          style={{ perspective: 1600 }}
-          className="relative w-full flex-1 flex items-center justify-center overflow-visible my-auto py-2"
-        >
-          <div
-            ref={orbitStageRef}
-            style={{ transformStyle: "preserve-3d" }}
-            className="relative w-full max-w-[1300px] h-[480px] sm:h-[520px] flex items-center justify-center"
-          >
-            {CARDS.map((card) => {
-              const IconComponent = card.badgeIcon;
-              return (
-                <div
-                  key={card.number}
-                  className="orbit-card absolute will-change-transform cursor-pointer transition-shadow duration-300"
-                  style={{
-                    transformOrigin: "center center",
-                    transformStyle: "preserve-3d",
-                  }}
-                >
-                  {/* Clean Rectangular Card Shell with exact rounded-[18px] corners from screenshot */}
-                  <div
-                    className={`group relative flex flex-col justify-between w-[265px] sm:w-[295px] lg:w-[315px] h-[440px] sm:h-[480px] lg:h-[500px] rounded-[18px] sm:rounded-[20px] overflow-hidden p-6 sm:p-7 text-white border border-white/25 shadow-[0_18px_40px_-10px_rgba(0,0,0,0.28)] hover:shadow-[0_28px_55px_-12px_rgba(0,0,0,0.42)] transition-all duration-500 ${card.borderHover}`}
+          {/* ---------------------------------------------------------- showcase */}
+          <div className={styles.impactStage}>
+            <div ref={trackRef} className={styles.impactTrack}>
+              {RESULTS.map((result, index) => {
+                const Icon = result.icon;
+                const isActive = index === activeIndex;
+                return (
+                  <article
+                    key={result.number}
+                    data-index={index}
+                    className={styles.impactCard}
                   >
-                    {/* Background Photographic Image: brightens and illuminates on hover */}
-                    <div className="absolute inset-0 -z-20 overflow-hidden">
+                    <div className={styles.impactCardMedia}>
                       <Image
-                        src={card.bgImage}
-                        alt={card.title}
+                        src={result.image}
+                        alt={result.title}
                         fill
-                        className="object-cover object-center transition-all duration-500 ease-out group-hover:scale-108 group-hover:brightness-[1.25] group-hover:contrast-[1.08]"
-                        sizes="(max-width: 640px) 265px, 315px"
+                        // No preload: the section sits far below the fold, and all four
+                        // images enter the viewport together when the pin begins, so the
+                        // default lazy loading already has them ready in time.
+                        // (`priority` is deprecated as of Next 16 in any case.)
+                        sizes="(max-width: 639px) 78vw, (max-width: 1023px) 40vw, 400px"
+                        className={styles.impactCardImage}
                       />
                     </div>
+                    <div aria-hidden="true" className={styles.impactCardScrim} />
 
-                    {/* Gradient Shading Overlay: relaxes slightly on hover so more light shines through */}
-                    <div
-                      className={`absolute inset-0 -z-10 bg-gradient-to-b ${card.cardGradient} transition-opacity duration-300 group-hover:opacity-75`}
-                    />
+                    <div className={styles.impactCardBody}>
+                      <span className={styles.impactCardIndex}>{result.number}</span>
 
-                    {/* Luminous light wash on hover */}
-                    <div
-                      aria-hidden="true"
-                      className="pointer-events-none absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors duration-400"
-                    />
+                      <div className={styles.impactCardFoot}>
+                        <span aria-hidden="true" className={styles.impactCardBadge}>
+                          <Icon strokeWidth={1.75} />
+                        </span>
 
-                    {/* Custom SVG line or Substack avatar card overlay */}
-                    {card.extraOverlay}
+                        <span
+                          ref={(el) => {
+                            valueRefs.current[index] = el;
+                          }}
+                          className={styles.impactValue}
+                        >
+                          {result.value}
+                        </span>
 
-                    {/* Top Row: Index number (e.g. 01, 02) */}
-                    <div className="flex items-center justify-between z-10">
-                      <span className="font-mono text-xs font-semibold tracking-widest text-white/80">
-                        {card.number}
-                      </span>
-                    </div>
+                        <h3 className={styles.impactCardTitle}>{result.title}</h3>
+                        <p className={styles.impactCardText}>{result.subtitle}</p>
 
-                    {/* Bottom Card Content */}
-                    <div className="flex flex-col z-10 mt-auto">
-                      {/* Frosted Badge Icon Box (matching screenshot's rounded square) */}
-                      <div className="w-12 h-12 rounded-xl bg-white/15 backdrop-blur-md border border-white/25 flex items-center justify-center mb-5 text-white/95 shadow-sm transition-transform duration-300 group-hover:scale-108">
-                        <IconComponent className="w-5 h-5 stroke-[1.75]" />
+                        <Link
+                          href={result.link}
+                          aria-label={`Learn more about ${result.title}`}
+                          // Receded cards are visually gone; leaving their links in the
+                          // tab order would send focus to something nobody can see.
+                          tabIndex={isActive ? undefined : -1}
+                          className={styles.impactCardArrow}
+                        >
+                          <ArrowRight className={styles.impactArrowIcon} />
+                        </Link>
                       </div>
-
-                      {/* Stat Big Value */}
-                      <div className="font-serif text-4xl sm:text-[44px] font-normal text-white leading-none tracking-tight mb-2.5">
-                        {card.value}
-                      </div>
-
-                      {/* Title */}
-                      <h3 className="font-sans text-base sm:text-lg font-semibold text-white leading-snug mb-1.5">
-                        {card.title}
-                      </h3>
-
-                      {/* Subtitle */}
-                      <p className="font-sans text-xs sm:text-[13px] text-white/75 leading-relaxed max-w-[92%] mb-5">
-                        {card.subtitle}
-                      </p>
-
-                      {/* Circular Arrow Button */}
-                      <Link
-                        href={card.link}
-                        aria-label={`Learn more about ${card.title}`}
-                        className="w-10 h-10 rounded-full border border-white/35 bg-white/10 backdrop-blur-sm hover:bg-white hover:text-[#0B1F3A] transition-all duration-300 flex items-center justify-center text-white shadow-xs group/btn"
-                      >
-                        <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover/btn:translate-x-0.5" />
-                      </Link>
                     </div>
-                  </div>
-                </div>
-              );
-            })}
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* ---------------------------------------------------------- progress */}
+          <div className={styles.impactProgress} aria-hidden="true">
+            {RESULTS.map((result, index) => (
+              <React.Fragment key={result.number}>
+                <span
+                  className={`${styles.impactProgressStep} ${
+                    index === activeIndex ? styles.impactProgressStepActive : ""
+                  }`}
+                >
+                  {result.number}
+                </span>
+                {index < LAST && (
+                  <span className={styles.impactProgressLine}>
+                    <span
+                      ref={(el) => {
+                        fillRefs.current[index] = el;
+                      }}
+                      className={styles.impactProgressFill}
+                    />
+                  </span>
+                )}
+              </React.Fragment>
+            ))}
           </div>
         </div>
+      </div>
 
-        {/* Bottom Progress Bar & Scroll Indicator - Identical to screenshot */}
-        <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 flex flex-col items-center justify-center gap-3 shrink-0 z-20">
-          {/* Segmented Gold Progress Line */}
-          <div className="flex items-center gap-2">
-            {[0, 1, 2, 3].map((idx) => {
-              const activeIdx = Math.min(3, Math.floor(scrollProgress * 4));
-              const isActive = idx === activeIdx;
-              return (
-                <div
-                  key={idx}
-                  className={`h-1 rounded-full transition-all duration-300 ${
-                    isActive ? "w-10 bg-[#B8860B]" : "w-10 bg-[#D4AF37]/25"
-                  }`}
-                />
-              );
-            })}
-          </div>
+      {/* ------------------------------------------------------ reduced-motion copy */}
+      <div className={styles.impactStatic}>
+        <div aria-hidden="true" className={styles.impactGlow} />
 
-          {/* Scroll explore note */}
-          <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#A1A1AA] flex items-center gap-1.5">
-            SCROLL TO EXPLORE MORE <span className="text-xs">&darr;</span>
+        <div className={styles.impactIntroCopy}>
+          <span className={styles.impactEyebrow}>
+            <span aria-hidden="true" className={styles.impactEyebrowRule} />
+            Our Impact
           </span>
+          <h2 className={styles.impactHeadline}>Marketing That Delivers Results</h2>
+          <p className={styles.impactLede}>
+            Through strategic media, creative campaigns and investor engagement, we turn
+            visibility into measurable growth.
+          </p>
+          <p className={styles.impactKicker}>Real campaigns. Tangible outcomes.</p>
+        </div>
+
+        <div className={styles.impactStaticGrid}>
+          {RESULTS.map((result) => {
+            const Icon = result.icon;
+            return (
+              <article key={result.number} className={styles.impactStaticItem}>
+                <div className={styles.impactCardMedia}>
+                  <Image
+                    src={result.image}
+                    alt={result.title}
+                    fill
+                    sizes="(max-width: 639px) 90vw, 300px"
+                    className={styles.impactCardImage}
+                  />
+                </div>
+                <div aria-hidden="true" className={styles.impactCardScrim} />
+
+                <div className={styles.impactCardBody}>
+                  <span className={styles.impactCardIndex}>{result.number}</span>
+                  <div className={styles.impactCardFoot}>
+                    <span aria-hidden="true" className={styles.impactCardBadge}>
+                      <Icon strokeWidth={1.75} />
+                    </span>
+                    <span className={styles.impactValue}>{result.value}</span>
+                    <h3 className={styles.impactCardTitle}>{result.title}</h3>
+                    <p className={styles.impactCardText}>{result.subtitle}</p>
+                    <Link
+                      href={result.link}
+                      aria-label={`Learn more about ${result.title}`}
+                      className={styles.impactCardArrow}
+                    >
+                      <ArrowRight className={styles.impactArrowIcon} />
+                    </Link>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
         </div>
       </div>
     </section>

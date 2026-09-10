@@ -70,6 +70,13 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Hide default cursor on desktop fine pointer devices to use custom animated cursor */
+@media (pointer: fine) {
+  body, a, button, input, select, textarea, [role="button"] {
+    cursor: none !important;
+  }
+}
+
 /* Hide Next.js dev indicator badge in dev mode */
 nextjs-portal,
 [data-nextjs-toast],

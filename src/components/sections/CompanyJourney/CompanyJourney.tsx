@@ -278,7 +278,7 @@ export function CompanyJourney() {
         <h2 className={styles.introTitle}>
           FROM MINING NEWS
           <br />
-          TO MARKET INFLUENCE.
+          TO GLOBAL <span className={styles.introTitleAccent}>INFLUENCE.</span>
         </h2>
       </div>
 

@@ -8,6 +8,10 @@
  * here imports the homepage's components — the two Services experiences are independent by
  * construction, not by convention.
  */
+export * from "./servicesData";
+export * from "./ServiceDetailOverlay";
+export * from "./ServiceStoryOverlay";
+export * from "./ServicesJourney";
 export * from "./ServicesHero";
 export * from "./ServicesCapabilities";
 export * from "./ServicesEcosystem";

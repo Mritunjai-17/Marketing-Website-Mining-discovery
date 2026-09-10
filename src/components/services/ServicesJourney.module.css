@@ -1,0 +1,853 @@
+/*
+ * /services — the six service categories as one continuous, scroll-driven journey.
+ *
+ * Three parts in normal flow: an oversized opening, a pinned stage the six chapters pass
+ * through, and a closing statement. The stage is where the work happens — every chapter
+ * owns one image plate and one block of type stacked in the same place, and a chapter
+ * arrives by having its plate wiped open from below while its type rises out of masks.
+ * Nothing cross-fades, so there is never a moment where two chapters are both half-there.
+ *
+ * Scoped names only — imported by ServicesJourney.tsx and nothing else.
+ */
+
+.sjRoot {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #11110F;
+  color: #F7F4ED;
+
+  --sj-gold: #B8924A;
+  --sj-gold-bright: #D4AF62;
+  --sj-cream: #F7F4ED;
+  --sj-navy: #142A46;
+  --sj-hairline: rgba(247, 244, 237, 0.13);
+  --sj-muted: rgba(247, 244, 237, 0.55);
+}
+
+/* ------------------------------------------------------------------------ opening */
+
+/*
+ * The hero is a composition, not a title slide: a drawn survey ground at the back, the
+ * six categories placed around the frame in the middle, and the masthead in front. The
+ * negative space is still there — it is what the constellation is arranged across —
+ * but it now carries the six names the section is about.
+ */
+.sjOpening {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: clamp(7rem, 16vh, 11rem) clamp(1.5rem, 5vw, 5rem) clamp(4rem, 10vh, 7rem);
+  max-width: 1500px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+/* The masthead, in front of the terrain and the constellation. */
+.sjOpeningCopy {
+  position: relative;
+  z-index: 2;
+  max-width: min(62rem, 74%);
+}
+
+/* ------------------------------------------------------------------ hero terrain */
+
+/*
+ * Contours, section lines and stations, all at an opacity that reads as texture rather
+ * than as graphics. Nothing here is interactive or informative — it is the ground the
+ * type stands on, and it must never compete with it.
+ */
+.sjTerrain {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.sjContours ellipse {
+  fill: none;
+  stroke: rgba(184, 146, 74, 0.085);
+  stroke-width: 1;
+}
+
+.sjSurvey path {
+  fill: none;
+  stroke: rgba(247, 244, 237, 0.05);
+  stroke-width: 1;
+}
+
+.sjStations circle {
+  fill: rgba(212, 175, 98, 0.28);
+}
+
+/* ------------------------------------------------------------- the constellation */
+
+.sjConstellation {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/*
+ * A marker, not a card: a number, a rule and a name on one line. Deliberately built
+ * from the same three parts as every other small label on this route, so it reads as
+ * the section's own vocabulary rather than as a component.
+ */
+.sjNode {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  white-space: nowrap;
+  will-change: transform, opacity;
+}
+
+.sjNodeNum {
+  color: var(--sj-gold-bright);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  font-variant-numeric: tabular-nums;
+}
+
+.sjNodeRule {
+  display: block;
+  width: 1.4rem;
+  height: 1px;
+  flex-shrink: 0;
+  background-color: rgba(184, 146, 74, 0.55);
+}
+
+.sjNodeName {
+  color: rgba(247, 244, 237, 0.5);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.sjEyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-bottom: clamp(1.5rem, 4vh, 2.75rem);
+  color: var(--sj-gold);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.sjEyebrowRule {
+  display: block;
+  width: 3rem;
+  height: 1px;
+  background-color: var(--sj-gold);
+}
+
+/*
+ * The page's largest type, and the only place it goes this big. Geist, uppercase, set
+ * tight — the register the site already reserves for architectural statements.
+ */
+.sjOpeningTitle {
+  margin: 0;
+  color: var(--sj-cream);
+  font-family: var(--font-geist, sans-serif);
+  /* Down from 7rem. At the old size a nineteen-character line filled the full
+     measure, leaving no margin for the constellation to stand in; this keeps the
+     masthead dominant while giving the six categories somewhere to be. */
+  font-size: clamp(2rem, 5.6vw, 5.25rem);
+  font-weight: 600;
+  line-height: 0.96;
+  letter-spacing: -0.045em;
+  text-transform: uppercase;
+}
+
+.sjOpeningTitle span {
+  display: block;
+}
+
+/* Every masked line: the wrapper clips, the inner element is what moves. */
+.sjMask {
+  display: block;
+  overflow: hidden;
+}
+
+.sjMaskInner {
+  display: block;
+  will-change: transform;
+}
+
+.sjOpeningLede {
+  margin: clamp(2rem, 5vh, 3.25rem) 0 0;
+  max-width: 34rem;
+  color: var(--sj-muted);
+  font-family: var(--font-sans, sans-serif);
+  font-size: clamp(0.9375rem, 1.15vw, 1.0625rem);
+  line-height: 1.75;
+}
+
+.sjScrollCue {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.9rem;
+  margin-top: clamp(2.5rem, 7vh, 4.5rem);
+  color: rgba(247, 244, 237, 0.38);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+}
+
+.sjScrollCueRule {
+  display: block;
+  width: 1px;
+  height: 3rem;
+  background-color: rgba(184, 146, 74, 0.16);
+  overflow: hidden;
+}
+
+/* Grows out of the label as the reader starts moving — the first sign that the
+   section responds to scroll at all. */
+.sjScrollCueFill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, var(--sj-gold) 0%, rgba(184, 146, 74, 0) 100%);
+  transform-origin: top center;
+  will-change: transform;
+}
+
+/* -------------------------------------------------------------------- pinned stage */
+
+.sjStage {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100svh;
+  box-sizing: border-box;
+  padding: clamp(5.5rem, 11vh, 7.5rem) clamp(1.5rem, 5vw, 5rem) clamp(2rem, 5vh, 3.5rem);
+  overflow: hidden;
+}
+
+.sjFrame {
+  position: relative;
+  width: 100%;
+  max-width: 1500px;
+  height: 100%;
+  margin: 0 auto;
+  /*
+   * The camera. Plates recede on a real Z axis, so their size and their drift toward the
+   * vanishing point both come out of one perspective rather than being faked with scale.
+   *
+   * The origin is aimed at the plate's own centre, not the frame's. Left at the default
+   * 50% 50% a plate that does not sit in the middle of the frame slides toward the middle
+   * as it recedes — which on the stacked layout means it retreats straight down into the
+   * type. Pointing the camera at the plate makes it recede into itself.
+   */
+  perspective: 1500px;
+  perspective-origin: 58% 50%;
+}
+
+/* ------------------------------------------------------------------- image plates */
+
+/*
+ * The stage the plates stand on.
+ *
+ * A grid with every plate in cell 1/1 stacks all six in the same place and centres them
+ * without a transform of its own — which matters, because the transform on each plate is
+ * now the animation and nothing may compete with it. padding-left offsets the whole stack
+ * right of centre by exactly the amount the old left:58% did.
+ *
+ * preserve-3d keeps the plates in the frame's perspective, so translateZ is real depth
+ * rather than a flattened no-op.
+ */
+.sjPlateSlot {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding-left: 16%;
+  transform-style: preserve-3d;
+}
+
+/*
+ * All six plates occupy the same rectangle, and a chapter changes by travelling along Z.
+ * The outgoing plate falls away from the camera — smaller, dimmer, drifting up and off
+ * its axis — while the incoming one comes forward out of the same depth. Neither slides
+ * across the frame, and neither is merely cross-faded: the size is the perspective doing
+ * its job, and opacity only finishes what distance has already started.
+ */
+.sjPlate {
+  grid-area: 1 / 1;
+  height: min(100%, 860px);
+  aspect-ratio: 1 / 1;
+  max-width: 54vw;
+  overflow: hidden;
+  background-color: #16150F;
+  /* Pre-hydration state only; the component writes both every frame. */
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.sjPlate:first-of-type {
+  opacity: 1;
+}
+
+/* Taller than the plate so the parallax inside it never exposes an edge. */
+.sjPlateInner {
+  position: absolute;
+  inset: -9% 0;
+  will-change: transform;
+}
+
+.sjPlateImg {
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Holds the oversized type that crosses the plate's left edge. */
+.sjPlateScrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(10, 9, 7, 0.88) 0%,
+    rgba(10, 9, 7, 0.55) 26%,
+    rgba(10, 9, 7, 0.12) 52%,
+    rgba(10, 9, 7, 0.3) 100%
+  );
+}
+
+/* -------------------------------------------------------------------------- type */
+
+/*
+ * One chapter's type, moved as a single composition rather than line by line. The
+ * neighbouring chapters' titles stay on stage either side of the current one — up and
+ * back for the one just left, down and forward for the one arriving — so the six read as
+ * a continuous sequence instead of six separate screens.
+ */
+.sjChapterText {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  z-index: 5;
+  width: min(48%, 40rem);
+  transform: translateY(-50%);
+  will-change: transform, opacity;
+}
+
+.sjNum {
+  display: block;
+  margin-bottom: clamp(0.85rem, 2vh, 1.4rem);
+  color: var(--sj-gold-bright);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  font-variant-numeric: tabular-nums;
+}
+
+.sjTitle {
+  margin: 0;
+  color: var(--sj-cream);
+  font-family: var(--font-geist, sans-serif);
+  font-size: clamp(2rem, 6.2vw, 5.75rem);
+  font-weight: 600;
+  line-height: 0.95;
+  letter-spacing: -0.045em;
+  text-transform: uppercase;
+}
+
+/*
+ * Concept and service list. These are the current chapter's detail, so they leave well
+ * before its title does — a neighbouring chapter shows its name and nothing else.
+ */
+.sjDetails {
+  will-change: opacity;
+}
+
+/* The two authored lines stack; the mask wrappers that used to do this are gone. */
+.sjTitle span {
+  display: block;
+}
+
+.sjConcept {
+  margin: clamp(1.1rem, 2.8vh, 1.9rem) 0 0;
+  max-width: 26rem;
+  color: rgba(247, 244, 237, 0.72);
+  font-family: var(--font-sans, sans-serif);
+  font-size: clamp(0.875rem, 1.05vw, 1rem);
+  line-height: 1.65;
+}
+
+.sjList {
+  margin: clamp(1.4rem, 3.2vh, 2.25rem) 0 0;
+  padding: 0;
+  list-style: none;
+  max-width: 22rem;
+}
+
+/*
+ * The hairlines belong to the line INSIDE the mask, not to the <li> around it.
+ *
+ * All six chapters' type is stacked in the same place, hidden by their masks. Anything
+ * drawn outside a mask is therefore drawn by all six at once — and because the chapters
+ * have different numbers of services, six sets of rules at six different heights struck
+ * straight through whichever chapter was actually readable. Inside the mask they travel
+ * with their own chapter and only the current one is ever visible.
+ */
+.sjListLine {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  border-top: 1px solid var(--sj-hairline);
+  padding: clamp(0.42rem, 1.1vh, 0.68rem) 0;
+  color: rgba(247, 244, 237, 0.9);
+  font-family: var(--font-sans, sans-serif);
+  font-size: clamp(0.75rem, 1.5vh, 0.875rem);
+  font-weight: 500;
+}
+
+.sjListItem:last-child .sjListLine {
+  border-bottom: 1px solid var(--sj-hairline);
+}
+
+.sjListRule {
+  display: block;
+  width: 0.85rem;
+  height: 1px;
+  flex-shrink: 0;
+  background-color: rgba(184, 146, 74, 0.8);
+}
+
+/* ------------------------------------------------------------------ view details */
+
+/*
+ * An editorial rule with a label on it, not a button shape: mono caps in the section's
+ * gold, sitting on a hairline that brightens with it. Everything about it already exists
+ * elsewhere on this page — the type scale, the gold, the arrow — so it reads as part of
+ * the composition rather than a control dropped onto it.
+ *
+ * It lives inside .sjDetails, so it inherits that block's opacity and is only visible on
+ * the category actually on stage.
+ */
+.sjViewDetails {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: clamp(1rem, 2.4vh, 1.6rem);
+  padding: 0 0 0.45rem;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid rgba(184, 146, 74, 0.42);
+  color: var(--sj-gold);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.3s ease, border-color 0.3s ease;
+}
+
+.sjViewDetails:hover,
+.sjViewDetails:focus-visible {
+  color: var(--sj-gold-bright);
+  border-bottom-color: var(--sj-gold-bright);
+}
+
+.sjViewDetails:focus-visible {
+  outline: 2px solid var(--sj-gold-bright);
+  outline-offset: 4px;
+}
+
+.sjViewDetailsIcon {
+  width: 0.85rem;
+  height: 0.85rem;
+  transition: transform 0.25s ease;
+}
+
+.sjViewDetails:hover .sjViewDetailsIcon,
+.sjViewDetails:focus-visible .sjViewDetailsIcon {
+  transform: translateX(3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sjViewDetailsIcon {
+    transition: none;
+  }
+}
+
+/* ------------------------------------------------------------------- service index */
+
+/*
+ * A reading position, not a navbar: six numerals down the right edge with the current
+ * one in gold. It lives inside the pinned stage, so it is present for exactly as long as
+ * the journey is and never floats over the opening or the closing statement.
+ */
+.sjIndex {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: clamp(0.5rem, 1.6vh, 1rem);
+}
+
+.sjIndexItem {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.7rem;
+  padding: 0.2rem 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  color: rgba(247, 244, 237, 0.3);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  transition: color 0.35s ease;
+}
+
+.sjIndexItem:hover,
+.sjIndexItem:focus-visible {
+  color: rgba(247, 244, 237, 0.75);
+}
+
+.sjIndexItemActive,
+.sjIndexItemActive:hover {
+  color: var(--sj-gold-bright);
+}
+
+.sjIndexRule {
+  display: block;
+  width: 0.9rem;
+  height: 1px;
+  background-color: currentColor;
+  opacity: 0.5;
+  transition: width 0.4s ease;
+}
+
+.sjIndexItemActive .sjIndexRule {
+  width: 2.25rem;
+  opacity: 1;
+}
+
+.sjIndexLabel {
+  min-width: 4.5rem;
+  text-align: right;
+}
+
+/* ------------------------------------------------------------------------ closing */
+
+.sjClosing {
+  position: relative;
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: clamp(6rem, 18vh, 12rem) clamp(1.5rem, 5vw, 5rem) clamp(5rem, 14vh, 9rem);
+}
+
+.sjClosingTitle {
+  margin: clamp(1.5rem, 4vh, 2.5rem) 0 0;
+  color: var(--sj-cream);
+  font-family: var(--font-geist, sans-serif);
+  font-size: clamp(1.875rem, 5.6vw, 5rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  max-width: 22ch;
+}
+
+.sjClosingTitle span {
+  display: block;
+}
+
+.sjCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-top: clamp(2.5rem, 6vh, 4rem);
+  padding: 1.05rem 2.1rem;
+  border: 1px solid rgba(184, 146, 74, 0.55);
+  border-radius: 999px;
+  color: var(--sj-gold-bright);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+.sjCta:hover,
+.sjCta:focus-visible {
+  background-color: var(--sj-gold);
+  border-color: var(--sj-gold);
+  color: #11110F;
+}
+
+.sjCtaIcon {
+  width: 1rem;
+  height: 1rem;
+  transition: transform 0.2s ease;
+}
+
+.sjCta:hover .sjCtaIcon,
+.sjCta:focus-visible .sjCtaIcon {
+  transform: translateX(4px);
+}
+
+/* The seam into the site footer, which opens on #0B1F3A. */
+.sjFooterRamp {
+  height: 140px;
+  background: linear-gradient(180deg, #11110F 0%, #0D1524 60%, #0B1F3A 100%);
+}
+
+/* ---------------------------------------------------------------------- below 1024 */
+
+@media (max-width: 1023px) {
+  /*
+   * No room to set type across the plate, so the composition stacks: plate above, type
+   * below. The chapter still arrives the same way — the plate wipes open, the type rises
+   * out of its masks — only the geometry changes.
+   */
+  .sjFrame {
+    /* The plate sits at the top here, so that is where the camera looks. */
+    perspective-origin: 50% 26%;
+  }
+
+  .sjPlateSlot {
+    padding-left: 0;
+    align-items: start;
+  }
+
+  .sjPlate {
+    height: min(52%, 460px);
+    width: min(100%, 560px);
+    max-width: 100%;
+    aspect-ratio: auto;
+  }
+
+  .sjPlateScrim {
+    background: linear-gradient(
+      180deg,
+      rgba(10, 9, 7, 0.45) 0%,
+      rgba(10, 9, 7, 0.12) 40%,
+      rgba(10, 9, 7, 0.5) 100%
+    );
+  }
+
+  .sjChapterText {
+    top: auto;
+    bottom: 0;
+    transform: none;
+    width: 100%;
+    max-width: 34rem;
+  }
+
+  .sjTitle {
+    font-size: clamp(2rem, 9vw, 3.5rem);
+  }
+
+  .sjConcept {
+    max-width: 30rem;
+  }
+
+  .sjIndex {
+    top: auto;
+    bottom: auto;
+    right: auto;
+    left: 0;
+    /* Sits on the seam between plate and type, out of both their ways. */
+    top: calc(min(52%, 460px) + 0.75rem);
+    transform: none;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.55rem;
+  }
+
+  .sjIndexLabel {
+    display: none;
+  }
+
+  .sjIndexRule {
+    width: 0.7rem;
+  }
+
+  .sjIndexItemActive .sjIndexRule {
+    width: 1.4rem;
+  }
+}
+
+/* ----------------------------------------------------------------------- below 640 */
+
+@media (max-width: 639px) {
+  .sjPlate {
+    height: min(46%, 340px);
+  }
+
+  .sjIndex {
+    top: calc(min(46%, 340px) + 0.6rem);
+  }
+
+  .sjStage {
+    /* Clears the site-wide "Ask AI" launcher fixed at the bottom-right. */
+    padding-bottom: 5.5rem;
+  }
+
+  .sjList {
+    max-width: none;
+  }
+}
+
+/* ------------------------------------------------------------------ reduced motion */
+
+/*
+ * A second, statically laid out copy of the same six chapters lives in the markup and is
+ * swapped in here — the pattern the rest of this codebase uses. The swap is CSS, so there
+ * is no first-paint flash of the travelling stage, and `display: none` keeps whichever
+ * copy is hidden out of the accessibility tree.
+ */
+.sjStatic {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sjScrollArea {
+    display: none;
+  }
+
+  .sjStatic {
+    display: block;
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 clamp(1.5rem, 5vw, 5rem);
+  }
+
+  .sjStaticItem {
+    display: grid;
+    gap: clamp(1.5rem, 4vw, 3rem);
+    padding: clamp(3rem, 8vh, 5rem) 0;
+    border-top: 1px solid var(--sj-hairline);
+  }
+
+  .sjStaticMedia {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background-color: #16150F;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) and (min-width: 900px) {
+  .sjStaticItem {
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+  }
+}
+
+/* ------------------------------------------------------- hero, below 1024px */
+
+@media (max-width: 1023px) {
+  .sjOpeningCopy {
+    max-width: 100%;
+  }
+
+  /* Pulled in toward the copy so the composition stays gathered rather than
+     spreading to the edges of a narrower frame. */
+  .sjNode {
+    gap: 0.5rem;
+  }
+
+  .sjNodeRule {
+    width: 1rem;
+  }
+}
+
+/* ---------------------------------------------------------- hero, below 640px */
+
+/*
+ * Six markers scattered around a phone frame would land on the words. Below 640 the
+ * constellation stops being positioned and becomes a staggered two-column list under
+ * the copy — same six names, same vocabulary, a composition that fits.
+ */
+@media (max-width: 639px) {
+  .sjOpening {
+    justify-content: flex-start;
+    padding-top: clamp(6rem, 14vh, 8rem);
+  }
+
+  .sjConstellation {
+    position: relative;
+    inset: auto;
+    order: 2;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem 1rem;
+    margin-top: clamp(2.5rem, 7vh, 4rem);
+  }
+
+  .sjNode {
+    position: static;
+    left: auto !important;
+    top: auto !important;
+    white-space: normal;
+  }
+
+  /* The odd ones step in, so the two columns read as a stagger not a table. */
+  .sjNode:nth-child(even) {
+    padding-left: 0.75rem;
+  }
+
+  .sjNodeName {
+    letter-spacing: 0.14em;
+  }
+
+  .sjOpeningCopy {
+    order: 1;
+  }
+
+  .sjTerrain {
+    opacity: 0.7;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sjNode,
+  .sjScrollCueFill {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
+/* A marker growing inward from the right edge reads better with its name leading and
+   its number against the frame, mirroring the left-hand ones. */
+.sjNode[style*="right"] {
+  flex-direction: row-reverse;
+}
+
+@media (max-width: 639px) {
+  .sjNode[style*="right"] {
+    flex-direction: row;
+  }
+}

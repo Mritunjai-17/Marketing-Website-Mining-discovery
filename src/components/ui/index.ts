@@ -6,3 +6,4 @@ export * from "./Divider";
 export * from "./Globe";
 export * from "./RevealOnScroll";
 export * from "./SectionReveal";
+export * from "./CustomCursor";

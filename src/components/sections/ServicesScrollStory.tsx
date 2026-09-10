@@ -1,610 +1,618 @@
 "use client";
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import {
-  Compass,
-  Palette,
-  Share2,
-  Target,
-  Building2,
-  Megaphone,
-  Video,
-  Globe,
-  Smartphone,
-  ArrowRight,
-} from "lucide-react";
-
-export interface ServiceCardData {
-  id: string;
-  title: string;
-  category: string;
-  description: string;
-  href: string;
-  icon: React.ElementType;
-}
-
-// 9 Service Cards mapped 1:1 across 4 Stages (2 / 3 / 2 / 2)
-export const STAGE_1_CARDS: ServiceCardData[] = [
-  {
-    id: "digital-branding",
-    title: "Digital Branding",
-    category: "Exploration & Identity",
-    description: "Establish a high-conviction market narrative and corporate identity for junior explorers & mining leaders.",
-    href: "/services#branding",
-    icon: Compass,
-  },
-  {
-    id: "logo-design",
-    title: "Logo & Visual Design",
-    category: "Brand Assets",
-    description: "Vector geological typography, technical report templates, and institutional pitch decks.",
-    href: "/services#logo-design",
-    icon: Palette,
-  },
-];
-
-export const STAGE_2_CARDS: ServiceCardData[] = [
-  {
-    id: "social-media",
-    title: "Social Media Marketing",
-    category: "Discovery Campaign",
-    description: "Targeted broadcast of drill core discoveries and mineral assay highlights across X, YouTube & Stockhouse.",
-    href: "/services#social-media",
-    icon: Share2,
-  },
-  {
-    id: "google-ads",
-    title: "Google Ads & Paid Campaigns",
-    category: "Investor Reach",
-    description: "High-intent search campaign targeting institutional mining funds, retail investors, and sector analysts.",
-    href: "/services#google-ads",
-    icon: Target,
-  },
-  {
-    id: "paid-social",
-    title: "LinkedIn & Meta Ads",
-    category: "Executive Audience",
-    description: "Geotargeted executive placement in financial capitals (Toronto, Vancouver, Perth, London, New York).",
-    href: "/services#paid-social",
-    icon: Building2,
-  },
-];
-
-export const STAGE_3_CARDS: ServiceCardData[] = [
-  {
-    id: "public-relations",
-    title: "Public Relations",
-    category: "Assay & Editorial",
-    description: "Direct wire distribution of drill intercepts, NI 43-101 technical reports, and quarterly filings.",
-    href: "/services#pr",
-    icon: Megaphone,
-  },
-  {
-    id: "webinars-events",
-    title: "Webinars & Events",
-    category: "Executive Q&A",
-    description: "Live CEO townhalls, virtual site visits, and 1-on-1 institutional investor conference hosting.",
-    href: "/services#events",
-    icon: Video,
-  },
-];
-
-export const STAGE_4_CARDS: ServiceCardData[] = [
-  {
-    id: "website-dev",
-    title: "Website Development",
-    category: "Production & Hub",
-    description: "Custom Next.js corporate portals with live commodity tickers, interactive property maps & SEC/SEDAR filings.",
-    href: "/services#web-dev",
-    icon: Globe,
-  },
-  {
-    id: "app-dev",
-    title: "App Development",
-    category: "Investor Mobile App",
-    description: "Native iOS/Android investor relation apps for real-time news alerts, drill results & stock tracking.",
-    href: "/services#app-dev",
-    icon: Smartphone,
-  },
-];
+import { ArrowRight } from "lucide-react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import styles from "./ServicesScrollStory.module.css";
 
 /**
- * The services journey: four photographs, four chapters, one pinned track.
+ * Our Services — six service categories travelling through one pinned
+ * frame.
  *
- * REWRITTEN AWAY FROM A CARD DECK. What was here rendered each stage as a duplicated
- * block carrying a gold "STAGE 01 // STAKE THE CLAIM" pill with a pulsing dot, two or
- * three glassmorphism cards, and a video-player progress bar pinned to the bottom of the
- * viewport. All of it read as UI sitting on top of a photograph rather than as a caption
- * belonging to one. The photograph is now the section; the type annotates it.
+ * WHAT CHANGED, AND WHY. This section used to cross-fade four full-bleed photographs
+ * behind four blocks of type, driven by a rAF loop that derived a category index from the
+ * track's rect. A fade tells the reader nothing about where a category went or what is
+ * coming; the brief asks for categories that physically travel, and for previous/active/
+ * next to be legible at any moment. So the photograph is no longer the section — each
+ * category is now one card carrying its own number, descriptor, title, statement,
+ * capabilities and photograph, and the cards move through the frame under the scroll.
  *
- * WHAT DRIVES IT. One rAF loop measures the track and derives the chapter from it — the
- * same driver the homepage's frame sequence uses, for the same reason: it reads the rect
- * every frame so it cannot hold a stale offset, and it is indifferent to Lenis owning the
- * scroll. Nothing here is on a timer; the pulsing dot was the only autoplaying thing in
- * the section and it is gone.
+ * Because every one of those elements lives inside the single transformed card, a
+ * category cannot come apart mid-travel: there is no second animation to keep in sync.
  *
- * WHERE THE TYPE SITS. Measured, not assumed — run scripts/analyze-service-images.mjs.
- * Each photograph is scored for negative space the same way the mining frames are (dark
- * 0.55 + smooth 0.45), per third:
- *
- *   01-survey   left 0.391  right 0.327  bottom 0.327   -> LEFT   (+0.063)
- *   02-drill    left 0.466  right 0.442  bottom 0.494   -> BOTTOM (+0.028)
- *   03-assay    left 0.261  right 0.339  bottom 0.295   -> RIGHT  (+0.044)
- *   04-pit      left 0.419  right 0.297  bottom 0.320   -> LEFT   (+0.099)
- *
- * That is left / bottom / right / left. The brief asked for left / right / bottom / left;
- * stages 2 and 3 are swapped because the photographs say so — 03-assay's left third is
- * the busiest region in the whole set (0.261), so type on the left there lands squarely
- * on the subject.
+ * WHAT DRIVES IT. GSAP ScrollTrigger, scrubbed — the stack this codebase already pins
+ * Our Impact with. The previous Framer Motion variants were time-based transitions fired
+ * by a state change, which is the fade this brief rules out; a scrub needs the scroll
+ * position itself to be the animation's clock. Framer Motion is untouched elsewhere.
+ * Nothing here runs on a timer, and there are exactly two ScrollTriggers: the intro
+ * reveal and the pin.
  */
 
-/** Where a chapter's type sits. */
-type Zone = "left" | "right" | "bottom";
-
-interface StageData {
-  /** Two digits, shown as the chapter number. */
+interface Service {
   num: string;
-  /** The chapter name. Kept verbatim from the old badge, minus the "STAGE 0X //" prefix. */
-  label: string;
-  title: string;
-  description: string;
-  imageSrc: string;
+  /** The small line above the title. */
+  descriptor: string;
+  /** Set as two lines by design, not by where the box happens to wrap. */
+  titleLines: [string, string];
+  statement: string;
+  /** Named exactly as the portfolio names them — this is a grouping, not a rewrite. */
+  capabilities: string[];
+  image: string;
   alt: string;
-  zone: Zone;
-  cards: ServiceCardData[];
 }
 
-const STAGES: StageData[] = [
+/*
+ * The six categories, and the photographs behind them.
+ *
+ * ON THE IMAGERY. The approved library is smaller than its filenames suggest: four of the
+ * five /stats images are byte-identical duplicates of the /services ones, and
+ * newsletter-briefing.jpg is an open-pit sunset rather than anything to do with a
+ * newsletter. That leaves nine distinct frames, exactly one of which has a person in it
+ * and none of which show media, conference or branding work.
+ *
+ * So 04, 05 and 06 get literal matches — a phone, a person, a desk — and 01, 02 and 03
+ * get mining operations standing in for capital, industry presence and creative
+ * presence, which is what the brief allows for 01 ("investors / mining operations /
+ * capital"). They are also sequenced so no two neighbouring categories look alike: aerial,
+ * then golden panorama, then green mountains, then device, then interior, then desk.
+ *
+ * Alt text describes what is actually in each frame, not what the filename claims.
+ */
+const SERVICES: Service[] = [
   {
     num: "01",
-    label: "Stake the Claim",
-    title: "Geological Survey & Identity",
-    description:
-      "Laying the foundation with high-precision exploration surveying, market positioning, and core brand assets.",
-    imageSrc: "/services/01-survey.jpg",
-    alt: "Geological exploration survey rig",
-    zone: "left",
-    cards: STAGE_1_CARDS,
+    descriptor: "Capital & Investor Reach",
+    titleLines: ["Investor", "Growth"],
+    statement:
+      "Turn mining opportunities into investor attention through targeted outreach and global stakeholder connections.",
+    capabilities: ["Investor Campaigns", "Global Outreach"],
+    image: "/services/04-pit.jpg",
+    alt: "Aerial view of a large open-pit mine in production",
   },
   {
     num: "02",
-    label: "Drill & Reach",
-    title: "Exploration Drilling & Reach",
-    description:
-      "Amplifying active drill rig milestones, core discoveries, and paid institutional investor campaigns.",
-    imageSrc: "/services/02-drill.jpg",
-    alt: "Active exploration drill rig",
-    zone: "bottom",
-    cards: STAGE_2_CARDS,
+    descriptor: "Credibility & Industry Presence",
+    titleLines: ["Media &", "Authority"],
+    statement:
+      "Build authority across the mining media landscape through industry coverage, press communication and conference visibility.",
+    capabilities: ["News & Syndication", "Press Office", "Conference Media"],
+    image: "/stats/newsletter-briefing.jpg",
+    alt: "Open-pit mining operation at sunset",
   },
   {
     num: "03",
-    label: "Assay & Prove",
-    title: "Assay Verification & PR",
-    description:
-      "Broadcasting lab results, technical filings, CEO townhalls, and tier-1 financial press coverage.",
-    imageSrc: "/services/03-assay.jpg",
-    alt: "Core sample assay laboratory",
-    zone: "right",
-    cards: STAGE_3_CARDS,
+    descriptor: "Identity & Creative Presence",
+    titleLines: ["Brand &", "Digital"],
+    statement:
+      "Build a distinctive visual and digital identity that makes mining companies easier to recognize, understand and remember.",
+    capabilities: ["Digital Branding", "Multimedia"],
+    image: "/services/02-drill.jpg",
+    alt: "Exploration drill rig and crew working in mountain terrain",
   },
   {
     num: "04",
-    label: "Smelt & Ship",
-    title: "Commercial Production & Hub",
-    description:
-      "Deploying enterprise corporate web hubs and mobile apps for continuous capital market engagement.",
-    imageSrc: "/services/04-pit.jpg",
-    alt: "Open pit mine in commercial production",
-    zone: "left",
-    cards: STAGE_4_CARDS,
+    descriptor: "Reach & Engagement",
+    titleLines: ["Audience", "Growth"],
+    statement:
+      "Expand your mining audience through targeted campaigns, social growth and paid digital promotion.",
+    capabilities: ["Social Growth & Ads", "Paid Ad Campaigns"],
+    image: "/cards/bg_card_3.jpg",
+    alt: "Smartphone held in front of a mining landscape",
+  },
+  {
+    num: "05",
+    descriptor: "Leadership & Voice",
+    titleLines: ["Executive", "Visibility"],
+    statement:
+      "Put leadership at the center of the story through executive conversations, interviews and industry insights.",
+    capabilities: ["Podcasts & Interviews"],
+    image: "/services/03-assay.jpg",
+    alt: "Mining professional logging drill core samples on a core bench",
+  },
+  {
+    num: "06",
+    descriptor: "Owned Audience",
+    titleLines: ["Direct", "Audience"],
+    statement:
+      "Keep your audience connected through direct, consistent and engaging communication.",
+    capabilities: ["Newsletter & Emailer"],
+    image: "/cards/bg_card_2.jpg",
+    alt: "Laptop and printed industry report on a desk at dusk",
   },
 ];
 
-/** The section's own ground, and the footer's, for the seam at the bottom. */
-const GROUND = "#0B1220";
-const FOOTER_GROUND = "#0B1F3A";
+const LAST = SERVICES.length - 1;
 
-/** Long, decelerating, no overshoot — the same curve the rest of the site moves on. */
-const EASE = [0.22, 1, 0.36, 1] as const;
-
-/** Each chapter drifts along its own axis. 24px, inside the brief's 20-40px. */
-const OFFSET: Record<Zone, { x: number; y: number }> = {
-  left: { x: -24, y: 0 },
-  right: { x: 24, y: 0 },
-  bottom: { x: 0, y: 24 },
-};
-
-/**
- * Placement per zone. The base classes are the phone layout: at 390px there is no left
- * or right negative space worth aiming at, so every chapter anchors low and the
- * photograph keeps the top of the frame.
+/*
+ * The scrub is expressed in "units", one unit being one category travelling onto centre.
+ * Scroll progress maps onto that scale as:
  *
- * The right zone clears 12vw rather than 8vw so it never runs into the chapter index
- * pinned to the right edge.
+ *   raw = progress * UNITS - LEAD
+ *   pos = clamp(raw, 0, LAST)
+ *
+ * LEAD is a short hold at the top of the pin so category 01 is genuinely the active card
+ * for a moment before it starts leaving, rather than departing on the first pixel.
+ *
+ * TAIL is the beat after 04 lands: the card recedes very slightly while the single
+ * closing CTA rises in, and the pin releases the instant that finishes. Nothing is
+ * static during it, so it costs no dead scroll — and because `pos` is clamped at LAST,
+ * no category can re-enter once the sequence is done.
  */
-const PLACE: Record<Zone, string> = {
-  left: "items-end justify-start pb-[14vh] md:pb-[12vh] md:pl-[8vw]",
-  right:
-    "items-end justify-start pb-[14vh] md:items-center md:justify-end md:pr-[12vw] md:pb-[6vh]",
-  bottom: "items-end justify-start pb-[14vh] md:justify-start md:pl-[8vw] md:pb-[11vh]",
-};
+const LEAD = 0.35;
+const TAIL = 0.3;
+const UNITS = LEAD + LAST + TAIL;
+
+/*
+ * The arc the categories travel on.
+ *
+ * SPREAD is how much of the ellipse one step spans, in radians — the slice of the curve
+ * between one category and the next. It is deliberately well under a quarter turn: the
+ * brief asks for a large arc, not a carousel going round, so the categories ride the top of
+ * a big ellipse rather than orbiting a small one.
+ *
+ * MIN_SCALE is the size a category has receded to a full step out from the apex, and the
+ * arc's depth is measured against it — a smaller card has more room before it clips.
+ */
+const SPREAD = 0.66;
+const MIN_SCALE = 0.86;
 
 /**
- * Localized scrims. Every chain reaches fully transparent well before the far edge, so
- * the photograph keeps its real exposure across most of the frame and the darkening
- * never closes into a rectangle behind the words.
+ * Must match the `perspective` declared on .svcTrack — the depth maths reads from it.
+ * A category's on-screen size is turned into the distance that produces it, rather
+ * than being applied as a scale, so the recede is the camera's doing.
  */
-const SCRIM: Record<Zone, string> = {
-  left:
-    "linear-gradient(90deg, rgba(11,18,32,0.86) 0%, rgba(11,18,32,0.60) 20%, rgba(11,18,32,0.26) 42%, rgba(11,18,32,0) 64%)",
-  right:
-    "linear-gradient(270deg, rgba(11,18,32,0.86) 0%, rgba(11,18,32,0.60) 20%, rgba(11,18,32,0.26) 42%, rgba(11,18,32,0) 64%)",
-  bottom:
-    "linear-gradient(0deg, rgba(11,18,32,0.88) 0%, rgba(11,18,32,0.62) 22%, rgba(11,18,32,0.26) 46%, rgba(11,18,32,0) 68%)",
-};
+const PERSPECTIVE = 1600;
 
-/** Keeps a thin glyph off a bright frame without reading as a glow. */
-const INK_SHADOW = "0 1px 12px rgba(11,18,32,0.70)";
-
-const chapterVariants = {
-  hidden: (offset: { x: number; y: number }) => ({
-    opacity: 0,
-    x: offset.x,
-    y: offset.y,
-  }),
-  visible: {
-    opacity: 1,
-    x: 0,
-    y: 0,
-    transition: { duration: 0.7, ease: EASE, staggerChildren: 0.07, delayChildren: 0.1 },
-  },
-};
-
-const lineVariants = {
-  hidden: { opacity: 0, y: 12 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } },
-};
+const clamp = (v: number, min: number, max: number) =>
+  v < min ? min : v > max ? max : v;
 
 export const ServicesScrollStory: React.FC = () => {
-  const containerRef = useRef<HTMLElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  const introRef = useRef<HTMLDivElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const ctaRef = useRef<HTMLDivElement>(null);
+  const fillRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const activeRef = useRef(0);
 
   const [active, setActive] = useState(0);
-  const [compact, setCompact] = useState(false);
 
   useEffect(() => {
-    const check = () => {
-      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      setCompact(reduced || window.innerWidth < 1024);
-    };
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    const section = sectionRef.current;
+    const intro = introRef.current;
+    const viewport = viewportRef.current;
+    const track = trackRef.current;
+    const cta = ctaRef.current;
+    if (!section || !intro || !viewport || !track || !cta) return;
+
+    const ctx = gsap.context(() => {
+      /* ------------------------------------------------------------ intro reveal */
+
+      /*
+       * The masthead arrives with the scroll rather than on a timer, so the label and
+       * headline surface while the handoff ramp above is still darkening — the section
+       * introduces itself instead of cutting in. Scrubbed, so it reverses on the way up.
+       */
+      gsap.fromTo(
+        intro.querySelectorAll(`.${styles.svcIntroItem}`),
+        { y: 34, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          ease: "none",
+          stagger: 0.12,
+          scrollTrigger: {
+            trigger: intro,
+            start: "top 82%",
+            end: "top 32%",
+            scrub: 0.6,
+          },
+        }
+      );
+
+      /* -------------------------------------------------------------- the categories */
+
+      const cards = gsap.utils.toArray<HTMLElement>(`.${styles.svcCard}`, track);
+      // One veil per card, in the same order — see .svcCardVeil in the stylesheet.
+      const veils = gsap.utils.toArray<HTMLElement>(`.${styles.svcCardVeil}`, track);
+      if (!cards.length) return;
+
+      /*
+       * Measured, not hard-coded: travel distance comes from the card's own laid-out
+       * size, so the CSS that sizes the card stays the single source of truth at every
+       * breakpoint.
+       *
+       * The axis is what changes with width. Wide viewports move the categories sideways,
+       * which is where the depth reads. A phone has no horizontal room to spare, so the
+       * stack goes vertical instead — the previous category recedes upward and the next
+       * waits below — and the previous/active/next relationship is identical.
+       */
+      const metrics = {
+        /** true when the categories travel sideways, false when they travel vertically. */
+        wide: true,
+        /** Ellipse radius along the axis the categories travel on. */
+        radiusMain: 0,
+        /** Ellipse radius across it — the depth of the arc. */
+        radiusBow: 0,
+        /** How far the apex sits off-centre, so the arc is balanced in the frame. */
+        apex: 0,
+        /** Hard limits on the across-axis position, so no card is clipped by the stage. */
+        bowMin: 0,
+        bowMax: 0,
+        /** Tangent angle one full step out — the normaliser for rotation. */
+        tangentAtStep: 1,
+        rot: 4,
+        per: 620,
+      };
+
+      const measure = () => {
+        const w = cards[0].offsetWidth;
+        const h = cards[0].offsetHeight;
+        const stageW = track.clientWidth;
+        const stageH = track.clientHeight;
+        const vw = window.innerWidth;
+
+        let main: number;
+
+        if (vw >= 1200) {
+          /*
+           * Sideways travel, but only as far as the window can actually show. At the
+           * crossover the two categories sit half a step either side of centre, so a step
+           * wider than (viewport − card) crops both of them at once and the frame has no
+           * dominant category at exactly the moment the movement should read clearest.
+           * 0.72w is the distance the composition wants; the min is what the window can
+           * give; the floor keeps some travel on a window that is wide but not wide
+           * enough to have both.
+           */
+          main = Math.min(w * 0.72, Math.max(w * 0.4, vw - w * 0.9));
+          metrics.wide = true;
+          metrics.rot = 4;
+          metrics.per = 620;
+        } else if (vw >= 640) {
+          // No window this narrow has room for two cards abreast, so the long axis of
+          // the arc turns vertical and it bows sideways instead. Same curve, rotated.
+          main = h * 0.3;
+          metrics.wide = false;
+          metrics.rot = 2.5;
+          metrics.per = 520;
+        } else {
+          main = h * 0.34;
+          metrics.wide = false;
+          metrics.rot = 1.5;
+          metrics.per = 440;
+        }
+
+        /*
+         * How deep the arc can bow before it starts clipping.
+         *
+         * Measured rather than picked, because it is bounded by real geometry: the card
+         * at the apex must still fit inside the stage, and so must a receded card at the
+         * far end of the bow — and a receded card is smaller, so it has more room. The
+         * 0.85 keeps a margin off both walls. `bowCard` is the card's size ACROSS the
+         * travel axis, which is its height when the categories move sideways.
+         */
+        const bowSpan = metrics.wide ? stageH : stageW;
+        const bowCard = metrics.wide ? h : w;
+        const apexRoom = Math.max(0, bowSpan / 2 - bowCard / 2);
+        const sideRoom = Math.max(0, bowSpan / 2 - (MIN_SCALE * bowCard) / 2);
+
+        metrics.apex = apexRoom * 0.85;
+        // 0.34 of the card was a real curve but a shallow-looking one. 0.46 makes the
+        // vertical leg of the arc unmistakable while the measured ceiling below still
+        // guarantees neither the apex card nor a flank card can clip the stage.
+        const depth = Math.min(bowCard * 0.46, metrics.apex + sideRoom * 0.85);
+
+        metrics.bowMin = -apexRoom;
+        metrics.bowMax = sideRoom;
+
+        // Radii that put a category exactly `main` along and `depth` across at |d| = 1.
+        metrics.radiusMain = main / Math.sin(SPREAD);
+        metrics.radiusBow = depth / (1 - Math.cos(SPREAD));
+        metrics.tangentAtStep =
+          Math.atan2(
+            metrics.radiusBow * Math.sin(SPREAD),
+            metrics.radiusMain * Math.cos(SPREAD)
+          ) || 1;
+      };
+
+      const render = (raw: number) => {
+        const pos = clamp(raw, 0, LAST);
+        // How far into the closing beat we are, 0 → 1.
+        const tail = clamp(raw - LAST, 0, TAIL) / TAIL;
+
+        for (let i = 0; i < cards.length; i++) {
+          // Signed distance from centre: negative once a category has been passed.
+          const d = i - pos;
+          const near = Math.min(Math.abs(d), 1);
+          const far = Math.min(Math.abs(d), 2);
+
+          /*
+           * The category's place on the ellipse. `angle` is continuous in scroll — there
+           * is no previous/active/next switch anywhere in here, only a point on a curve —
+           * so every property below is a function of one arc position and reverses along
+           * the identical path.
+           *
+           * `along` sweeps the travel axis, `across` is the bow: zero at the apex and
+           * growing either side of it, which is what puts the active category at the top
+           * of the arc and its neighbours down and out on both flanks.
+           */
+          /*
+           * Clamped to a quarter turn. Past that the ellipse starts curving back on
+           * itself and a far-off card would drift inward again instead of continuing
+           * out. Nothing within the visible range (|d| < 1.85) ever reaches the clamp —
+           * it only keeps the six-card sequence well-behaved at its far ends.
+           */
+          const angle = clamp(d * SPREAD, -Math.PI / 2, Math.PI / 2);
+          const along = metrics.radiusMain * Math.sin(angle);
+          const across = clamp(
+            metrics.radiusBow * (1 - Math.cos(angle)) - metrics.apex,
+            metrics.bowMin,
+            metrics.bowMax
+          );
+
+          /*
+           * Rotation is the tangent to that ellipse, normalised so a category one step
+           * out sits at `rot` degrees. It is flat at the apex because the tangent there
+           * IS flat, and it changes sign either side because the curve does — the card
+           * banks with the path instead of being tilted at it.
+           */
+          const tangent = Math.atan2(
+            metrics.radiusBow * Math.sin(angle),
+            metrics.radiusMain * Math.cos(angle)
+          );
+
+          // Depth read off the same arc parameter as the position, so a category grows as
+          // it climbs toward the apex and recedes as it falls away — one curve driving
+          // travel, size and tilt together rather than three separate ramps.
+          const depth = clamp((1 - Math.cos(angle)) / (1 - Math.cos(SPREAD)), 0, 1);
+
+          /*
+           * Size is distance, not scale.
+           *
+           * `apparent` is the on-screen size wanted at this point on the arc — 1 at the
+           * apex, 0.86 a step out — and `z` is the depth that produces it under the
+           * track's perspective, from apparent = P / (P - z). Same sizes as before, but
+           * now the card is genuinely further away: it foreshortens, and because the
+           * projection is about the track's centre it also drifts toward the vanishing
+           * point as it goes, which a scale can never do.
+           */
+          const apparent = (1 - depth * 0.14) * (1 - tail * 0.05);
+          const z = PERSPECTIVE * (1 - 1 / apparent);
+
+          gsap.set(cards[i], {
+            xPercent: -50,
+            yPercent: -50,
+            z,
+            /*
+             * Divided by apparent because the perspective divides everything: the
+             * projection scales this offset by the same factor it scales the card, so
+             * pre-dividing is what keeps the arc walked in screen pixels rather than
+             * contracting as the card recedes.
+             */
+            x: (metrics.wide ? along : across) / apparent,
+            y: (metrics.wide ? across : along) / apparent,
+            rotation: (tangent / metrics.tangentAtStep) * metrics.rot,
+            // Solid until the card is off-frame, then out — receding is the veil's job.
+            opacity: clamp((1.85 - far) / 0.7, 0, 1),
+            zIndex: Math.round(100 - far * 20),
+          });
+
+          const veil = veils[i];
+          if (veil) veil.style.opacity = String(near * 0.62 + tail * 0.1);
+        }
+
+        for (let i = 0; i < fillRefs.current.length; i++) {
+          const fill = fillRefs.current[i];
+          if (fill) fill.style.transform = `scaleX(${clamp(pos - i, 0, 1)})`;
+        }
+
+        // One closing CTA, not one per category. It starts rising as 04 comes onto centre
+        // and completes exactly as the pin releases.
+        const reveal = clamp((raw - (LAST - 0.4)) / (0.4 + TAIL), 0, 1);
+        cta.style.opacity = String(reveal);
+        cta.style.transform = `translate3d(0, ${(1 - reveal) * 18}px, 0)`;
+        cta.style.pointerEvents = reveal > 0.9 ? "auto" : "none";
+
+        const next = clamp(Math.round(pos), 0, LAST);
+        if (next !== activeRef.current) {
+          activeRef.current = next;
+          setActive(next);
+        }
+      };
+
+      ScrollTrigger.create({
+        trigger: viewport,
+        start: "top top",
+        end: () => `+=${Math.round(UNITS * metrics.per)}`,
+        pin: viewport,
+        pinSpacing: true,
+        scrub: 0.8,
+        invalidateOnRefresh: true,
+        onRefreshInit: measure,
+        onRefresh: (self) => {
+          measure();
+          render(self.progress * UNITS - LEAD);
+        },
+        onUpdate: (self) => render(self.progress * UNITS - LEAD),
+      });
+
+      measure();
+      render(-LEAD);
+    }, section);
+
+    return () => ctx.revert();
   }, []);
 
-  /*
-   * The driver. Measures the track every frame and derives the chapter from it — the
-   * same approach as the homepage sequence, and for the same reason: a cached scroll
-   * offset goes stale when the content above this section reflows, and this page's
-   * scrolling is owned by Lenis rather than by native scroll events alone.
-   */
-  const tick = useCallback(() => {
-    const node = containerRef.current;
-    if (!node) return;
+  /* ------------------------------------------------------------------- service card */
 
-    const rect = node.getBoundingClientRect();
-    const viewport = window.innerHeight;
-    if (rect.bottom < 0 || rect.top > viewport) return;
+  const cardBody = (service: Service, sizes: string) => (
+    <>
+      <div className={styles.svcCardMedia}>
+        <Image
+          src={service.image}
+          alt={service.alt}
+          fill
+          quality={95}
+          sizes={sizes}
+          className={styles.svcCardImage}
+        />
+        <div aria-hidden="true" className={styles.svcCardMediaScrim} />
 
-    const span = rect.height - viewport;
-    const raw = span > 0 ? -rect.top / span : 0;
-    const p = raw < 0 ? 0 : raw > 1 ? 1 : raw;
+        <div className={styles.svcCardMediaHead}>
+          <span className={styles.svcCardNum}>{service.num}</span>
+          <span aria-hidden="true" className={styles.svcCardNumRule} />
+          <span className={styles.svcCardDescriptor}>{service.descriptor}</span>
+        </div>
+      </div>
 
-    const next = Math.min(STAGES.length - 1, Math.floor(p * STAGES.length));
-    if (next !== activeRef.current) {
-      activeRef.current = next;
-      setActive(next);
-    }
-  }, []);
+      <div className={styles.svcCardPanel}>
+        {/* The two lines are a layout decision; aria-label keeps the accessible name a
+            single properly spaced phrase rather than "InvestorGrowth". */}
+        <h3 className={styles.svcCardTitle} aria-label={service.titleLines.join(" ")}>
+          {service.titleLines.map((line) => (
+            <span key={line}>{line}</span>
+          ))}
+        </h3>
+        <p className={styles.svcCardText}>{service.statement}</p>
 
-  useEffect(() => {
-    if (compact) return;
-    let frame = requestAnimationFrame(function loop() {
-      tick();
-      frame = requestAnimationFrame(loop);
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [compact, tick]);
-
-  /* ----------------------------------------------------------------- chapter type */
-
-  const chapter = (stage: StageData, isActive: boolean) => (
-    <motion.div
-      key={stage.num}
-      custom={OFFSET[stage.zone]}
-      variants={chapterVariants}
-      initial="hidden"
-      animate={isActive ? "visible" : "hidden"}
-      aria-hidden={!isActive}
-      className={`absolute inset-0 flex px-6 md:px-0 ${PLACE[stage.zone]}`}
-      style={{ pointerEvents: isActive ? "auto" : "none" }}
-    >
-      <div className="w-full max-w-[460px]">
-        {/* Number, rule, chapter name on one line — the site's small-label pattern. */}
-        <motion.div variants={lineVariants} className="flex items-center gap-4">
-          <span className="font-mono text-[11px] tabular-nums text-[#D4AF37]/80">
-            {stage.num}
-          </span>
-          <span className="h-px w-10 bg-[#B8860B]/50" />
-          <p
-            className="font-mono text-[11px] font-semibold uppercase tracking-[0.22em] text-[#D4AF37]"
-            style={{ textShadow: INK_SHADOW }}
-          >
-            {stage.label}
-          </p>
-        </motion.div>
-
-        <motion.h2
-          variants={lineVariants}
-          className="mt-5 font-geist text-[clamp(1.5rem,2.2vw,2rem)] font-semibold leading-[1.25] tracking-[-0.035em] text-white"
-          style={{ textShadow: INK_SHADOW }}
-        >
-          {stage.title}
-        </motion.h2>
-
-        <motion.p
-          variants={lineVariants}
-          className="mt-4 text-base font-normal leading-[1.6] text-[#B8BCC8] sm:text-[17px]"
-          style={{ textShadow: INK_SHADOW }}
-        >
-          {stage.description}
-        </motion.p>
-
-        {/*
-          The services themselves. Nine cards became nine lines: name, discipline, link.
-          Each card's paragraph used to live inside a glass panel covering a third of the
-          photograph; at this size the names carry the information and the /services page
-          carries the detail.
-        */}
-        <motion.ul variants={lineVariants} className="mt-6 space-y-2.5">
-          {stage.cards.map((card) => (
-            <li key={card.id}>
-              <Link
-                href={card.href}
-                tabIndex={isActive ? 0 : -1}
-                className="group inline-flex items-baseline gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37] focus-visible:ring-offset-4 focus-visible:ring-offset-[#0B1220]"
-                style={{ textShadow: INK_SHADOW }}
-              >
-                <span className="h-px w-4 shrink-0 translate-y-[-4px] bg-[#B8860B]/50 transition-all duration-300 group-hover:w-7 group-hover:bg-[#D4AF37]" />
-                <span className="text-sm font-medium text-white/85 transition-colors duration-200 group-hover:text-white">
-                  {card.title}
-                </span>
-                <span className="font-mono text-[11px] text-white/40">
-                  {card.category}
-                </span>
-              </Link>
+        <ul className={styles.svcCardCaps}>
+          {service.capabilities.map((capability) => (
+            <li key={capability} className={styles.svcCardCap}>
+              <span aria-hidden="true" className={styles.svcCardCapRule} />
+              {capability}
             </li>
           ))}
-        </motion.ul>
-
-        <motion.div variants={lineVariants} className="mt-7">
-          <Link
-            href="/services"
-            tabIndex={isActive ? 0 : -1}
-            className="group inline-flex items-center gap-2 rounded-md bg-[#B8860B] px-6 py-3 font-sans text-sm font-semibold text-[#0B1F3A] transition-colors duration-200 hover:bg-[#D4AF37] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B8860B] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B1220]"
-          >
-            Explore Our Services
-            <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
-          </Link>
-        </motion.div>
+        </ul>
       </div>
-    </motion.div>
+
+      {/* Depth. Inert in the static copy, driven by distance-from-centre in the pin. */}
+      <div aria-hidden="true" className={styles.svcCardVeil} />
+    </>
   );
 
-  /* ------------------------------------------------------------ compact / reduced */
+  return (
+    <section id="services" ref={sectionRef} className={styles.svcSection}>
+      {/* Seam down from Market Influence & Reach. Decorative, and entirely inside this
+          section, so that one never has to know about it. */}
+      <div aria-hidden="true" className={styles.svcHandoff} />
 
-  if (compact) {
-    return (
-      <section
-        id="services"
-        className="relative font-sans"
-        /*
-         * FOOTER_GROUND, not GROUND, and only on this branch.
-         *
-         * The journey branch below sits on GROUND (#0B1220) and dissolves into the
-         * footer's #0B1F3A with the seam at the bottom of its sticky viewport. This
-         * branch returns before any of that exists, so it was ending on a flat #0B1220
-         * butting straight into the footer - two flat navies one step apart, which is
-         * exactly the horizontal line a seam is there to prevent. Below 1024px that was
-         * the last thing on the page.
-         *
-         * Taking the ground itself to the footer's colour removes the join rather than
-         * hiding it: there is no longer a boundary to blend, so this branch needs no seam
-         * of its own. It also happens to soften the join at the OTHER end - the ramp at
-         * the bottom of TrustedBy is still mid-transition where it meets this section, and
-         * #0B1F3A is nearer that grey than #0B1220 was, so the step there drops from 141
-         * to 102 in summed channel distance.
-         */
-        style={{ backgroundColor: FOOTER_GROUND }}
-      >
-        <div className="container-editorial flex flex-col gap-16 py-20">
-          {STAGES.map((stage) => (
-            <article key={stage.num}>
-              <div className="relative mb-6 h-56 w-full overflow-hidden sm:h-72">
-                <Image
-                  src={stage.imageSrc}
-                  alt={stage.alt}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                />
-                <div
-                  aria-hidden="true"
-                  className="absolute inset-0"
-                  style={{ background: SCRIM.bottom }}
-                />
-              </div>
+      <div ref={introRef} className={styles.svcIntro}>
+        <span className={`${styles.svcEyebrow} ${styles.svcIntroItem}`}>
+          <span aria-hidden="true" className={styles.svcEyebrowRule} />
+          Our Services
+          <span aria-hidden="true" className={styles.svcEyebrowRule} />
+        </span>
 
-              <div className="flex items-center gap-4">
-                <span className="font-mono text-[11px] tabular-nums text-[#D4AF37]/80">
-                  {stage.num}
-                </span>
-                <span className="h-px w-10 bg-[#B8860B]/50" />
-                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.22em] text-[#D4AF37]">
-                  {stage.label}
-                </p>
-              </div>
+        <h2 className={`${styles.svcHeadline} ${styles.svcIntroItem}`}>
+          <span>Mining Expertise.</span>
+          <span>Digital Influence.</span>
+          <span>Investor Reach.</span>
+        </h2>
 
-              <h2 className="mt-5 font-geist text-[clamp(1.5rem,2.2vw,2rem)] font-semibold leading-[1.25] tracking-[-0.035em] text-white">
-                {stage.title}
-              </h2>
-              <p className="mt-4 text-base leading-[1.6] text-[#B8BCC8]">
-                {stage.description}
-              </p>
+        <p className={`${styles.svcLede} ${styles.svcIntroItem}`}>
+          From investor campaigns and industry media to digital branding, audience growth
+          and executive visibility, we help mining companies turn their stories into market
+          influence.
+        </p>
 
-              <ul className="mt-6 space-y-2.5">
-                {stage.cards.map((card) => (
-                  <li key={card.id}>
-                    <Link href={card.href} className="inline-flex items-baseline gap-3">
-                      <span className="h-px w-4 shrink-0 translate-y-[-4px] bg-[#B8860B]/50" />
-                      <span className="text-sm font-medium text-white/85">
-                        {card.title}
-                      </span>
-                      <span className="font-mono text-[11px] text-white/40">
-                        {card.category}
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </article>
-          ))}
+        <span className={`${styles.svcScrollCue} ${styles.svcIntroItem}`}>
+          Scroll to explore
+          <span aria-hidden="true" className={styles.svcScrollCueRule} />
+        </span>
+      </div>
 
-          <Link
-            href="/services"
-            className="inline-flex w-fit items-center gap-2 rounded-md bg-[#B8860B] px-6 py-3 font-sans text-sm font-semibold text-[#0B1F3A]"
-          >
-            Explore Our Services
-            <ArrowRight className="h-4 w-4" />
+      <div className={styles.svcScrollArea}>
+        <div ref={viewportRef} className={styles.svcViewport}>
+          <div aria-hidden="true" className={styles.svcGlow} />
+
+          {/* No section label up here: the masthead directly above says "Our Services"
+              and is still on screen as the pin begins, so a second one only doubled. */}
+          <div className={styles.svcHead}>
+            {/* A table of contents, not carousel navigation: it says where in the
+                journey you are and offers nothing to click. */}
+            <div className={styles.svcProgress} aria-hidden="true">
+              {SERVICES.map((service, index) => (
+                <React.Fragment key={service.num}>
+                  <span
+                    className={`${styles.svcProgressStep} ${
+                      index === active ? styles.svcProgressStepActive : ""
+                    }`}
+                  >
+                    {service.num}
+                  </span>
+                  {index < LAST && (
+                    <span className={styles.svcProgressLine}>
+                      <span
+                        ref={(el) => {
+                          fillRefs.current[index] = el;
+                        }}
+                        className={styles.svcProgressFill}
+                      />
+                    </span>
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
+            <span className="sr-only">
+              Service {active + 1} of {SERVICES.length}
+            </span>
+          </div>
+
+          <div className={styles.svcStage}>
+            <div ref={trackRef} className={styles.svcTrack}>
+              {SERVICES.map((service, index) => (
+                <article
+                  key={service.num}
+                  data-index={index}
+                  className={styles.svcCard}
+                >
+                  {cardBody(
+                    service,
+                    "(max-width: 639px) 82vw, (max-width: 1023px) 50vw, 45vw"
+                  )}
+                </article>
+              ))}
+            </div>
+          </div>
+
+          <div className={styles.svcFoot}>
+            <div ref={ctaRef} style={{ opacity: 0, pointerEvents: "none" }}>
+              <Link href="/services" className={styles.svcCta}>
+                Explore all services
+                <ArrowRight className={styles.svcCtaIcon} />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ---------------------------------------------------- reduced-motion copy */}
+      <div className={styles.svcStatic}>
+        {SERVICES.map((service) => (
+          <article key={service.num} className={styles.svcStaticItem}>
+            {cardBody(
+                    service, "(max-width: 899px) 92vw, 58vw")}
+          </article>
+        ))}
+
+        <div className={styles.svcStaticFoot}>
+          <Link href="/services" className={styles.svcCta}>
+            Explore all services
+            <ArrowRight className={styles.svcCtaIcon} />
           </Link>
         </div>
-      </section>
-    );
-  }
-
-  /* ------------------------------------------------------------------- the journey */
-
-  return (
-    <section
-      id="services"
-      ref={containerRef}
-      className="relative h-[500vh] font-sans"
-      style={{ backgroundColor: GROUND }}
-    >
-      <div className="sticky top-0 h-screen w-full overflow-hidden">
-        {/*
-          All four photographs mounted and cross-faded. No Ken Burns: the previous version
-          drifted and scaled each one to 1.15, which is the "premium template" move the
-          brief rules out, and with the type now anchored to measured negative space a
-          moving frame would slide the subject under the words.
-        */}
-        {STAGES.map((stage, index) => (
-          <motion.div
-            key={stage.num}
-            className="absolute inset-0"
-            initial={false}
-            animate={{ opacity: index === active ? 1 : 0 }}
-            transition={{ duration: 1.1, ease: EASE }}
-          >
-            <Image
-              src={stage.imageSrc}
-              alt={stage.alt}
-              fill
-              priority={index === 0}
-              className="object-cover"
-              sizes="100vw"
-            />
-          </motion.div>
-        ))}
-
-        {/* A contrast floor, not a darkening. */}
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{ backgroundColor: "rgba(11,18,32,0.18)" }}
-        />
-
-        {/* Zone scrims — only the active chapter's is lit, so the shading travels. */}
-        {(Object.keys(SCRIM) as Zone[]).map((zone) => (
-          <motion.div
-            key={zone}
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0"
-            style={{ background: SCRIM[zone] }}
-            initial={false}
-            animate={{ opacity: STAGES[active].zone === zone ? 1 : 0 }}
-            transition={{ duration: 0.9, ease: EASE }}
-          />
-        ))}
-
-        {/* Something for the fixed navbar to sit on. */}
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 h-28"
-          style={{
-            background:
-              "linear-gradient(180deg, rgba(11,18,32,0.72) 0%, rgba(11,18,32,0) 100%)",
-          }}
-        />
-
-        <div className="absolute inset-0 z-20">
-          {STAGES.map((stage, index) => chapter(stage, index === active))}
-        </div>
-
-        {/*
-          Chapter index, right edge. Four numerals and a rule that grows beside the
-          current one — a table of contents, not a playhead. The bar it replaces was a
-          192px track with a percentage readout, which read as a video scrubber and told
-          the reader nothing about where they were in the story.
-        */}
-        <div className="absolute right-6 top-1/2 z-20 hidden -translate-y-1/2 flex-col gap-4 md:flex">
-          {STAGES.map((stage, index) => (
-            <div key={stage.num} className="flex items-center justify-end gap-3">
-              <span
-                className={`h-px bg-[#D4AF37] transition-all duration-500 ease-out ${
-                  index === active ? "w-6 opacity-100" : "w-0 opacity-0"
-                }`}
-              />
-              <span
-                className={`font-mono text-[11px] tabular-nums transition-colors duration-500 ${
-                  index === active ? "text-[#D4AF37]" : "text-white/35"
-                }`}
-              >
-                {stage.num}
-              </span>
-            </div>
-          ))}
-          <span className="sr-only">
-            Chapter {active + 1} of {STAGES.length}
-          </span>
-        </div>
-
-        {/*
-          Seam into the footer. This section's ground is #0B1220 and the footer's is
-          #0B1F3A — close, but a straight join between two flat navies still shows as a
-          line. The entry seam is already handled from the other side, by the ramp at the
-          bottom of TrustedBy.
-        */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-24"
-          style={{
-            background: `linear-gradient(180deg, rgba(11,18,32,0) 0%, ${FOOTER_GROUND} 100%)`,
-          }}
-        />
       </div>
+
+      {/* Seam into the section below, which opens on #050C18 and pulls itself up into
+          the end of this ramp. */}
+      <div aria-hidden="true" className={styles.svcOutro} />
     </section>
   );
 };
