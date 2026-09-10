@@ -1061,7 +1061,7 @@ function YellowCircleIcon() {
   return (
     <svg
       viewBox="0 0 1869 1869"
-      className="inline-block shrink-0 w-[clamp(3.5rem,11vw,12rem)] h-[clamp(3.5rem,11vw,12rem)] mx-4 sm:mx-8 md:mx-12 align-middle drop-shadow-[0_0_24px_rgba(254,242,0,0.4)]"
+      className="inline-block shrink-0 w-[clamp(2rem,9vw,12rem)] h-[clamp(2rem,9vw,12rem)] mx-2 sm:mx-6 md:mx-12 align-middle drop-shadow-[0_0_24px_rgba(254,242,0,0.4)]"
       aria-hidden="true"
     >
       <circle cx="934.453" cy="934.453" r="934.453" fill="#fef200" />
@@ -1073,7 +1073,7 @@ function OrangeDonutIcon() {
   return (
     <svg
       viewBox="0 0 1869 1869"
-      className="inline-block shrink-0 w-[clamp(3.5rem,11vw,12rem)] h-[clamp(3.5rem,11vw,12rem)] mx-4 sm:mx-8 md:mx-12 align-middle drop-shadow-[0_0_24px_rgba(255,104,57,0.4)]"
+      className="inline-block shrink-0 w-[clamp(2rem,9vw,12rem)] h-[clamp(2rem,9vw,12rem)] mx-2 sm:mx-6 md:mx-12 align-middle drop-shadow-[0_0_24px_rgba(255,104,57,0.4)]"
       aria-hidden="true"
     >
       <path
@@ -1088,7 +1088,7 @@ function PurplePieIcon() {
   return (
     <svg
       viewBox="0 0 1870 1838"
-      className="inline-block shrink-0 w-[clamp(3.5rem,11vw,12rem)] h-[clamp(3.5rem,11vw,12rem)] mx-4 sm:mx-8 md:mx-12 align-middle drop-shadow-[0_0_24px_rgba(172,90,255,0.4)]"
+      className="inline-block shrink-0 w-[clamp(2rem,9vw,12rem)] h-[clamp(2rem,9vw,12rem)] mx-2 sm:mx-6 md:mx-12 align-middle drop-shadow-[0_0_24px_rgba(172,90,255,0.4)]"
       aria-hidden="true"
     >
       <path
@@ -1213,7 +1213,8 @@ export function ClientScrubShowcase() {
             end: "bottom 45%",
             scrub: 1.5,
             onUpdate: (self) => {
-              const spacing = Math.max(0, (1 - self.progress) * 60);
+              const maxSpacing = typeof window !== "undefined" && window.innerWidth < 640 ? 12 : typeof window !== "undefined" && window.innerWidth < 1024 ? 28 : 60;
+              const spacing = Math.max(0, (1 - self.progress) * maxSpacing);
               const weight = Math.round(gsap.utils.mapRange(0, 1, 200, 900, self.progress));
               if (textARef.current) {
                 textARef.current.style.letterSpacing = `${spacing}px`;
@@ -1232,7 +1233,8 @@ export function ClientScrubShowcase() {
             end: "bottom 40%",
             scrub: 1.5,
             onUpdate: (self) => {
-              const spacing = Math.max(0, (1 - self.progress) * 90);
+              const maxSpacing = typeof window !== "undefined" && window.innerWidth < 640 ? 14 : typeof window !== "undefined" && window.innerWidth < 1024 ? 36 : 90;
+              const spacing = Math.max(0, (1 - self.progress) * maxSpacing);
               const weight = Math.round(gsap.utils.mapRange(0, 1, 300, 900, self.progress));
               if (textBRef.current) {
                 textBRef.current.style.letterSpacing = `${spacing}px`;
@@ -1272,7 +1274,7 @@ export function ClientScrubShowcase() {
     <section
       ref={containerRef}
       id="clients"
-      className="relative w-full overflow-hidden bg-[#06080E] select-none"
+      className="relative w-full overflow-hidden bg-[#11110F] select-none"
       aria-label="Client Ecosystem"
     >
       {/* Background ambient lighting accents */}
@@ -1298,7 +1300,7 @@ export function ClientScrubShowcase() {
         <div className="w-full overflow-hidden py-4 sm:py-6 md:py-8 flex items-center justify-center">
           <div ref={row1Ref} className="flex items-center justify-center whitespace-nowrap will-change-transform">
             <YellowCircleIcon />
-            <h1 ref={h1Row1Ref} className="text-[clamp(3.8rem,13vw,13.5rem)] uppercase text-white tracking-tighter leading-none select-none transition-colors duration-200 hover:text-[#fef200]" style={{ fontWeight: 600 }}>
+            <h1 ref={h1Row1Ref} className="text-[clamp(2.2rem,11vw,13.5rem)] uppercase text-white tracking-tighter leading-none select-none transition-colors duration-200 hover:text-[#fef200]" style={{ fontWeight: 600 }}>
               EXPLORATION
             </h1>
           </div>
@@ -1306,7 +1308,7 @@ export function ClientScrubShowcase() {
         <div className="w-full border-t border-white/20" />
         <div className="w-full overflow-hidden py-4 sm:py-6 md:py-8 flex items-center justify-center">
           <div ref={row2Ref} className="flex items-center justify-center whitespace-nowrap will-change-transform">
-            <h1 ref={h1Row2Ref} className="text-[clamp(3.8rem,13vw,13.5rem)] uppercase text-white tracking-tighter leading-none select-none transition-colors duration-200 hover:text-[#ff6839]" style={{ fontWeight: 600 }}>
+            <h1 ref={h1Row2Ref} className="text-[clamp(2.2rem,11vw,13.5rem)] uppercase text-white tracking-tighter leading-none select-none transition-colors duration-200 hover:text-[#ff6839]" style={{ fontWeight: 600 }}>
               PRODUCTION
             </h1>
             <OrangeDonutIcon />
@@ -1316,7 +1318,7 @@ export function ClientScrubShowcase() {
         <div className="w-full overflow-hidden py-4 sm:py-6 md:py-8 flex items-center justify-center">
           <div ref={row3Ref} className="flex items-center justify-center whitespace-nowrap will-change-transform">
             <PurplePieIcon />
-            <h1 ref={h1Row3Ref} className="text-[clamp(3.8rem,13vw,13.5rem)] uppercase text-white tracking-tighter leading-none select-none transition-colors duration-200 hover:text-[#ac5aff]" style={{ fontWeight: 600 }}>
+            <h1 ref={h1Row3Ref} className="text-[clamp(2.2rem,11vw,13.5rem)] uppercase text-white tracking-tighter leading-none select-none transition-colors duration-200 hover:text-[#ac5aff]" style={{ fontWeight: 600 }}>
               CAPITAL
             </h1>
           </div>
@@ -1326,7 +1328,7 @@ export function ClientScrubShowcase() {
 
       {/* Row Legend */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 mt-8 mb-16 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs sm:text-sm text-neutral-400 font-mono">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3">
           <span className="inline-block w-2 h-2 rounded-full bg-[#fef200]" />
           <span>PRECIOUS &amp; BASE METALS</span>
           <span className="text-white/20">•</span>
@@ -1345,7 +1347,7 @@ export function ClientScrubShowcase() {
       {/* DISCOVERY ZOOM-OUT HEADING (BEFORE CLIENT INFORMATION) */}
       <div
         ref={discoverySectionRef}
-        className="relative w-full h-screen flex flex-col items-center justify-center bg-[#06080E] text-white overflow-hidden select-none z-10"
+        className="relative w-full h-screen flex flex-col items-center justify-center bg-[#11110F] text-white overflow-hidden select-none z-10"
       >
         {/* Subtle Ambient Radial Glow */}
         <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
@@ -1356,7 +1358,7 @@ export function ClientScrubShowcase() {
         <div className="relative z-10 w-full h-full flex items-center justify-center px-4 pointer-events-none will-change-transform">
           <h2
             ref={discoveryHeadingRef}
-            className="text-[clamp(4.2rem,15vw,14rem)] font-black uppercase text-white tracking-wider leading-none select-none drop-shadow-[0_4px_40px_rgba(0,0,0,0.9)] text-center"
+            className="text-[clamp(2.75rem,14vw,14rem)] font-black uppercase text-white tracking-wider leading-none select-none drop-shadow-[0_4px_40px_rgba(0,0,0,0.9)] text-center"
             style={{
               fontFamily: "var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
               transformOrigin: "center center",
@@ -1366,15 +1368,15 @@ export function ClientScrubShowcase() {
           </h2>
         </div>
 
-        {/* Seamless Crossfade Layer to Off-White (#F5F4F0) */}
+        {/* Seamless Crossfade Layer to Warm Cream (#F7F4ED) */}
         <div
           ref={discoveryBgTransitionRef}
-          className="absolute inset-0 bg-[#F5F4F0] pointer-events-none z-20 opacity-0 will-change-opacity"
+          className="absolute inset-0 bg-[#F7F4ED] pointer-events-none z-20 opacity-0 will-change-opacity"
         />
       </div>
 
-      {/* CLIENT INFORMATION ON OFF-WHITE BACKGROUND (#F5F4F0) */}
-      <div className="relative z-20 w-full bg-[#F5F4F0] text-neutral-900 pt-20 md:pt-32 pb-32 md:pb-44">
+      {/* CLIENT INFORMATION ON WARM CREAM BACKGROUND (#F7F4ED) */}
+      <div className="relative z-20 w-full bg-[#F7F4ED] text-neutral-900 pt-20 md:pt-32 pb-32 md:pb-44">
         {/* Kinetic Title Scrub */}
         <div className="max-w-7xl mx-auto px-6 mb-16 md:mb-20">
           <div className="w-full flex flex-col items-start overflow-hidden">
@@ -1382,10 +1384,10 @@ export function ClientScrubShowcase() {
               <Layers className="w-4 h-4 text-[#B8860B]" />
               Corporate Client Portfolio &amp; Strategic Ecosystem
             </div>
-            <h1 ref={textARef} className="text-[clamp(3.5rem,9vw,9.5rem)] uppercase text-neutral-950 leading-none will-change-[letter-spacing,font-weight] select-none" style={{ fontWeight: 200, letterSpacing: "60px" }}>
+            <h1 ref={textARef} className="text-[clamp(2.4rem,9vw,9.5rem)] uppercase text-neutral-950 leading-none will-change-[letter-spacing,font-weight] select-none" style={{ fontWeight: 200, letterSpacing: "clamp(8px, 3vw, 60px)" }}>
               CLIENT
             </h1>
-            <h1 ref={textBRef} className="text-[clamp(3.5rem,9vw,9.5rem)] uppercase text-neutral-900 leading-none will-change-[letter-spacing,font-weight] select-none mt-2" style={{ fontWeight: 300, letterSpacing: "90px" }}>
+            <h1 ref={textBRef} className="text-[clamp(2.4rem,9vw,9.5rem)] uppercase text-neutral-900 leading-none will-change-[letter-spacing,font-weight] select-none mt-2" style={{ fontWeight: 300, letterSpacing: "clamp(10px, 4vw, 90px)" }}>
               INFORMATION
             </h1>
             <p className="mt-6 text-base sm:text-lg text-neutral-600 max-w-2xl font-normal leading-relaxed">

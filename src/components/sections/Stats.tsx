@@ -165,7 +165,7 @@ export const Stats: React.FC = () => {
                     >
 
                       {/* Oversized Human Serif Stat Number */}
-                      <div className="font-serif text-6xl sm:text-7xl lg:text-8xl font-normal text-[#0B1F3A] tracking-tight leading-none group-hover:text-[#B8860B] transition-colors duration-300">
+                      <div className="font-serif text-5xl sm:text-7xl lg:text-8xl font-normal text-[#0B1F3A] tracking-tight leading-none group-hover:text-[#B8860B] transition-colors duration-300">
                         {stat.valueDisplay}
                       </div>
 

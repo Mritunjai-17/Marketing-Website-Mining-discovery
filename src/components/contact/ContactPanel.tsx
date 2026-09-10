@@ -150,7 +150,7 @@ export const ContactPanel: React.FC = () => {
       <div className="mx-auto w-full max-w-[1180px] overflow-hidden rounded-2xl bg-white shadow-[0_24px_60px_-32px_rgba(11,31,58,0.28)]">
         <div className="grid grid-cols-1 lg:grid-cols-[30%_1fr]">
           {/* ------------------------------------------------- navy information panel */}
-          <div className="relative overflow-hidden bg-[#0B1F3A] px-8 py-10 text-white sm:px-10 lg:py-12">
+          <div className="relative overflow-hidden bg-[#0B1F3A] px-6 py-8 text-white sm:px-10 lg:py-12">
             {/*
               The two soft discs from the reference, bottom-right and mostly outside the
               panel. Low-contrast white rather than gold: gold at this size would be a
@@ -243,7 +243,7 @@ export const ContactPanel: React.FC = () => {
           </div>
 
           {/* --------------------------------------------------------- white form panel */}
-          <div className="bg-white px-8 py-10 sm:px-12 lg:px-14 lg:py-14">
+          <div className="bg-white px-6 py-8 sm:px-12 lg:px-14 lg:py-14">
             <form ref={formRef} onSubmit={onSubmit} noValidate>
               {/* Name and email share a row on desktop, stack below it. */}
               <div className="grid grid-cols-1 gap-x-12 gap-y-8 sm:grid-cols-2">

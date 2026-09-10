@@ -62,7 +62,12 @@ html.lenis, html.lenis body {
   pointer-events: none;
 }
 
+html {
+  overflow-x: clip;
+}
+
 body {
+  overflow-x: clip;
   background-color: var(--bg-color);
   color: var(--text-color);
   font-family: var(--font-sans);
@@ -1131,8 +1136,8 @@ nextjs-portal,
                off-screen, so the panel could not even be dismissed.
 ------------------------------------------------------------------ */
 
-/* 390 of panel plus its 24px gutter needs 414px of viewport. */
-@media (max-width: 420px) {
+/* 390 of panel plus its 24px gutter needs 414px of viewport. Cover up to 640px for mobile devices. */
+@media (max-width: 640px) {
   .chat-window-new {
     left: 12px;
     right: 12px;

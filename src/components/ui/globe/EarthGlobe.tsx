@@ -88,6 +88,8 @@ export interface EarthGlobeProps {
   emphasisId?: string | null;
   /** Fired once per frame with projected anchors. Write to DOM refs here, never to state. */
   onProject?: (anchors: ProjectedAnchor[]) => void;
+  /** Fired right before each frame renders to sync scroll/aiming state with rendering. */
+  onBeforeRender?: () => void;
   /** Fired once the textures are built and the first frame has rendered. */
   onReady?: () => void;
   /** Seconds for one full revolution. */
@@ -253,6 +255,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
   arcs,
   emphasisId = null,
   onProject,
+  onBeforeRender,
   onReady,
   // 58, not 52. The brief for this pass was "slow, elegant, non-distracting", and the
   // drift was already close — this is a ~11% slowing, which is under the threshold where
@@ -268,6 +271,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
   // Props consumed inside the render loop live in refs so changing them never
   // tears down the WebGL context.
   const onProjectRef = useRef(onProject);
+  const onBeforeRenderRef = useRef(onBeforeRender);
   const onReadyRef = useRef(onReady);
   const anchorsRef = useRef(anchors);
   const arcsRef = useRef(arcs);
@@ -278,6 +282,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
 
   useEffect(() => {
     onProjectRef.current = onProject;
+    onBeforeRenderRef.current = onBeforeRender;
     onReadyRef.current = onReady;
     anchorsRef.current = anchors;
     arcsRef.current = arcs;
@@ -664,28 +669,23 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
       // parts that show aliasing first. Kept at its existing value so the planet renders
       // exactly as sharp as it does today. It is an ask, not a promise — ratioCap below is
       // what actually binds on a box this large.
-      const SUPERSAMPLE = 2.8;
-      // Longest drawing-buffer edge. Raised from 4096; the depth buffer dropped above
-      // pays for it, so total framebuffer memory is roughly unchanged. Clamped by what
-      // the driver will really allocate — past maxTextureSize the buffer is silently
-      // clamped or the context is lost, and that is a blank globe rather than a soft one.
       const driverCap = renderer.capabilities.maxTextureSize || 4096;
-      const maxEdge = Math.min(isCompactDevice ? 3200 : 5760, driverCap);
+      // On mobile / compact devices, avoid rendering an overblown 3200px buffer (10M+ pixels)
+      // which thermal throttles mobile GPUs during scroll. A 1600px cap and 1.75 max ratio
+      // is razor-sharp on Retina mobile screens while saving ~75% shader overhead.
+      const maxEdge = Math.min(isCompactDevice ? 1600 : 5760, driverCap);
       const ratioCap = maxEdge / Math.max(width, height);
-      renderer.setPixelRatio(
-        Math.max(
-          1,
-          Math.min(
-            (window.devicePixelRatio || 1) * SUPERSAMPLE,
-            isCompactDevice ? 3 : 4,
-            ratioCap
-          )
-        )
-      );
+      const targetDpr = isCompactDevice
+        ? Math.min(window.devicePixelRatio || 1, 1.75)
+        : Math.min((window.devicePixelRatio || 1) * 2, 3);
+      renderer.setPixelRatio(Math.max(1, Math.min(targetDpr, ratioCap)));
 
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
       renderer.setSize(width, height, false);
+      if (arcNodeMaterial) {
+        arcNodeMaterial.uniforms.uPixelRatio.value = renderer.getPixelRatio();
+      }
       return true;
     };
     applySize();
@@ -813,7 +813,9 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     let userPitch = 0;
 
     const onPointerDown = (e: PointerEvent) => {
-      if (e.button !== 0 && e.pointerType === "mouse") return;
+      // Only drag with a mouse cursor on desktop. On touch devices (smartphones, tablets),
+      // touch gestures must scroll the page naturally without being trapped by the 3D globe.
+      if (e.pointerType !== "mouse" || e.button !== 0) return;
       isPointerDown = true;
       try {
         canvas.setPointerCapture(e.pointerId);
@@ -866,6 +868,9 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     canvas.addEventListener("pointercancel", onPointerUp);
 
     const renderFrame = (delta: number) => {
+      // Synchronize scroll-driven aim and stage right before drawing this frame
+      onBeforeRenderRef.current?.();
+
       if (delta > 0) {
         const target = speedScaleRef.current;
         currentSpeed += (target - currentSpeed) * (1 - Math.exp(-delta * SPEED_EASE));
@@ -1258,7 +1263,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     <canvas
       ref={canvasRef}
       className={className}
-      style={{ ...style, cursor: "grab", touchAction: "none" }}
+      style={{ ...style, cursor: "grab", touchAction: "pan-y" }}
       aria-hidden="true"
     />
   );

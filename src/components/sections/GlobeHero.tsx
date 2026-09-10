@@ -382,7 +382,7 @@ const ZOOM_SPRING = { stiffness: 90, damping: 14 };
  * scrolled out of view and its render loop suspended. Damping across that gap would
  * play the whole skipped span back as a slide, so progress snaps instead.
  */
-const RESUME_GAP = 0.2;
+const RESUME_GAP = 0.8;
 /**
  * Milliseconds without a frame before the scroll listener takes over sampling.
  *
@@ -716,7 +716,15 @@ export const GlobeHero: React.FC = () => {
         visibleY: -boxTop + s.height / 2,
         tiltBias: Math.asin(clamp(1 - s.height / sphereSize, 0, 0.995)),
       };
-      setMetrics({ boxSize, boxTop });
+      setMetrics((prev) => {
+        if (
+          Math.abs(prev.boxSize - boxSize) < 2 &&
+          Math.abs(prev.boxTop - boxTop) < 2
+        ) {
+          return prev;
+        }
+        return { boxSize, boxTop };
+      });
       // Markers are reported in the canvas box's space, so the card bounds that clip
       // them have to be restated in it.
       const boxTopInCard = s.top - c.top + boxTop;
@@ -966,9 +974,6 @@ export const GlobeHero: React.FC = () => {
     // re-pinned every frame, not only when the scroll position changes.
     const aim = projected.find((a) => a.id === FOCUS_ANCHOR_ID);
     if (aim) aimPointRef.current = { x: aim.x, y: aim.y };
-    // Unconditional: this is the per-frame heartbeat that samples the scroll position,
-    // so it has to run before any focus exists too, or the tour could never engage.
-    applyStage();
 
     for (const anchor of projected) {
       const el = markerRefs.current.get(anchor.id);
@@ -992,7 +997,7 @@ export const GlobeHero: React.FC = () => {
       style.opacity = opacity.toFixed(3);
       style.pointerEvents = opacity >= MARKER_OPACITY_FLOOR ? "auto" : "none";
     }
-  }, [applyStage]);
+  }, []);
 
   const handleReady = useCallback(() => setReady(true), []);
 
@@ -1129,7 +1134,7 @@ export const GlobeHero: React.FC = () => {
           So these three values are not free. Changing one without moving the eyebrow's own
           spacing takes the difference straight out of the planet.
         */
-        className="flex flex-col items-center px-6 pb-8 pt-[clamp(86px,calc(30vh-98px),132px)] text-center sm:px-10 sm:pt-[clamp(89px,calc(34vh-163px),149px)] lg:pt-[clamp(97px,calc(36vh-183px),169px)]"
+        className="flex flex-col items-center px-6 pb-8 pt-[74px] text-center sm:px-10 sm:pt-[clamp(89px,calc(34vh-163px),149px)] lg:pt-[clamp(97px,calc(36vh-183px),169px)]"
       >
         {/*
           Eyebrow, headline, support, CTAs. The wrapper above is untouched - same padding,
@@ -1311,6 +1316,7 @@ export const GlobeHero: React.FC = () => {
                   anchors={ANCHORS}
                   arcs={HERO_ARCS}
                   onProject={handleProject}
+                  onBeforeRender={applyStage}
                   onReady={handleReady}
                   focusRef={focusRef}
                   speedScale={activeId ? 0.25 : 1}

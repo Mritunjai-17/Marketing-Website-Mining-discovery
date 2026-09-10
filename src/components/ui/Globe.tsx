@@ -304,8 +304,9 @@ export const Globe: React.FC<GlobeProps> = ({
       {/* Responsive Globe WebGL Canvas Container */}
       <div
         ref={containerRef}
-        className="relative w-full h-full flex items-center justify-center cursor-grab active:cursor-grabbing touch-none aspect-square"
+        className="relative w-full h-full flex items-center justify-center cursor-grab active:cursor-grabbing touch-pan-y aspect-square"
         onPointerDown={(e) => {
+          if ((e as any).pointerType === "touch") return;
           pointerInteracting.current = {
             x: e.clientX,
             y: e.clientY,

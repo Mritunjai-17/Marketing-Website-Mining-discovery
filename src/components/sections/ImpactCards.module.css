@@ -42,8 +42,8 @@
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(circle 900px at 50% 58%, rgba(184, 146, 74, 0.13) 0%, rgba(17, 17, 15, 0) 68%),
-    radial-gradient(circle 700px at 50% 0%, rgba(247, 244, 237, 0.05) 0%, rgba(17, 17, 15, 0) 70%);
+    radial-gradient(circle 900px at 50% 58%, rgba(184, 146, 74, 0.08) 0%, rgba(17, 17, 15, 0) 68%),
+    radial-gradient(circle 700px at 50% 0%, rgba(247, 244, 237, 0.03) 0%, rgba(17, 17, 15, 0) 70%);
 }
 
 /* ------------------------------------------------------------------ pinned viewport */
@@ -162,7 +162,7 @@
 .impactArrow:focus-visible {
   background-color: var(--impact-gold);
   border-color: var(--impact-gold);
-  color: #11110F;
+  color: #06080E;
 }
 
 .impactArrowIcon {
@@ -211,7 +211,7 @@
   border-radius: 18px;
   overflow: hidden;
   border: 1px solid var(--impact-hairline);
-  background-color: #16150F;
+  background-color: #0B0E17;
   will-change: transform, opacity;
   transform-origin: center center;
 }
@@ -251,9 +251,9 @@
   inset: 0;
   background: linear-gradient(
     to bottom,
-    rgba(10, 9, 7, 0.28) 0%,
-    rgba(10, 9, 7, 0.62) 45%,
-    rgba(8, 8, 6, 0.94) 100%
+    rgba(6, 8, 14, 0.28) 0%,
+    rgba(6, 8, 14, 0.62) 45%,
+    rgba(6, 8, 14, 0.95) 100%
   );
 }
 
@@ -346,7 +346,7 @@
 .impactCardArrow:focus-visible {
   background-color: var(--impact-cream);
   border-color: var(--impact-cream);
-  color: #11110F;
+  color: #06080E;
 }
 
 .impactCardArrow:hover .impactArrowIcon,
@@ -451,7 +451,7 @@
     border: 1px solid var(--impact-hairline);
     border-radius: 18px;
     overflow: hidden;
-    background-color: #16150F;
+    background-color: #0B0E17;
   }
 }
 
@@ -465,7 +465,7 @@
   /* Extra floor so the progress line clears the site-wide "Ask AI" launcher, which is
      fixed 28px from the bottom-right and reaches the centre of a phone-width screen. */
   .impactViewport {
-    padding-bottom: 5.75rem;
+    padding: clamp(3.5rem, 6vh, 4.5rem) 0 clamp(4.5rem, 8vh, 5.75rem);
   }
 
   .impactCard {

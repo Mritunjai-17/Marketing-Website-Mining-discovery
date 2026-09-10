@@ -90,7 +90,7 @@ export const Header: React.FC = () => {
             width={220}
             height={85}
             priority
-            className="h-12 sm:h-11 w-auto object-contain transition-transform duration-300 group-hover:scale-102"
+            className="h-9 sm:h-11 w-auto object-contain transition-transform duration-300 group-hover:scale-102"
           />
         </Link>
 
@@ -165,7 +165,7 @@ export const Header: React.FC = () => {
             onClick={() => setMobileMenuOpen(false)}
           />
 
-          <div className="fixed inset-y-0 right-0 w-full max-w-xs bg-[#080909] text-[#FAF7F2] shadow-2xl p-6 flex flex-col justify-between transform transition-transform duration-300 ease-out border-l border-white/10 font-sans">
+          <div className="fixed inset-y-0 right-0 w-full max-w-xs bg-[#080909] text-[#FAF7F2] shadow-2xl p-6 flex flex-col justify-between transform transition-transform duration-300 ease-out border-l border-white/10 font-sans overflow-y-auto overscroll-contain">
             <div>
               <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
                 <Link
