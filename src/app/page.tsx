@@ -10,6 +10,7 @@ import { Stats } from "@/components/sections/Stats";
 import { About } from "@/components/sections/About";
 import { TrustedBy } from "@/components/sections/TrustedBy";
 import { ServicesScrollStory } from "@/components/sections/ServicesScrollStory";
+import { ClientScrubShowcase } from "@/components/sections/ClientScrubShowcase";
 
 export default function Home() {
   // overflow-x-clip, not -hidden: "hidden" computes overflow-y to "auto", which makes
@@ -42,6 +43,11 @@ export default function Home() {
         About's #050C18 at the bottom for About's -mt-16 to land on.
       */}
       <ServicesScrollStory />
+
+      {/* CLIENT ECOSYSTEM & SECTOR REACH */}
+      <div className="relative z-20">
+        <ClientScrubShowcase />
+      </div>
       {/* The header and footer both link to #about; this is what they resolve to. */}
       <About />
       <TrustedBy />

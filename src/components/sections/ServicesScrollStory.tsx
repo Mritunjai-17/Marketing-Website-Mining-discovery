@@ -609,10 +609,6 @@ export const ServicesScrollStory: React.FC = () => {
           </Link>
         </div>
       </div>
-
-      {/* Seam into the section below, which opens on #050C18 and pulls itself up into
-          the end of this ramp. */}
-      <div aria-hidden="true" className={styles.svcOutro} />
     </section>
   );
 };
