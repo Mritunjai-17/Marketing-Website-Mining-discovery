@@ -22,6 +22,7 @@ type Message = {
   type: "bot" | "user";
   html?: string;
   loading?: boolean;
+  statusText?: string;
   sources?: {
     name: string;
     url: string;
@@ -31,6 +32,7 @@ type Message = {
 
 export default function MiningAICHatWidget() {
   const [chatOpen, setChatOpen] = useState(false);
+  const [showBubble, setShowBubble] = useState(true);
   const [input, setInput] = useState("");
   const [conversationId, setConversationId] = useState("");
   const [sending, setSending] = useState(false);
@@ -61,6 +63,8 @@ export default function MiningAICHatWidget() {
 
   function openChat() {
     setChatOpen(true);
+    // Pre-warm the chat API connection in background
+    fetch("/api/chat").catch(() => {});
     setTimeout(() => {
       inputRef.current?.focus();
     }, 100);
@@ -82,10 +86,27 @@ export default function MiningAICHatWidget() {
     const userMsgId = "user-" + Date.now();
     const botMsgId = "bot-" + Date.now();
 
+    // Fast-path: Instant 0ms greeting response
+    const normalized = text.toLowerCase().replace(/[!?.,]/g, "").trim();
+    if (["hi", "hello", "hey", "hola", "good morning", "good evening", "good afternoon"].includes(normalized)) {
+      setMessages((prev) => [
+        ...prev,
+        { id: userMsgId, text, type: "user" },
+        {
+          id: botMsgId,
+          text: "Hello! I am the Mining Discovery AI Assistant. How can I assist you with mining intelligence, commodities, projects, or our investor reach services today?",
+          type: "bot",
+          loading: false,
+        },
+      ]);
+      setInput("");
+      return;
+    }
+
     setMessages((prev) => [
       ...prev,
       { id: userMsgId, text, type: "user" },
-      { id: botMsgId, text: "", type: "bot", loading: true },
+      { id: botMsgId, text: "", type: "bot", loading: true, statusText: "Searching mining sources..." },
     ]);
 
     setInput("");
@@ -112,6 +133,22 @@ export default function MiningAICHatWidget() {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
+      let accumulatedText = "";
+      let rafId: number | null = null;
+
+      const scheduleTextUpdate = () => {
+        if (rafId) return;
+        rafId = requestAnimationFrame(() => {
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === botMsgId
+                ? { ...msg, text: accumulatedText, loading: false }
+                : msg
+            )
+          );
+          rafId = null;
+        });
+      };
 
       while (true) {
         const { value, done } = await reader.read();
@@ -125,16 +162,18 @@ export default function MiningAICHatWidget() {
           if (!line.trim()) continue;
           try {
             const event = JSON.parse(line);
-            if (event.type === "answer") {
+            if (event.type === "status" && event.data) {
+              const statusMsg = String(event.data);
+              setMessages((prev) =>
+                prev.map((msg) =>
+                  msg.id === botMsgId ? { ...msg, statusText: statusMsg } : msg
+                )
+              );
+            } else if (event.type === "answer") {
               const chunk = String(event.data || "");
               if (chunk) {
-                setMessages((prev) =>
-                  prev.map((msg) =>
-                    msg.id === botMsgId
-                      ? { ...msg, text: msg.text + chunk, loading: false }
-                      : msg
-                  )
-                );
+                accumulatedText += chunk;
+                scheduleTextUpdate();
               }
             } else if (event.type === "chart" && event.data) {
               setMessages((prev) =>
@@ -159,17 +198,21 @@ export default function MiningAICHatWidget() {
           if (event.type === "answer") {
             const chunk = String(event.data || "");
             if (chunk) {
-              setMessages((prev) =>
-                prev.map((msg) =>
-                  msg.id === botMsgId
-                    ? { ...msg, text: msg.text + chunk, loading: false }
-                    : msg
-                )
-              );
+              accumulatedText += chunk;
             }
           }
         } catch (e) { }
       }
+
+      // Final synchronous commit to guarantee full text is displayed
+      if (rafId) cancelAnimationFrame(rafId);
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === botMsgId
+            ? { ...msg, text: accumulatedText, loading: false }
+            : msg
+        )
+      );
     } catch (error) {
       console.error("Chat Error:", error);
       setMessages((prev) => {
@@ -198,13 +241,10 @@ export default function MiningAICHatWidget() {
 
   function renderBotMessage(message: Message) {
     if (message.loading) {
-      // Presentation only — this is still the same `message.loading` branch, entered and
-      // left by the same streaming code. Announced politely so a screen reader is told the
-      // assistant is working, which three static full stops never conveyed.
       return (
         <div className="searching-animation" role="status" aria-live="polite">
           <span className="searching-mark" aria-hidden="true">✦</span>
-          <span className="searching-label">Searching mining sources</span>
+          <span className="searching-label">{message.statusText || "Searching mining sources..."}</span>
           <span className="searching-dots" aria-hidden="true">
             <i />
             <i />
@@ -258,12 +298,99 @@ export default function MiningAICHatWidget() {
 
   return (
     <>
-      {/* Floating Chat Button */}
+      {/* Floating Chat Launcher (Matching picture exactly) */}
       {!chatOpen && (
-        <button className="chat-button-new" onClick={openChat} aria-label="Open Mining Discovery AI">
-          <span className="chat-icon">✦</span>
-          <span>Ask AI</span>
-        </button>
+        <div className="chat-launcher-wrapper">
+          {showBubble && (
+            <div
+              className="chat-speech-bubble"
+              onClick={openChat}
+              role="button"
+              tabIndex={0}
+              aria-label="Ask Mining AI"
+            >
+              <span className="chat-bubble-wave">👋</span>
+              <span className="chat-bubble-text-white">Hi!</span>
+              <span className="chat-bubble-text-gold">Ask Mining AI</span>
+            </div>
+          )}
+
+          <button
+            className="chat-button-new"
+            onClick={openChat}
+            aria-label="Open Mining Discovery AI"
+          >
+            {/* Pickaxe with Diamond Icon */}
+            <svg
+              width="38"
+              height="38"
+              viewBox="0 0 44 44"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="chat-pickaxe-icon"
+              aria-hidden="true"
+            >
+              <g transform="rotate(40 22 22)">
+                {/* Solid Diamond Gem perched on head */}
+                <polygon
+                  points="16,2 28,2 33,8 22,17 11,8"
+                  fill="#FFC837"
+                  stroke="#FFC837"
+                  strokeWidth="0.5"
+                  strokeLinejoin="round"
+                />
+                <polygon
+                  points="16,2 28,2 22,8"
+                  fill="#FFE57F"
+                  opacity="0.9"
+                />
+
+                {/* Outline Pickaxe Head */}
+                <path
+                  d="M 7 18 C 6.5 16 9 14.5 13 15 L 19.5 16 L 19.5 21.5 L 13 21 C 9 20.5 7.5 20 7 18 Z"
+                  fill="#0B1220"
+                  stroke="#FFC837"
+                  strokeWidth="1.8"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M 24.5 16 L 29.5 16.5 C 33 17.5 34 20.5 33 24.5 L 31 29.5 C 30 30.5 28.5 29.5 29 27.5 L 30.5 23.5 C 31 21 29.5 20 24.5 21 Z"
+                  fill="#0B1220"
+                  stroke="#FFC837"
+                  strokeWidth="1.8"
+                  strokeLinejoin="round"
+                />
+
+                {/* Shaft / Handle (Outline Capsule) */}
+                <rect
+                  x="19.5"
+                  y="16.5"
+                  width="5"
+                  height="22"
+                  rx="2.5"
+                  fill="#0B1220"
+                  stroke="#FFC837"
+                  strokeWidth="2"
+                />
+
+                {/* Collar band */}
+                <rect
+                  x="18"
+                  y="17.5"
+                  width="8"
+                  height="5"
+                  rx="1.5"
+                  fill="#0B1220"
+                  stroke="#FFC837"
+                  strokeWidth="1.8"
+                />
+              </g>
+            </svg>
+
+            {/* Green Online Status Dot */}
+            <span className="chat-status-dot" aria-hidden="true" />
+          </button>
+        </div>
       )}
 
       {/* Floating Chat Window */}

@@ -1059,43 +1059,61 @@ const CLIENT_PILLARS = [
 
 function YellowCircleIcon() {
   return (
-    <svg
-      viewBox="0 0 1869 1869"
-      className="inline-block shrink-0 w-[clamp(2rem,9vw,12rem)] h-[clamp(2rem,9vw,12rem)] mx-2 sm:mx-6 md:mx-12 align-middle drop-shadow-[0_0_24px_rgba(254,242,0,0.4)]"
-      aria-hidden="true"
-    >
-      <circle cx="934.453" cy="934.453" r="934.453" fill="#fef200" />
-    </svg>
+    <div className="relative inline-block shrink-0 aspect-square w-[clamp(2rem,9vw,12rem)] h-[clamp(2rem,9vw,12rem)] mx-2 sm:mx-6 md:mx-12 align-middle">
+      <div
+        className="relative w-full h-full rounded-full overflow-hidden border-2 xl:border-[3px] border-white/40 shadow-[0_0_24px_rgba(255,255,255,0.12)] group/icon"
+        aria-hidden="true"
+      >
+        <Image
+          src="/services/02-drill.jpg"
+          alt="Exploration drilling"
+          fill
+          sizes="(min-width: 1024px) 192px, 120px"
+          className="object-cover transition-transform duration-500 group-hover:scale-110 group-hover/icon:scale-110"
+          priority
+        />
+      </div>
+    </div>
   );
 }
 
 function OrangeDonutIcon() {
   return (
-    <svg
-      viewBox="0 0 1869 1869"
-      className="inline-block shrink-0 w-[clamp(2rem,9vw,12rem)] h-[clamp(2rem,9vw,12rem)] mx-2 sm:mx-6 md:mx-12 align-middle drop-shadow-[0_0_24px_rgba(255,104,57,0.4)]"
-      aria-hidden="true"
-    >
-      <path
-        d="M934.453,0c515.739,0 934.454,418.715 934.453,934.453c-0,515.739 -418.715,934.454 -934.454,934.454c-515.738,-0 -934.453,-418.715 -934.453,-934.454c0,-515.738 418.715,-934.453 934.453,-934.453Zm0,467.227c257.87,-0 467.227,209.357 467.227,467.226c0,257.87 -209.357,467.227 -467.227,467.227c-257.869,0 -467.226,-209.357 -467.226,-467.227c-0,-257.869 209.357,-467.226 467.226,-467.226Z"
-        fill="#ff6839"
-      />
-    </svg>
+    <div className="relative inline-block shrink-0 aspect-square w-[clamp(2rem,9vw,12rem)] h-[clamp(2rem,9vw,12rem)] mx-2 sm:mx-6 md:mx-12 align-middle">
+      <div
+        className="relative w-full h-full rounded-full overflow-hidden border-2 xl:border-[3px] border-white/40 shadow-[0_0_24px_rgba(255,255,255,0.12)] group/icon"
+        aria-hidden="true"
+      >
+        <Image
+          src="/services/04-pit.jpg"
+          alt="Production open pit"
+          fill
+          sizes="(min-width: 1024px) 192px, 120px"
+          className="object-cover transition-transform duration-500 group-hover:scale-110 group-hover/icon:scale-110"
+          priority
+        />
+      </div>
+    </div>
   );
 }
 
 function PurplePieIcon() {
   return (
-    <svg
-      viewBox="0 0 1870 1838"
-      className="inline-block shrink-0 w-[clamp(2rem,9vw,12rem)] h-[clamp(2rem,9vw,12rem)] mx-2 sm:mx-6 md:mx-12 align-middle drop-shadow-[0_0_24px_rgba(172,90,255,0.4)]"
-      aria-hidden="true"
-    >
-      <path
-        d="M692.831,-0c-498.499,133.572 -794.331,645.968 -660.758,1144.47c133.483,498.166 646.301,794.242 1144.47,660.759c498.499,-133.573 794.331,-645.968 660.758,-1144.47l-902.613,241.855l-241.854,-902.613Z"
-        fill="#ac5aff"
-      />
-    </svg>
+    <div className="relative inline-block shrink-0 aspect-square w-[clamp(2rem,9vw,12rem)] h-[clamp(2rem,9vw,12rem)] mx-2 sm:mx-6 md:mx-12 align-middle">
+      <div
+        className="relative w-full h-full rounded-full overflow-hidden border-2 xl:border-[3px] border-white/40 shadow-[0_0_24px_rgba(255,255,255,0.12)] group/icon"
+        aria-hidden="true"
+      >
+        <Image
+          src="/images/engine/investor_meeting.jpg"
+          alt="Capital markets"
+          fill
+          sizes="(min-width: 1024px) 192px, 120px"
+          className="object-cover transition-transform duration-500 group-hover:scale-110 group-hover/icon:scale-110"
+          priority
+        />
+      </div>
+    </div>
   );
 }
 
@@ -1114,10 +1132,6 @@ export function ClientScrubShowcase() {
   const row2Ref = useRef<HTMLDivElement | null>(null);
   const row3Ref = useRef<HTMLDivElement | null>(null);
 
-  const h1Row1Ref = useRef<HTMLHeadingElement | null>(null);
-  const h1Row2Ref = useRef<HTMLHeadingElement | null>(null);
-  const h1Row3Ref = useRef<HTMLHeadingElement | null>(null);
-
   const discoverySectionRef = useRef<HTMLDivElement | null>(null);
   const discoveryHeadingRef = useRef<HTMLHeadingElement | null>(null);
   const discoveryBgTransitionRef = useRef<HTMLDivElement | null>(null);
@@ -1133,21 +1147,18 @@ export function ClientScrubShowcase() {
     const r1 = row1Ref.current;
     const r2 = row2Ref.current;
     const r3 = row3Ref.current;
-    const h1 = h1Row1Ref.current;
-    const h2 = h1Row2Ref.current;
-    const h3 = h1Row3Ref.current;
 
     if (!container || !r1 || !r2 || !r3) return;
 
     const ctx = gsap.context(() => {
       // 1. THREE WORDS PIC SECTION SCRUB
       const rows = [
-        { el: r1, heading: h1, dir: 1 },
-        { el: r2, heading: h2, dir: -1 },
-        { el: r3, heading: h3, dir: 1 },
+        { el: r1, dir: 1 },
+        { el: r2, dir: -1 },
+        { el: r3, dir: 1 },
       ];
 
-      rows.forEach(({ el, heading, dir }) => {
+      rows.forEach(({ el, dir }) => {
         gsap.fromTo(
           el,
           { x: () => dir * -window.innerWidth * 0.22 },
@@ -1159,16 +1170,6 @@ export function ClientScrubShowcase() {
               start: "top bottom",
               end: "bottom top",
               scrub: true,
-              onUpdate: (self) => {
-                if (heading) {
-                  const progress = self.progress;
-                  const distanceFromCenter = Math.abs(progress - 0.5);
-                  const fontWeight = Math.round(
-                    gsap.utils.mapRange(0, 0.5, 900, 200, distanceFromCenter)
-                  );
-                  heading.style.fontWeight = `${fontWeight}`;
-                }
-              },
             },
           }
         );
@@ -1204,45 +1205,23 @@ export function ClientScrubShowcase() {
         });
       }
 
-      // 3. KINETIC LETTER-SPACING & FONT-WEIGHT SCRUB
-      if (textARef.current) {
-        gsap.timeline({
-          scrollTrigger: {
-            trigger: textARef.current,
-            start: "top 90%",
-            end: "bottom 45%",
-            scrub: 1.5,
-            onUpdate: (self) => {
-              const maxSpacing = typeof window !== "undefined" && window.innerWidth < 640 ? 12 : typeof window !== "undefined" && window.innerWidth < 1024 ? 28 : 60;
-              const spacing = Math.max(0, (1 - self.progress) * maxSpacing);
-              const weight = Math.round(gsap.utils.mapRange(0, 1, 200, 900, self.progress));
-              if (textARef.current) {
-                textARef.current.style.letterSpacing = `${spacing}px`;
-                textARef.current.style.fontWeight = `${weight}`;
-              }
+      // 3. CLIENT INFORMATION ENTRANCE REVEAL
+      if (textARef.current && textBRef.current) {
+        gsap.fromTo(
+          [textARef.current, textBRef.current],
+          { y: 24, opacity: 0.3 },
+          {
+            y: 0,
+            opacity: 1,
+            stagger: 0.1,
+            scrollTrigger: {
+              trigger: textARef.current,
+              start: "top 90%",
+              end: "bottom 55%",
+              scrub: 1,
             },
-          },
-        });
-      }
-
-      if (textBRef.current) {
-        gsap.timeline({
-          scrollTrigger: {
-            trigger: textBRef.current,
-            start: "top 90%",
-            end: "bottom 40%",
-            scrub: 1.5,
-            onUpdate: (self) => {
-              const maxSpacing = typeof window !== "undefined" && window.innerWidth < 640 ? 14 : typeof window !== "undefined" && window.innerWidth < 1024 ? 36 : 90;
-              const spacing = Math.max(0, (1 - self.progress) * maxSpacing);
-              const weight = Math.round(gsap.utils.mapRange(0, 1, 300, 900, self.progress));
-              if (textBRef.current) {
-                textBRef.current.style.letterSpacing = `${spacing}px`;
-                textBRef.current.style.fontWeight = `${weight}`;
-              }
-            },
-          },
-        });
+          }
+        );
       }
 
       // 4. CLIENT LOGO CARDS REVEAL
@@ -1277,69 +1256,52 @@ export function ClientScrubShowcase() {
       className="relative w-full overflow-hidden bg-[#11110F] select-none"
       aria-label="Client Ecosystem"
     >
-      {/* Background ambient lighting accents */}
-      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
-        <div className="absolute top-1/6 -left-48 w-96 h-96 rounded-full bg-[#fef200]/5 blur-[120px]" />
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-[#ff6839]/5 blur-[150px]" />
-      </div>
 
-      {/* Top Header Context */}
-      <div className="relative z-10 max-w-7xl mx-auto px-6 pt-8 md:pt-12 mb-8 md:mb-10 text-center">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/15 bg-white/[0.04] backdrop-blur-sm text-xs font-semibold tracking-wider uppercase text-[#D4AF37] mb-3">
-          <span className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse" />
-          Client Ecosystem &amp; Sector Reach
-        </div>
-        <p className="text-xs sm:text-sm text-neutral-400 font-mono tracking-wider uppercase">
-          Global Natural Resource &amp; Critical Infrastructure Portfolio
+      {/* Top Header Context - Seamlessly Blended */}
+      <div className="relative z-10 max-w-4xl mx-auto px-6 pt-4 sm:pt-6 md:pt-24 lg:pt-28 mb-12 md:mb-16 text-center flex flex-col items-center">
+        <span className="flex items-center justify-center gap-3 text-xs font-mono font-semibold tracking-[0.22em] text-[#B8924A] uppercase mb-3.5">
+          <span className="block w-7 h-px bg-[#B8924A]/70" aria-hidden="true" />
+          Our Impact
+          <span className="block w-7 h-px bg-[#B8924A]/70" aria-hidden="true" />
+        </span>
+
+        <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-[46px] font-normal text-[#FCFBF8] tracking-[-0.015em] leading-[1.12] mb-4">
+          Marketing That Delivers Results
+        </h2>
+
+        <p className="max-w-2xl mx-auto text-sm sm:text-base text-neutral-400 font-sans font-normal leading-relaxed">
+          Through strategic media, creative campaigns and investor engagement, we turn visibility into measurable growth.
         </p>
       </div>
 
       {/* THREE WORDS PIC SECTION */}
       <div ref={rowsWrapperRef} className="relative z-10 w-full flex flex-col my-4">
-        <div className="w-full border-t border-white/20" />
+        <div className="w-full border-t border-white/[0.09]" />
         <div className="w-full overflow-hidden py-4 sm:py-6 md:py-8 flex items-center justify-center">
-          <div ref={row1Ref} className="flex items-center justify-center whitespace-nowrap will-change-transform">
+          <div ref={row1Ref} className="group flex items-center justify-center whitespace-nowrap will-change-transform cursor-default">
             <YellowCircleIcon />
-            <h1 ref={h1Row1Ref} className="text-[clamp(2.2rem,11vw,13.5rem)] uppercase text-white tracking-tighter leading-none select-none transition-colors duration-200 hover:text-[#fef200]" style={{ fontWeight: 600 }}>
+            <h1 className="font-geist font-bold text-[clamp(2.2rem,11vw,13.5rem)] uppercase text-white tracking-[-0.02em] leading-none select-none">
               EXPLORATION
             </h1>
           </div>
         </div>
-        <div className="w-full border-t border-white/20" />
+        <div className="w-full border-t border-white/[0.09]" />
         <div className="w-full overflow-hidden py-4 sm:py-6 md:py-8 flex items-center justify-center">
-          <div ref={row2Ref} className="flex items-center justify-center whitespace-nowrap will-change-transform">
-            <h1 ref={h1Row2Ref} className="text-[clamp(2.2rem,11vw,13.5rem)] uppercase text-white tracking-tighter leading-none select-none transition-colors duration-200 hover:text-[#ff6839]" style={{ fontWeight: 600 }}>
+          <div ref={row2Ref} className="group flex items-center justify-center whitespace-nowrap will-change-transform cursor-default">
+            <h1 className="font-geist font-bold text-[clamp(2.2rem,11vw,13.5rem)] uppercase text-white tracking-[-0.02em] leading-none select-none">
               PRODUCTION
             </h1>
             <OrangeDonutIcon />
           </div>
         </div>
-        <div className="w-full border-t border-white/20" />
+        <div className="w-full border-t border-white/[0.09]" />
         <div className="w-full overflow-hidden py-4 sm:py-6 md:py-8 flex items-center justify-center">
-          <div ref={row3Ref} className="flex items-center justify-center whitespace-nowrap will-change-transform">
+          <div ref={row3Ref} className="group flex items-center justify-center whitespace-nowrap will-change-transform cursor-default">
             <PurplePieIcon />
-            <h1 ref={h1Row3Ref} className="text-[clamp(2.2rem,11vw,13.5rem)] uppercase text-white tracking-tighter leading-none select-none transition-colors duration-200 hover:text-[#ac5aff]" style={{ fontWeight: 600 }}>
+            <h1 className="font-geist font-bold text-[clamp(2.2rem,11vw,13.5rem)] uppercase text-white tracking-[-0.02em] leading-none select-none">
               CAPITAL
             </h1>
           </div>
-        </div>
-        <div className="w-full border-t border-white/20" />
-      </div>
-
-      {/* Row Legend */}
-      <div className="relative z-10 max-w-7xl mx-auto px-6 mt-8 mb-16 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs sm:text-sm text-neutral-400 font-mono">
-        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3">
-          <span className="inline-block w-2 h-2 rounded-full bg-[#fef200]" />
-          <span>PRECIOUS &amp; BASE METALS</span>
-          <span className="text-white/20">•</span>
-          <span className="inline-block w-2 h-2 rounded-full bg-[#ff6839]" />
-          <span>PRODUCING ASSETS &amp; ENERGY</span>
-          <span className="text-white/20">•</span>
-          <span className="inline-block w-2 h-2 rounded-full bg-[#ac5aff]" />
-          <span>GLOBAL CAPITAL MARKETS</span>
-        </div>
-        <div className="tracking-wider uppercase text-neutral-500">
-          Global Mining &amp; Energy Client Registry
         </div>
       </div>
 
@@ -1349,8 +1311,14 @@ export function ClientScrubShowcase() {
         ref={discoverySectionRef}
         className="relative w-full h-screen flex flex-col items-center justify-center bg-[#11110F] text-white overflow-hidden select-none z-10"
       >
-        {/* Subtle Ambient Radial Glow */}
-        <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+        {/* Subtle Ambient Radial Glow masked away from top seam */}
+        <div
+          className="absolute inset-0 pointer-events-none flex items-center justify-center"
+          style={{
+            maskImage: "linear-gradient(to bottom, transparent 0%, black 25%, black 75%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 25%, black 75%, transparent 100%)",
+          }}
+        >
           <div className="w-[500px] sm:w-[700px] h-[500px] sm:h-[700px] rounded-full bg-[#B8860B]/10 blur-[140px]" />
         </div>
 
@@ -1358,9 +1326,8 @@ export function ClientScrubShowcase() {
         <div className="relative z-10 w-full h-full flex items-center justify-center px-4 pointer-events-none will-change-transform">
           <h2
             ref={discoveryHeadingRef}
-            className="text-[clamp(2.75rem,14vw,14rem)] font-black uppercase text-white tracking-wider leading-none select-none drop-shadow-[0_4px_40px_rgba(0,0,0,0.9)] text-center"
+            className="font-geist font-bold text-[clamp(2.75rem,14vw,14rem)] uppercase text-white tracking-[-0.02em] leading-none select-none drop-shadow-[0_4px_40px_rgba(0,0,0,0.9)] text-center"
             style={{
-              fontFamily: "var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
               transformOrigin: "center center",
             }}
           >
@@ -1372,11 +1339,15 @@ export function ClientScrubShowcase() {
         <div
           ref={discoveryBgTransitionRef}
           className="absolute inset-0 bg-[#F7F4ED] pointer-events-none z-20 opacity-0 will-change-opacity"
+          style={{ backgroundColor: "#F7F4ED" }}
         />
       </div>
 
       {/* CLIENT INFORMATION ON WARM CREAM BACKGROUND (#F7F4ED) */}
-      <div className="relative z-20 w-full bg-[#F7F4ED] text-neutral-900 pt-20 md:pt-32 pb-32 md:pb-44">
+      <div
+        className="relative z-20 w-full bg-[#F7F4ED] text-neutral-900 pt-20 md:pt-32 pb-32 md:pb-44"
+        style={{ backgroundColor: "#F7F4ED" }}
+      >
         {/* Kinetic Title Scrub */}
         <div className="max-w-7xl mx-auto px-6 mb-16 md:mb-20">
           <div className="w-full flex flex-col items-start overflow-hidden">
@@ -1384,10 +1355,16 @@ export function ClientScrubShowcase() {
               <Layers className="w-4 h-4 text-[#B8860B]" />
               Corporate Client Portfolio &amp; Strategic Ecosystem
             </div>
-            <h1 ref={textARef} className="text-[clamp(2.4rem,9vw,9.5rem)] uppercase text-neutral-950 leading-none will-change-[letter-spacing,font-weight] select-none" style={{ fontWeight: 200, letterSpacing: "clamp(8px, 3vw, 60px)" }}>
+            <h1
+              ref={textARef}
+              className="font-geist font-bold text-[clamp(2.4rem,9vw,9.5rem)] uppercase text-neutral-950 leading-[0.92] tracking-[-0.02em] select-none"
+            >
               CLIENT
             </h1>
-            <h1 ref={textBRef} className="text-[clamp(2.4rem,9vw,9.5rem)] uppercase text-neutral-900 leading-none will-change-[letter-spacing,font-weight] select-none mt-2" style={{ fontWeight: 300, letterSpacing: "clamp(10px, 4vw, 90px)" }}>
+            <h1
+              ref={textBRef}
+              className="font-geist font-bold text-[clamp(2.4rem,9vw,9.5rem)] uppercase text-neutral-900 leading-[0.92] tracking-[-0.02em] select-none mt-2"
+            >
               INFORMATION
             </h1>
             <p className="mt-6 text-base sm:text-lg text-neutral-600 max-w-2xl font-normal leading-relaxed">

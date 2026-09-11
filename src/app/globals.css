@@ -402,36 +402,183 @@ nextjs-portal,
    CHATBOT WIDGET STYLES (EXACT MATCH TO MINING_ASSISTENT DESIGN)
 ============================================================ */
 
-.chat-button-new {
+.chat-launcher-wrapper {
   position: fixed;
   right: 28px;
   bottom: 28px;
-  height: 54px;
-  padding: 0 22px;
-  border: none;
-  border-radius: 30px;
-  background: linear-gradient(135deg, #071426 0%, #102844 100%);
-  color: #ffffff;
-  box-shadow: 0 12px 35px rgba(7, 20, 38, 0.28);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.chat-speech-bubble {
+  position: relative;
+  background: #0B1220;
+  border: 1.5px solid #FFC837;
+  border-radius: 16px;
+  padding: 8px 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  user-select: none;
+  cursor: pointer;
+  margin-bottom: 10px;
+  margin-right: 0px;
+  pointer-events: auto;
+  transition: box-shadow 0.2s ease;
+  animation: chatbot-bubble-float 3s ease-in-out infinite;
+}
+
+.chat-speech-bubble:hover {
+  animation-play-state: paused;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+}
+
+/* Speech bubble caret */
+.chat-speech-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -9px;
+  right: 22px;
+  width: 0;
+  height: 0;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 9px solid #FFC837;
+}
+
+.chat-speech-bubble::before {
+  content: '';
+  position: absolute;
+  bottom: -7px;
+  right: 23px;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 8px solid #0B1220;
+  z-index: 2;
+}
+
+.chat-bubble-wave {
+  font-size: 16px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  transform-origin: 70% 70%;
+  animation: wave-hand 2.2s infinite;
+}
+
+.chat-bubble-text-white {
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 14.5px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+.chat-bubble-text-gold {
+  color: #FFC837;
+  font-weight: 800;
+  font-size: 14.5px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+
+.chat-button-new {
+  position: relative;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: #0B1220;
+  border: 2px solid #FFC837;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 700;
-  z-index: 1000;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  padding: 0;
+  pointer-events: auto;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
 }
 
 .chat-button-new:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 17px 42px rgba(7, 20, 38, 0.34);
+  transform: scale(1.06);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.5), 0 0 18px rgba(255, 200, 55, 0.25);
 }
 
-.chat-icon {
-  color: #D4AF37;
-  font-size: 18px;
+.chat-pickaxe-icon {
+  display: block;
+}
+
+.chat-status-dot {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #10B981;
+  border: 2px solid #0B1220;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.4);
+}
+
+@keyframes chatbot-bubble-appear {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes chatbot-bubble-float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes wave-hand {
+  0% {
+    transform: rotate(0deg);
+  }
+  10% {
+    transform: rotate(14deg);
+  }
+  20% {
+    transform: rotate(-8deg);
+  }
+  30% {
+    transform: rotate(14deg);
+  }
+  40% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
+  60% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@media (max-width: 640px) {
+  .chat-launcher-wrapper {
+    right: 16px;
+    bottom: 16px;
+  }
 }
 
 .chat-window-new {
