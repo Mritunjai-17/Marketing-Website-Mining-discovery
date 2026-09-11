@@ -14,11 +14,11 @@
   position: relative;
   width: 100%;
   box-sizing: border-box;
-  background-color: #11110F;
+  background-color: #1A1512;
   color: #F7F4ED;
 
-  --sj-gold: #B8924A;
-  --sj-gold-bright: #D4AF62;
+  --sj-gold: #C9A050;
+  --sj-gold-bright: #C9A050;
   --sj-cream: #F7F4ED;
   --sj-navy: #142A46;
   --sj-hairline: rgba(247, 244, 237, 0.13);
@@ -45,6 +45,7 @@
   max-width: 1500px;
   margin: 0 auto;
   overflow: hidden;
+  background-color: #1A1512;
 }
 
 /* The masthead, in front of the terrain and the constellation. */
@@ -72,18 +73,21 @@
 
 .sjContours ellipse {
   fill: none;
-  stroke: rgba(184, 146, 74, 0.085);
-  stroke-width: 1;
+  stroke: #332C24;
+  stroke-width: 1.25;
+  opacity: 0.18;
 }
 
 .sjSurvey path {
   fill: none;
-  stroke: rgba(247, 244, 237, 0.05);
+  stroke: #332C24;
   stroke-width: 1;
+  opacity: 0.18;
 }
 
 .sjStations circle {
-  fill: rgba(212, 175, 98, 0.28);
+  fill: #C9A050;
+  opacity: 0.50;
 }
 
 /* ------------------------------------------------------------- the constellation */
@@ -110,12 +114,13 @@
 }
 
 .sjNodeNum {
-  color: var(--sj-gold-bright);
+  color: #C9A050;
   font-family: var(--font-mono, monospace);
   font-size: 0.625rem;
   font-weight: 600;
   letter-spacing: 0.16em;
   font-variant-numeric: tabular-nums;
+  opacity: 1;
 }
 
 .sjNodeRule {
@@ -123,11 +128,12 @@
   width: 1.4rem;
   height: 1px;
   flex-shrink: 0;
-  background-color: rgba(184, 146, 74, 0.55);
+  background-color: #C9A050;
+  opacity: 0.90;
 }
 
 .sjNodeName {
-  color: rgba(247, 244, 237, 0.5);
+  color: rgba(247, 244, 237, 0.7);
   font-family: var(--font-mono, monospace);
   font-size: 0.625rem;
   font-weight: 600;
@@ -384,8 +390,23 @@
   display: block;
 }
 
+/*
+ * Short bold value proposition — sits between the title and the concept paragraph,
+ * gives each chapter a punchy first line at a glance before the detail resolves.
+ */
+.sjValueStatement {
+  margin: clamp(1.2rem, 3vh, 2rem) 0 0;
+  max-width: 26rem;
+  color: var(--sj-cream);
+  font-family: var(--font-sans, sans-serif);
+  font-size: clamp(0.9375rem, 1.15vw, 1.0625rem);
+  font-weight: 600;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+}
+
 .sjConcept {
-  margin: clamp(1.1rem, 2.8vh, 1.9rem) 0 0;
+  margin: clamp(0.45rem, 1.2vh, 0.8rem) 0 0;
   max-width: 26rem;
   color: rgba(247, 244, 237, 0.72);
   font-family: var(--font-sans, sans-serif);
@@ -667,6 +688,10 @@
 
   .sjTitle {
     font-size: clamp(2rem, 9vw, 3.5rem);
+  }
+
+  .sjValueStatement {
+    max-width: 30rem;
   }
 
   .sjConcept {

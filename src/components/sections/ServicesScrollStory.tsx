@@ -31,15 +31,22 @@ import styles from "./ServicesScrollStory.module.css";
  * reveal and the pin.
  */
 
+interface Feature {
+  title: string;
+  desc: string;
+}
+
 interface Service {
   num: string;
   /** The small line above the title. */
   descriptor: string;
   /** Set as two lines by design, not by where the box happens to wrap. */
   titleLines: [string, string];
+  /** Short gold-accented value proposition. */
+  valueStatement: string;
   statement: string;
-  /** Named exactly as the portfolio names them — this is a grouping, not a rewrite. */
-  capabilities: string[];
+  /** Exactly two features with title + explanation, replacing the plain caps list. */
+  features: [Feature, Feature];
   image: string;
   alt: string;
 }
@@ -66,9 +73,19 @@ const SERVICES: Service[] = [
     num: "01",
     descriptor: "Capital & Investor Reach",
     titleLines: ["Investor", "Growth"],
+    valueStatement: "Turn mining opportunities into investor attention.",
     statement:
-      "Turn mining opportunities into investor attention through targeted outreach and global stakeholder connections.",
-    capabilities: ["Investor Campaigns", "Global Outreach"],
+      "Connect mining projects with relevant investors, stakeholders and decision-makers through focused investor campaigns and global industry outreach.",
+    features: [
+      {
+        title: "Investor Campaigns",
+        desc: "Targeted campaigns designed to communicate the opportunity and story behind mining projects to relevant audiences.",
+      },
+      {
+        title: "Global Outreach",
+        desc: "Extend project visibility across international mining audiences and create connections with global stakeholders.",
+      },
+    ],
     image: "/services/04-pit.jpg",
     alt: "Aerial view of a large open-pit mine in production",
   },
@@ -76,9 +93,19 @@ const SERVICES: Service[] = [
     num: "02",
     descriptor: "Credibility & Industry Presence",
     titleLines: ["Media &", "Authority"],
+    valueStatement: "Build authority across the mining media landscape.",
     statement:
-      "Build authority across the mining media landscape through industry coverage, press communication and conference visibility.",
-    capabilities: ["News & Syndication", "Press Office", "Conference Media"],
+      "Strengthen your industry presence through mining-focused news coverage, press communication and conference media.",
+    features: [
+      {
+        title: "News & Syndication",
+        desc: "Turn company developments, project stories and important updates into relevant industry visibility.",
+      },
+      {
+        title: "Press & Conference Media",
+        desc: "Communicate key announcements and extend the impact of mining events through focused media coverage and storytelling.",
+      },
+    ],
     image: "/stats/newsletter-briefing.jpg",
     alt: "Open-pit mining operation at sunset",
   },
@@ -86,9 +113,19 @@ const SERVICES: Service[] = [
     num: "03",
     descriptor: "Identity & Creative Presence",
     titleLines: ["Brand &", "Digital"],
+    valueStatement: "Build a distinctive digital identity for mining.",
     statement:
-      "Build a distinctive visual and digital identity that makes mining companies easier to recognize, understand and remember.",
-    capabilities: ["Digital Branding", "Multimedia"],
+      "Create a stronger digital presence through focused branding, multimedia and visual communication built around your company's story.",
+    features: [
+      {
+        title: "Digital Branding",
+        desc: "Build a recognizable and consistent visual identity across your company's digital presence.",
+      },
+      {
+        title: "Multimedia",
+        desc: "Transform complex mining stories, projects and developments into engaging visual experiences.",
+      },
+    ],
     image: "/services/02-drill.jpg",
     alt: "Exploration drill rig and crew working in mountain terrain",
   },
@@ -96,9 +133,19 @@ const SERVICES: Service[] = [
     num: "04",
     descriptor: "Reach & Engagement",
     titleLines: ["Audience", "Growth"],
+    valueStatement: "Turn content into audience growth.",
     statement:
-      "Expand your mining audience through targeted campaigns, social growth and paid digital promotion.",
-    capabilities: ["Social Growth & Ads", "Paid Ad Campaigns"],
+      "Expand your mining audience by combining targeted campaigns, social growth and paid digital promotion to amplify important stories.",
+    features: [
+      {
+        title: "Social Growth & Ads",
+        desc: "Build visibility and engagement across relevant mining audiences through focused social content and promotion.",
+      },
+      {
+        title: "Paid Ad Campaigns",
+        desc: "Amplify important stories, announcements and campaigns towards relevant digital audiences.",
+      },
+    ],
     image: "/cards/bg_card_3.jpg",
     alt: "Smartphone held in front of a mining landscape",
   },
@@ -106,9 +153,19 @@ const SERVICES: Service[] = [
     num: "05",
     descriptor: "Leadership & Voice",
     titleLines: ["Executive", "Visibility"],
+    valueStatement: "Put mining leaders at the center of the conversation.",
     statement:
-      "Put leadership at the center of the story through executive conversations, interviews and industry insights.",
-    capabilities: ["Podcasts & Interviews"],
+      "Give mining executives and industry leaders a stronger voice through podcasts, interviews, features and editorial storytelling.",
+    features: [
+      {
+        title: "Podcasts & Interviews",
+        desc: "Create engaging conversations that give industry leaders a platform to share their experience, perspective and vision.",
+      },
+      {
+        title: "Executive Features",
+        desc: "Highlight the people behind mining companies and projects through focused leadership and industry storytelling.",
+      },
+    ],
     image: "/services/03-assay.jpg",
     alt: "Mining professional logging drill core samples on a core bench",
   },
@@ -116,9 +173,19 @@ const SERVICES: Service[] = [
     num: "06",
     descriptor: "Owned Audience",
     titleLines: ["Direct", "Audience"],
+    valueStatement: "Build a direct connection with your audience.",
     statement:
-      "Keep your audience connected through direct, consistent and engaging communication.",
-    capabilities: ["Newsletter & Emailer"],
+      "Create an ongoing communication channel with your audience through newsletters, email communication and relevant industry updates.",
+    features: [
+      {
+        title: "Newsletter & Emailer",
+        desc: "Keep audiences connected through company developments, project updates, industry insights and relevant mining stories.",
+      },
+      {
+        title: "Audience Retention",
+        desc: "Turn individual interactions into an ongoing relationship through consistent and relevant communication.",
+      },
+    ],
     image: "/cards/bg_card_2.jpg",
     alt: "Laptop and printed industry report on a desk at dusk",
   },
@@ -143,7 +210,26 @@ const LAST = SERVICES.length - 1;
  */
 const LEAD = 0.35;
 const TAIL = 0.3;
-const UNITS = LEAD + LAST + TAIL;
+const CARD_UNITS = LEAD + LAST + TAIL;
+
+/*
+ * THE OPENING OF THE SAME SCENE.
+ *
+ * The masthead used to sit in normal flow above the pinned frame, which made Services
+ * read as two screens: an intro page, then - after most of a blank viewport while the
+ * frame scrolled up under it - a card page. The masthead now lives INSIDE the pinned
+ * frame as its opening state, and these two units are the beats that carry it into the
+ * cards. They are part of the same scrub as the categories, so there is one timeline and
+ * one pin for the whole section.
+ *
+ * INTRO_HOLD is a short beat where only the masthead is on screen, drifting slightly so
+ * the scroll is never frozen. TRANSITION is the handover itself: the masthead rises and
+ * recedes while the stage climbs in from below and the index resolves. They overlap on
+ * purpose - the first card is already entering well before the masthead has gone.
+ */
+const INTRO_HOLD = 0.3;
+const TRANSITION = 1;
+const UNITS = INTRO_HOLD + TRANSITION + CARD_UNITS;
 
 /*
  * The arc the categories travel on.
@@ -169,10 +255,16 @@ const PERSPECTIVE = 1600;
 const clamp = (v: number, min: number, max: number) =>
   v < min ? min : v > max ? max : v;
 
+/** Smoothstep. Keeps the handover from reading as a linear, mechanical slide. */
+const smooth = (v: number) => v * v * (3 - 2 * v);
+
 export const ServicesScrollStory: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const introRef = useRef<HTMLDivElement>(null);
+  const handoffRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
+  const headRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
   const fillRefs = useRef<(HTMLSpanElement | null)[]>([]);
@@ -187,10 +279,19 @@ export const ServicesScrollStory: React.FC = () => {
 
     const section = sectionRef.current;
     const intro = introRef.current;
+    const handoff = handoffRef.current;
     const viewport = viewportRef.current;
+    const head = headRef.current;
+    const stage = stageRef.current;
     const track = trackRef.current;
     const cta = ctaRef.current;
-    if (!section || !intro || !viewport || !track || !cta) return;
+    if (!section || !intro || !handoff || !viewport || !head || !stage) return;
+    if (!track || !cta) return;
+
+    // The two lower lines of the masthead. They clear the frame ahead of the headline -
+    // see the ordering in render().
+    const lede = intro.querySelector<HTMLElement>(`.${styles.svcLede}`);
+    const cue = intro.querySelector<HTMLElement>(`.${styles.svcScrollCue}`);
 
     const ctx = gsap.context(() => {
       /* ------------------------------------------------------------ intro reveal */
@@ -208,10 +309,18 @@ export const ServicesScrollStory: React.FC = () => {
           opacity: 1,
           ease: "none",
           stagger: 0.12,
+          /*
+           * Triggered off the handoff ramp, not the masthead itself: the masthead now
+           * lives inside the pinned frame, and a trigger on a pinned element is measured
+           * against a moving target. The ramp's bottom edge IS the frame's top edge, so
+           * this reads the frame rising into the window without ever asking the pin where
+           * it is - the lines surface as the dark ground arrives, and the pin then takes
+           * over with nothing left to hand off.
+           */
           scrollTrigger: {
-            trigger: intro,
-            start: "top 82%",
-            end: "top 32%",
+            trigger: handoff,
+            start: "bottom bottom",
+            end: "bottom 30%",
             scrub: 0.6,
           },
         }
@@ -322,7 +431,92 @@ export const ServicesScrollStory: React.FC = () => {
           ) || 1;
       };
 
-      const render = (raw: number) => {
+      /**
+       * One function, one clock. `u` is the position along the whole pin measured in
+       * units, and every phase below is a window on it - masthead, handover, categories,
+       * closing CTA. Nothing here switches state; each phase is a ramp, so scrolling back
+       * up retraces the identical path.
+       */
+      const render = (u: number) => {
+        const introT = clamp(u / INTRO_HOLD, 0, 1);
+        // The handover, 0 -> 1.
+        const t = clamp((u - INTRO_HOLD) / TRANSITION, 0, 1);
+        // What the category arc has always been driven by, offset past the opening.
+        const raw = u - INTRO_HOLD - TRANSITION - LEAD;
+
+        const h = viewport.clientHeight || window.innerHeight;
+
+        /* --------------------------------------------------- masthead leaving */
+
+        /*
+         * It rises and recedes rather than cutting: a third of the frame's height and
+         * four percent of its size, which is enough to read as depth and far short of a
+         * zoom.
+         *
+         * The travel is what keeps the overlap legible rather than muddy. The masthead
+         * and the card are on screen together for most of this beat by design, so they
+         * have to cross vertically instead of stacking - the headline clears the top of
+         * the frame on roughly the same scroll that the card's own title arrives at the
+         * middle of it. A shorter rise left the two sets of type sitting on one another
+         * at t = 0.5, which read as a collision and not as a handover.
+         */
+        gsap.set(intro, {
+          y: -h * (0.03 * introT + 0.36 * smooth(t)),
+          scale: 1 - 0.04 * smooth(t),
+          opacity: 1 - smooth(clamp((t - 0.08) / 0.52, 0, 1)),
+        });
+
+        /*
+         * The masthead empties from the bottom up: cue, then lede, then the headline and
+         * label with the layer itself.
+         *
+         * This is what keeps the overlap clean. The card arrives at the middle of the
+         * frame, which is exactly where the lede sits, so a masthead that faded evenly
+         * would put a paragraph across the photograph for the whole beat. Emptying it
+         * bottom-up clears that band first and leaves the headline - which by then is
+         * riding up out of the card's way - as the last thing to go. It also reads as the
+         * right order editorially: the cue has done its job the moment the scroll it
+         * asked for begins, and the supporting copy follows it out.
+         *
+         * Only opacity is set on these two. They ride upward on the masthead layer above,
+         * and their transforms belong to the reveal tween, which is the one other thing
+         * in this component that writes to them.
+         */
+        if (cue) gsap.set(cue, { opacity: 1 - smooth(clamp(t / 0.3, 0, 1)) });
+        if (lede) {
+          gsap.set(lede, { opacity: 1 - smooth(clamp((t - 0.02) / 0.44, 0, 1)) });
+        }
+
+        /* -------------------------------------------- index and stage arriving */
+
+        // The index resolves once there is something for it to index.
+        const indexIn = smooth(clamp((t - 0.3) / 0.5, 0, 1));
+        gsap.set(head, { opacity: indexIn, y: (1 - indexIn) * -12 });
+
+        /*
+         * The categories arrive as a stage, not as six separate entrances: the frame
+         * they travel in climbs from a fifth of a screen below and comes forward from
+         * 0.92, and the arc inside it is untouched. The card's own movement - the
+         * ellipse, the veils, the banking - therefore starts from exactly the state it
+         * always had; this only decides when that frame is standing in front of the
+         * reader, and it is already doing so while the masthead is still on screen.
+         */
+        const enter = smooth(clamp((t - 0.14) / 0.86, 0, 1));
+        /*
+         * Opacity resolves ahead of the arrival so the card is read while it is still
+         * travelling, rather than being found already in place. This is the other half of
+         * the overlap: at the midpoint of the beat the card is the brighter of the two
+         * and the masthead is the one on its way out.
+         */
+        const enterFade = smooth(clamp((t - 0.14) / 0.52, 0, 1));
+        gsap.set(stage, {
+          opacity: enterFade,
+          y: (1 - enter) * h * 0.2,
+          scale: 0.92 + 0.08 * enter,
+        });
+
+        /* -------------------------------------------------------- the categories */
+
         const pos = clamp(raw, 0, LAST);
         // How far into the closing beat we are, 0 → 1.
         const tail = clamp(raw - LAST, 0, TAIL) / TAIL;
@@ -438,13 +632,13 @@ export const ServicesScrollStory: React.FC = () => {
         onRefreshInit: measure,
         onRefresh: (self) => {
           measure();
-          render(self.progress * UNITS - LEAD);
+          render(self.progress * UNITS);
         },
-        onUpdate: (self) => render(self.progress * UNITS - LEAD),
+        onUpdate: (self) => render(self.progress * UNITS),
       });
 
       measure();
-      render(-LEAD);
+      render(0);
     }, section);
 
     return () => ctx.revert();
@@ -473,23 +667,31 @@ export const ServicesScrollStory: React.FC = () => {
       </div>
 
       <div className={styles.svcCardPanel}>
-        {/* The two lines are a layout decision; aria-label keeps the accessible name a
-            single properly spaced phrase rather than "InvestorGrowth". */}
-        <h3 className={styles.svcCardTitle} aria-label={service.titleLines.join(" ")}>
-          {service.titleLines.map((line) => (
-            <span key={line}>{line}</span>
-          ))}
-        </h3>
-        <p className={styles.svcCardText}>{service.statement}</p>
+        {/* Top block: title, gold value statement, description */}
+        <div className={styles.svcCardPanelTop}>
+          {/* aria-label keeps the accessible name a single phrase. */}
+          <h3 className={styles.svcCardTitle} aria-label={service.titleLines.join(" ")}>
+            {service.titleLines.map((line) => (
+              <span key={line}>{line}</span>
+            ))}
+          </h3>
+          <p className={styles.svcCardValueStmt}>{service.valueStatement}</p>
+          <p className={styles.svcCardText}>{service.statement}</p>
+        </div>
 
-        <ul className={styles.svcCardCaps}>
-          {service.capabilities.map((capability) => (
-            <li key={capability} className={styles.svcCardCap}>
-              <span aria-hidden="true" className={styles.svcCardCapRule} />
-              {capability}
-            </li>
-          ))}
-        </ul>
+        {/* Feature block: two features separated by hairline dividers */}
+        <div className={styles.svcCardFeatures}>
+          <span aria-hidden="true" className={styles.svcCardDivider} />
+          <div className={styles.svcCardFeature}>
+            <span className={styles.svcCardFeatureTitle}>{service.features[0].title}</span>
+            <p className={styles.svcCardFeatureDesc}>{service.features[0].desc}</p>
+          </div>
+          <span aria-hidden="true" className={styles.svcCardDivider} />
+          <div className={styles.svcCardFeature}>
+            <span className={styles.svcCardFeatureTitle}>{service.features[1].title}</span>
+            <p className={styles.svcCardFeatureDesc}>{service.features[1].desc}</p>
+          </div>
+        </div>
       </div>
 
       {/* Depth. Inert in the static copy, driven by distance-from-centre in the pin. */}
@@ -501,94 +703,100 @@ export const ServicesScrollStory: React.FC = () => {
     <section id="services" ref={sectionRef} className={styles.svcSection}>
       {/* Seam down from Market Influence & Reach. Decorative, and entirely inside this
           section, so that one never has to know about it. */}
-      <div aria-hidden="true" className={styles.svcHandoff} />
+      <div ref={handoffRef} aria-hidden="true" className={styles.svcHandoff} />
 
-      <div ref={introRef} className={styles.svcIntro}>
-        <span className={`${styles.svcEyebrow} ${styles.svcIntroItem}`}>
-          <span aria-hidden="true" className={styles.svcEyebrowRule} />
-          Our Services
-          <span aria-hidden="true" className={styles.svcEyebrowRule} />
-        </span>
+      <div ref={viewportRef} className={styles.svcViewport}>
+        <div aria-hidden="true" className={styles.svcGlow} />
 
-        <h2 className={`${styles.svcHeadline} ${styles.svcIntroItem}`}>
-          <span>Mining Expertise.</span>
-          <span>Digital Influence.</span>
-          <span>Investor Reach.</span>
-        </h2>
-
-        <p className={`${styles.svcLede} ${styles.svcIntroItem}`}>
-          From investor campaigns and industry media to digital branding, audience growth
-          and executive visibility, we help mining companies turn their stories into market
-          influence.
-        </p>
-
-        <span className={`${styles.svcScrollCue} ${styles.svcIntroItem}`}>
-          Scroll to explore
-          <span aria-hidden="true" className={styles.svcScrollCueRule} />
-        </span>
-      </div>
-
-      <div className={styles.svcScrollArea}>
-        <div ref={viewportRef} className={styles.svcViewport}>
-          <div aria-hidden="true" className={styles.svcGlow} />
-
-          {/* No section label up here: the masthead directly above says "Our Services"
-              and is still on screen as the pin begins, so a second one only doubled. */}
-          <div className={styles.svcHead}>
-            {/* A table of contents, not carousel navigation: it says where in the
-                journey you are and offers nothing to click. */}
-            <div className={styles.svcProgress} aria-hidden="true">
-              {SERVICES.map((service, index) => (
-                <React.Fragment key={service.num}>
-                  <span
-                    className={`${styles.svcProgressStep} ${
-                      index === active ? styles.svcProgressStepActive : ""
-                    }`}
-                  >
-                    {service.num}
-                  </span>
-                  {index < LAST && (
-                    <span className={styles.svcProgressLine}>
-                      <span
-                        ref={(el) => {
-                          fillRefs.current[index] = el;
-                        }}
-                        className={styles.svcProgressFill}
-                      />
-                    </span>
-                  )}
-                </React.Fragment>
-              ))}
-            </div>
-            <span className="sr-only">
-              Service {active + 1} of {SERVICES.length}
-            </span>
-          </div>
-
-          <div className={styles.svcStage}>
-            <div ref={trackRef} className={styles.svcTrack}>
-              {SERVICES.map((service, index) => (
-                <article
-                  key={service.num}
-                  data-index={index}
-                  className={styles.svcCard}
+        {/* No second section label in here: the masthead is the opening state of this
+            same frame and is still on screen as the index resolves, so one would only
+            have doubled it. */}
+        <div ref={headRef} className={styles.svcHead}>
+          {/* A table of contents, not carousel navigation: it says where in the
+              journey you are and offers nothing to click. */}
+          <div className={styles.svcProgress} aria-hidden="true">
+            {SERVICES.map((service, index) => (
+              <React.Fragment key={service.num}>
+                <span
+                  className={`${styles.svcProgressStep} ${
+                    index === active ? styles.svcProgressStepActive : ""
+                  }`}
                 >
-                  {cardBody(
-                    service,
-                    "(max-width: 639px) 82vw, (max-width: 1023px) 50vw, 45vw"
-                  )}
-                </article>
-              ))}
-            </div>
+                  {service.num}
+                </span>
+                {index < LAST && (
+                  <span className={styles.svcProgressLine}>
+                    <span
+                      ref={(el) => {
+                        fillRefs.current[index] = el;
+                      }}
+                      className={styles.svcProgressFill}
+                    />
+                  </span>
+                )}
+              </React.Fragment>
+            ))}
           </div>
+          <span className="sr-only">
+            Service {active + 1} of {SERVICES.length}
+          </span>
+        </div>
 
-          <div className={styles.svcFoot}>
-            <div ref={ctaRef} style={{ opacity: 0, pointerEvents: "none" }}>
-              <Link href="/services" className={styles.svcCta}>
-                Explore all services
-                <ArrowRight className={styles.svcCtaIcon} />
-              </Link>
-            </div>
+        <div ref={stageRef} className={styles.svcStage}>
+          <div ref={trackRef} className={styles.svcTrack}>
+            {SERVICES.map((service, index) => (
+              <article
+                key={service.num}
+                data-index={index}
+                className={styles.svcCard}
+              >
+                {cardBody(
+                  service,
+                  "(max-width: 639px) 88vw, (max-width: 1199px) 84vw, 68vw"
+                )}
+              </article>
+            ))}
+          </div>
+        </div>
+
+        <div className={styles.svcFoot}>
+          <div ref={ctaRef} style={{ opacity: 0, pointerEvents: "none" }}>
+            <Link href="/services" className={styles.svcCta}>
+              Explore all services
+              <ArrowRight className={styles.svcCtaIcon} />
+            </Link>
+          </div>
+        </div>
+
+        {/*
+          The masthead, inside the frame it opens. Last in the markup so it sits over
+          the stage while the two overlap, and inert to the pointer throughout so it
+          never stands between the reader and the closing link underneath it.
+        */}
+        <div ref={introRef} className={styles.svcIntro}>
+          <div className={styles.svcIntroInner}>
+            <span className={`${styles.svcEyebrow} ${styles.svcIntroItem}`}>
+              <span aria-hidden="true" className={styles.svcEyebrowRule} />
+              Our Services
+              <span aria-hidden="true" className={styles.svcEyebrowRule} />
+            </span>
+
+            <h2 className={`${styles.svcHeadline} ${styles.svcIntroItem}`}>
+              <span>Mining Expertise.</span>
+              <span>Digital Influence.</span>
+              <span>Investor Reach.</span>
+            </h2>
+
+            <p className={`${styles.svcLede} ${styles.svcIntroItem}`}>
+              From investor campaigns and industry media to digital branding, audience
+              growth and executive visibility, we help mining companies turn their
+              stories into market influence.
+            </p>
+
+            <span className={`${styles.svcScrollCue} ${styles.svcIntroItem}`}>
+              Scroll to explore
+              <span aria-hidden="true" className={styles.svcScrollCueRule} />
+            </span>
           </div>
         </div>
       </div>

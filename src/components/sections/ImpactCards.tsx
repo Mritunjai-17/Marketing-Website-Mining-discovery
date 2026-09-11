@@ -34,7 +34,7 @@ const RESULTS: ImpactResult[] = [
     title: "Qualified Leads",
     subtitle: "Generated through a targeted digital campaign.",
     image: "/cards/bg_card_1.jpg",
-    link: "/contact",
+    link: "/work",
   },
   {
     number: "02",
@@ -46,7 +46,7 @@ const RESULTS: ImpactResult[] = [
     title: "Newsletter Subscriptions",
     subtitle: "Growth in newsletter subscriptions.",
     image: "/cards/bg_card_2.jpg",
-    link: "/contact",
+    link: "/work",
   },
   {
     number: "03",
@@ -58,7 +58,7 @@ const RESULTS: ImpactResult[] = [
     title: "Social Media Engagement",
     subtitle: "Increase in social media engagement.",
     image: "/cards/bg_card_3.jpg",
-    link: "/contact",
+    link: "/work",
   },
   {
     number: "04",
@@ -70,7 +70,7 @@ const RESULTS: ImpactResult[] = [
     title: "Substack Subscribers",
     subtitle: "Building a global audience of mining professionals.",
     image: "/cards/bg_card_4.jpg",
-    link: "/contact",
+    link: "/work",
   },
 ];
 
@@ -279,7 +279,7 @@ export const ImpactCards: React.FC = () => {
             <div className={styles.impactIntroAside}>
               <span className={styles.impactKicker}>Real campaigns. Tangible outcomes.</span>
               <Link
-                href="/services"
+                href="/work"
                 aria-label="View all campaigns and outcomes"
                 className={styles.impactArrow}
               >

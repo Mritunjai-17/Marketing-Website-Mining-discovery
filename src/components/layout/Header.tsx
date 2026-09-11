@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/Button";
 const navLinks = [
   { name: "About", href: "/about" },
   { name: "Services", href: "/services" },
+  { name: "Work", href: "/work" },
   { name: "Contact", href: "/contact" },
 ];
 
@@ -27,7 +28,7 @@ export const Header: React.FC = () => {
   const pathname = usePathname();
 
   // Dark ground routes that open immediately in dark mode
-  const DARK_GROUND_ROUTES = ["/services"];
+  const DARK_GROUND_ROUTES = ["/services", "/work"];
   const isDarkInitialRoute = DARK_GROUND_ROUTES.includes(pathname);
 
   // Effective dark ratio: 0 = top Hero light state, 1 = dark charcoal section state

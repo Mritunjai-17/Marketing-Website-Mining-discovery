@@ -1,11 +1,14 @@
 /*
  * Our Services - four chapters travelling through one pinned frame.
  *
- * The section is three parts in normal flow: a handoff ramp that carries Market
- * Influence's near-white ground down into this section's dark one, an editorial intro,
- * and then the pinned viewport the four service cards move through. Everything that
- * moves is a transform on a single card element, so a chapter's number, descriptor,
- * title, statement, capabilities and photograph are one object that cannot come apart.
+ * The section is two parts in normal flow: a handoff ramp that carries Market
+ * Influence's near-white ground down into this section's dark one, and then the pinned
+ * viewport that is the whole rest of the section. The editorial masthead lives INSIDE
+ * that viewport, absolutely positioned over the stage as its opening state, so the
+ * masthead and the cards are one composition on one pin rather than two screens with a
+ * blank viewport between them. Everything that moves is a transform on a single card
+ * element, so a chapter's number, descriptor, title, statement, capabilities and
+ * photograph are one object that cannot come apart.
  *
  * Scoped names only - imported by ServicesScrollStory.tsx and nothing else.
  */
@@ -19,8 +22,12 @@
 
   /* The card's preferred height. Its width comes from the aspect ratio, and .svcCard
      caps the height at the room the stage actually has, so a short window shrinks the
-     card instead of clipping it. */
-  --svc-card-h: clamp(320px, 66vh, 680px);
+     card instead of clipping it.
+
+     The ceiling is what governs a tall window. At 680px a 1080-tall screen was leaving
+     the card well short of the room the stage had; 780px lets the percentage cap in
+     .svcCard stay the thing that decides, at every height. */
+  --svc-card-h: clamp(440px, 78vh, 920px);
 
   --svc-gold: #B8924A;
   --svc-gold-bright: #D4AF62;
@@ -62,12 +69,39 @@
 
 /* ------------------------------------------------------------------------- intro */
 
+/*
+ * The masthead is a layer of the pinned frame, not a block above it.
+ *
+ * It used to be a normal-flow block with 12vh of padding under it, which meant the
+ * reader finished it, scrolled, and then crossed most of an empty viewport while the
+ * 100vh frame climbed up into place - two screens, one after the other. As an overlay on
+ * the frame itself it is the frame's first state instead: the component lifts and fades
+ * it on the same scrub that brings the stage in underneath, so the two genuinely
+ * overlap and there is nothing empty to cross.
+ *
+ * inset: 0 resolves against the viewport's padding box, which is where the stage sits -
+ * so the masthead is centred on exactly the spot the first card arrives at, and the
+ * handover happens in one place rather than across a gap. pointer-events stays off
+ * throughout: the closing link sits underneath this layer and must always be reachable.
+ */
 .svcIntro {
-  position: relative;
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  pointer-events: none;
+  text-align: center;
+  will-change: transform, opacity;
+}
+
+.svcIntroInner {
+  width: 100%;
   max-width: 60rem;
   margin: 0 auto;
-  padding: clamp(2rem, 6vh, 4.5rem) clamp(1.5rem, 5vw, 3.5rem) clamp(4rem, 12vh, 8rem);
-  text-align: center;
+  padding: 0 clamp(1.5rem, 5vw, 3.5rem);
 }
 
 /* Each line of the masthead, revealed on the scrub. */
@@ -145,6 +179,36 @@
   background: linear-gradient(180deg, var(--svc-gold) 0%, rgba(184, 146, 74, 0) 100%);
 }
 
+/*
+ * Short windows - landscape phones, mostly.
+ *
+ * The masthead is a layer inside a 100svh frame now rather than a block that could push
+ * the page taller, so on a window this short it has to give up spacing instead of
+ * overflowing the frame it opens. Nothing about the type itself changes; only how much
+ * air is set around it.
+ */
+@media (max-height: 680px) {
+  .svcHeadline {
+    margin-top: 0.75rem;
+    font-size: clamp(1.375rem, 3.4vw, 2rem);
+  }
+
+  .svcLede {
+    margin-top: 0.7rem;
+    font-size: 0.8125rem;
+    line-height: 1.55;
+  }
+
+  .svcScrollCue {
+    margin-top: 1rem;
+    gap: 0.5rem;
+  }
+
+  .svcScrollCueRule {
+    height: 1.5rem;
+  }
+}
+
 /* -------------------------------------------------------------- pinned viewport */
 
 .svcViewport {
@@ -155,7 +219,7 @@
   height: 100vh;
   height: 100svh;
   box-sizing: border-box;
-  padding: clamp(5.25rem, 10vh, 7rem) clamp(1.25rem, 4vw, 3.5rem) clamp(1.5rem, 3vh, 2.5rem);
+  padding: clamp(4.5rem, 7.5vh, 5.75rem) clamp(1.25rem, 3.5vw, 3rem) clamp(1.25rem, 2.2vh, 2rem);
   overflow: hidden;
 }
 
@@ -175,6 +239,11 @@
   -webkit-mask-image: linear-gradient(to bottom, black 0%, black calc(100% - 150px), transparent 100%);
 }
 
+/*
+ * The index and the stage both open hidden, because at the top of the pin the frame is
+ * showing the masthead and nothing else. The component ramps them in during the
+ * handover; these are only the values the first paint uses before it does.
+ */
 .svcHead {
   position: relative;
   display: flex;
@@ -182,6 +251,8 @@
   justify-content: flex-end;
   gap: 1rem;
   flex-shrink: 0;
+  opacity: 0;
+  will-change: transform, opacity;
 }
 
 /* ---------------------------------------------------------------- progress index */
@@ -238,9 +309,14 @@
   flex: 1 1 auto;
   width: 100%;
   min-height: 0;
-  margin: clamp(0.75rem, 2vh, 1.5rem) 0;
+  margin: clamp(0.5rem, 1.2vh, 1rem) 0;
   /* The travelling neighbours are clipped here rather than reaching the page. */
   overflow: hidden;
+  /* Where the stage climbs in from. The arc inside it is unaffected - this transform is
+     on the frame, and every card's own position is still measured within it. */
+  opacity: 0;
+  transform: translate3d(0, 20vh, 0) scale(0.92);
+  will-change: transform, opacity;
 }
 
 /*
@@ -266,12 +342,20 @@
   left: 50%;
   /* Height first, width from the ratio: the card takes the room the stage has and no
      more, so it stays dominant on a tall window and simply gets smaller on a short one. */
-  /* 82%, not 100%: the arc needs somewhere to bow. The apex card sits above centre
+  /* 86%, not 100%: the arc needs somewhere to bow. The apex card sits above centre
      and its neighbours fall below it, and both ends of that curve have to stay inside
-     the stage — a card filling the full height would leave the path nowhere to go. */
-  height: min(var(--svc-card-h), 82%);
+     the stage — a card filling the full height would leave the path nowhere to go.
+
+     Raised from 82% together with the closing row's padding below. Those two move as a
+     pair on purpose: the row gave up the ~84px it was holding empty for most of the
+     scroll, the stage grew by the same amount, and 86% of the larger stage leaves the
+     arc the same absolute room it had at 82% of the smaller one. That is why the card
+     gains a fifth of its size here and the curve it travels is unchanged — the depth
+     the component measures off this geometry comes out within a few percent of what it
+     was at every width tested. */
+  height: min(var(--svc-card-h), 91%);
   aspect-ratio: 158 / 100;
-  max-width: 72vw;
+  max-width: 76vw;
   display: flex;
   box-sizing: border-box;
   border: 1px solid var(--svc-hairline);
@@ -394,7 +478,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
   box-sizing: border-box;
   padding: clamp(1.1rem, 2.6vh, 2rem) clamp(1.1rem, 1.8vw, 1.85rem);
 }
@@ -456,6 +540,87 @@
   background-color: rgba(184, 146, 74, 0.75);
 }
 
+/* -------------------------------------------------------------- panel top block */
+
+/*
+ * Wraps the title, value statement and description. flex: 0 0 auto so the features
+ * block below can grow into the remaining space without this shrinking.
+ */
+.svcCardPanelTop {
+  flex: 0 0 auto;
+}
+
+/*
+ * Gold value proposition — one short line between the title and the description.
+ * Mono caps so it shares the section's editorial voice; gold so it reads as a
+ * secondary focal point rather than competing with the cream title.
+ */
+.svcCardValueStmt {
+  margin: clamp(0.45rem, 1vh, 0.7rem) 0 0;
+  color: var(--svc-gold-bright);
+  font-family: var(--font-mono, monospace);
+  font-size: clamp(0.5rem, 0.95vh, 0.625rem);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  line-height: 1.5;
+}
+
+/* ----------------------------------------------------------- feature block */
+
+/*
+ * The two features live in their own flex column, pushed toward the bottom of
+ * the panel by the space-between on .svcCardPanel. They share the remaining
+ * vertical space evenly so neither compresses the other.
+ */
+.svcCardFeatures {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Hairline — same weight as the existing svcCardCap borders. */
+.svcCardDivider {
+  display: block;
+  height: 1px;
+  background-color: var(--svc-hairline);
+  margin: clamp(0.5rem, 1.1vh, 0.8rem) 0;
+}
+
+/* One feature item: title + description stacked. */
+.svcCardFeature {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.2rem, 0.45vh, 0.32rem);
+}
+
+/*
+ * Feature title — small mono caps, cream, slightly dimmer than the main title
+ * but clearly distinct from the description text below it.
+ */
+.svcCardFeatureTitle {
+  display: block;
+  color: rgba(252, 251, 248, 0.92);
+  font-family: var(--font-mono, monospace);
+  font-size: clamp(0.5rem, 0.95vh, 0.625rem);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  line-height: 1.3;
+}
+
+/*
+ * Feature description — smallest text on the card. Muted so the hierarchy reads:
+ * title > value statement > description > feature title > feature description.
+ */
+.svcCardFeatureDesc {
+  margin: 0;
+  color: rgba(252, 251, 248, 0.5);
+  font-family: var(--font-sans, sans-serif);
+  font-size: clamp(0.6rem, 1.1vh, 0.6875rem);
+  line-height: 1.55;
+}
+
 /* --------------------------------------------------------------------------- CTA */
 
 .svcFoot {
@@ -500,13 +665,20 @@
   transform: translateX(3px);
 }
 
+/*
+ * The closing row holds one link that is invisible for all but the last beat of the
+ * scroll, so its padding was 112px of frame held empty behind nothing while six cards
+ * went past. Handing that height to the stage is what pays for the larger card; the
+ * link still clears the card by ~85px and sits ~60px off the foot of the window, which
+ * is the room it needs and no more.
+ */
 .svcFoot {
   position: relative;
   z-index: 10;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 2.5rem 1.5rem 4.5rem;
+  padding: 0.75rem 1.5rem 1rem;
 }
 
 /* ------------------------------------------------------------- reduced motion copy */
@@ -522,8 +694,37 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .svcScrollArea {
+  /*
+   * No pin and no travel here - but the masthead now lives inside the frame the pin
+   * drives, so the frame is unwound back into normal flow rather than hidden outright.
+   * Only the moving parts are taken out, and the masthead keeps the place in the reading
+   * order it has always had: above the categories. The cue goes with them, since there
+   * is no scroll story left for it to point at.
+   */
+  .svcViewport {
+    display: block;
+    height: auto;
+    padding: 0;
+    overflow: visible;
+  }
+
+  .svcGlow,
+  .svcHead,
+  .svcStage,
+  .svcFoot,
+  .svcScrollCue {
     display: none;
+  }
+
+  .svcIntro {
+    position: static;
+    display: block;
+    opacity: 1;
+    transform: none;
+  }
+
+  .svcIntroInner {
+    padding: clamp(2rem, 6vh, 4.5rem) clamp(1.5rem, 5vw, 3.5rem) clamp(2.5rem, 7vh, 4rem);
   }
 
   .svcStatic {
@@ -580,8 +781,15 @@
  * thing that actually decides it.
  */
 @media (max-width: 1199px) {
+  /*
+   * Scaled up too, but by less than the desktop card, and the reason is the axis. Here
+   * the categories travel vertically and the arc bows SIDEWAYS, so the card's width is
+   * taken directly out of the bow's room — where on desktop it is the height that
+   * competes with it, and the stage had spare height to give. This is the most the card
+   * can gain before the sideways curve stops reading as one.
+   */
   .svcSection {
-    --svc-card-h: clamp(340px, 62vh, 620px);
+    --svc-card-h: clamp(440px, 78vh, 840px);
   }
 
   .svcCard {
@@ -590,7 +798,7 @@
     /* Travel is vertical here and the arc bows sideways, so the room it needs is
        horizontal — hence a narrower card than the stage rather than a shorter one. */
     height: min(var(--svc-card-h), 100%);
-    max-width: 78vw;
+    max-width: 84vw;
   }
 
   /*
@@ -614,12 +822,19 @@
 /* -------------------------------------------------------------------- below 640px */
 
 @media (max-width: 639px) {
+  /*
+   * A phone gains the least, and only in height. Width is what the bow costs, the stage
+   * is only ~350px across, and the previous/next cards have to stay readable at the
+   * edges of it - 80vw is as wide as the card goes before they stop being legible as
+   * cards. The extra height is free by comparison: the travel is vertical here, so it
+   * comes out of room the arc was not using.
+   */
   .svcSection {
-    --svc-card-h: clamp(300px, 56vh, 500px);
+    --svc-card-h: clamp(360px, 70vh, 620px);
   }
 
   .svcCard {
-    max-width: 76vw;
+    max-width: 85vw;
   }
 
   /* Tighter type so four capabilities plus a title and a statement still fit the panel

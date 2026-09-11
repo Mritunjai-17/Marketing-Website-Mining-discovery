@@ -118,15 +118,18 @@ const HeroTerrain: React.FC = () => (
 
     <g className={styles.sjStations}>
       {[
-        [120, 742],
-        [612, 556],
-        [1108, 368],
-        [1462, 236],
         [186, 168],
+        [480, 280],
+        [612, 556],
         [744, 520],
+        [1108, 446],
+        [1108, 368],
         [1338, 796],
+        [1380, 260],
+        [1462, 236],
+        [120, 742],
       ].map(([x, y]) => (
-        <circle key={`${x}-${y}`} cx={x} cy={y} r="3" />
+        <circle key={`${x}-${y}`} cx={x} cy={y} r="3.5" />
       ))}
     </g>
   </svg>
@@ -573,6 +576,7 @@ export const ServicesJourney: React.FC = () => {
                 </h2>
 
                 <div className={styles.sjDetails}>
+                  <p className={styles.sjValueStatement}>{chapter.valueStatement}</p>
                   <p className={styles.sjConcept}>{chapter.concept}</p>
 
                   <ul className={styles.sjList}>
@@ -650,6 +654,7 @@ export const ServicesJourney: React.FC = () => {
                   </span>
                 ))}
               </h2>
+              <p className={styles.sjValueStatement}>{chapter.valueStatement}</p>
               <p className={styles.sjConcept}>{chapter.concept}</p>
               <ul className={styles.sjList}>
                 {chapter.services.map((service) => (

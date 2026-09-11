@@ -196,8 +196,17 @@ export const ServiceStoryOverlay: React.FC<ServiceStoryOverlayProps> = ({
       track.style.height = `${Math.round(last * per + stage.offsetHeight)}px`;
     };
 
-    const rectOf = (index: number): Rect =>
-      index === 0 ? introRect : states[index].frame;
+    /*
+     * Read at render rather than captured once: the narrow crop has to follow a resize
+     * across the breakpoint, and render() already runs on every one.
+     */
+    const rectOf = (index: number): Rect => {
+      if (index === 0) return introRect;
+      const state = states[index];
+      return window.innerWidth < 1024 && state.frameNarrow
+        ? state.frameNarrow
+        : state.frame;
+    };
 
     const render = () => {
       const max = root.scrollHeight - root.clientHeight;
@@ -393,9 +402,16 @@ export const ServiceStoryOverlay: React.FC<ServiceStoryOverlayProps> = ({
     left: styles.igLeft,
     panel: styles.igPanel,
     figures: styles.igFigures,
+    closing: styles.igClosing,
   };
 
-  const statePanel = (state: ServiceState) => (
+  /*
+   * `last` rather than a layout test decides where the way out goes. It used to be
+   * pinned to the figures layout, which meant the button lived wherever the numbers
+   * happened to be — and a story whose final state is not a figures block would have had
+   * no way back at all except the persistent Close button at the top.
+   */
+  const statePanel = (state: ServiceState, last: boolean) => (
     <div
       key={state.id}
       className={`${styles.igState} ${layoutClass[state.layout] ?? ""}`}
@@ -408,6 +424,9 @@ export const ServiceStoryOverlay: React.FC<ServiceStoryOverlayProps> = ({
 
         {/* Supporting scale on purpose — the service name is the hero, not this. */}
         <h3 className={styles.igHeading}>{state.label}</h3>
+
+        {/* The chapter's claim, between its name and its detail. */}
+        {state.lead && <p className={styles.igLead}>{state.lead}</p>}
 
         {state.body && <p className={styles.stBody}>{state.body}</p>}
 
@@ -452,7 +471,7 @@ export const ServiceStoryOverlay: React.FC<ServiceStoryOverlayProps> = ({
         {state.note && <p className={styles.stNote}>{state.note}</p>}
 
         {/* The last state carries the way out; there is no closing hero. */}
-        {state.layout === "figures" && (
+        {last && (
           <button type="button" onClick={onClose} className={styles.igBack}>
             <ArrowLeft aria-hidden="true" className={styles.stActionIcon} />
             Back to services
@@ -540,16 +559,23 @@ export const ServiceStoryOverlay: React.FC<ServiceStoryOverlayProps> = ({
                   <p className={`${styles.stStatement} ${styles.igHeroItem}`}>
                     {story.intro.statement}
                   </p>
-                  <p className={`${styles.stBody} ${styles.igHeroItem}`}>
-                    {story.intro.body}
-                  </p>
+                  {story.intro.body.map((paragraph) => (
+                    <p
+                      key={paragraph}
+                      className={`${styles.stBody} ${styles.igHeroItem}`}
+                    >
+                      {paragraph}
+                    </p>
+                  ))}
                 </div>
               </div>
             </div>
           </div>
 
-          {/* The six supporting states, all inside the same stage. */}
-          {story.states.slice(1).map(statePanel)}
+          {/* The supporting states, all inside the same stage. */}
+          {story.states
+            .slice(1)
+            .map((state, index, all) => statePanel(state, index === all.length - 1))}
         </div>
       </div>
 

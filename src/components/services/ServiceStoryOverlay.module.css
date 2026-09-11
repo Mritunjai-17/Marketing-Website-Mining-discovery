@@ -622,6 +622,24 @@
   max-width: 18ch;
 }
 
+/*
+ * The chapter's claim, between its name and its detail.
+ *
+ * It takes the cream the heading has and the body does not, at a size between the two,
+ * so a state reads as three descending steps — name, claim, detail — rather than a
+ * heading with two paragraphs under it. Narrow on purpose: a claim that runs the full
+ * measure of the body below it stops looking like a separate register.
+ */
+.igLead {
+  margin: clamp(0.7rem, 1.8vh, 1.15rem) 0 0;
+  max-width: 30ch;
+  color: var(--st-cream);
+  font-family: var(--font-sans, sans-serif);
+  font-size: clamp(0.9375rem, 1.35vw, 1.1875rem);
+  font-weight: 500;
+  line-height: 1.42;
+}
+
 /* The frame stops at 90% of the stage in this state, so the type has to sit above that
    line rather than on the stage floor, or it reads as falling out of the picture. */
 .igLower {
@@ -650,9 +668,16 @@
 }
 
 .igCentre .igHeading,
+.igCentre .igLead,
 .igCentre .stBody {
   margin-left: auto;
   margin-right: auto;
+}
+
+/* The narrow measure is for a lead set flush left against a body below it. Centred, it
+   just strands the last word on its own line — the inner column is the constraint here. */
+.igCentre .igLead {
+  max-width: none;
 }
 
 .igLeft {
@@ -673,6 +698,41 @@
 .igPanel .igStateInner {
   max-width: min(46%, 34rem);
   margin-left: 0;
+}
+
+/*
+ * The close.
+ *
+ * Centred and full-bleed behind the darkest dim in the story, so the environment shuts
+ * around one sentence. Its heading is allowed a wider measure than the chapter headings
+ * because it is a statement rather than a name — at 18ch it broke into four short stubs.
+ * It is still not hero-sized: the service name at the top left is what the reader
+ * leaves on, and a second display title here would read as the story restarting.
+ */
+.igClosing {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.igClosing .igStateInner {
+  max-width: 48rem;
+}
+
+.igClosing .stEyebrow {
+  justify-content: center;
+}
+
+.igClosing .igHeading {
+  max-width: 24ch;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: clamp(1.625rem, 3.9vw, 3rem);
+}
+
+.igClosing .stBody {
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .igFigures {
@@ -718,8 +778,27 @@
     max-width: none;
   }
 
+  /* Its crop is a band across the top at this width (see frameNarrow), so the type goes
+     under the picture rather than beside it — there is no column to sit in. */
+  .igPanel {
+    align-items: flex-end;
+    padding-bottom: clamp(4rem, 12vh, 7rem);
+  }
+
   .igHeading {
     font-size: clamp(1.375rem, 6.4vw, 2.25rem);
+  }
+
+  /* The measures above are set in ch against a desktop size; at phone width they stop
+     being a narrow column and start being a hard wrap in the middle of a sentence. */
+  .igLead {
+    max-width: none;
+    font-size: clamp(0.9375rem, 3.9vw, 1.0625rem);
+  }
+
+  .igClosing .igHeading {
+    max-width: none;
+    font-size: clamp(1.5rem, 7vw, 2.375rem);
   }
 
   .igNetArt {
