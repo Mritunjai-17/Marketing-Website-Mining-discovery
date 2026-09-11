@@ -7,8 +7,6 @@ import { GlobeHero } from "@/components/sections/GlobeHero";
 import { CompanyJourney } from "@/components/sections/CompanyJourney/CompanyJourney";
 import { ImpactCards } from "@/components/sections/ImpactCards";
 import { Stats } from "@/components/sections/Stats";
-import { About } from "@/components/sections/About";
-import { TrustedBy } from "@/components/sections/TrustedBy";
 import { ServicesScrollStory } from "@/components/sections/ServicesScrollStory";
 import { ClientScrubShowcase } from "@/components/sections/ClientScrubShowcase";
 
@@ -48,9 +46,6 @@ export default function Home() {
       <div className="relative z-20">
         <ClientScrubShowcase />
       </div>
-      {/* The header and footer both link to #about; this is what they resolve to. */}
-      <About />
-      <TrustedBy />
     </div>
   );
 }

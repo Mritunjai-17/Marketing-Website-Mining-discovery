@@ -436,6 +436,9 @@ export const ImpactCards: React.FC = () => {
           })}
         </div>
       </div>
+
+      {/* Seamless editorial handoff into Market Influence & Reach */}
+      <div aria-hidden="true" className={styles.impactOutroSeam} />
     </section>
   );
 };

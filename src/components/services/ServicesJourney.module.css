@@ -350,7 +350,8 @@
   left: 0;
   top: 50%;
   z-index: 5;
-  width: min(48%, 40rem);
+  width: min(44%, 38rem);
+  max-width: calc(48% - 1.5rem);
   transform: translateY(-50%);
   will-change: transform, opacity;
 }
@@ -663,7 +664,7 @@
   }
 
   .sjPlate {
-    height: min(52%, 460px);
+    height: min(42%, 360px);
     width: min(100%, 560px);
     max-width: 100%;
     aspect-ratio: auto;
@@ -679,15 +680,15 @@
   }
 
   .sjChapterText {
-    top: auto;
-    bottom: 0;
+    top: calc(min(42%, 360px) + 2.4rem);
+    bottom: auto;
     transform: none;
     width: 100%;
     max-width: 34rem;
   }
 
   .sjTitle {
-    font-size: clamp(2rem, 9vw, 3.5rem);
+    font-size: clamp(1.85rem, 5vw, 2.75rem);
   }
 
   .sjValueStatement {
@@ -704,7 +705,7 @@
     right: auto;
     left: 0;
     /* Sits on the seam between plate and type, out of both their ways. */
-    top: calc(min(52%, 460px) + 0.75rem);
+    top: calc(min(42%, 360px) + 0.6rem);
     transform: none;
     flex-direction: row;
     align-items: center;
@@ -727,21 +728,87 @@
 /* ----------------------------------------------------------------------- below 640 */
 
 @media (max-width: 639px) {
+  .sjStage {
+    padding-top: clamp(4.25rem, 8vh, 5rem);
+    /* Clears the site-wide "Ask AI" launcher fixed at the bottom-right. */
+    padding-bottom: 3.5rem;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+
   .sjPlate {
-    height: min(46%, 340px);
+    height: clamp(210px, 31vh, 275px);
+    border-radius: 0.85rem;
   }
 
   .sjIndex {
-    top: calc(min(46%, 340px) + 0.6rem);
+    top: calc(clamp(210px, 31vh, 275px) + 0.65rem);
   }
 
-  .sjStage {
-    /* Clears the site-wide "Ask AI" launcher fixed at the bottom-right. */
-    padding-bottom: 5.5rem;
+  .sjChapterText {
+    top: calc(clamp(210px, 31vh, 275px) + 2.35rem);
+    bottom: auto;
+    max-height: calc(100% - clamp(210px, 31vh, 275px) - 2.6rem);
+  }
+
+  .sjNum {
+    display: none;
+  }
+
+  .sjTitle {
+    font-size: clamp(1.65rem, 7vw, 2.2rem);
+    line-height: 1.08;
+    margin: 0;
+  }
+
+  .sjValueStatement {
+    margin-top: clamp(0.55rem, 1.5vh, 0.85rem);
+    font-size: clamp(0.85rem, 2.2vw, 0.9375rem);
+    line-height: 1.45;
+    max-width: 100%;
+  }
+
+  .sjConcept {
+    margin-top: clamp(0.4rem, 1.2vh, 0.65rem);
+    font-size: clamp(0.78rem, 2vw, 0.85rem);
+    line-height: 1.55;
+    max-width: 100%;
   }
 
   .sjList {
+    margin-top: clamp(0.75rem, 1.8vh, 1.1rem);
     max-width: none;
+  }
+
+  .sjListLine {
+    padding: clamp(0.38rem, 1vh, 0.52rem) 0;
+    font-size: clamp(0.78rem, 1.8vw, 0.84rem);
+  }
+
+  .sjViewDetails {
+    margin-top: clamp(0.85rem, 2vh, 1.25rem);
+    padding: 0.65rem 1.4rem;
+    font-size: 0.75rem;
+  }
+
+  .sjClosing {
+    padding: clamp(2.75rem, 6vh, 3.75rem) 1.25rem clamp(2.25rem, 5vh, 3rem);
+  }
+
+  .sjClosingTitle {
+    margin-top: 1rem;
+    font-size: clamp(1.75rem, 8vw, 2.5rem);
+    line-height: 1.05;
+  }
+
+  .sjCta {
+    margin-top: 1.75rem;
+    padding: 0.9rem 1.8rem;
+    font-size: 0.72rem;
+  }
+
+  .sjFooterRamp {
+    height: 50px;
   }
 }
 

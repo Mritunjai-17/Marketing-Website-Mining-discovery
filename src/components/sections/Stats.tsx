@@ -207,7 +207,7 @@ export const Stats: React.FC = () => {
                 {/* Pill Outline Button */}
                 <div className="pt-2">
                   <Link
-                    href="#about"
+                    href="/about"
                     className="inline-flex items-center justify-center rounded-full border border-[#1A1D21]/30 hover:border-[#0B1F3A] hover:bg-[#0B1F3A] hover:text-white px-7 py-3 text-[11px] font-mono font-semibold tracking-wider uppercase text-[#1A1D21] transition-all duration-300 shadow-xs"
                   >
                     LEARN MORE ABOUT US

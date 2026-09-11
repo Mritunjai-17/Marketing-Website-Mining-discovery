@@ -391,6 +391,9 @@ export function CompanyJourney() {
           ecosystem for media, branding, investor engagement and digital growth.&rdquo;
         </p>
       </div>
+
+      {/* Seamless editorial handoff into Our Impact */}
+      <div aria-hidden="true" className={styles.outroSeam} />
     </section>
   );
 }

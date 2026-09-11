@@ -478,3 +478,26 @@
     width: 1.75rem;
   }
 }
+
+/*
+ * Seam into Market Influence & Reach (Stats).
+ *
+ * Smooth editorial handoff easing Our Impact's dark ground (#11110F)
+ * gracefully back into Stats' light ground (#FBFBFA).
+ */
+.impactOutroSeam {
+  display: block;
+  width: 100%;
+  height: clamp(140px, 20vh, 220px);
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    #11110F 0%,
+    #221E1A 24%,
+    #4B443B 46%,
+    #9C9486 68%,
+    #EFEBE2 88%,
+    #FBFBFA 100%
+  );
+}
+

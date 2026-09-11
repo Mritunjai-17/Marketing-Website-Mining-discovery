@@ -86,8 +86,8 @@ const SERVICES: Service[] = [
         desc: "Extend project visibility across international mining audiences and create connections with global stakeholders.",
       },
     ],
-    image: "/services/04-pit.jpg",
-    alt: "Aerial view of a large open-pit mine in production",
+    image: "/images/engine/investor_meeting.jpg",
+    alt: "Strategic investor meeting and capital partnership conference",
   },
   {
     num: "02",
@@ -106,8 +106,8 @@ const SERVICES: Service[] = [
         desc: "Communicate key announcements and extend the impact of mining events through focused media coverage and storytelling.",
       },
     ],
-    image: "/stats/newsletter-briefing.jpg",
-    alt: "Open-pit mining operation at sunset",
+    image: "/images/engine/conference_auditorium.jpg",
+    alt: "Industry conference auditorium and keynote media presentation",
   },
   {
     num: "03",
@@ -126,8 +126,8 @@ const SERVICES: Service[] = [
         desc: "Transform complex mining stories, projects and developments into engaging visual experiences.",
       },
     ],
-    image: "/services/02-drill.jpg",
-    alt: "Exploration drill rig and crew working in mountain terrain",
+    image: "/images/engine/brand_identity.jpg",
+    alt: "Corporate brand guidelines, visual identity design and creative stationery",
   },
   {
     num: "04",
@@ -146,8 +146,8 @@ const SERVICES: Service[] = [
         desc: "Amplify important stories, announcements and campaigns towards relevant digital audiences.",
       },
     ],
-    image: "/cards/bg_card_3.jpg",
-    alt: "Smartphone held in front of a mining landscape",
+    image: "/images/engine/digital_ads_marketing.jpg",
+    alt: "Digital advertising campaign analytics and targeted audience growth marketing",
   },
   {
     num: "05",
@@ -166,8 +166,8 @@ const SERVICES: Service[] = [
         desc: "Highlight the people behind mining companies and projects through focused leadership and industry storytelling.",
       },
     ],
-    image: "/services/03-assay.jpg",
-    alt: "Mining professional logging drill core samples on a core bench",
+    image: "/images/engine/youtube_production.jpg",
+    alt: "Professional media podcast recording studio, cameras, and executive broadcast suite",
   },
   {
     num: "06",
@@ -186,8 +186,8 @@ const SERVICES: Service[] = [
         desc: "Turn individual interactions into an ongoing relationship through consistent and relevant communication.",
       },
     ],
-    image: "/cards/bg_card_2.jpg",
-    alt: "Laptop and printed industry report on a desk at dusk",
+    image: "/images/engine/editorial_magazine.jpg",
+    alt: "Executive briefing newsletter editorial and publication review on executive desk",
   },
 ];
 

@@ -323,7 +323,7 @@ export const ServicesJourney: React.FC = () => {
         const w = frame.clientWidth;
         const h = frame.clientHeight;
         if (vw >= 1024) {
-          metrics.textX = w * 0.1;
+          metrics.textX = 0;
           metrics.textY = h * 0.34;
           // Far enough off-axis that the two plates in a handover are not stacked on one
           // another at the moment they are closest in size.
@@ -335,11 +335,11 @@ export const ServicesJourney: React.FC = () => {
         } else {
           // Stacked layout: the type block already owns the lower half, so a neighbour
           // steps mostly downward and barely sideways.
-          metrics.textX = w * 0.04;
-          metrics.textY = h * 0.2;
+          metrics.textX = 0;
+          metrics.textY = h * 0.08;
           // Less room to move here, and the plate has type directly beneath it.
-          metrics.plateX = w * 0.06;
-          metrics.plateY = h * 0.1;
+          metrics.plateX = w * 0.04;
+          metrics.plateY = h * 0.05;
           metrics.centredText = false;
           metrics.spanOut = AWAY_SPAN_OUT_NARROW;
           metrics.spanIn = AWAY_SPAN_IN_NARROW;
@@ -409,18 +409,10 @@ export const ServicesJourney: React.FC = () => {
            */
           gsap.set(texts[i], {
             yPercent: metrics.centredText ? -50 : 0,
-            x: dir * kText * metrics.textX,
+            x: 0,
             y: dir * kText * metrics.textY,
-            scale: 1 - kText * 0.38,
-            /*
-             * Previous, active, next — and nothing else. Past one chapter's distance the
-             * title is gone within a third of a step, because a fourth name on stage
-             * stops reading as a sequence and starts reading as clutter.
-             */
-            opacity:
-              t < 1
-                ? 1 - kText * 0.86
-                : clamp(0.14 * ((1.3 - Math.abs(d)) / 0.3), 0, 0.14),
+            scale: 1 - kText * 0.25,
+            opacity: clamp(1 - (t / 0.6), 0, 1),
             zIndex: Math.round(20 - kText * 10),
           });
 

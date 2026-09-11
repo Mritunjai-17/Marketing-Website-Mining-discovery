@@ -2,9 +2,10 @@
 
 import React, { useEffect, useRef, useState, useId, useCallback } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { TrendingUp, ShieldCheck, MapPin, Layers, ArrowUpRight } from "lucide-react";
+import { TrendingUp, ShieldCheck, MapPin, Layers, ArrowUpRight, ArrowRight } from "lucide-react";
 
 /*
  * Detailed Portfolio Case Data
@@ -1253,27 +1254,9 @@ export function ClientScrubShowcase() {
     <section
       ref={containerRef}
       id="clients"
-      className="relative w-full overflow-hidden bg-[#11110F] select-none"
+      className="relative w-full overflow-hidden bg-[#11110F] select-none pt-8 sm:pt-12 md:pt-16"
       aria-label="Client Ecosystem"
     >
-
-      {/* Top Header Context - Seamlessly Blended */}
-      <div className="relative z-10 max-w-4xl mx-auto px-6 pt-4 sm:pt-6 md:pt-24 lg:pt-28 mb-12 md:mb-16 text-center flex flex-col items-center">
-        <span className="flex items-center justify-center gap-3 text-xs font-mono font-semibold tracking-[0.22em] text-[#B8924A] uppercase mb-3.5">
-          <span className="block w-7 h-px bg-[#B8924A]/70" aria-hidden="true" />
-          Our Impact
-          <span className="block w-7 h-px bg-[#B8924A]/70" aria-hidden="true" />
-        </span>
-
-        <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-[46px] font-normal text-[#FCFBF8] tracking-[-0.015em] leading-[1.12] mb-4">
-          Marketing That Delivers Results
-        </h2>
-
-        <p className="max-w-2xl mx-auto text-sm sm:text-base text-neutral-400 font-sans font-normal leading-relaxed">
-          Through strategic media, creative campaigns and investor engagement, we turn visibility into measurable growth.
-        </p>
-      </div>
-
       {/* THREE WORDS PIC SECTION */}
       <div ref={rowsWrapperRef} className="relative z-10 w-full flex flex-col my-4">
         <div className="w-full border-t border-white/[0.09]" />
@@ -1349,7 +1332,7 @@ export function ClientScrubShowcase() {
         style={{ backgroundColor: "#F7F4ED" }}
       >
         {/* Kinetic Title Scrub */}
-        <div className="max-w-7xl mx-auto px-6 mb-16 md:mb-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-12 sm:mb-16 md:mb-20">
           <div className="w-full flex flex-col items-start overflow-hidden">
             <div className="text-xs font-mono font-bold uppercase tracking-widest text-[#B8860B] mb-3 flex items-center gap-2">
               <Layers className="w-4 h-4 text-[#B8860B]" />
@@ -1367,23 +1350,25 @@ export function ClientScrubShowcase() {
             >
               INFORMATION
             </h1>
-            <p className="mt-6 text-base sm:text-lg text-neutral-600 max-w-2xl font-normal leading-relaxed">
+            <p className="mt-4 sm:mt-6 text-sm sm:text-base md:text-lg text-neutral-600 max-w-2xl font-normal leading-relaxed">
               Empowering premier global mining companies, exploration developers, and institutional capital partners with targeted visibility and measurable industry growth.
             </p>
           </div>
         </div>
 
-        {/* Slide 14 Collaboration Pillars - Directly Overlapped on Photography */}
-        <div className="max-w-7xl mx-auto px-6 mb-16">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Slide 14 Collaboration Pillars - Styled Exactly Like First Image Cards */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-16 sm:mb-20">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
             {CLIENT_PILLARS.map((pillar, idx) => {
               return (
-                <div
+                <Link
                   key={`pillar-${idx}`}
-                  className="group relative h-[360px] sm:h-[380px] rounded-2xl overflow-hidden border border-white/40 shadow-[0_8px_30px_rgba(11,31,58,0.12)] hover:shadow-[0_20px_45px_rgba(11,31,58,0.25)] transition-all duration-500 hover:-translate-y-1.5 flex flex-col justify-between p-5 sm:p-6"
+                  href="/work"
+                  className="group relative flex flex-col rounded-2xl overflow-hidden bg-[#0D0F15] border border-white/10 hover:border-[#E5A93C]/60 transition-all duration-500 hover:-translate-y-1.5 shadow-[0_12px_36px_rgba(0,0,0,0.35)] hover:shadow-[0_24px_55px_rgba(0,0,0,0.6)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E5A93C]"
+                  aria-label={`View ${pillar.title} portfolio`}
                 >
-                  {/* High-Resolution Thematic Photography - Normal Picture */}
-                  <div className="absolute inset-0 z-0">
+                  {/* Upper Image Section */}
+                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#151821]">
                     <Image
                       src={pillar.image}
                       alt={pillar.title}
@@ -1391,41 +1376,54 @@ export function ClientScrubShowcase() {
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                       className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
                     />
-                    {/* Darkened area covering title + description with a smooth fade, slightly increased height */}
-                    <div className="absolute inset-x-0 bottom-0 h-[180px] bg-gradient-to-t from-neutral-950 via-neutral-950/90 to-transparent pointer-events-none" />
-                    {/* Delicate Inner Highlight Bevel */}
-                    <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/20 pointer-events-none" />
-                  </div>
+                    {/* Subtle gradient overlay at top for badge legibility */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/20 pointer-events-none" />
 
-                  {/* Header Tier: Editorial Telemetry & Interactive Disc */}
-                  <div className="relative z-10 flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/25 text-white font-mono text-[10px] tracking-wider uppercase shadow-xs">
-                      <span className="text-amber-400 font-bold">{pillar.index}</span>
-                      <span className="text-white/40">/</span>
-                      <span className="text-white/95 font-medium">{pillar.tag}</span>
-                    </div>
-
-                    <div className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md border border-white/25 flex items-center justify-center text-white/90 group-hover:bg-[#B8860B] group-hover:text-white group-hover:border-[#B8860B] transition-all duration-300 shadow-xs">
-                      <ArrowUpRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                    </div>
-                  </div>
-
-                  {/* Bottom Tier: High-Contrast Crystal-Clear Text */}
-                  <div className="relative z-10 pt-6">
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/25 shadow-xs mb-2.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-400">
-                        {pillar.eyebrow}
+                    {/* Top Badge matching screenshot: 01 — CONFERENCE & POLICY */}
+                    <div className="absolute top-3 left-3.5 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-black/60 backdrop-blur-md border border-white/15">
+                      <span className="font-mono text-xs font-bold text-[#E5A93C] tracking-wider">
+                        {pillar.index}
+                      </span>
+                      <span className="text-white/40 text-xs font-mono">—</span>
+                      <span className="font-mono text-[9px] tracking-widest uppercase text-white/90 font-medium">
+                        {pillar.tag}
                       </span>
                     </div>
-                    <h4 className="font-serif text-xl sm:text-[21px] font-bold text-white leading-snug tracking-tight mb-2 group-hover:text-amber-200 transition-colors drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)]">
-                      {pillar.title}
-                    </h4>
-                    <p className="text-xs sm:text-[13px] text-neutral-200 leading-relaxed font-normal drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]">
-                      {pillar.description}
-                    </p>
                   </div>
-                </div>
+
+                  {/* Lower Section: Solid Black Background with Content */}
+                  <div className="flex flex-col justify-between flex-1 p-5 sm:p-6 bg-[#0D0F15]">
+                    <div>
+                      {/* Eyebrow */}
+                      <span className="text-[10px] sm:text-[10.5px] font-mono font-bold tracking-[0.18em] uppercase text-[#E5A93C] mb-2 block">
+                        {pillar.eyebrow}
+                      </span>
+
+                      {/* Title */}
+                      <h4 className="font-serif text-[19px] sm:text-[21px] font-normal text-white leading-tight tracking-tight mb-2.5 group-hover:text-[#F3E5C8] transition-colors duration-300">
+                        {pillar.title}
+                      </h4>
+
+                      {/* Description */}
+                      <p className="text-xs sm:text-[13px] text-neutral-400 leading-relaxed font-sans font-normal mb-5">
+                        {pillar.description}
+                      </p>
+                    </div>
+
+                    {/* Bottom Action Row with Circular Button */}
+                    <div className="flex items-center justify-between pt-3 border-t border-white/10">
+                      <span className="font-mono text-[10px] sm:text-[10.5px] font-semibold tracking-[0.16em] uppercase text-[#E5A93C] group-hover:text-[#FFC766] transition-colors flex items-center gap-1.5">
+                        EXPLORE ALLIANCE
+                        <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+                      </span>
+
+                      {/* Circular Button */}
+                      <div className="w-9 h-9 rounded-full border border-[#E5A93C]/50 bg-black/40 flex items-center justify-center text-[#E5A93C] group-hover:bg-[#E5A93C] group-hover:text-[#0B0E17] group-hover:border-[#E5A93C] group-hover:scale-105 transition-all duration-300 shadow-md shrink-0">
+                        <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+                      </div>
+                    </div>
+                  </div>
+                </Link>
               );
             })}
           </div>

@@ -29,7 +29,7 @@
 .intro {
   max-width: 900px;
   margin: 0 auto;
-  padding: 6rem 1.5rem 3rem;
+  padding: clamp(1.75rem, 3.5vh, 2.5rem) 1.5rem clamp(0.75rem, 1.5vh, 1.25rem);
   text-align: center;
 }
 
@@ -61,7 +61,7 @@
 .outro {
   max-width: 860px;
   margin: 0 auto;
-  padding: 4rem 1.5rem 6rem;
+  padding: clamp(3rem, 6vh, 4.5rem) 1.5rem clamp(2rem, 4vh, 3rem);
   text-align: center;
 }
 
@@ -84,6 +84,28 @@
   font-size: 0.9375rem;
   font-style: italic;
   line-height: 1.5;
+}
+
+/*
+ * Seam into Our Impact.
+ *
+ * Smooth editorial handoff easing Company Journey's warm cream ground (#F7F4ED)
+ * down into Our Impact's rich dark ground (#11110F) without a hard cut.
+ */
+.outroSeam {
+  display: block;
+  width: 100%;
+  height: clamp(140px, 20vh, 220px);
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    #F7F4ED 0%,
+    #EFEBE2 12%,
+    #9C9486 32%,
+    #4B443B 54%,
+    #221E1A 76%,
+    #11110F 100%
+  );
 }
 
 /* ---------------------------------------------------------------- scroll + viewport */
