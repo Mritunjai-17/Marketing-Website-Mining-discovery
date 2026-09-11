@@ -1364,11 +1364,11 @@ export function ClientScrubShowcase() {
                 <Link
                   key={`pillar-${idx}`}
                   href="/work"
-                  className="group relative flex flex-col rounded-2xl overflow-hidden bg-[#0D0F15] border border-white/10 hover:border-[#E5A93C]/60 transition-all duration-500 hover:-translate-y-1.5 shadow-[0_12px_36px_rgba(0,0,0,0.35)] hover:shadow-[0_24px_55px_rgba(0,0,0,0.6)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E5A93C]"
+                  className="group relative flex flex-col rounded-2xl overflow-hidden bg-[#161B26] border border-[#2B3345] hover:border-[#E5A93C]/60 transition-all duration-500 hover:-translate-y-1.5 shadow-[0_10px_32px_rgba(11,31,58,0.14)] hover:shadow-[0_20px_48px_rgba(11,31,58,0.24)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E5A93C]"
                   aria-label={`View ${pillar.title} portfolio`}
                 >
                   {/* Upper Image Section */}
-                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#151821]">
+                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#1D2332]">
                     <Image
                       src={pillar.image}
                       alt={pillar.title}
@@ -1380,7 +1380,7 @@ export function ClientScrubShowcase() {
                     <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/20 pointer-events-none" />
 
                     {/* Top Badge matching screenshot: 01 — CONFERENCE & POLICY */}
-                    <div className="absolute top-3 left-3.5 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-black/60 backdrop-blur-md border border-white/15">
+                    <div className="absolute top-3 left-3.5 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#10141D]/80 backdrop-blur-md border border-white/15">
                       <span className="font-mono text-xs font-bold text-[#E5A93C] tracking-wider">
                         {pillar.index}
                       </span>
@@ -1391,8 +1391,8 @@ export function ClientScrubShowcase() {
                     </div>
                   </div>
 
-                  {/* Lower Section: Solid Black Background with Content */}
-                  <div className="flex flex-col justify-between flex-1 p-5 sm:p-6 bg-[#0D0F15]">
+                  {/* Lower Section: Softened Lighter Dark Background with Content */}
+                  <div className="flex flex-col justify-between flex-1 p-5 sm:p-6 bg-[#161B26]">
                     <div>
                       {/* Eyebrow */}
                       <span className="text-[10px] sm:text-[10.5px] font-mono font-bold tracking-[0.18em] uppercase text-[#E5A93C] mb-2 block">
@@ -1405,20 +1405,20 @@ export function ClientScrubShowcase() {
                       </h4>
 
                       {/* Description */}
-                      <p className="text-xs sm:text-[13px] text-neutral-400 leading-relaxed font-sans font-normal mb-5">
+                      <p className="text-xs sm:text-[13px] text-neutral-300 leading-relaxed font-sans font-normal mb-5">
                         {pillar.description}
                       </p>
                     </div>
 
                     {/* Bottom Action Row with Circular Button */}
-                    <div className="flex items-center justify-between pt-3 border-t border-white/10">
+                    <div className="flex items-center justify-between pt-3 border-t border-white/[0.12]">
                       <span className="font-mono text-[10px] sm:text-[10.5px] font-semibold tracking-[0.16em] uppercase text-[#E5A93C] group-hover:text-[#FFC766] transition-colors flex items-center gap-1.5">
                         EXPLORE ALLIANCE
                         <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
                       </span>
 
                       {/* Circular Button */}
-                      <div className="w-9 h-9 rounded-full border border-[#E5A93C]/50 bg-black/40 flex items-center justify-center text-[#E5A93C] group-hover:bg-[#E5A93C] group-hover:text-[#0B0E17] group-hover:border-[#E5A93C] group-hover:scale-105 transition-all duration-300 shadow-md shrink-0">
+                      <div className="w-9 h-9 rounded-full border border-[#E5A93C]/50 bg-[#10141D]/70 flex items-center justify-center text-[#E5A93C] group-hover:bg-[#E5A93C] group-hover:text-[#0B0E17] group-hover:border-[#E5A93C] group-hover:scale-105 transition-all duration-300 shadow-md shrink-0">
                         <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5" />
                       </div>
                     </div>
