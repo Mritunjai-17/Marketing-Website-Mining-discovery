@@ -64,105 +64,107 @@ export const Header: React.FC = () => {
   }, []);
 
   return (
-    <header
-      className="fixed top-0 z-50 w-full font-sans transition-all duration-300 ease-out"
-      style={{
-        backgroundColor: isDarkInitialRoute
-          ? "rgba(8, 9, 9, 0.72)"
-          : `rgba(8, 9, 9, ${(scrollProgress * 0.70).toFixed(2)})`,
-        backdropFilter: scrollProgress > 0.1 || isDarkInitialRoute ? "blur(12px)" : "none",
-        WebkitBackdropFilter: scrollProgress > 0.1 || isDarkInitialRoute ? "blur(12px)" : "none",
-        borderBottom: `1px solid rgba(255, 255, 255, ${(scrollProgress * 0.06).toFixed(2)})`,
-        paddingTop: isScrolled ? "10px" : "14px",
-        paddingBottom: isScrolled ? "10px" : "14px",
-      }}
-    >
-      {/* Full-width container */}
-      <div className="w-full px-4 sm:px-8 lg:px-16 flex items-center justify-between">
-        {/* Brand Logo */}
-        <Link
-          href="/"
-          className="group flex items-center focus:outline-none"
-          aria-label="Mining Discovery Home"
-        >
-          <Image
-            src="/logo.png"
-            alt="Mining Discovery Logo"
-            width={220}
-            height={85}
-            priority
-            className="h-9 sm:h-11 w-auto object-contain transition-transform duration-300 group-hover:scale-102"
-          />
-        </Link>
-
-        {/* Desktop Navigation Links */}
-        <nav className="hidden lg:flex items-center gap-7 font-sans">
-          {navLinks.map((link) => {
-            const isActive = pathname === link.href;
-            return (
-              <Link
-                key={link.name}
-                href={link.href}
-                className="relative py-1 text-xs font-semibold uppercase tracking-[0.09em] transition-colors duration-300"
-                style={{
-                  color: isDarkMode
-                    ? isActive
-                      ? "#FAF7F2"
-                      : "rgba(250, 247, 242, 0.84)"
-                    : isActive
-                      ? "#0B1F3A"
-                      : "rgba(11, 31, 58, 0.90)",
-                }}
-              >
-                <span className="hover:text-[#B8860B] transition-colors duration-200">
-                  {link.name}
-                </span>
-
-                {/* Restrained Gold Active Indicator */}
-                {isActive && (
-                  <span
-                    className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#B8860B] shadow-[0_0_6px_rgba(184,134,11,0.6)]"
-                    aria-hidden="true"
-                  />
-                )}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Desktop Header Action CTA: Get Featured */}
-        <div className="hidden lg:flex items-center">
-          <Button
-            variant="gold"
-            size="sm"
-            onClick={goToContact}
-            className="font-sans font-semibold tracking-wider text-xs py-1.5 px-4 text-white bg-[#A87E2C] hover:bg-[#8F6B24] shadow-xs transition-all duration-300"
+    <>
+      <header
+        className="fixed top-0 z-50 w-full font-sans transition-all duration-300 ease-out"
+        style={{
+          backgroundColor: isDarkInitialRoute
+            ? "rgba(8, 9, 9, 0.72)"
+            : `rgba(8, 9, 9, ${(scrollProgress * 0.70).toFixed(2)})`,
+          backdropFilter: scrollProgress > 0.1 || isDarkInitialRoute ? "blur(12px)" : "none",
+          WebkitBackdropFilter: scrollProgress > 0.1 || isDarkInitialRoute ? "blur(12px)" : "none",
+          borderBottom: `1px solid rgba(255, 255, 255, ${(scrollProgress * 0.06).toFixed(2)})`,
+          paddingTop: isScrolled ? "10px" : "14px",
+          paddingBottom: isScrolled ? "10px" : "14px",
+        }}
+      >
+        {/* Full-width container */}
+        <div className="w-full px-4 sm:px-8 lg:px-16 flex items-center justify-between">
+          {/* Brand Logo */}
+          <Link
+            href="/"
+            className="group flex items-center focus:outline-none"
+            aria-label="Mining Discovery Home"
           >
-            Get Featured
-            <ArrowRight className="w-3.5 h-3.5 ml-1" />
-          </Button>
+            <Image
+              src="/logo.png"
+              alt="Mining Discovery Logo"
+              width={220}
+              height={85}
+              priority
+              className="h-9 sm:h-11 w-auto object-contain transition-transform duration-300 group-hover:scale-102"
+            />
+          </Link>
+
+          {/* Desktop Navigation Links */}
+          <nav className="hidden lg:flex items-center gap-7 font-sans">
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href;
+              return (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  className="relative py-1 text-xs font-semibold uppercase tracking-[0.09em] transition-colors duration-300"
+                  style={{
+                    color: isDarkMode
+                      ? isActive
+                        ? "#FAF7F2"
+                        : "rgba(250, 247, 242, 0.84)"
+                      : isActive
+                        ? "#0B1F3A"
+                        : "rgba(11, 31, 58, 0.90)",
+                  }}
+                >
+                  <span className="hover:text-[#B8860B] transition-colors duration-200">
+                    {link.name}
+                  </span>
+
+                  {/* Restrained Gold Active Indicator */}
+                  {isActive && (
+                    <span
+                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#B8860B] shadow-[0_0_6px_rgba(184,134,11,0.6)]"
+                      aria-hidden="true"
+                    />
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* Desktop Header Action CTA: Get Featured */}
+          <div className="hidden lg:flex items-center">
+            <Button
+              variant="gold"
+              size="sm"
+              onClick={goToContact}
+              className="font-sans font-semibold tracking-wider text-xs py-1.5 px-4 text-white bg-[#A87E2C] hover:bg-[#8F6B24] shadow-xs transition-all duration-300"
+            >
+              Get Featured
+              <ArrowRight className="w-3.5 h-3.5 ml-1" />
+            </Button>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(true)}
+            className="lg:hidden p-2 rounded-lg focus:outline-none transition-colors"
+            style={{
+              color: isDarkMode ? "#FAF7F2" : "#0B1F3A",
+              backgroundColor: isDarkMode ? "rgba(255,255,255,0.06)" : "rgba(11,31,58,0.06)",
+            }}
+            aria-label="Open navigation menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
         </div>
+      </header>
 
-        {/* Mobile Menu Button */}
-        <button
-          type="button"
-          onClick={() => setMobileMenuOpen(true)}
-          className="lg:hidden p-2 rounded-lg focus:outline-none transition-colors"
-          style={{
-            color: isDarkMode ? "#FAF7F2" : "#0B1F3A",
-            backgroundColor: isDarkMode ? "rgba(255,255,255,0.06)" : "rgba(11,31,58,0.06)",
-          }}
-          aria-label="Open navigation menu"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
-      </div>
-
-      {/* Mobile Navigation Drawer */}
+      {/* Mobile Navigation Drawer - rendered outside <header> so backdrop-filter does not clip fixed positioning */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
+        <div className="fixed inset-0 z-[100] lg:hidden">
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity duration-300"
+            className="fixed inset-0 bg-black/70 backdrop-blur-xs transition-opacity duration-300"
             onClick={() => setMobileMenuOpen(false)}
           />
 
@@ -224,6 +226,6 @@ export const Header: React.FC = () => {
           </div>
         </div>
       )}
-    </header>
+    </>
   );
 };
