@@ -100,72 +100,73 @@ export const Stats: React.FC = () => {
       <div className="absolute inset-0 opacity-[0.02] pointer-events-none bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:16px_16px]" />
 
       {/* Main Container */}
-      <div className="relative w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 py-20 lg:py-28">
-        <div className="flex flex-col lg:flex-row items-start gap-12 lg:gap-24">
+      <div className="relative w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 py-16 lg:py-24">
+        <div className="flex flex-col lg:flex-row items-start gap-10 lg:gap-14 xl:gap-20">
 
-          {/* LEFT COLUMN: Human Editorial Sticky Block */}
-          <div className="w-full lg:w-5/12 lg:sticky lg:top-[120px]">
-            <div className="flex flex-col items-start gap-6 lg:pr-6">
-
-              {/* Subtle Gold Hairline Divider */}
-              <div className="w-12 h-0.5 bg-[#B8860B]" />
-
-              {/* Eyebrow Label */}
-              <span className="text-xs font-semibold uppercase tracking-[0.15em] text-[#B8860B]">
-                Market Influence & Reach
-              </span>
-
-              {/* Editorial Quote Headline */}
-              <h2 className="font-serif text-3xl sm:text-4xl lg:text-[44px] font-normal text-[#0B1F3A] leading-[1.15] tracking-[-0.015em]">
-                "One platform. Every major mining audience."
-              </h2>
-
-              {/* Mining Editorial Feature Image — crossfades in sync with the active stat */}
-              <div className="w-full mt-2 rounded-xl overflow-hidden border border-[#E5E4DE] shadow-md relative group aspect-[16/10] max-h-[250px] sm:max-h-[270px]">
-                {STATS_DATA.map((stat, index) => (
-                  <Image
-                    key={stat.image}
-                    src={stat.image}
-                    alt={stat.imageAlt}
-                    width={600}
-                    height={375}
-                    priority={index === 0}
-                    aria-hidden={index !== activeIndex}
-                    className={`absolute inset-0 w-full h-full object-cover transition-[opacity,transform] duration-500 ease-in-out group-hover:scale-[1.03] ${
-                      index === activeIndex ? "opacity-100" : "opacity-0"
-                    }`}
-                  />
-                ))}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0B1F3A]/30 via-transparent to-transparent opacity-40 pointer-events-none" />
-              </div>
+          {/* LEFT COLUMN: Large Cinematic Visual Anchor (50-55% visual weight, 80-90% section/viewport height) */}
+          <div className="w-full lg:w-[52%] xl:w-[54%] lg:sticky lg:top-[100px] self-start">
+            <div className="relative w-full aspect-[16/10] sm:aspect-[16/10] lg:aspect-auto lg:h-[82vh] lg:min-h-[580px] lg:max-h-[820px] rounded-2xl overflow-hidden border border-[#E5E4DE] shadow-xl group bg-[#0B1F3A]/5">
+              {STATS_DATA.map((stat, index) => (
+                <Image
+                  key={stat.image}
+                  src={stat.image}
+                  alt={stat.imageAlt}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 54vw"
+                  priority={index === 0}
+                  aria-hidden={index !== activeIndex}
+                  className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-in-out group-hover:scale-[1.02] ${
+                    index === activeIndex ? "opacity-100 scale-100" : "opacity-0 scale-105 pointer-events-none"
+                  }`}
+                />
+              ))}
+              {/* Subtle Cinematic Vignette / Tone Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0B1F3A]/30 via-transparent to-[#0B1F3A]/10 opacity-50 pointer-events-none" />
             </div>
           </div>
 
-          {/* RIGHT COLUMN: Natural Editorial Flow */}
-          <div className="w-full lg:w-7/12 flex flex-col gap-14 lg:gap-16 lg:pl-10 border-t lg:border-t-0 lg:border-l border-[#E5E4DE] pt-12 lg:pt-0">
+          {/* RIGHT COLUMN: Editorial Story Hierarchy (45-50% visual weight) */}
+          <div className="w-full lg:w-[48%] xl:w-[46%] flex flex-col gap-10 lg:gap-14 lg:pl-10 xl:pl-14 border-t lg:border-t-0 lg:border-l border-[#E5E4DE] pt-10 lg:pt-0">
 
-            {/* INTRO SENTENCE BLOCK (First item above 150,000+ with RevealOnScroll effect) */}
+            {/* EYEBROW & LARGE HEADLINE */}
             <RevealOnScroll>
-              <div className="pb-10 border-b border-[#E5E4DE]">
-                <p className="text-xl sm:text-2xl text-[#3A3D42] leading-relaxed font-normal font-sans">
+              <div className="flex flex-col items-start gap-5">
+                {/* Subtle Gold Hairline Divider */}
+                <div className="w-12 h-0.5 bg-[#B8860B]" />
+
+                {/* Eyebrow Label */}
+                <span className="text-xs font-semibold uppercase tracking-[0.15em] text-[#B8860B]">
+                  Market Influence & Reach
+                </span>
+
+                {/* Editorial Quote Headline */}
+                <h2 className="font-serif text-3xl sm:text-4xl lg:text-[42px] xl:text-[46px] font-normal text-[#0B1F3A] leading-[1.18] tracking-[-0.015em]">
+                  "One platform. Every major mining audience."
+                </h2>
+              </div>
+            </RevealOnScroll>
+
+            {/* INTRO DESCRIPTIVE PARAGRAPH */}
+            <RevealOnScroll>
+              <div className="pb-8 sm:pb-10 border-b border-[#E5E4DE]">
+                <p className="text-lg sm:text-xl text-[#3A3D42] leading-relaxed font-normal font-sans">
                   Mining Discovery bridges the gap between mining companies and the global investment community through targeted editorial coverage and market intelligence. Connecting global mining companies directly with institutional investors, analysts, and executive decision-makers.
                 </p>
               </div>
             </RevealOnScroll>
 
             {/* STATS LIST (Clean Editorial Rows) */}
-            <div className="flex flex-col gap-12 sm:gap-16">
+            <div className="flex flex-col gap-10 sm:gap-14">
               {STATS_DATA.map((stat, index) => {
                 return (
                   <RevealOnScroll key={stat.label}>
                     <div
                       ref={setStatRef(index)}
                       data-active={index === activeIndex}
-                      className="group flex flex-col gap-2 pb-10 border-b border-[#E5E4DE] last:border-b-0"
+                      className="group flex flex-col gap-2 pb-8 sm:pb-10 border-b border-[#E5E4DE] last:border-b-0"
                     >
-
                       {/* Oversized Human Serif Stat Number */}
-                      <div className="font-serif text-5xl sm:text-7xl lg:text-8xl font-normal text-[#0B1F3A] tracking-tight leading-none group-hover:text-[#B8860B] transition-colors duration-300">
+                      <div className="font-serif text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-normal text-[#0B1F3A] tracking-tight leading-none group-hover:text-[#B8860B] transition-colors duration-300">
                         {stat.valueDisplay}
                       </div>
 
@@ -178,19 +179,17 @@ export const Stats: React.FC = () => {
                       <p className="text-sm sm:text-base text-[#57595E] leading-relaxed font-normal max-w-lg mt-1">
                         {stat.description}
                       </p>
-
                     </div>
                   </RevealOnScroll>
                 );
               })}
             </div>
 
-            {/* EDITORIAL CALLOUT BLOCK (Exact Screenshot Design) */}
+            {/* EDITORIAL CALLOUT BLOCK & CTA */}
             <RevealOnScroll>
-              <div className="flex flex-col gap-8 pt-4">
-
+              <div className="flex flex-col gap-8 pt-2">
                 {/* Paragraph 1 */}
-                <p className="font-sans text-xl sm:text-2xl font-medium text-[#1A1D21] leading-snug sm:leading-snug max-w-xl">
+                <p className="font-sans text-lg sm:text-xl font-medium text-[#1A1D21] leading-relaxed max-w-xl">
                   With direct access to institutional investors and industry analysts, your company's news reaches the decision-makers who matter most in global mining.
                 </p>
 
@@ -199,7 +198,7 @@ export const Stats: React.FC = () => {
                   <div className="flex-shrink-0 w-8 h-8 rounded-full border border-[#D5D4CE] bg-white flex items-center justify-center text-[#1A1D21] text-xs font-bold shadow-xs mt-1">
                     •
                   </div>
-                  <p className="font-sans text-xl sm:text-2xl font-medium text-[#1A1D21] leading-snug sm:leading-snug max-w-xl">
+                  <p className="font-sans text-lg sm:text-xl font-medium text-[#1A1D21] leading-relaxed max-w-xl">
                     That means no fragmented messaging between channels. No news lost in handoffs. Just one dedicated team, accountable for reaching decision-makers worldwide.
                   </p>
                 </div>
@@ -208,20 +207,20 @@ export const Stats: React.FC = () => {
                 <div className="pt-2">
                   <Link
                     href="/about"
-                    className="inline-flex items-center justify-center rounded-full border border-[#1A1D21]/30 hover:border-[#0B1F3A] hover:bg-[#0B1F3A] hover:text-white px-7 py-3 text-[11px] font-mono font-semibold tracking-wider uppercase text-[#1A1D21] transition-all duration-300 shadow-xs"
+                    className="inline-flex items-center justify-center gap-2.5 rounded-full border border-[#1A1D21]/30 hover:border-[#0B1F3A] hover:bg-[#0B1F3A] hover:text-white px-7 py-3.5 text-[11px] font-mono font-semibold tracking-wider uppercase text-[#1A1D21] transition-all duration-300 shadow-xs group"
                   >
-                    LEARN MORE ABOUT US
+                    <span>LEARN MORE ABOUT US</span>
+                    <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
                   </Link>
                 </div>
 
                 {/* Bottom Tagline with Horizontal Divider Line */}
-                <div className="pt-16">
+                <div className="pt-12 sm:pt-16">
                   <p className="text-sm font-medium text-[#1A1D21] tracking-wide mb-3">
                     From raw discoveries, market clarity emerges
                   </p>
                   <div className="w-full h-px bg-[#E5E4DE]" />
                 </div>
-
               </div>
             </RevealOnScroll>
 

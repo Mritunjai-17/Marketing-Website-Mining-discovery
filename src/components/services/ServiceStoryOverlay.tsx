@@ -88,7 +88,6 @@ export const ServiceStoryOverlay: React.FC<ServiceStoryOverlayProps> = ({
   const trackRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
-  const frameImgRef = useRef<HTMLDivElement>(null);
   const dimRef = useRef<HTMLDivElement>(null);
   const netRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
@@ -101,6 +100,22 @@ export const ServiceStoryOverlay: React.FC<ServiceStoryOverlayProps> = ({
     ? SERVICE_STORIES[serviceNum]
     : undefined;
   const open = Boolean(story);
+
+  /* ----------------------------------------------------------- image preloading */
+
+  useEffect(() => {
+    if (!open || !story) return;
+
+    const imagesToPreload = [
+      story.intro.image,
+      ...story.states.map((st) => st.image).filter((img): img is string => Boolean(img)),
+    ];
+    const uniqueImages = Array.from(new Set(imagesToPreload));
+    uniqueImages.forEach((src) => {
+      const img = new window.Image();
+      img.src = src;
+    });
+  }, [open, story]);
 
   /* ---------------------------------------------------------------- scroll lock */
 
@@ -141,6 +156,7 @@ export const ServiceStoryOverlay: React.FC<ServiceStoryOverlayProps> = ({
     if (reduced) return; // The stylesheet lays the same states out as a document.
 
     const panels = gsap.utils.toArray<HTMLElement>(`.${styles.igState}`, stage);
+    const layers = gsap.utils.toArray<HTMLElement>(`.${styles.igFrameImg}`, frame);
     const states = story.states;
     const last = states.length - 1;
 
@@ -173,12 +189,12 @@ export const ServiceStoryOverlay: React.FC<ServiceStoryOverlayProps> = ({
       stageW = s.width;
       stageH = s.height;
       side = Math.max(stageW, stageH) * 1.02;
-      if (frameImgRef.current) {
-        frameImgRef.current.style.width = `${side}px`;
-        frameImgRef.current.style.height = `${side}px`;
-        frameImgRef.current.style.marginLeft = `${-side / 2}px`;
-        frameImgRef.current.style.marginTop = `${-side / 2}px`;
-      }
+      layers.forEach((layer) => {
+        layer.style.width = `${side}px`;
+        layer.style.height = `${side}px`;
+        layer.style.marginLeft = `${-side / 2}px`;
+        layer.style.marginTop = `${-side / 2}px`;
+      });
       if (s.width > 0 && s.height > 0 && a.width > 0) {
         introRect = [
           (a.left - s.left) / s.width,
@@ -238,12 +254,91 @@ export const ServiceStoryOverlay: React.FC<ServiceStoryOverlayProps> = ({
       const cy = (y + h / 2) * stageH;
       // The drift starts at zero, not at 3%: at progress 0 this is an exact cover fit, which
       // is what makes the first screen identical to the approved one rather than 3% tighter.
-      const cover = (Math.max(w * stageW, h * stageH) / side) * (1 + progress * 0.03);
-      gsap.set(frameImgRef.current, {
-        x: cx - stageW / 2,
-        y: cy - stageH / 2,
-        scale: cover,
-      });
+      const baseCover = Math.max(w * stageW, h * stageH) / side;
+      const cover = baseCover * (1 + progress * 0.03);
+      const baseX = cx - stageW / 2;
+      const baseY = cy - stageH / 2;
+
+      /* ---- service-specific visual story with subtle non-repetitive transitions ---- */
+      const transMode = i % 5;
+
+      for (let k = 0; k <= last; k++) {
+        const layer = layers[k];
+        if (!layer) continue;
+
+        if (k === i) {
+          // Outgoing layer
+          let curX = baseX;
+          let curY = baseY;
+          let curScale = cover;
+
+          if (transMode === 0) {
+            // Mode 0: Depth-based slow scale
+            curScale = cover * (1 + 0.04 * t);
+          } else if (transMode === 1) {
+            // Mode 1: Horizontal lateral pan
+            curX = baseX - 28 * t;
+          } else if (transMode === 2) {
+            // Mode 2: Vertical depth settle
+            curY = baseY + 22 * t;
+            curScale = cover * (1 - 0.02 * t);
+          } else if (transMode === 3) {
+            // Mode 3: Diagonal dynamic mask drift
+            curX = baseX - 16 * t;
+            curY = baseY - 14 * t;
+            curScale = cover * (1 + 0.02 * t);
+          } else if (transMode === 4) {
+            // Mode 4: Cinematic expansion
+            curScale = cover * (1 + 0.05 * t);
+          }
+
+          gsap.set(layer, {
+            x: curX,
+            y: curY,
+            scale: curScale,
+            autoAlpha: 1 - t,
+            zIndex: 1,
+          });
+        } else if (k === i + 1) {
+          // Incoming layer
+          let curX = baseX;
+          let curY = baseY;
+          let curScale = cover;
+
+          if (transMode === 0) {
+            // Mode 0: Settle into frame from subtle depth
+            curScale = cover * (1.05 - 0.05 * t);
+          } else if (transMode === 1) {
+            // Mode 1: Smooth horizontal arrival
+            curX = baseX + 32 * (1 - t);
+          } else if (transMode === 2) {
+            // Mode 2: Gentle vertical rise into position
+            curY = baseY - 24 * (1 - t);
+          } else if (transMode === 3) {
+            // Mode 3: Diagonal arrival
+            curX = baseX + 18 * (1 - t);
+            curY = baseY + 16 * (1 - t);
+            curScale = cover * (1.03 - 0.03 * t);
+          } else if (transMode === 4) {
+            // Mode 4: Focus reveal from wide
+            curScale = cover * (0.96 + 0.04 * t);
+          }
+
+          gsap.set(layer, {
+            x: curX,
+            y: curY,
+            scale: curScale,
+            autoAlpha: t,
+            zIndex: 2,
+          });
+        } else {
+          // Inactive layer outside current scroll window
+          gsap.set(layer, {
+            autoAlpha: 0,
+            zIndex: 0,
+          });
+        }
+      }
 
       const net = lerp(states[i].network ?? 0, states[i + 1].network ?? 0, t);
       gsap.set(dimRef.current, {
@@ -515,17 +610,26 @@ export const ServiceStoryOverlay: React.FC<ServiceStoryOverlayProps> = ({
         <div ref={stageRef} className={styles.stStage}>
           {/* The one frame, present from the first screen to the last. */}
           <div ref={frameRef} className={styles.igFrame}>
-            <div ref={frameImgRef} className={styles.igFrameImg}>
-              <Image
-                src={story.intro.image}
-                alt={story.intro.alt}
-                fill
-                quality={92}
-                sizes="100vw"
-                className={styles.stMediaImg}
-                priority
-              />
-            </div>
+            {story.states.map((st, idx) => (
+              <div
+                key={st.id || idx}
+                className={styles.igFrameImg}
+                style={{
+                  zIndex: idx === 0 ? 1 : 0,
+                  opacity: idx === 0 ? 1 : 0,
+                }}
+              >
+                <Image
+                  src={st.image || story.intro.image}
+                  alt={st.alt || story.intro.alt}
+                  fill
+                  quality={92}
+                  sizes="100vw"
+                  className={styles.stMediaImg}
+                  priority={idx <= 1}
+                />
+              </div>
+            ))}
             <div ref={dimRef} aria-hidden="true" className={styles.igDim} />
             <div ref={netRef} aria-hidden="true" className={styles.igNet}>
               <NetworkArt />

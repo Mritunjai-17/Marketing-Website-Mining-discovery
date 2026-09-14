@@ -10,6 +10,8 @@ import styles from "./ImpactCards.module.css";
 
 interface ImpactResult {
   number: string;
+  category: string;
+  categoryName: string;
   icon: React.ElementType;
   /** The exact string that must be on screen once the count-up settles. */
   value: string;
@@ -17,6 +19,9 @@ interface ImpactResult {
   countTo: number;
   prefix: string;
   suffix: string;
+  metricLabel: string;
+  description: string;
+  contextLabel: string;
   title: string;
   subtitle: string;
   image: string;
@@ -26,49 +31,77 @@ interface ImpactResult {
 const RESULTS: ImpactResult[] = [
   {
     number: "01",
+    category: "01 / REACH",
+    categoryName: "REACH",
     icon: Users,
     value: "+120%",
     countTo: 120,
     prefix: "+",
     suffix: "%",
+    metricLabel: "QUALIFIED LEADS",
+    description:
+      "Targeted digital campaigns helped create stronger connections between mining opportunities and relevant audiences.",
+    contextLabel: "SELECTED CAMPAIGN OUTCOME",
     title: "Qualified Leads",
-    subtitle: "Generated through a targeted digital campaign.",
+    subtitle:
+      "Targeted digital campaigns helped create stronger connections between mining opportunities and relevant audiences.",
     image: "/cards/bg_card_1.jpg",
     link: "/work",
   },
   {
     number: "02",
+    category: "02 / RETENTION",
+    categoryName: "RETENTION",
     icon: Mail,
     value: "+35%",
     countTo: 35,
     prefix: "+",
     suffix: "%",
+    metricLabel: "NEWSLETTER SUBSCRIPTIONS",
+    description:
+      "Consistent industry communication helped expand the direct audience around mining content.",
+    contextLabel: "SELECTED CAMPAIGN OUTCOME",
     title: "Newsletter Subscriptions",
-    subtitle: "Growth in newsletter subscriptions.",
+    subtitle:
+      "Consistent industry communication helped expand the direct audience around mining content.",
     image: "/cards/bg_card_2.jpg",
     link: "/work",
   },
   {
     number: "03",
+    category: "03 / ENGAGEMENT",
+    categoryName: "ENGAGEMENT",
     icon: Share2,
     value: "+50%",
     countTo: 50,
     prefix: "+",
     suffix: "%",
+    metricLabel: "SOCIAL MEDIA ENGAGEMENT",
+    description:
+      "Strategic content and digital distribution helped increase interaction across relevant audiences.",
+    contextLabel: "SELECTED CAMPAIGN OUTCOME",
     title: "Social Media Engagement",
-    subtitle: "Increase in social media engagement.",
+    subtitle:
+      "Strategic content and digital distribution helped increase interaction across relevant audiences.",
     image: "/cards/bg_card_3.jpg",
     link: "/work",
   },
   {
     number: "04",
+    category: "04 / COMMUNITY",
+    categoryName: "COMMUNITY",
     icon: User,
     value: "12,000+",
     countTo: 12000,
     prefix: "",
     suffix: "+",
+    metricLabel: "SUBSTACK SUBSCRIBERS",
+    description:
+      "A growing direct audience built around mining news, insights and industry stories.",
+    contextLabel: "CURRENT AUDIENCE",
     title: "Substack Subscribers",
-    subtitle: "Building a global audience of mining professionals.",
+    subtitle:
+      "A growing direct audience built around mining news, insights and industry stories.",
     image: "/cards/bg_card_4.jpg",
     link: "/work",
   },
@@ -316,13 +349,20 @@ export const ImpactCards: React.FC = () => {
                     <div aria-hidden="true" className={styles.impactCardScrim} />
 
                     <div className={styles.impactCardBody}>
-                      <span className={styles.impactCardIndex}>{result.number}</span>
-
-                      <div className={styles.impactCardFoot}>
+                      {/* SMALL CATEGORY */}
+                      <div className={styles.impactCardTop}>
+                        <span className={styles.impactCardCategory}>
+                          <span className={styles.impactCategoryNumber}>{result.number}</span>
+                          <span className={styles.impactCategoryDivider}>/</span>
+                          <span className={styles.impactCategoryName}>{result.categoryName}</span>
+                        </span>
                         <span aria-hidden="true" className={styles.impactCardBadge}>
                           <Icon strokeWidth={1.75} />
                         </span>
+                      </div>
 
+                      {/* MAIN CONTENT: LARGE METRIC -> METRIC LABEL -> SHORT DESCRIPTION */}
+                      <div className={styles.impactCardMain}>
                         <span
                           ref={(el) => {
                             valueRefs.current[index] = el;
@@ -332,12 +372,20 @@ export const ImpactCards: React.FC = () => {
                           {result.value}
                         </span>
 
-                        <h3 className={styles.impactCardTitle}>{result.title}</h3>
-                        <p className={styles.impactCardText}>{result.subtitle}</p>
+                        <h3 className={styles.impactMetricLabel}>{result.metricLabel}</h3>
+                        <p className={styles.impactDescription}>{result.description}</p>
+                      </div>
+
+                      {/* FOOTER: SMALL CONTEXT LABEL -> ACTION ARROW */}
+                      <div className={styles.impactCardFoot}>
+                        <div className={styles.impactContextWrap}>
+                          <span className={styles.impactContextDot} aria-hidden="true" />
+                          <span className={styles.impactContextLabel}>{result.contextLabel}</span>
+                        </div>
 
                         <Link
                           href={result.link}
-                          aria-label={`Learn more about ${result.title}`}
+                          aria-label={`Learn more about ${result.metricLabel}`}
                           // Receded cards are visually gone; leaving their links in the
                           // tab order would send focus to something nobody can see.
                           tabIndex={isActive ? undefined : -1}
@@ -405,7 +453,7 @@ export const ImpactCards: React.FC = () => {
                 <div className={styles.impactCardMedia}>
                   <Image
                     src={result.image}
-                    alt={result.title}
+                    alt={result.metricLabel}
                     fill
                     sizes="(max-width: 639px) 90vw, 300px"
                     className={styles.impactCardImage}
@@ -414,17 +462,35 @@ export const ImpactCards: React.FC = () => {
                 <div aria-hidden="true" className={styles.impactCardScrim} />
 
                 <div className={styles.impactCardBody}>
-                  <span className={styles.impactCardIndex}>{result.number}</span>
-                  <div className={styles.impactCardFoot}>
+                  {/* SMALL CATEGORY */}
+                  <div className={styles.impactCardTop}>
+                    <span className={styles.impactCardCategory}>
+                      <span className={styles.impactCategoryNumber}>{result.number}</span>
+                      <span className={styles.impactCategoryDivider}>/</span>
+                      <span className={styles.impactCategoryName}>{result.categoryName}</span>
+                    </span>
                     <span aria-hidden="true" className={styles.impactCardBadge}>
                       <Icon strokeWidth={1.75} />
                     </span>
+                  </div>
+
+                  {/* MAIN CONTENT: LARGE METRIC -> METRIC LABEL -> SHORT DESCRIPTION */}
+                  <div className={styles.impactCardMain}>
                     <span className={styles.impactValue}>{result.value}</span>
-                    <h3 className={styles.impactCardTitle}>{result.title}</h3>
-                    <p className={styles.impactCardText}>{result.subtitle}</p>
+                    <h3 className={styles.impactMetricLabel}>{result.metricLabel}</h3>
+                    <p className={styles.impactDescription}>{result.description}</p>
+                  </div>
+
+                  {/* FOOTER: SMALL CONTEXT LABEL -> ACTION ARROW */}
+                  <div className={styles.impactCardFoot}>
+                    <div className={styles.impactContextWrap}>
+                      <span className={styles.impactContextDot} aria-hidden="true" />
+                      <span className={styles.impactContextLabel}>{result.contextLabel}</span>
+                    </div>
+
                     <Link
                       href={result.link}
-                      aria-label={`Learn more about ${result.title}`}
+                      aria-label={`Learn more about ${result.metricLabel}`}
                       className={styles.impactCardArrow}
                     >
                       <ArrowRight className={styles.impactArrowIcon} />

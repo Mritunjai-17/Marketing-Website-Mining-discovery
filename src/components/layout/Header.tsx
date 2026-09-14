@@ -28,7 +28,7 @@ export const Header: React.FC = () => {
   const pathname = usePathname();
 
   // Dark ground routes that open immediately in dark mode
-  const DARK_GROUND_ROUTES = ["/services", "/work"];
+  const DARK_GROUND_ROUTES = ["/services", "/work", "/contact"];
   const isDarkInitialRoute = DARK_GROUND_ROUTES.includes(pathname);
 
   // Effective dark ratio: 0 = top Hero light state, 1 = dark charcoal section state

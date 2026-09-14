@@ -547,7 +547,13 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  will-change: transform;
+  width: 1200px;
+  height: 1200px;
+  margin-left: -600px;
+  margin-top: -600px;
+  will-change: transform, opacity;
+  pointer-events: none;
+  user-select: none;
 }
 
 .igDim {

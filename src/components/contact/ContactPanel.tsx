@@ -1,42 +1,24 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import { ArrowRight, Mail, MapPin } from "lucide-react";
+import Image from "next/image";
+import { ArrowRight, Mail, MapPin, Globe, Compass } from "lucide-react";
+import styles from "./ContactPanel.module.css";
 
 /**
- * The /contact page: one centred card, navy information panel beside a white form.
- *
- * REPLACES ContactHero + ContactInformation, which between them made the page a
- * full-bleed editorial spread — a display-scale uppercase headline over a tinted ground,
- * with the details set as an editorial list below it. This is a contact card instead: the
- * page is a light ground, the card sits on it, and nothing is at display scale.
- *
- * ON SUBMISSION. The project has no API routes (there is no src/app/api) and no mail
- * transport, so there is nothing to POST to. The form hands the composed message to the
- * visitor's own mail client through a mailto: URL and says exactly that — it does not
- * claim the message was received, because nothing here received it.
- *
- * To move it onto a real endpoint: replace the body of `handoff` with a fetch, keep
- * `validate` as it is, change SENT_COPY, and add a failure branch that leaves `values`
- * alone — the state is already shaped for it.
+ * The /contact page: a premium, cinematic, editorial contact experience
+ * designed in the Mining Discovery dark charcoal, warm cream, and gold accent visual language.
  */
 
-/** The official details, unchanged from the component this replaces. */
 const CONTACT = {
   email: "info@miningdiscovery.com",
-  /*
-   * Reproduced as the source publishes it, including "Layfatte" — that looks like it
-   * should read "Lafayette", but correcting a street name is inventing an address, so it
-   * is left exactly as found and flagged for a human to confirm.
-   */
+  basedIn: "Chandigarh · India",
   address: ["180 Layfatte street", "Passaic, New Jersey 07055"],
+  focus: "Media · Branding · Investor Engagement",
 } as const;
 
 /*
- * Mirrors the set in layout/Footer.tsx — same marks, same paths, same placeholder hrefs.
- * Duplicated rather than shared because lifting it into a module would mean editing the
- * footer, which is out of scope here; worth collapsing into one export next time that
- * file is open.
+ * Brand glyphs matching the site's footer and social links.
  */
 const SOCIALS: Array<{ name: string; href: string; path: string }> = [
   {
@@ -67,12 +49,13 @@ const SENT_COPY =
 interface Fields {
   name: string;
   email: string;
+  company: string;
+  subject: string;
   message: string;
 }
 
 type Errors = Partial<Record<keyof Fields, string>>;
 
-/** Permissive on purpose: tighter patterns reject valid addresses more often than typos. */
 const EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function validate(v: Fields): Errors {
@@ -85,17 +68,14 @@ function validate(v: Fields): Errors {
   return errors;
 }
 
-/** A ruled line, not a box: no fill, no radius, one hairline under the text. */
-const FIELD =
-  "w-full border-0 border-b bg-transparent px-0 pb-2.5 pt-1 font-sans text-[15px] " +
-  "text-[#1A1D21] placeholder:text-[#9A9A95] transition-colors duration-200 " +
-  "focus:outline-none focus:ring-0";
-const IDLE = "border-[#D9D9D6] focus:border-[#B8860B]";
-const BAD = "border-[#C0563C] focus:border-[#C0563C]";
-const LABEL = "block font-sans text-[13px] font-semibold text-[#0B1F3A]";
-
 export const ContactPanel: React.FC = () => {
-  const [values, setValues] = useState<Fields>({ name: "", email: "", message: "" });
+  const [values, setValues] = useState<Fields>({
+    name: "",
+    email: "",
+    company: "",
+    subject: "",
+    message: "",
+  });
   const [errors, setErrors] = useState<Errors>({});
   const [sent, setSent] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
@@ -105,17 +85,18 @@ export const ContactPanel: React.FC = () => {
     (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const next = event.target.value;
       setValues((prev) => ({ ...prev, [key]: next }));
-      // Clear the error as soon as they start fixing it, rather than making them submit
-      // again to find out whether they did.
       setErrors((prev) => (prev[key] ? { ...prev, [key]: undefined } : prev));
     };
 
-  /** Composes the message and hands it to the visitor's mail client. See the file note. */
+  /** Composes the message and hands it to the visitor's mail client. */
   const handoff = (v: Fields) => {
-    const subject = `Website enquiry from ${v.name.trim()}`;
-    const body = `${v.message.trim()}\n\n—\n${v.name.trim()}\n${v.email.trim()}`;
+    const emailSubject = v.subject.trim()
+      ? `${v.subject.trim()} — ${v.name.trim()}`
+      : `Website enquiry from ${v.name.trim()}`;
+    const companyHeader = v.company.trim() ? `Company: ${v.company.trim()}\n\n` : "";
+    const body = `${companyHeader}${v.message.trim()}\n\n—\n${v.name.trim()}\n${v.email.trim()}`;
     window.location.href =
-      `mailto:${CONTACT.email}?subject=${encodeURIComponent(subject)}` +
+      `mailto:${CONTACT.email}?subject=${encodeURIComponent(emailSubject)}` +
       `&body=${encodeURIComponent(body)}`;
   };
 
@@ -125,7 +106,6 @@ export const ContactPanel: React.FC = () => {
     setErrors(found);
 
     if (Object.keys(found).length > 0) {
-      // Take focus to the first problem rather than leaving a keyboard user at the button.
       const first = (["name", "email", "message"] as const).find((k) => found[k]);
       if (first) formRef.current?.querySelector<HTMLElement>(`#c-${first}`)?.focus();
       return;
@@ -133,210 +113,250 @@ export const ContactPanel: React.FC = () => {
 
     handoff(values);
     setSent(true);
-    setValues({ name: "", email: "", message: "" });
+    setValues({ name: "", email: "", company: "", subject: "", message: "" });
   };
 
-  const cls = (key: keyof Fields) => `${FIELD} ${errors[key] ? BAD : IDLE}`;
   const described = (key: keyof Fields) => (errors[key] ? `c-${key}-error` : undefined);
 
   return (
-    /*
-      pt clears the fixed navbar; the card is centred with real margin around it rather
-      than running to the viewport edge. overflow-hidden on the card is what rounds the
-      two panels' outer corners without either of them carrying a radius of its own — the
-      navy is square-cornered internally, so the split down the middle stays a clean edge.
-    */
-    <div className="w-full px-4 pb-20 pt-28 sm:px-6 lg:pb-28 lg:pt-32">
-      <div className="mx-auto w-full max-w-[1180px] overflow-hidden rounded-2xl bg-white shadow-[0_24px_60px_-32px_rgba(11,31,58,0.28)]">
-        <div className="grid grid-cols-1 lg:grid-cols-[30%_1fr]">
-          {/* ------------------------------------------------- navy information panel */}
-          <div className="relative overflow-hidden bg-[#0B1F3A] px-6 py-8 text-white sm:px-10 lg:py-12">
-            {/*
-              The two soft discs from the reference, bottom-right and mostly outside the
-              panel. Low-contrast white rather than gold: gold at this size would be a
-              second focal point competing with the button across the card.
-            */}
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute -bottom-16 -right-12 h-48 w-48 rounded-full bg-white/[0.06]"
-            />
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute bottom-10 right-10 h-24 w-24 rounded-full bg-white/[0.04]"
-            />
+    <div className={styles.contactContainer}>
+      <div className={styles.contactGlow} aria-hidden="true" />
 
-            <div className="relative flex h-full flex-col">
+      <div className={styles.contentWrapper}>
+        {/* ------------------------------------------------- Top Introduction */}
+        <div className="max-w-3xl">
+          <div className={styles.eyebrowBadge}>
+            <span className={styles.eyebrowDot} />
+            GET IN TOUCH
+          </div>
+
+          <h1 className={styles.mainHeading}>
+            LET&apos;S START A<br />CONVERSATION.
+          </h1>
+
+          <p className={styles.supportingCopy}>
+            Have a mining project, brand or story ready to move further? Let&apos;s talk.
+          </p>
+        </div>
+
+        {/* ------------------------------------------------- Two-Column Editorial Grid */}
+        <div className={styles.mainGrid}>
+          {/* ----------------------------------------------- LEFT: Mining Visual & Information */}
+          <div className={styles.infoCard}>
+            <div className={styles.visualContainer}>
+              <Image
+                src="/about/open-pit-golden-hour.png"
+                alt="Mining Discovery Global Exploration and Operations"
+                fill
+                priority
+                sizes="(max-width: 1024px) 100vw, 40vw"
+                className="object-cover transition-transform duration-700 hover:scale-105"
+              />
+              <div className={styles.visualOverlay} />
+              <div className={styles.visualBadge}>
+                <Compass className="h-3 w-3 text-[#C49A3A]" />
+                GLOBAL REACH · MINING OPERATIONS
+              </div>
+            </div>
+
+            <div className={styles.infoBody}>
               <div>
-                <h1 className="font-sans text-[22px] font-semibold tracking-[-0.01em] text-white">
-                  Contact Information
-                </h1>
-                <p className="mt-2 font-sans text-[14px] leading-[1.6] text-white/60">
-                  Say something to start a live chat!
+                <h2 className={styles.infoHeading}>LET&apos;S TALK MINING.</h2>
+                <p className={styles.infoDesc}>
+                  Whether you&apos;re looking to amplify a project, strengthen your digital
+                  presence, reach investors or put your company in front of the mining industry
+                  — let&apos;s start the conversation.
                 </p>
               </div>
 
-              <dl className="mt-12 space-y-8">
-                <div className="flex gap-4">
-                  <Mail
-                    aria-hidden="true"
-                    className="mt-0.5 h-[18px] w-[18px] shrink-0 text-[#D4AF37]"
-                  />
-                  <div>
-                    <dt className="font-sans text-[13px] font-semibold text-white/50">
-                      Email
-                    </dt>
-                    <dd className="mt-1.5">
-                      <a
-                        href={`mailto:${CONTACT.email}`}
-                        className="font-sans text-[14px] text-white underline decoration-white/25 underline-offset-4 transition-colors duration-200 hover:decoration-[#D4AF37] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B1F3A]"
-                      >
-                        {CONTACT.email}
-                      </a>
-                    </dd>
-                  </div>
+              <dl className={styles.infoList}>
+                <div className={styles.infoItem}>
+                  <dt className={styles.infoLabel}>EMAIL</dt>
+                  <dd className="mt-0.5">
+                    <a
+                      href={`mailto:${CONTACT.email}`}
+                      className={`${styles.infoValue} ${styles.infoLink}`}
+                    >
+                      {CONTACT.email}
+                    </a>
+                  </dd>
                 </div>
 
-                <div className="flex gap-4">
-                  <MapPin
-                    aria-hidden="true"
-                    className="mt-0.5 h-[18px] w-[18px] shrink-0 text-[#D4AF37]"
-                  />
-                  <div>
-                    <dt className="font-sans text-[13px] font-semibold text-white/50">
-                      Address
-                    </dt>
-                    <dd className="mt-1.5">
-                      <address className="font-sans text-[14px] not-italic leading-[1.65] text-white">
-                        {CONTACT.address.map((line) => (
-                          <span key={line} className="block">
-                            {line}
-                          </span>
-                        ))}
-                      </address>
-                    </dd>
-                  </div>
+                <div className={styles.infoItem}>
+                  <dt className={styles.infoLabel}>BASED IN</dt>
+                  <dd className={`${styles.infoValue} mt-0.5`}>
+                    {CONTACT.basedIn}
+                  </dd>
+                </div>
+
+                <div className={styles.infoItem}>
+                  <dt className={styles.infoLabel}>REGISTERED OFFICE</dt>
+                  <dd className="mt-0.5">
+                    <address className="font-sans text-[14px] not-italic leading-[1.6] text-[#F5F1E8]">
+                      {CONTACT.address.map((line) => (
+                        <span key={line} className="block">
+                          {line}
+                        </span>
+                      ))}
+                    </address>
+                  </dd>
+                </div>
+
+                <div className={styles.infoItem}>
+                  <dt className={styles.infoLabel}>FOCUS</dt>
+                  <dd className={`${styles.infoValue} mt-0.5`}>
+                    {CONTACT.focus}
+                  </dd>
                 </div>
               </dl>
 
-              {/* mt-auto pins the row to the foot of the panel on desktop, where the
-                  column is tall; on mobile it simply follows the address. */}
-              <ul className="mt-16 flex items-center gap-5 lg:mt-auto lg:pt-16">
+              {/* Social Links */}
+              <div className={styles.socialRow}>
                 {SOCIALS.map((social) => (
-                  <li key={social.name}>
-                    <a
-                      href={social.href}
-                      aria-label={social.name}
-                      className="block text-white/55 transition-colors duration-200 hover:text-[#D4AF37] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B1F3A]"
+                  <a
+                    key={social.name}
+                    href={social.href}
+                    aria-label={social.name}
+                    className={styles.socialBtn}
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                      className="h-4 w-4 fill-current"
                     >
-                      <svg
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                        className="h-[18px] w-[18px] fill-current"
-                      >
-                        <path d={social.path} />
-                      </svg>
-                    </a>
-                  </li>
+                      <path d={social.path} />
+                    </svg>
+                  </a>
                 ))}
-              </ul>
+              </div>
             </div>
           </div>
 
-          {/* --------------------------------------------------------- white form panel */}
-          <div className="bg-white px-6 py-8 sm:px-12 lg:px-14 lg:py-14">
+          {/* ----------------------------------------------- RIGHT: Contact Form */}
+          <div className={styles.formCard}>
             <form ref={formRef} onSubmit={onSubmit} noValidate>
-              {/* Name and email share a row on desktop, stack below it. */}
-              <div className="grid grid-cols-1 gap-x-12 gap-y-8 sm:grid-cols-2">
-                <div>
-                  <label htmlFor="c-name" className={LABEL}>
-                    Full Name
+              {/* Row 1: Full Name & Email */}
+              <div className={styles.formRow2}>
+                <div className={styles.fieldGroup}>
+                  <label htmlFor="c-name" className={styles.fieldLabel}>
+                    Full Name <span className="text-[#C49A3A]">*</span>
                   </label>
                   <input
                     id="c-name"
                     name="name"
                     type="text"
                     autoComplete="name"
-                    placeholder="full name"
+                    placeholder="Enter your full name"
                     value={values.name}
                     onChange={set("name")}
                     aria-invalid={Boolean(errors.name)}
                     aria-describedby={described("name")}
-                    className={`mt-3 ${cls("name")}`}
+                    className={`${styles.fieldInput} ${errors.name ? styles.fieldInputBad : ""}`}
                   />
                   {errors.name && (
-                    <p id="c-name-error" className="mt-2 text-[13px] text-[#C0563C]">
+                    <p id="c-name-error" className={styles.fieldError}>
                       {errors.name}
                     </p>
                   )}
                 </div>
 
-                <div>
-                  <label htmlFor="c-email" className={LABEL}>
-                    Email
+                <div className={styles.fieldGroup}>
+                  <label htmlFor="c-email" className={styles.fieldLabel}>
+                    Email Address <span className="text-[#C49A3A]">*</span>
                   </label>
                   <input
                     id="c-email"
                     name="email"
                     type="email"
                     autoComplete="email"
-                    placeholder="email address"
+                    placeholder="Enter your email"
                     value={values.email}
                     onChange={set("email")}
                     aria-invalid={Boolean(errors.email)}
                     aria-describedby={described("email")}
-                    className={`mt-3 ${cls("email")}`}
+                    className={`${styles.fieldInput} ${errors.email ? styles.fieldInputBad : ""}`}
                   />
                   {errors.email && (
-                    <p id="c-email-error" className="mt-2 text-[13px] text-[#C0563C]">
+                    <p id="c-email-error" className={styles.fieldError}>
                       {errors.email}
                     </p>
                   )}
                 </div>
               </div>
 
-              <div className="mt-10">
-                <label htmlFor="c-message" className={LABEL}>
-                  Message
+              {/* Row 2: Company & Subject */}
+              <div className={`${styles.formRow2} mt-8 sm:mt-10`}>
+                <div className={styles.fieldGroup}>
+                  <label htmlFor="c-company" className={styles.fieldLabel}>
+                    Company / Organization
+                  </label>
+                  <input
+                    id="c-company"
+                    name="company"
+                    type="text"
+                    autoComplete="organization"
+                    placeholder="Mining company or project name"
+                    value={values.company}
+                    onChange={set("company")}
+                    className={styles.fieldInput}
+                  />
+                </div>
+
+                <div className={styles.fieldGroup}>
+                  <label htmlFor="c-subject" className={styles.fieldLabel}>
+                    Subject
+                  </label>
+                  <input
+                    id="c-subject"
+                    name="subject"
+                    type="text"
+                    placeholder="Area of interest / enquiry"
+                    value={values.subject}
+                    onChange={set("subject")}
+                    className={styles.fieldInput}
+                  />
+                </div>
+              </div>
+
+              {/* Row 3: Message */}
+              <div className={`${styles.fieldGroup} mt-8 sm:mt-10`}>
+                <label htmlFor="c-message" className={styles.fieldLabel}>
+                  Message <span className="text-[#C49A3A]">*</span>
                 </label>
                 <textarea
                   id="c-message"
                   name="message"
                   rows={4}
-                  placeholder="Write your message..."
+                  placeholder="Tell us about your project, objectives, or timeline..."
                   value={values.message}
                   onChange={set("message")}
                   aria-invalid={Boolean(errors.message)}
                   aria-describedby={described("message")}
-                  className={`mt-3 resize-none ${cls("message")}`}
+                  className={`${styles.fieldInput} resize-none ${
+                    errors.message ? styles.fieldInputBad : ""
+                  }`}
                 />
                 {errors.message && (
-                  <p id="c-message-error" className="mt-2 text-[13px] text-[#C0563C]">
+                  <p id="c-message-error" className={styles.fieldError}>
                     {errors.message}
                   </p>
                 )}
               </div>
 
-              <div className="mt-10 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-end">
-                {/*
-                  aria-live so the confirmation is announced without stealing focus. It
-                  says the mail client opened, which is what actually happened.
-                */}
+              {/* Submit Action Bar */}
+              <div className={styles.submitBar}>
                 <p
                   aria-live="polite"
-                  className={`max-w-[38ch] text-[13px] leading-[1.6] text-[#57595E] transition-opacity duration-500 sm:mr-auto ${
-                    sent ? "opacity-100" : "opacity-0"
+                  className={`${styles.sentMessage} ${
+                    sent ? "opacity-100" : "opacity-0 pointer-events-none"
                   }`}
                 >
                   {sent ? SENT_COPY : " "}
                 </p>
 
-                {/* The site's primary button, unchanged from the hero's. */}
-                <button
-                  type="submit"
-                  className="group inline-flex w-full items-center justify-center gap-2 rounded-md bg-[#B8860B] px-7 py-3.5 font-sans text-[13px] font-semibold uppercase tracking-[0.08em] text-[#0B1F3A] shadow-sm transition-colors duration-200 hover:bg-[#D4AF37] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B8860B] focus-visible:ring-offset-2 focus-visible:ring-offset-white sm:w-auto"
-                >
+                <button type="submit" className={styles.submitBtn}>
                   Send Message
-                  <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+                  <ArrowRight className={styles.submitArrow} />
                 </button>
               </div>
             </form>
