@@ -706,6 +706,32 @@ export const ServicesScrollStory: React.FC = () => {
       <div ref={handoffRef} aria-hidden="true" className={styles.svcHandoff} />
 
       <div ref={viewportRef} className={styles.svcViewport}>
+        {/* Full-bleed atmospheric mining background image covering entire viewport and empty space */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 pointer-events-none overflow-hidden select-none z-0"
+        >
+          <div className="relative w-full h-full opacity-[0.18]">
+            <Image
+              src="/about/open-pit-golden-hour.png"
+              alt="Mining Landscape Background"
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover object-center scale-105"
+            />
+            {/* Soft radial & edge vignette */}
+            <div
+              className="absolute inset-0"
+              style={{
+                background:
+                  "radial-gradient(ellipse 80% 75% at 50% 50%, rgba(11, 14, 20, 0.3) 0%, rgba(11, 14, 20, 0.82) 65%, rgba(11, 14, 20, 1) 100%)",
+              }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#0B0E14] via-transparent to-[#0B0E14] opacity-80" />
+          </div>
+        </div>
+
         <div aria-hidden="true" className={styles.svcGlow} />
 
         {/* No second section label in here: the masthead is the opening state of this
@@ -774,7 +800,77 @@ export const ServicesScrollStory: React.FC = () => {
           never stands between the reader and the closing link underneath it.
         */}
         <div ref={introRef} className={styles.svcIntro}>
-          <div className={styles.svcIntroInner}>
+
+          {/* Subtle oversized background visual: faint geological contour lines & abstract 3D mineral crystal form */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden select-none z-0"
+          >
+            <div className="w-[1100px] max-w-[140vw] aspect-[12/7] opacity-[0.07] text-[#D4AF37]">
+              <svg
+                viewBox="0 0 1200 700"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1"
+                className="w-full h-full"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                {/* 1. Geological / Topographic Elevation Contours */}
+                <g strokeOpacity="0.85" strokeWidth="0.8">
+                  <path d="M 60 350 C 140 180, 360 80, 600 80 C 840 80, 1060 180, 1140 350 C 1060 520, 840 620, 600 620 C 360 620, 140 520, 60 350 Z" />
+                  <path d="M 120 350 C 190 210, 380 130, 600 130 C 820 130, 1010 210, 1080 350 C 1010 490, 820 570, 600 570 C 380 570, 190 490, 120 350 Z" />
+                  <path d="M 180 350 C 240 240, 410 180, 600 180 C 790 180, 960 240, 1020 350 C 960 460, 790 520, 600 520 C 410 520, 240 460, 180 350 Z" />
+                  <path d="M 250 350 C 300 270, 440 230, 600 230 C 760 230, 900 270, 950 350 C 900 430, 760 470, 600 470 C 440 470, 300 430, 250 350 Z" />
+                  <path d="M 320 350 C 360 300, 470 280, 600 280 C 730 280, 840 300, 880 350 C 840 400, 730 420, 600 420 C 470 420, 360 400, 320 350 Z" />
+
+                  {/* Organic geological ridges and survey elevation sweeps */}
+                  <path d="M 30 180 C 220 140, 420 220, 600 160 C 780 100, 980 200, 1170 140" />
+                  <path d="M 40 520 C 240 560, 440 480, 600 540 C 760 600, 960 500, 1160 560" />
+                  <path d="M 80 260 C 260 220, 460 300, 600 250 C 740 200, 940 310, 1120 260" strokeDasharray="3 3" />
+                  <path d="M 80 440 C 260 480, 460 400, 600 450 C 740 500, 940 390, 1120 440" strokeDasharray="3 3" />
+                </g>
+
+                {/* 2. Abstract 3D Mineral / Crystal Facets & Polyhedral Geometry */}
+                <g strokeOpacity="0.9" strokeWidth="1">
+                  {/* Central Crystal Core (Isometric Faceted Prism) */}
+                  <polygon points="600,140 760,250 760,450 600,560 440,450 440,250" />
+                  <polygon points="600,210 710,290 710,410 600,490 490,410 490,290" strokeDasharray="4 4" strokeWidth="0.75" />
+
+                  {/* Internal Crystal Axis & Facet Ridges */}
+                  <line x1="600" y1="140" x2="600" y2="560" />
+                  <line x1="440" y1="250" x2="760" y2="450" />
+                  <line x1="440" y1="450" x2="760" y2="250" />
+                  <line x1="600" y1="210" x2="600" y2="490" strokeDasharray="2 3" />
+
+                  {/* Radiating Mineral Growth Planes */}
+                  <line x1="600" y1="140" x2="600" y2="50" strokeDasharray="2 4" />
+                  <line x1="600" y1="560" x2="600" y2="650" strokeDasharray="2 4" />
+                  <line x1="760" y1="250" x2="940" y2="180" strokeDasharray="3 3" />
+                  <line x1="760" y1="450" x2="940" y2="520" strokeDasharray="3 3" />
+                  <line x1="440" y1="250" x2="260" y2="180" strokeDasharray="3 3" />
+                  <line x1="440" y1="450" x2="260" y2="520" strokeDasharray="3 3" />
+
+                  {/* Outer Mineral Apex Nodes (Octahedral Wings) */}
+                  <polygon points="600,80 690,140 600,200 510,140" strokeWidth="0.8" />
+                  <polygon points="600,500 690,560 600,620 510,560" strokeWidth="0.8" />
+                  <polygon points="760,250 850,350 760,450 670,350" strokeWidth="0.8" />
+                  <polygon points="440,250 530,350 440,450 350,350" strokeWidth="0.8" />
+                </g>
+
+                {/* 3. Mining Geodetic Survey Coordinate Marks & Crosshairs */}
+                <g strokeOpacity="0.7" strokeWidth="0.75">
+                  {/* Coordinate crosshairs */}
+                  <path d="M 600,70 L 600,90 M 590,80 L 610,80" />
+                  <path d="M 600,610 L 600,630 M 590,620 L 610,620" />
+                  <path d="M 340,350 L 360,350 M 350,340 L 350,360" />
+                  <path d="M 840,350 L 860,350 M 850,340 L 850,360" />
+                  <circle cx="600" cy="350" r="2" fill="currentColor" fillOpacity="0.5" />
+                </g>
+              </svg>
+            </div>
+          </div>
+
+          <div className={`${styles.svcIntroInner} relative z-10`}>
             <span className={`${styles.svcEyebrow} ${styles.svcIntroItem}`}>
               <span aria-hidden="true" className={styles.svcEyebrowRule} />
               Our Services

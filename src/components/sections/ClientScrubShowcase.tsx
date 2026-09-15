@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { TrendingUp, ShieldCheck, MapPin, Layers, ArrowUpRight, ArrowRight } from "lucide-react";
+import { TrendingUp, ShieldCheck, MapPin, Layers, ArrowUpRight, ArrowRight, ChevronDown } from "lucide-react";
 
 /*
  * Detailed Portfolio Case Data
@@ -1031,6 +1031,7 @@ const CLIENT_PILLARS = [
     title: "Leading Mining Associations",
     description: "Knowledge sharing, policy alignment, and keynote conference partnerships.",
     image: "/images/engine/conference_auditorium.jpg",
+    cornerStyle: "contour-1",
   },
   {
     index: "02",
@@ -1039,6 +1040,7 @@ const CLIENT_PILLARS = [
     title: "Service & Technology Providers",
     description: "Co-branded digital campaigns, software integration, and investor showcase events.",
     image: "/images/engine/financial_terminal.jpg",
+    cornerStyle: "contour-2",
   },
   {
     index: "03",
@@ -1047,6 +1049,7 @@ const CLIENT_PILLARS = [
     title: "Corporate Growth Partners",
     description: "Digital transformation in marketing, corporate re-branding, and liquidity acceleration.",
     image: "/images/engine/investor_meeting.jpg",
+    cornerStyle: "crystal",
   },
   {
     index: "04",
@@ -1055,6 +1058,7 @@ const CLIENT_PILLARS = [
     title: "Regulatory & Transparency Bodies",
     description: "Promoting ESG reporting standards, investor trust, and verified market intelligence.",
     image: "/images/engine/executive_boardroom.jpg",
+    cornerStyle: "leaf",
   },
 ];
 
@@ -1328,99 +1332,243 @@ export function ClientScrubShowcase() {
 
       {/* CLIENT INFORMATION ON WARM CREAM BACKGROUND (#F7F4ED) */}
       <div
-        className="relative z-20 w-full bg-[#F7F4ED] text-neutral-900 pt-20 md:pt-32 pb-32 md:pb-44"
+        className="relative z-20 w-full bg-[#F7F4ED] text-neutral-900 pt-20 md:pt-32 pb-32 md:pb-44 overflow-hidden"
         style={{ backgroundColor: "#F7F4ED" }}
       >
-        {/* Kinetic Title Scrub */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-12 sm:mb-16 md:mb-20">
-          <div className="w-full flex flex-col items-start overflow-hidden">
-            <div className="text-xs font-mono font-bold uppercase tracking-widest text-[#B8860B] mb-3 flex items-center gap-2">
-              <Layers className="w-4 h-4 text-[#B8860B]" />
-              Corporate Client Portfolio &amp; Strategic Ecosystem
+        {/* Photorealistic alpine mountain ridge in background matching target mockup */}
+        <div
+          aria-hidden="true"
+          className="absolute top-0 right-0 w-[550px] lg:w-[850px] h-[350px] lg:h-[480px] pointer-events-none opacity-45 mix-blend-multiply overflow-hidden select-none z-0"
+          style={{
+            maskImage: "radial-gradient(ellipse 90% 75% at 85% 20%, black 30%, transparent 80%)",
+            WebkitMaskImage: "radial-gradient(ellipse 90% 75% at 85% 20%, black 30%, transparent 80%)",
+          }}
+        >
+          <Image
+            src="/images/mountain_ridge_bg.jpg"
+            alt="Mountain ridge backdrop"
+            fill
+            className="object-cover object-top-right"
+          />
+        </div>
+
+        {/* Editorial Section Header Matching Target Mockup */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-12 sm:mb-16 md:mb-20 relative z-10">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 sm:gap-8">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 text-[11px] sm:text-xs font-mono font-bold uppercase tracking-[0.25em] text-[#A67C1E] mb-3.5">
+                <span className="w-0.5 h-3.5 bg-[#A67C1E] inline-block" />
+                OUR FOCUS AREAS
+              </div>
+              <h2 className="font-serif text-3xl sm:text-4xl lg:text-[48px] font-normal text-[#161A22] leading-[1.12] tracking-tight">
+                Driving Sustainable <br className="hidden sm:inline" />
+                Growth in Mining
+              </h2>
             </div>
-            <h1
-              ref={textARef}
-              className="font-geist font-bold text-[clamp(2.4rem,9vw,9.5rem)] uppercase text-neutral-950 leading-[0.92] tracking-[-0.02em] select-none"
-            >
-              CLIENT
-            </h1>
-            <h1
-              ref={textBRef}
-              className="font-geist font-bold text-[clamp(2.4rem,9vw,9.5rem)] uppercase text-neutral-900 leading-[0.92] tracking-[-0.02em] select-none mt-2"
-            >
-              INFORMATION
-            </h1>
-            <p className="mt-4 sm:mt-6 text-sm sm:text-base md:text-lg text-neutral-600 max-w-2xl font-normal leading-relaxed">
-              Empowering premier global mining companies, exploration developers, and institutional capital partners with targeted visibility and measurable industry growth.
-            </p>
+            <div className="md:max-w-md lg:max-w-lg md:border-l md:border-[#D4AF37]/45 md:pl-6 pt-1">
+              <p className="text-sm sm:text-[15px] text-[#555047] leading-relaxed font-sans font-normal">
+                We connect industry leaders, foster collaboration and create opportunities for a stronger, more sustainable mining future.
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* Slide 14 Collaboration Pillars - Styled Exactly Like First Image Cards */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-16 sm:mb-20">
+        {/* Slide 14 Collaboration Pillars - Styled Exactly Like Target Mockup */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-16 sm:mb-20 relative z-10">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
             {CLIENT_PILLARS.map((pillar, idx) => {
               return (
                 <Link
                   key={`pillar-${idx}`}
                   href="/work"
-                  className="group relative flex flex-col rounded-2xl overflow-hidden bg-[#161B26] border border-[#2B3345] hover:border-[#E5A93C]/60 transition-all duration-500 hover:-translate-y-1.5 shadow-[0_10px_32px_rgba(11,31,58,0.14)] hover:shadow-[0_20px_48px_rgba(11,31,58,0.24)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E5A93C]"
-                  aria-label={`View ${pillar.title} portfolio`}
+                  className="group relative flex flex-col justify-between rounded-[24px] overflow-hidden transition-all duration-500 hover:-translate-y-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B8860B]"
+                  style={{
+                    backgroundColor: "#F3EEE3",
+                    border: "1px solid rgba(255, 255, 255, 0.95)",
+                    boxShadow: "0 22px 48px -10px rgba(50, 40, 20, 0.13), 0 6px 18px -2px rgba(50, 40, 20, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.8)",
+                  }}
+                  aria-label={`View ${pillar.title}`}
                 >
-                  {/* Upper Image Section */}
-                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#1D2332]">
+                  {/* Top Photo Section with Centered Frosted Badge */}
+                  <div className="relative aspect-[16/11.5] w-full overflow-hidden bg-neutral-900">
                     <Image
                       src={pillar.image}
                       alt={pillar.title}
                       fill
+                      priority={idx < 2}
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                       className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
                     />
-                    {/* Subtle gradient overlay at top for badge legibility */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/20 pointer-events-none" />
+                    {/* Top gradient shadow for badge legibility */}
+                    <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-black/40 to-transparent pointer-events-none" />
 
-                    {/* Top Badge matching screenshot: 01 — CONFERENCE & POLICY */}
-                    <div className="absolute top-3 left-3.5 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#10141D]/80 backdrop-blur-md border border-white/15">
-                      <span className="font-mono text-xs font-bold text-[#E5A93C] tracking-wider">
+                    {/* Centered Frosted Pill Badge matching reference image */}
+                    <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#FAF5EB]/90 backdrop-blur-md border border-white/85 shadow-[0_3px_12px_rgba(0,0,0,0.12)] whitespace-nowrap">
+                      <span className="font-mono text-[11px] font-bold text-[#A67C1E] tracking-wider">
                         {pillar.index}
                       </span>
-                      <span className="text-white/40 text-xs font-mono">—</span>
-                      <span className="font-mono text-[9px] tracking-widest uppercase text-white/90 font-medium">
+                      <span className="text-[#A89E8D] text-[11px] font-mono">—</span>
+                      <span className="font-mono text-[9px] tracking-widest uppercase text-[#1C1917] font-bold">
                         {pillar.tag}
                       </span>
                     </div>
                   </div>
 
-                  {/* Lower Section: Softened Lighter Dark Background with Content */}
-                  <div className="flex flex-col justify-between flex-1 p-5 sm:p-6 bg-[#161B26]">
-                    <div>
-                      {/* Eyebrow */}
-                      <span className="text-[10px] sm:text-[10.5px] font-mono font-bold tracking-[0.18em] uppercase text-[#E5A93C] mb-2 block">
+                  {/* Organic Wave Seam with Sculpted Liquid Gold Highlight Rim */}
+                  <div className="relative -mt-6 z-10 w-full pointer-events-none drop-shadow-[0_-3px_8px_rgba(0,0,0,0.15)]">
+                    <svg
+                      viewBox="0 0 400 40"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="w-full h-9 block -mb-0.5"
+                      preserveAspectRatio="none"
+                    >
+                      <defs>
+                        <linearGradient id={`goldWave-${idx}`} x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="0%" stopColor="#C5A059" stopOpacity="0.6" />
+                          <stop offset="25%" stopColor="#F5E296" stopOpacity="1" />
+                          <stop offset="60%" stopColor="#E2BD63" stopOpacity="0.95" />
+                          <stop offset="100%" stopColor="#A67C1E" stopOpacity="0.7" />
+                        </linearGradient>
+                      </defs>
+                      <path
+                        d="M0,28 C115,34 250,8 400,18 L400,40 L0,40 Z"
+                        fill="#F3EEE3"
+                      />
+                      {/* Rich sculpted gold metallic rim */}
+                      <path
+                        d="M0,28 C115,34 250,8 400,18"
+                        stroke={`url(#goldWave-${idx})`}
+                        strokeWidth="2.75"
+                        strokeLinecap="round"
+                        fill="none"
+                      />
+                      {/* White specular gleam */}
+                      <path
+                        d="M60,29.5 C140,32 230,12 340,14"
+                        stroke="#FFF6D8"
+                        strokeWidth="1"
+                        strokeOpacity="0.8"
+                        strokeLinecap="round"
+                        fill="none"
+                      />
+                    </svg>
+                  </div>
+
+                  {/* Lower Content Panel */}
+                  <div className="relative z-10 flex flex-col justify-between flex-1 px-6 pb-6 pt-1 bg-[#F3EEE3]">
+                    {/* Text Block */}
+                    <div className="relative z-10">
+                      <span className="text-[10.5px] font-mono font-bold tracking-[0.22em] uppercase text-[#A67C1E] mb-2 block">
                         {pillar.eyebrow}
                       </span>
 
-                      {/* Title */}
-                      <h4 className="font-serif text-[19px] sm:text-[21px] font-normal text-white leading-tight tracking-tight mb-2.5 group-hover:text-[#F3E5C8] transition-colors duration-300">
+                      <h4 className="font-serif text-[21px] sm:text-[22px] font-normal text-[#161A22] leading-[1.22] tracking-tight mb-2.5 group-hover:text-[#A67C1E] transition-colors duration-300">
                         {pillar.title}
                       </h4>
 
-                      {/* Description */}
-                      <p className="text-xs sm:text-[13px] text-neutral-300 leading-relaxed font-sans font-normal mb-5">
+                      <p className="text-xs sm:text-[13px] text-[#555047] leading-relaxed font-sans font-normal mb-4">
                         {pillar.description}
                       </p>
                     </div>
 
-                    {/* Bottom Action Row with Circular Button */}
-                    <div className="flex items-center justify-between pt-3 border-t border-white/[0.12]">
-                      <span className="font-mono text-[10px] sm:text-[10.5px] font-semibold tracking-[0.16em] uppercase text-[#E5A93C] group-hover:text-[#FFC766] transition-colors flex items-center gap-1.5">
-                        EXPLORE ALLIANCE
-                        <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
-                      </span>
+                    {/* Faint Golden Topographic / 3D Mineral / Leaf Contours in Bottom-Right Corner */}
+                    <div className="absolute right-0 bottom-0 pointer-events-none z-0 overflow-hidden w-32 h-32">
+                      {pillar.cornerStyle === "contour-1" && (
+                        <>
+                          <div className="absolute inset-0 bg-[radial-gradient(circle_at_100%_100%,rgba(212,175,55,0.25)_0%,transparent_70%)]" />
+                          <svg viewBox="0 0 120 120" fill="none" stroke="#B48E43" strokeWidth="0.9" className="w-full h-full opacity-60 group-hover:opacity-85 transition-opacity duration-500">
+                            <path d="M 10 120 C 25 85, 65 65, 120 60" />
+                            <path d="M 28 120 C 42 90, 78 78, 120 74" />
+                            <path d="M 48 120 C 60 98, 92 88, 120 86" />
+                            <path d="M 68 120 C 78 104, 102 98, 120 98" />
+                            <path d="M 0 110 C 18 70, 52 50, 120 45" />
+                          </svg>
+                        </>
+                      )}
+                      {pillar.cornerStyle === "contour-2" && (
+                        <>
+                          <div className="absolute inset-0 bg-[radial-gradient(circle_at_100%_100%,rgba(212,175,55,0.2)_0%,transparent_70%)]" />
+                          <svg viewBox="0 0 120 120" fill="none" stroke="#B48E43" strokeWidth="0.9" className="w-full h-full opacity-60 group-hover:opacity-85 transition-opacity duration-500">
+                            <path d="M 5 120 C 30 75, 75 60, 120 52" />
+                            <path d="M 22 120 C 45 85, 85 72, 120 66" />
+                            <path d="M 42 120 C 60 92, 95 82, 120 78" />
+                            <path d="M 62 120 C 75 100, 105 92, 120 90" />
+                            <path d="M 82 120 C 92 108, 112 102, 120 102" />
+                          </svg>
+                        </>
+                      )}
+                      {pillar.cornerStyle === "crystal" && (
+                        <>
+                          {/* Corner warm golden bevel wedge */}
+                          <div
+                            className="absolute right-0 bottom-0 w-24 h-24 pointer-events-none opacity-40 group-hover:opacity-60 transition-opacity"
+                            style={{
+                              background: "linear-gradient(135deg, transparent 40%, rgba(212,175,55,0.35) 75%, rgba(180,135,35,0.5) 100%)",
+                            }}
+                          />
+                          <svg viewBox="0 0 120 120" fill="none" className="w-full h-full drop-shadow-[0_4px_8px_rgba(180,135,35,0.25)]">
+                            {/* 3D solid polished metallic crystal */}
+                            <polygon points="68,84 98,62 116,74 86,96" fill="#FDF1B0" stroke="#C59B27" strokeWidth="1" />
+                            <polygon points="68,84 86,96 78,114 60,102" fill="#D4AF37" stroke="#A67C1E" strokeWidth="1" />
+                            <polygon points="86,96 116,74 108,92 78,114" fill="#997328" stroke="#7A5A1B" strokeWidth="1" />
+                            {/* Facet gleam highlights */}
+                            <line x1="68" y1="84" x2="86" y2="96" stroke="#FFFFFF" strokeWidth="1" strokeOpacity="0.8" />
+                            <line x1="86" y1="96" x2="78" y2="114" stroke="#FFF5D0" strokeWidth="0.8" strokeOpacity="0.6" />
+                          </svg>
+                        </>
+                      )}
+                      {pillar.cornerStyle === "leaf" && (
+                        <>
+                          {/* Corner warm golden sweep */}
+                          <div
+                            className="absolute right-0 bottom-0 w-24 h-24 pointer-events-none opacity-35 group-hover:opacity-55 transition-opacity"
+                            style={{
+                              background: "radial-gradient(circle at 100% 100%, rgba(212,175,55,0.35) 0%, rgba(180,135,35,0.15) 50%, transparent 80%)",
+                            }}
+                          />
+                          <svg viewBox="0 0 120 120" fill="none" className="w-full h-full drop-shadow-[0_4px_8px_rgba(180,135,35,0.2)]">
+                            <defs>
+                              <linearGradient id={`goldLeafGrad-${idx}`} x1="0" y1="1" x2="1" y2="0">
+                                <stop offset="0%" stopColor="#A67C1E" />
+                                <stop offset="50%" stopColor="#E5C158" />
+                                <stop offset="100%" stopColor="#F9EAA2" />
+                              </linearGradient>
+                            </defs>
+                            {/* Rich botanical leaf branch */}
+                            <path
+                              d="M 64 116 C 70 92, 92 72, 116 66 C 112 88, 90 108, 64 116 Z"
+                              fill={`url(#goldLeafGrad-${idx})`}
+                              fillOpacity="0.7"
+                              stroke="#A67C1E"
+                              strokeWidth="0.85"
+                            />
+                            {/* Main leaf spine */}
+                            <path d="M 66 114 L 114 68" stroke="#7A5A1B" strokeWidth="1" strokeLinecap="round" />
+                            {/* Lateral veins */}
+                            <path d="M 80 100 C 76 95, 80 91, 86 94" stroke="#7A5A1B" strokeWidth="0.75" />
+                            <path d="M 94 86 C 90 81, 94 77, 100 80" stroke="#7A5A1B" strokeWidth="0.75" />
+                            {/* Secondary delicate foliage leaf */}
+                            <path
+                              d="M 88 114 C 92 102, 104 94, 116 90 C 114 100, 104 108, 88 114 Z"
+                              fill={`url(#goldLeafGrad-${idx})`}
+                              fillOpacity="0.5"
+                              stroke="#A67C1E"
+                              strokeWidth="0.7"
+                            />
+                          </svg>
+                        </>
+                      )}
+                    </div>
 
-                      {/* Circular Button */}
-                      <div className="w-9 h-9 rounded-full border border-[#E5A93C]/50 bg-[#10141D]/70 flex items-center justify-center text-[#E5A93C] group-hover:bg-[#E5A93C] group-hover:text-[#0B0E17] group-hover:border-[#E5A93C] group-hover:scale-105 transition-all duration-300 shadow-md shrink-0">
-                        <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+                    {/* Bottom Action Row: Thin Circle Button + EXPLORE ALLIANCE */}
+                    <div className="relative z-10 flex items-center gap-3 pt-2">
+                      <div className="w-8 h-8 rounded-full border border-[#8C8270]/40 bg-transparent flex items-center justify-center text-[#5A5346] group-hover:bg-[#A67C1E] group-hover:text-white group-hover:border-[#A67C1E] transition-all duration-300 shrink-0 shadow-sm">
+                        <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
                       </div>
+                      <span className="font-mono text-[10.5px] font-semibold tracking-[0.2em] uppercase text-[#5A5346] group-hover:text-[#161A22] transition-colors">
+                        EXPLORE ALLIANCE
+                      </span>
                     </div>
                   </div>
                 </Link>

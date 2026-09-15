@@ -44,8 +44,8 @@ export const SERVICE_CHAPTERS: ServiceChapter[] = [
     valueStatement: "Capital connections, built for mining.",
     concept: "Turn mining opportunities into investor attention through targeted outreach and global stakeholder connections.",
     services: ["Investor Campaigns", "Global Outreach"],
-    image: "/services/04-pit.jpg",
-    alt: "Aerial view of a large open-pit mine in production",
+    image: "/images/engine/investor_meeting.jpg",
+    alt: "Strategic investor meeting and capital negotiations in an executive boardroom overlooking the financial district",
   },
   {
     num: "02",
