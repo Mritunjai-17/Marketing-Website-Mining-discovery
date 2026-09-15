@@ -1,0 +1,876 @@
+/*
+ * MagazineShowcase - Editorial Magazine Cover & Smooth Reader Experience
+ *
+ * Preserves Step 1 cover dimensions (17 / 22), subtle spine depth, ambient drop shadow.
+ * Adds controlled Step 2 opening transition and reader environment.
+ */
+
+.showcaseStage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ==========================================================================
+   SCROLL-DRIVEN EDITORIAL SHOWCASE (LATEST 5 EDITIONS)
+   ========================================================================== */
+
+.scrollContainer {
+  position: relative;
+  width: 100%;
+  /* 2400px of scroll distance for the 4 transitions */
+  height: clamp(2200px, 320vh, 2800px);
+  box-sizing: border-box;
+}
+
+.stickyStage {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-sizing: border-box;
+  padding: clamp(1.75rem, 3.2vh, 2.75rem) 1.5rem clamp(1rem, 2vh, 1.5rem);
+}
+
+.magazinePresentation {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  max-width: 1240px;
+}
+
+/* -------------------------------------------------- 5-Card Carousel Track (Larger Hero Sizing) */
+
+.showcaseCardsTrack {
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  /* 35-45% larger: height 480-540px gives width 370-420px at 17/22 aspect ratio */
+  height: clamp(370px, 54vh, 540px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  margin: 0 auto;
+}
+
+.showcaseCard {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  aspect-ratio: 17 / 22;
+  border-radius: 5px;
+  overflow: hidden;
+  background-color: #0c0f16;
+  border: 1px solid rgba(247, 244, 237, 0.13);
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.38),
+    0 16px 36px -8px rgba(0, 0, 0, 0.68),
+    0 38px 76px -18px rgba(0, 0, 0, 0.85),
+    0 0 0 1px rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  will-change: transform, opacity;
+  transition: box-shadow 0.4s ease, border-color 0.4s ease;
+  user-select: none;
+}
+
+.showcaseCard:hover {
+  border-color: rgba(184, 146, 74, 0.4);
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.42),
+    0 24px 52px -10px rgba(0, 0, 0, 0.78),
+    0 48px 92px -20px rgba(0, 0, 0, 0.9),
+    0 0 24px rgba(184, 146, 74, 0.08);
+}
+
+.showcaseCardActive {
+  border-color: rgba(184, 146, 74, 0.45);
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, 0.45),
+    0 28px 60px -12px rgba(0, 0, 0, 0.82),
+    0 56px 104px -22px rgba(0, 0, 0, 0.92),
+    0 0 28px rgba(184, 146, 74, 0.1);
+}
+
+/* -------------------------------------------------- Progress & Indicator */
+
+.progressRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+.progressDot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(247, 244, 237, 0.05);
+  border: 1px solid rgba(247, 244, 237, 0.12);
+  color: rgba(247, 244, 237, 0.55);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.625rem;
+  letter-spacing: 0.12em;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.progressDotActive {
+  background: rgba(184, 146, 74, 0.2);
+  border-color: rgba(184, 146, 74, 0.75);
+  color: #f7f4ed;
+  font-weight: 600;
+  box-shadow: 0 0 12px rgba(184, 146, 74, 0.18);
+}
+
+/* -------------------------------------------------- View All CTA */
+
+.viewAllCtaBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+  padding: 0.45rem 1.35rem;
+  border-radius: 999px;
+  background: rgba(247, 244, 237, 0.035);
+  border: 1px solid rgba(184, 146, 74, 0.35);
+  color: #b8924a;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.65625rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.viewAllCtaBtn:hover {
+  background: rgba(184, 146, 74, 0.12);
+  border-color: rgba(184, 146, 74, 0.7);
+  color: #f7f4ed;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(184, 146, 74, 0.15);
+}
+
+.viewAllCtaIcon {
+  width: 0.85rem;
+  height: 0.85rem;
+  transition: transform 0.25s ease;
+}
+
+.viewAllCtaBtn:hover .viewAllCtaIcon {
+  transform: translateX(3px);
+}
+
+/* -------------------------------------------------- cover presentation */
+
+.coverWrapper {
+  position: relative;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.coverWrapper:hover {
+  transform: translateY(-4px);
+}
+
+.coverFrame {
+  position: relative;
+  /* 
+   * Strict US Letter / Magazine aspect ratio: 612pt x 792pt = 17 / 22 = 0.7727
+   * Responsive height capped so it remains dominant yet fits comfortably in viewport.
+   */
+  height: clamp(280px, 42vh, 460px);
+  aspect-ratio: 17 / 22;
+  border-radius: 4px;
+  overflow: hidden;
+  background-color: #0d1017;
+  border: 1px solid rgba(247, 244, 237, 0.14);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.25),
+    0 12px 28px -6px rgba(0, 0, 0, 0.6),
+    0 32px 64px -16px rgba(0, 0, 0, 0.8),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
+  transition: box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.45s ease;
+  will-change: transform, box-shadow;
+}
+
+.coverWrapper:hover .coverFrame {
+  border-color: rgba(184, 146, 74, 0.35);
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.3),
+    0 18px 36px -8px rgba(0, 0, 0, 0.7),
+    0 42px 76px -20px rgba(0, 0, 0, 0.88),
+    0 0 24px rgba(184, 146, 74, 0.08);
+}
+
+/* -------------------------------------------------- canvas & skeleton */
+
+.coverCanvas,
+.coverImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background-color: #0d1017;
+  transition: opacity 0.3s ease;
+}
+
+.canvasHidden {
+  opacity: 0;
+}
+
+.coverSkeleton {
+  position: absolute;
+  inset: 0;
+  background: #11141c;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.skeletonShimmer {
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(247, 244, 237, 0.03) 40%,
+    rgba(184, 146, 74, 0.05) 50%,
+    rgba(247, 244, 237, 0.03) 60%,
+    transparent 100%
+  );
+  animation: shimmer 1.8s infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* -------------------------------------------------- tactile editorial overlays */
+
+/* Left-edge spine shadow and binding fold */
+.coverSpine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: clamp(14px, 4%, 22px);
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.55) 0%,
+    rgba(0, 0, 0, 0.25) 30%,
+    rgba(255, 255, 255, 0.06) 55%,
+    rgba(0, 0, 0, 0.1) 80%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Subtle satin sheen across the page surface */
+.coverSheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    130deg,
+    rgba(255, 255, 255, 0.03) 0%,
+    transparent 45%,
+    rgba(0, 0, 0, 0.15) 100%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Protective layer */
+.coverShield {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  cursor: pointer;
+}
+
+/* -------------------------------------------------- meta & affordance */
+
+.coverMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.32rem;
+  margin-top: clamp(0.55rem, 1.2vh, 0.95rem);
+}
+
+.editionTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #B8924A;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.editionDot {
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background-color: #B8924A;
+}
+
+.editionTitle {
+  margin: 0;
+  color: #F7F4ED;
+  font-family: var(--font-serif, Georgia, serif);
+  font-size: clamp(1.15rem, 2vw, 1.45rem);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+
+/* Interactive open affordance */
+.openAffordance {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.25rem;
+  padding: 0.45rem 1.15rem;
+  border: 1px solid rgba(184, 146, 74, 0.35);
+  border-radius: 999px;
+  background: rgba(184, 146, 74, 0.05);
+  color: #B8924A;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.coverWrapper:hover ~ .coverMeta .openAffordance,
+.openAffordance:hover {
+  background: rgba(184, 146, 74, 0.15);
+  border-color: rgba(184, 146, 74, 0.6);
+  color: #F7F4ED;
+  transform: translateY(-1px);
+}
+
+.openAffordanceIcon {
+  width: 0.85rem;
+  height: 0.85rem;
+  transition: transform 0.25s ease;
+}
+
+.coverWrapper:hover ~ .coverMeta .openAffordance .openAffordanceIcon,
+.openAffordance:hover .openAffordanceIcon {
+  transform: translateX(3px);
+}
+
+/* -------------------------------------------------- STEP 2: READER ENVIRONMENT */
+
+.readerOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  background-color: rgba(9, 11, 15, 0.96);
+  backdrop-filter: blur(10px);
+  padding: clamp(1rem, 2.5vh, 2rem) clamp(1rem, 3vw, 2.5rem);
+  box-sizing: border-box;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.readerOverlayOpening,
+.readerOverlayOpen {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.readerOverlayClosing {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Top bar: Editorial brand details + Close button */
+.readerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1100px;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(247, 244, 237, 0.1);
+  box-sizing: border-box;
+  z-index: 10;
+}
+
+.readerMetaLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.readerBrand {
+  color: rgba(247, 244, 237, 0.7);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.readerIssue {
+  color: #B8924A;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* Restrained, elegant close button */
+.readerCloseBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.85rem;
+  border: 1px solid rgba(247, 244, 237, 0.2);
+  border-radius: 999px;
+  background: rgba(247, 244, 237, 0.04);
+  color: rgba(247, 244, 237, 0.85);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.readerCloseBtn:hover,
+.readerCloseBtn:focus-visible {
+  background: rgba(184, 146, 74, 0.15);
+  border-color: rgba(184, 146, 74, 0.5);
+  color: #F7F4ED;
+}
+
+.readerCloseIcon {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+/* Center Stage: The expanded reading view */
+.readerStage {
+  position: relative;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 0;
+  padding: 0.5rem 0;
+  box-sizing: border-box;
+}
+
+.readerCover {
+  position: relative;
+  /* 
+   * Prominent reader height while fitting comfortably inside full viewport 
+   * Strict 17 / 22 aspect ratio preserved
+   */
+  height: clamp(380px, 72vh, 760px);
+  aspect-ratio: 17 / 22;
+  border-radius: 4px;
+  overflow: hidden;
+  background-color: #0c0f16;
+  border: 1px solid rgba(247, 244, 237, 0.15);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.4),
+    0 24px 64px -12px rgba(0, 0, 0, 0.85),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+  transform: scale(0.96);
+  opacity: 0;
+  transition:
+    transform 0.42s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.38s ease,
+    box-shadow 0.4s ease;
+  will-change: transform, opacity;
+}
+
+.readerOverlayOpen .readerCover {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.readerOverlayClosing .readerCover {
+  transform: scale(0.96);
+  opacity: 0;
+}
+
+/* Subtle reader footer note */
+.readerFooter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 1100px;
+  padding-top: 0.6rem;
+  border-top: 1px solid rgba(247, 244, 237, 0.08);
+  box-sizing: border-box;
+  color: rgba(247, 244, 237, 0.4);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.59375rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* -------------------------------------------------- responsive constraints */
+
+@media (max-width: 639px) {
+  .showcaseStage {
+    padding: 0.5rem 1rem;
+  }
+
+  .coverFrame {
+    height: clamp(280px, 40vh, 370px);
+    aspect-ratio: 17 / 22;
+  }
+
+  .editionTitle {
+    font-size: 1.05rem;
+  }
+
+  .openAffordance {
+    font-size: 0.625rem;
+    padding: 0.38rem 0.85rem;
+  }
+
+  .readerOverlay {
+    padding: 0.85rem 0.75rem;
+  }
+
+  .readerCover {
+    height: clamp(340px, 68vh, 520px);
+    aspect-ratio: 17 / 22;
+  }
+
+  .readerBrand {
+    font-size: 0.5625rem;
+  }
+
+  .readerIssue {
+    font-size: 0.5625rem;
+  }
+
+  .readerCloseBtn {
+    font-size: 0.59375rem;
+    padding: 0.3rem 0.65rem;
+  }
+}
+
+/* ==========================================================================
+   STEP 6: PREVIOUS EDITIONS MAGAZINE ARCHIVE
+   Clean, premium editorial archive for all 12–13 monthly magazine publications
+   ========================================================================== */
+
+.archiveSection {
+  width: 100%;
+  max-width: 1200px;
+  margin-top: clamp(3rem, 6vh, 4.5rem);
+  padding-top: clamp(2rem, 4vh, 3rem);
+  border-top: 1px solid rgba(247, 244, 237, 0.1);
+  box-sizing: border-box;
+}
+
+.archiveHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: clamp(1.75rem, 3.5vh, 2.75rem);
+}
+
+.archiveEyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.65625rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #b8924a;
+  margin-bottom: 0.5rem;
+}
+
+.archiveEyebrowRule {
+  display: inline-block;
+  width: 1.25rem;
+  height: 1px;
+  background-color: #b8924a;
+  opacity: 0.7;
+}
+
+.archiveTitle {
+  font-family: var(--font-serif, "Cinzel", Georgia, serif);
+  font-size: clamp(1.35rem, 2.4vw, 1.85rem);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: #f7f4ed;
+  margin: 0 0 0.5rem 0;
+  text-transform: uppercase;
+}
+
+.archiveSubtitle {
+  font-family: var(--font-sans, "Plus Jakarta Sans", sans-serif);
+  font-size: clamp(0.78125rem, 1.1vw, 0.875rem);
+  color: rgba(247, 244, 237, 0.55);
+  margin: 0;
+  max-width: 540px;
+}
+
+/* Responsive Grid for previous editions */
+.archiveGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(1rem, 2vw, 1.75rem);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 1024px) {
+  .archiveGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 639px) {
+  .archiveGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.85rem;
+  }
+}
+
+/* Individual Edition Card */
+.archiveCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: transparent;
+  border: 1px solid rgba(247, 244, 237, 0.08);
+  border-radius: 6px;
+  padding: 1rem 0.75rem 1.1rem;
+  cursor: pointer;
+  outline: none;
+  transition:
+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.35s ease,
+    background-color 0.35s ease,
+    box-shadow 0.35s ease;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.archiveCard:hover {
+  transform: translateY(-4px);
+  border-color: rgba(184, 146, 74, 0.35);
+  background-color: rgba(247, 244, 237, 0.02);
+  box-shadow:
+    0 8px 24px -6px rgba(0, 0, 0, 0.5),
+    0 0 16px rgba(184, 146, 74, 0.06);
+}
+
+.archiveCardSelected {
+  border-color: rgba(184, 146, 74, 0.6);
+  background-color: rgba(184, 146, 74, 0.04);
+  box-shadow:
+    0 8px 28px -6px rgba(0, 0, 0, 0.6),
+    0 0 20px rgba(184, 146, 74, 0.12);
+}
+
+/* Selected Badge */
+.selectedBadge {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 5;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.5rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #0c0f16;
+  background: #b8924a;
+  padding: 0.18rem 0.45rem;
+  border-radius: 999px;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+/* Thumbnail Frame */
+.thumbWrapper {
+  position: relative;
+  width: 100%;
+  max-width: 190px;
+  aspect-ratio: 17 / 22;
+  border-radius: 3px;
+  overflow: hidden;
+  background-color: #0d1017;
+  border: 1px solid rgba(247, 244, 237, 0.1);
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.3),
+    0 10px 24px -4px rgba(0, 0, 0, 0.6);
+  margin-bottom: 0.85rem;
+  transition: box-shadow 0.35s ease, border-color 0.35s ease;
+}
+
+.archiveCard:hover .thumbWrapper {
+  border-color: rgba(184, 146, 74, 0.3);
+  box-shadow:
+    0 4px 10px rgba(0, 0, 0, 0.35),
+    0 14px 28px -6px rgba(0, 0, 0, 0.7);
+}
+
+.thumbImg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background-color: #0d1017;
+  transition: opacity 0.3s ease;
+}
+
+.thumbSkeleton {
+  position: absolute;
+  inset: 0;
+  background: #121620;
+  overflow: hidden;
+}
+
+.thumbShimmer {
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(247, 244, 237, 0.04) 40%,
+    rgba(184, 146, 74, 0.08) 50%,
+    rgba(247, 244, 237, 0.04) 60%,
+    transparent 100%
+  );
+  animation: thumbShimmer 2s infinite;
+}
+
+@keyframes thumbShimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Thumbnail subtle spine depth */
+.thumbSpine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: clamp(4px, 4%, 8px);
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.5) 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Card Text Info */
+.cardMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  width: 100%;
+}
+
+.cardMonthYear {
+  font-family: var(--font-serif, "Cinzel", Georgia, serif);
+  font-size: clamp(0.8125rem, 1.1vw, 0.9375rem);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: #f7f4ed;
+  margin: 0;
+  transition: color 0.25s ease;
+}
+
+.archiveCard:hover .cardMonthYear {
+  color: #b8924a;
+}
+
+.cardEditionName {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.625rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(247, 244, 237, 0.5);
+  margin: 0;
+}
+
+.cardAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.5625rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #b8924a;
+  opacity: 0.8;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.archiveCard:hover .cardAction {
+  opacity: 1;
+  transform: translateX(2px);
+}
+
+.cardActionIcon {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+

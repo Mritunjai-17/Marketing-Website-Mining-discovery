@@ -782,15 +782,14 @@ export const ServicesScrollStory: React.FC = () => {
             </span>
 
             <h2 className={`${styles.svcHeadline} ${styles.svcIntroItem}`}>
-              <span>Mining Expertise.</span>
-              <span>Digital Influence.</span>
+              <span>Mining Expertise. Digital Influence.</span>
               <span>Investor Reach.</span>
             </h2>
 
             <p className={`${styles.svcLede} ${styles.svcIntroItem}`}>
-              From investor campaigns and industry media to digital branding, audience
-              growth and executive visibility, we help mining companies turn their
-              stories into market influence.
+              From investor campaigns and industry media to digital branding, audience growth
+              <br className={styles.desktopBr} />
+              and executive visibility, we help mining companies turn their stories into market influence.
             </p>
 
             <span className={`${styles.svcScrollCue} ${styles.svcIntroItem}`}>

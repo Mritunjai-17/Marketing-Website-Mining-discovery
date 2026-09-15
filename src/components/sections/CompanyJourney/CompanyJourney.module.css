@@ -16,10 +16,10 @@
   color: #171613;
 
   --road-y: 56%;
-  /* Half the gold outer stroke below — the road's visual half-thickness. */
-  --road-half: 48px;
+  /* Half the gold outer stroke below — the road's visual half-thickness (reduced ~12.5% for lighter dominance). */
+  --road-half: 42px;
   /* Vertical run of the marker: stem plus dot, from the year down to the road. */
-  --marker-h: 54px;
+  --marker-h: 58px;
   /* Width of one milestone column; the year and story centre inside it. */
   --col-w: min(720px, 86vw);
 }
@@ -136,6 +136,87 @@
   transition: opacity 0.4s ease;
 }
 
+/* --------------------------------------------------- background atmosphere layers */
+
+.atmosphereStage {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.atmosphereLayer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
+.atmosphereSvg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  user-select: none;
+}
+
+/* ---------------------------------------------------- subtle side progress indicator */
+
+.sideProgress {
+  position: absolute;
+  left: clamp(1.25rem, 2.8vw, 3.25rem);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  z-index: 12;
+  pointer-events: none;
+}
+
+.indicatorItem {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  opacity: 0.3;
+  transition: opacity 0.25s ease;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  color: #706B60;
+  user-select: none;
+}
+
+.indicatorLine {
+  width: 16px;
+  height: 1.5px;
+  background-color: rgba(184, 146, 74, 0.3);
+  transform-origin: left center;
+  transition: background-color 0.25s ease, transform 0.25s ease;
+}
+
+.indicatorIndex {
+  font-weight: 700;
+  color: #B8924A;
+}
+
+.indicatorYear {
+  font-weight: 500;
+  color: #5C584E;
+}
+
+@media (max-width: 1024px) {
+  .sideProgress {
+    display: none;
+  }
+}
+
 /* ------------------------------------------------------------------------- the road */
 
 /*
@@ -146,7 +227,8 @@
   position: absolute;
   left: 0;
   will-change: transform;
-  filter: drop-shadow(0 16px 26px rgba(23, 22, 19, 0.1));
+  filter: drop-shadow(0 12px 22px rgba(23, 22, 19, 0.08));
+  z-index: 2;
 }
 
 .roadSvg {
@@ -156,28 +238,28 @@
 
 /*
  * Stroke widths are in user units, and the SVG is rendered 1:1 with its viewBox, so
- * these are literal pixels. Outer gold minus inner charcoal leaves a 10px gold edge
- * either side of the surface.
+ * these are literal pixels. Reduced ~12.5% (outer gold 84px minus inner charcoal 66px
+ * leaves 9px gold edge either side) to keep the road visual secondary to milestone stories.
  */
 .roadEdge {
   fill: none;
   stroke: #B8924A;
-  stroke-width: 96;
+  stroke-width: 84;
   stroke-linecap: round;
 }
 
 .roadSurface {
   fill: none;
   stroke: #343331;
-  stroke-width: 76;
+  stroke-width: 66;
   stroke-linecap: round;
 }
 
 .roadCentreLine {
   fill: none;
   stroke: #D8D2C5;
-  stroke-width: 6;
-  stroke-dasharray: 34 30;
+  stroke-width: 5;
+  stroke-dasharray: 30 26;
   stroke-linecap: butt;
   opacity: 0.85;
 }
@@ -269,11 +351,11 @@
 }
 
 .markerDot {
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background-color: #B8924A;
-  border: 3px solid #F7F4ED;
+  border: 2.5px solid #F7F4ED;
   box-sizing: border-box;
 }
 
@@ -283,40 +365,52 @@
   position: absolute;
   left: 0;
   width: 100%;
-  top: calc(var(--road-y) + var(--road-half) + 2.5rem);
+  top: calc(var(--road-y) + var(--road-half) + 2.75rem);
   text-align: center;
   transform-origin: top center;
   will-change: transform, opacity;
 }
 
-.label {
-  margin-bottom: 0.75rem;
+.label,
+.chapterLabel {
+  margin-bottom: 0.85rem;
   color: #B8924A;
   font-family: var(--font-mono, monospace);
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   font-weight: 700;
-  letter-spacing: 0.28em;
+  letter-spacing: 0.26em;
   text-transform: uppercase;
 }
 
 .storyTitle {
-  margin-bottom: 0.85rem;
+  margin-bottom: 0.95rem;
   color: #171613;
   font-family: var(--font-geist, var(--font-display, sans-serif));
   font-size: clamp(1.05rem, 1.75vw, 1.6rem);
-  line-height: 1.25;
+  line-height: 1.28;
   font-weight: 800;
   letter-spacing: -0.01em;
   text-transform: uppercase;
 }
 
 .storyText {
-  max-width: 560px;
+  max-width: 580px;
   margin: 0 auto;
   color: #4A4740;
   font-family: var(--font-sans, sans-serif);
   font-size: clamp(0.95rem, 1.15vw, 1.0625rem);
-  line-height: 1.6;
+  line-height: 1.65;
+}
+
+.editorialMeta {
+  display: inline-block;
+  margin-top: 1rem;
+  color: #8C8474;
+  font-family: var(--font-mono, monospace);
+  font-size: clamp(0.625rem, 0.8vw, 0.71875rem);
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
 }
 
 /* ------------------------------------------------------------------------- progress */
@@ -349,12 +443,12 @@
  */
 @media (min-width: 768px) and (max-height: 780px) {
   .section {
-    --road-y: 54%;
-    --marker-h: 42px;
+    --road-y: 53%;
+    --marker-h: 46px;
   }
 
   .detailBlock {
-    top: calc(var(--road-y) + var(--road-half) + 1.75rem);
+    top: calc(var(--road-y) + var(--road-half) + 1.85rem);
   }
 
   .rail {
@@ -369,8 +463,8 @@
     /* Higher road line than desktop: a phone frame is tall, and centring the road
        leaves the year stranded halfway down the screen. */
     --road-y: 46%;
-    --road-half: 30px;
-    --marker-h: 34px;
+    --road-half: 26px;
+    --marker-h: 36px;
     --col-w: min(84vw, 440px);
   }
 
@@ -388,16 +482,16 @@
   }
 
   .roadEdge {
-    stroke-width: 60;
+    stroke-width: 52;
   }
 
   .roadSurface {
-    stroke-width: 46;
+    stroke-width: 38;
   }
 
   .roadCentreLine {
-    stroke-width: 4;
-    stroke-dasharray: 20 18;
+    stroke-width: 3.5;
+    stroke-dasharray: 18 16;
   }
 
   .year {
@@ -415,7 +509,17 @@
   }
 
   .detailBlock {
-    top: calc(var(--road-y) + var(--road-half) + 1.75rem);
+    top: calc(var(--road-y) + var(--road-half) + 1.85rem);
+  }
+
+  .atmosphereStage {
+    opacity: 0.55;
+  }
+
+  .editorialMeta {
+    font-size: 0.59375rem;
+    letter-spacing: 0.12em;
+    margin-top: 0.65rem;
   }
 
   .rail {
