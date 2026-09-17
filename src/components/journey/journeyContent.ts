@@ -145,10 +145,10 @@ export interface Metric {
  * not a result.
  */
 export const METRICS: Metric[] = [
-  { id: "leads", value: "120%", label: "Increase in qualified leads", worldX: 1970 },
-  { id: "subs", value: "35%", label: "Increase in newsletter subscriptions", worldX: 2030 },
-  { id: "social", value: "50%", label: "Increase in social media engagement", worldX: 2090 },
-  { id: "substack", value: "12,000+", label: "Substack subscribers", worldX: 2150 },
+  { id: "leads", value: "120%", label: "Increase in qualified leads", worldX: 1950 },
+  { id: "subs", value: "35%", label: "Increase in newsletter subscriptions", worldX: 2010 },
+  { id: "social", value: "50%", label: "Increase in social media engagement", worldX: 2070 },
+  { id: "substack", value: "12,000+", label: "Substack subscribers", worldX: 2130 },
 ];
 
 export const METRICS_QUALIFIER = [

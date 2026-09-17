@@ -26,8 +26,8 @@ export const TRUCK_MODEL_URL: string | null = null;
 const WHEEL_RADIUS = 0.62;
 const WHEEL_WIDTH = 0.44;
 
-/** Axle stations along the truck: steer axle, tractor drive pair, trailer bogie. */
-const AXLE_Z = [-4.9, -2.6, -1.7, 4.3, 5.4];
+/** Axle stations along the truck: steer axle, tractor drive pair, trailer bogie pair at rear. */
+const AXLE_Z = [-4.9, -2.6, -1.7, 8.8, 10.1];
 const AXLE_X = 1.3;
 
 /**
@@ -94,10 +94,12 @@ function useJourneyRig(groupRef: React.RefObject<THREE.Group | null>) {
 
     group.position.copy(position);
 
-    // lookAt aims -Z at the target, so a point one unit further along the
-    // direction of travel makes the truck face where it is going.
-    lookTarget.copy(position).add(tangent);
+    // In Three.js, Object3D.lookAt aims +Z at target. Since the truck body
+    // is authored nose-along -Z, aiming at (position - tangent) points the nose
+    // along +tangent (forward down the road).
+    lookTarget.copy(position).sub(tangent);
     group.lookAt(lookTarget);
+    group.scale.setScalar(1.4);
   });
 }
 
@@ -219,6 +221,190 @@ const BodyPaint: React.FC<{ color: string; roughness?: number }> = ({
   />
 );
 
+interface CardTrajectory {
+  startX: number;
+  startY: number;
+  startZ: number;
+  targetX: number;
+  targetY: number;
+  targetZ: number;
+  targetRotY: number;
+  tumbleSpinX: number;
+  tumbleSpinZ: number;
+  startT: number;
+  endT: number;
+  texIndex: number;
+}
+
+const CARD_COUNT = 14;
+
+/**
+ * Animated truck cargo rear:
+ * As the road ends (progress > 0.86), the back doors swing wide open
+ * and milestone cards cascade/tumble out onto the road behind the truck.
+ */
+const TruckCargoRear: React.FC = () => {
+  const progress = useJourneyProgress();
+  const leftDoorRef = useRef<THREE.Group>(null);
+  const rightDoorRef = useRef<THREE.Group>(null);
+  const cardRefs = useRef<(THREE.Group | null)[]>([]);
+
+  // Pre-calculated deterministic card trajectories
+  // Many cards cascade & spill out of the truck onto the road behind it
+  const cards = useMemo<CardTrajectory[]>(() => {
+    function prng(seed: number) {
+      const x = Math.sin(seed * 127.1 + 311.7) * 43758.5453;
+      return x - Math.floor(x);
+    }
+
+    return Array.from({ length: CARD_COUNT }, (_, i) => {
+      // Staggered tumbling out as truck doors open (from p = 0.865 to 0.945)
+      const startT = 0.865 + (i / CARD_COUNT) * 0.075;
+      const endT = Math.min(0.995, startT + 0.055);
+
+      return {
+        // Starts inside the truck cargo bay
+        startX: (prng(i * 3 + 1) - 0.5) * 1.6,
+        startY: 1.8 + prng(i * 5 + 2) * 1.2,
+        startZ: 4.8 + prng(i * 7 + 3) * 1.8,
+        // Tumbles out through the rear doors and scatters onto the road behind the truck
+        targetX: (prng(i * 11 + 2) - 0.5) * 5.2,
+        targetY: 0.12 + prng(i * 13 + 4) * 0.06,
+        targetZ: 8.5 + i * 1.1 + prng(i * 17 + 5) * 3.5,
+        targetRotY: (prng(i * 19 + 4) - 0.5) * 3.1,
+        tumbleSpinX: (prng(i * 23) > 0.5 ? 1 : -1) * (Math.PI * 2.5 + prng(i * 29) * 2.0),
+        tumbleSpinZ: (prng(i * 31) - 0.5) * 3.0,
+        startT,
+        endT,
+        texIndex: i % 5,
+      };
+    });
+  }, []);
+
+  // Card textures
+  const cardTextures = useMemo(() => {
+    if (typeof window === "undefined") return [];
+    const loader = new THREE.TextureLoader();
+    const urls = [
+      "/cards/bg_card_1.jpg",
+      "/cards/bg_card_2.jpg",
+      "/cards/bg_card_3.jpg",
+      "/cards/bg_card_4.jpg",
+      "/about/open-pit-golden-hour.png",
+    ];
+    return urls.map((url) => {
+      const tex = loader.load(url);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    });
+  }, []);
+
+  useFrame(() => {
+    // Keep cargo doors closed and clean so the truck remains a solid container trailer in top-down view
+    if (leftDoorRef.current) leftDoorRef.current.rotation.y = 0;
+    if (rightDoorRef.current) rightDoorRef.current.rotation.y = 0;
+    cards.forEach((_, i) => {
+      const grp = cardRefs.current[i];
+      if (grp) grp.visible = false;
+    });
+  });
+
+  return (
+    <group>
+      {/* Trailer cargo bay interior cavity */}
+      <group position={[0, 2.46, 5.2]}>
+        <mesh position={[0, -1.36, 0]} receiveShadow>
+          <boxGeometry args={[2.42, 0.04, 3.5]} />
+          <meshStandardMaterial color="#2d2218" roughness={0.88} metalness={0.1} />
+        </mesh>
+        <mesh position={[0, 1.36, 0]}>
+          <boxGeometry args={[2.42, 0.04, 3.5]} />
+          <meshStandardMaterial color="#1a202c" roughness={0.7} metalness={0.3} />
+        </mesh>
+        <mesh position={[-1.21, 0, 0]}>
+          <boxGeometry args={[0.04, 2.68, 3.5]} />
+          <meshStandardMaterial color="#1e293b" roughness={0.65} metalness={0.35} />
+        </mesh>
+        <mesh position={[1.21, 0, 0]}>
+          <boxGeometry args={[0.04, 2.68, 3.5]} />
+          <meshStandardMaterial color="#1e293b" roughness={0.65} metalness={0.35} />
+        </mesh>
+        <mesh position={[0, 0, -1.75]}>
+          <boxGeometry args={[2.42, 2.68, 0.04]} />
+          <meshStandardMaterial color="#0f172a" roughness={0.8} metalness={0.2} />
+        </mesh>
+        {/* Interior cargo bay ambient light when doors open */}
+        <pointLight position={[0, 0.8, 0]} intensity={3.5} distance={7} decay={2} color="#f59e0b" />
+      </group>
+
+      {/* Left rear door hinged at x = -1.24 */}
+      <group ref={leftDoorRef} position={[-1.24, 2.46, 7.0]}>
+        <mesh position={[0.61, 0, 0]} castShadow receiveShadow>
+          <boxGeometry args={[1.22, 2.76, 0.08]} />
+          <meshStandardMaterial color="#d8dce3" roughness={0.52} metalness={0.14} />
+        </mesh>
+        <mesh position={[1.1, 0, 0.06]} castShadow>
+          <cylinderGeometry args={[0.02, 0.02, 2.65, 8]} />
+          <meshStandardMaterial color="#334155" roughness={0.3} metalness={0.8} />
+        </mesh>
+        <mesh position={[1.05, -0.15, 0.09]} castShadow>
+          <boxGeometry args={[0.16, 0.04, 0.04]} />
+          <meshStandardMaterial color="#1e293b" roughness={0.3} metalness={0.8} />
+        </mesh>
+      </group>
+
+      {/* Right rear door hinged at x = +1.24 */}
+      <group ref={rightDoorRef} position={[1.24, 2.46, 7.0]}>
+        <mesh position={[-0.61, 0, 0]} castShadow receiveShadow>
+          <boxGeometry args={[1.22, 2.76, 0.08]} />
+          <meshStandardMaterial color="#d8dce3" roughness={0.52} metalness={0.14} />
+        </mesh>
+        <mesh position={[-1.1, 0, 0.06]} castShadow>
+          <cylinderGeometry args={[0.02, 0.02, 2.65, 8]} />
+          <meshStandardMaterial color="#334155" roughness={0.3} metalness={0.8} />
+        </mesh>
+        <mesh position={[-1.05, -0.15, 0.09]} castShadow>
+          <boxGeometry args={[0.16, 0.04, 0.04]} />
+          <meshStandardMaterial color="#1e293b" roughness={0.3} metalness={0.8} />
+        </mesh>
+      </group>
+
+      {/* Falling Cards */}
+      {cards.map((card, i) => (
+        <group
+          key={i}
+          ref={(el) => {
+            cardRefs.current[i] = el;
+          }}
+          visible={false}
+        >
+          {/* Gold foiled card rim */}
+          <mesh castShadow receiveShadow>
+            <boxGeometry args={[0.92, 0.018, 1.38]} />
+            <meshStandardMaterial color="#d4af37" metalness={0.85} roughness={0.25} />
+          </mesh>
+          {/* Front face with marketing/milestone artwork */}
+          {cardTextures[card.texIndex] && (
+            <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+              <planeGeometry args={[0.88, 1.34]} />
+              <meshStandardMaterial
+                map={cardTextures[card.texIndex]}
+                roughness={0.35}
+                metalness={0.1}
+              />
+            </mesh>
+          )}
+          {/* Luxury dark back face */}
+          <mesh position={[0, -0.01, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <planeGeometry args={[0.88, 1.34]} />
+            <meshStandardMaterial color="#0b111a" roughness={0.5} metalness={0.2} />
+          </mesh>
+        </group>
+      ))}
+    </group>
+  );
+};
+
 /**
  * Built-in truck body.
  *
@@ -255,12 +441,12 @@ const BuiltInTruck: React.FC<{
   return (
     <group>
       {/* Chassis rail, tying tractor and trailer together. */}
-      <mesh position={[0, 0.74, 0.4]} castShadow>
-        <boxGeometry args={[2.05, 0.3, 12.4]} />
+      <mesh position={[0, 0.74, 2.8]} castShadow>
+        <boxGeometry args={[2.05, 0.3, 17.2]} />
         <meshStandardMaterial color="#0e141d" roughness={0.72} metalness={0.55} />
       </mesh>
 
-      {/* Tractor cab. */}
+      {/* Tractor cab - sleek dark finish matching unitedcarriers.com */}
       <RoundedBox
         args={[2.58, 2.1, 3.0]}
         radius={0.3}
@@ -269,7 +455,7 @@ const BuiltInTruck: React.FC<{
         castShadow
         receiveShadow
       >
-        <BodyPaint color="#eef1f5" />
+        <BodyPaint color="#1c212a" roughness={0.28} />
       </RoundedBox>
 
       {/* Sleeper section behind the cab. */}
@@ -281,7 +467,7 @@ const BuiltInTruck: React.FC<{
         castShadow
         receiveShadow
       >
-        <BodyPaint color="#e4e8ee" />
+        <BodyPaint color="#181d26" roughness={0.32} />
       </RoundedBox>
 
       {/*
@@ -291,7 +477,7 @@ const BuiltInTruck: React.FC<{
        */}
       <mesh position={[0, 3.32, -3.3]} rotation={[-0.19, 0, 0]} castShadow>
         <boxGeometry args={[2.42, 0.62, 2.6]} />
-        <BodyPaint color="#e9edf2" roughness={0.3} />
+        <BodyPaint color="#222834" roughness={0.25} />
       </mesh>
 
       {/* Windscreen — dark glass, slightly proud of the cab face. */}
@@ -375,93 +561,60 @@ const BuiltInTruck: React.FC<{
         <meshStandardMaterial color="#5d6774" roughness={0.26} metalness={0.92} />
       </mesh>
 
-      {/* Trailer body. */}
+      {/* Trailer body - elongated 40ft/53ft container proportions matching unitedcarriers.com */}
       <RoundedBox
-        args={[2.6, 2.96, 8.2]}
-        radius={0.12}
+        args={[2.54, 2.96, 12.8]}
+        radius={0.10}
         smoothness={2}
-        position={[0, 2.46, 2.9]}
+        position={[0, 2.46, 5.2]}
         castShadow
         receiveShadow
       >
         <BodyPaint color="#f7f8f9" roughness={0.44} />
       </RoundedBox>
 
-      {/* Trailer side skirts, hiding the gap between body and road. */}
-      {[-1.28, 1.28].map((x) => (
-        <mesh key={x} position={[x, 1.02, 3.1]} castShadow>
-          <boxGeometry args={[0.07, 0.72, 6.6]} />
-          <meshStandardMaterial color="#c2c8d1" roughness={0.55} metalness={0.15} />
+      {/* Shipping container corrugated roof ribs for overhead top-down view (56 ribs across 12.4m length) */}
+      {Array.from({ length: 54 }, (_, i) => {
+        const rz = -1.0 + i * (12.3 / 53);
+        return (
+          <mesh key={`roof-rib-${i}`} position={[0, 3.96, rz]}>
+            <boxGeometry args={[2.48, 0.04, 0.11]} />
+            <meshStandardMaterial color="#d4d9df" roughness={0.52} metalness={0.2} />
+          </mesh>
+        );
+      })}
+
+      {/* 4 Corner Castings on Container Roof */}
+      {[
+        [-1.20, -1.1],
+        [1.20, -1.1],
+        [-1.20, 11.5],
+        [1.20, 11.5],
+      ].map(([cx, cz], i) => (
+        <mesh key={`casting-${i}`} position={[cx, 3.97, cz]}>
+          <boxGeometry args={[0.22, 0.06, 0.28]} />
+          <meshStandardMaterial color="#828d9b" roughness={0.35} metalness={0.75} />
         </mesh>
       ))}
 
-      {/*
-       * The single brand note: one thin livery stripe down each flank. Kept to
-       * a hairline because the brief is explicit that gold should not be
-       * overused, and a gold trailer would read as a toy.
-       */}
-      {[-1.312, 1.312].map((x) => (
-        <mesh key={x} position={[x, 1.74, 2.9]}>
-          <boxGeometry args={[0.02, 0.15, 7.7]} />
-          <meshStandardMaterial
-            color="#B8860B"
-            roughness={0.3}
-            metalness={0.85}
-            emissive="#6a4c06"
-            emissiveIntensity={0.35}
-          />
-        </mesh>
-      ))}
-
-      {/* Rear doors, marker lamps and underrun bar. */}
-      <mesh position={[0, 2.46, 7.02]} castShadow>
-        <boxGeometry args={[2.48, 2.8, 0.1]} />
-        <meshStandardMaterial color="#d8dce3" roughness={0.52} metalness={0.14} />
-      </mesh>
-      {[-0.96, 0.96].map((x) => (
-        <mesh key={x} position={[x, 1.24, 7.08]}>
-          <boxGeometry args={[0.42, 0.17, 0.08]} />
-          <meshStandardMaterial color="#8e3628" emissive="#c9432f" emissiveIntensity={1.5} />
-        </mesh>
-      ))}
-      <mesh position={[0, 0.72, 7.05]} castShadow>
-        <boxGeometry args={[2.2, 0.12, 0.08]} />
-        <meshStandardMaterial color="#2b3340" roughness={0.5} metalness={0.7} />
-      </mesh>
-
-      {/* Wheels: tyre, rim and a fender over each axle station. */}
+      {/* Wheels: tyre, rim over each axle station matching slim trailer clearance */}
       {AXLE_Z.map((z) =>
         [-AXLE_X, AXLE_X].map((x) => (
           <group key={`${z}:${x}`} position={[x, WHEEL_RADIUS, z]}>
             <mesh ref={handleWheelRef} rotation={wheelRest} castShadow>
-              <cylinderGeometry args={[WHEEL_RADIUS, WHEEL_RADIUS, WHEEL_WIDTH, 18]} />
+              <cylinderGeometry args={[WHEEL_RADIUS, WHEEL_RADIUS, WHEEL_WIDTH, 32]} />
               <meshStandardMaterial color="#0b0e13" roughness={0.92} metalness={0.08} />
             </mesh>
-            {/*
-             * The rim is a child of nothing — it is registered as a wheel too,
-             * so it turns with the tyre. Without it the tyre is a featureless
-             * black disc and the rotation is invisible at any distance.
-             */}
             <mesh
               ref={handleWheelRef}
               position={[Math.sign(x) * (WHEEL_WIDTH / 2 + 0.01), 0, 0]}
               rotation={wheelRest}
               castShadow
             >
-              <cylinderGeometry args={[WHEEL_RADIUS * 0.58, WHEEL_RADIUS * 0.58, 0.05, 6]} />
+              <cylinderGeometry args={[WHEEL_RADIUS * 0.58, WHEEL_RADIUS * 0.58, 0.05, 16]} />
               <meshStandardMaterial color="#6b7480" roughness={0.3} metalness={0.9} />
             </mesh>
           </group>
-        )),
-      )}
-
-      {/* Fenders over the drive and trailer axles. */}
-      {[-2.15, 4.85].map((z) =>
-        [-AXLE_X, AXLE_X].map((x) => (
-          <mesh key={`f${z}:${x}`} position={[x, 1.42, z]} castShadow>
-            <boxGeometry args={[0.72, 0.1, 3.1]} />
-            <meshStandardMaterial color="#aeb5c0" roughness={0.6} metalness={0.2} />
-          </mesh>
         )),
       )}
     </group>
@@ -481,8 +634,8 @@ const ContactShadow: React.FC = () => {
   useEffect(() => () => texture.dispose(), [texture]);
 
   return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.09, 0.6]} renderOrder={1}>
-      <planeGeometry args={[5.6, 15]} />
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.09, 2.8]} renderOrder={1}>
+      <planeGeometry args={[5.6, 20]} />
       <meshBasicMaterial
         map={texture}
         transparent
@@ -555,7 +708,7 @@ export const Truck: React.FC<TruckProps> = ({
   modelScale = 1,
   modelYOffset = 0,
   wheelNamePattern = /wheel|tyre|tire|rim/i,
-  wheelRadius = WHEEL_RADIUS,
+  wheelRadius = WHEEL_RADIUS * 1.4,
 }) => {
   const groupRef = useRef<THREE.Group>(null);
   const wheelsRef = useRef<RegisteredWheel[]>([]);

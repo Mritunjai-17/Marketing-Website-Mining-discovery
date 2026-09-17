@@ -16,25 +16,19 @@ import * as THREE from "three";
 export const UP = new THREE.Vector3(0, 1, 0);
 
 /**
- * Control points, laid out as a long-haul highway rather than a site track:
- * wide, lazy S-bends with a big radius, no switchbacks. Spacing is roughly
- * 140 units between points against a ~12-unit truck, which keeps the curvature
- * gentle enough that the truck reads as cruising, not slaloming.
- *
- * The route runs down -Z so that "forward" is the conventional camera-facing
- * direction; X carries the lateral sweep. Y stays at 0 for the prototype —
- * elevation would need the ground plane to become terrain, which is out of
- * scope for STEP 1.
+ * Control points for a straight, clean highway corridor.
+ * Runs straight down -Z so that a camera beside the road (+X) views the highway
+ * as a perfectly straight horizontal road across the screen.
  */
 const CONTROL_POINTS: readonly [number, number, number][] = [
-  [0, 0, 60],
-  [0, 0, -80],
-  [-52, 0, -220],
-  [-44, 0, -370],
-  [26, 0, -500],
-  [62, 0, -640],
-  [22, 0, -780],
-  [0, 0, -900],
+  [0, 0, 120],
+  [0, 0, 0],
+  [0, 0, -200],
+  [0, 0, -400],
+  [0, 0, -600],
+  [0, 0, -800],
+  [0, 0, -1000],
+  [0, 0, -1180],
 ];
 
 /**

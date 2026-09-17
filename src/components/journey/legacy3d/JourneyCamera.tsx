@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import { PerspectiveCamera } from "@react-three/drei";
@@ -8,22 +8,15 @@ import { UP, getJourneyPoint, getJourneySide, getJourneyTangent } from "./journe
 import { useJourneyProgress } from "../journeyProgress";
 
 /**
- * Where the camera sits relative to the truck, in the truck's own frame.
- *
- * Pulled a long way back from a conventional chase rig on purpose. The brief
- * wants the truck to hold roughly a fifth of the attention and the world the
- * rest, and framing is the only honest lever for that — shrinking the truck
- * would break its scale against the road, and crowding the frame with scenery
- * would fight the composition rather than compose it. At 54 units with a 33°
- * lens the truck spans about a fifth of the frame width and a good deal less
- * of its area, with the road and landscape carrying everything else.
+ * Straight horizontal roadside tracking camera.
+ * Positions camera beside the truck looking across the straight road,
+ * creating a clean, level horizontal highway across the screen.
  */
-const CHASE_BEHIND = 54;
-const CHASE_HEIGHT = 19;
+const CHASE_SIDE = 54;
+const CHASE_HEIGHT = 1.6;
 
-/** How far ahead of the truck the camera aims, so bends open up before arrival. */
-const LOOK_AHEAD = 30;
-const LOOK_HEIGHT = 4.2;
+/** Where the camera aims to center the truck profile higher and give more space under road */
+const LOOK_HEIGHT = -1.8;
 
 /** Fixed. An animated FOV is the classic source of a "zoom" nobody asked for. */
 const FIELD_OF_VIEW = 33;
@@ -36,18 +29,6 @@ const FIELD_OF_VIEW = 33;
  */
 const POSITION_SMOOTHING = 0.32;
 const TARGET_SMOOTHING = 0.22;
-
-/**
- * The lateral swing, in world units, across the whole journey.
- *
- * This is the "subtle cinematic offset" and it is deliberately one single slow
- * movement rather than a sequence of moves: the camera drifts from the truck's
- * left shoulder to its right over the entire route, which re-frames the
- * landscape continuously without ever being fast enough to notice as a camera
- * move. Anything more energetic belongs in the later choreography stage.
- */
-const SIDE_SWING = 9;
-const HEIGHT_SWING = 3.5;
 
 /**
  * Frame-rate independent exponential damping.
@@ -87,36 +68,36 @@ function createRigState(): CameraRigState {
   };
 }
 
+function smoothstep(min: number, max: number, value: number): number {
+  const x = Math.max(0, Math.min(1, (value - min) / (max - min)));
+  return x * x * (3 - 2 * x);
+}
+
 /**
- * A cinematic chase camera that follows the truck along the journey.
- *
- * It derives its own framing from the path rather than reading the truck's
- * transform, so there is no ordering dependency between the two `useFrame`
- * callbacks — both are pure functions of the same progress value, and neither
- * can ever be a frame behind the other.
- *
- * Every offset below is a function of progress alone, which is what keeps the
- * shot perfectly reversible: scrolling back up retraces the identical camera
- * path rather than unwinding some accumulated state.
+ * A cinematic camera that tracks the truck along the journey.
+ * In the first stage, it views the truck from the side as the roadside text milestones scroll past.
+ * After all text finishes, the camera swoops smoothly behind the truck into a rear chase view
+ * looking forward down the highway.
  */
 export const JourneyCamera: React.FC = () => {
   const cameraRef = useRef<THREE.PerspectiveCamera>(null);
   const progress = useJourneyProgress();
   const { size } = useThree();
 
-  // Held in a ref and built on first frame: the rig mutates this every frame,
-  // and mutating a value produced during render is what React's lint rules
-  // (correctly) reject. Nothing here is ever read during render.
   const stateRef = useRef<CameraRigState | null>(null);
 
-  /*
-   * Narrow viewports see less of the scene at a given FOV, so the chase
-   * distance is scaled up a little on small screens to keep the truck fully in
-   * frame. This is the only responsive concession in the prototype — a proper
-   * mobile treatment comes later — but it means the desktop framing is not
-   * silently broken when someone opens it on a phone.
-   */
-  const distanceScale = size.width < 768 ? 1.28 : size.width < 1200 ? 1.1 : 1;
+  const scratch = useMemo(
+    () => ({
+      sidePos: new THREE.Vector3(),
+      sideTarget: new THREE.Vector3(),
+      sideUp: new THREE.Vector3(0, 1, 0),
+      backPos: new THREE.Vector3(),
+      backTarget: new THREE.Vector3(),
+      backUp: new THREE.Vector3(0, 1, 0),
+      currentUp: new THREE.Vector3(),
+    }),
+    [],
+  );
 
   useFrame((_, delta) => {
     const camera = cameraRef.current;
@@ -125,43 +106,75 @@ export const JourneyCamera: React.FC = () => {
     stateRef.current ??= createRigState();
     const state = stateRef.current;
 
-    // Guard against tab-restore spikes, which would otherwise damp a whole
-    // second of motion into one frame.
-    const dt = Math.min(delta, 1 / 20);
     const t = progress.current;
 
     getJourneyPoint(t, state.truckPosition);
     getJourneyTangent(t, state.tangent);
     getJourneySide(t, state.side);
 
-    // A single cosine sweep across the journey: starts left, crosses to right,
-    // never reverses direction, never accelerates.
-    const swing = Math.cos(t * Math.PI);
-    const sideOffset = -swing * SIDE_SWING;
-    // Rises gently through the middle of the route, where the hills are
-    // tallest and the extra elevation buys the most landscape.
-    const heightOffset = Math.sin(t * Math.PI) * HEIGHT_SWING;
+    const aspect = size.width / Math.max(1, size.height);
+    const isPortrait = aspect < 1.0;
 
-    state.desiredPosition
+    // Mobile / Portrait responsive scaling:
+    // PerspectiveCamera has a fixed vertical FOV (33deg). In portrait mode (aspect ~0.45 - 0.55),
+    // the horizontal FOV is roughly 3x narrower than in landscape (aspect ~1.78).
+    // Scaling camera distance dynamically by aspect ratio keeps the truck and highway perfectly framed across phones, tablets, and desktops.
+    const sideDistanceScale = isPortrait
+      ? Math.min(2.35, 1.12 / Math.max(0.42, aspect))
+      : size.width < 1200
+      ? 1.15
+      : 1.0;
+
+    const rearDistanceScale = isPortrait
+      ? Math.min(1.42, 0.72 / Math.max(0.48, aspect))
+      : size.width < 1200
+      ? 1.12
+      : 1.0;
+
+    // On tall mobile screens, aim the side view slightly lower so the truck is centered in the upper portion
+    // with plenty of clearance above the under-road text cards.
+    const effectiveLookHeight = isPortrait ? -3.0 : LOOK_HEIGHT;
+
+    // After all text has passed (t >= 0.82), the camera turns smoothly to behind the truck by t = 0.90
+    const turnS = smoothstep(0.82, 0.90, t);
+    const easeTurn = turnS * turnS * (3 - 2 * turnS);
+
+    // 1. Profile Side View
+    scratch.sidePos
       .copy(state.truckPosition)
-      .addScaledVector(state.tangent, -CHASE_BEHIND * distanceScale)
-      .addScaledVector(state.side, sideOffset * distanceScale)
-      .addScaledVector(UP, (CHASE_HEIGHT + heightOffset) * distanceScale);
+      .addScaledVector(state.side, CHASE_SIDE * sideDistanceScale)
+      .addScaledVector(UP, CHASE_HEIGHT * (isPortrait ? 1.0 : sideDistanceScale));
 
-    state.desiredTarget
+    scratch.sideTarget
       .copy(state.truckPosition)
-      .addScaledVector(state.tangent, LOOK_AHEAD)
-      .addScaledVector(UP, LOOK_HEIGHT);
+      .addScaledVector(UP, effectiveLookHeight);
 
-    if (!state.initialised) {
-      state.smoothedPosition.copy(state.desiredPosition);
-      state.smoothedTarget.copy(state.desiredTarget);
-      state.initialised = true;
-    } else {
-      state.smoothedPosition.lerp(state.desiredPosition, dampFactor(POSITION_SMOOTHING, dt));
-      state.smoothedTarget.lerp(state.desiredTarget, dampFactor(TARGET_SMOOTHING, dt));
-    }
+    scratch.sideUp.set(0, 1, 0);
 
+    // 2. Rear Chase View (positioned behind the truck looking forward down the highway)
+    const REAR_DISTANCE = 46 * rearDistanceScale;
+    const REAR_HEIGHT = 7.4 * rearDistanceScale;
+    scratch.backPos
+      .copy(state.truckPosition)
+      .addScaledVector(state.tangent, -REAR_DISTANCE)
+      .addScaledVector(UP, REAR_HEIGHT);
+
+    scratch.backTarget
+      .copy(state.truckPosition)
+      .addScaledVector(state.tangent, 12)
+      .addScaledVector(UP, isPortrait ? 3.4 : 2.6);
+
+    scratch.backUp.set(0, 1, 0);
+
+    // 3. Smoothly blend positions, targets, and up vector
+    state.desiredPosition.lerpVectors(scratch.sidePos, scratch.backPos, easeTurn);
+    state.desiredTarget.lerpVectors(scratch.sideTarget, scratch.backTarget, easeTurn);
+    scratch.currentUp.lerpVectors(scratch.sideUp, scratch.backUp, easeTurn).normalize();
+
+    state.smoothedPosition.copy(state.desiredPosition);
+    state.smoothedTarget.copy(state.desiredTarget);
+
+    camera.up.copy(scratch.currentUp);
     camera.position.copy(state.smoothedPosition);
     camera.lookAt(state.smoothedTarget);
   });
@@ -174,7 +187,7 @@ export const JourneyCamera: React.FC = () => {
       near={1}
       // Far enough to contain the sky dome at radius 1200.
       far={2600}
-      position={[0, CHASE_HEIGHT, CHASE_BEHIND + 60]}
+      position={[CHASE_SIDE, CHASE_HEIGHT, 0]}
     />
   );
 };

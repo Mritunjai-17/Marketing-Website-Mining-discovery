@@ -80,32 +80,12 @@ export const DescentBackdrop: React.FC<DescentBackdropProps> = ({ progress: p })
       className="pointer-events-none absolute inset-0 z-23 overflow-hidden"
       style={{ opacity: opacity.toFixed(3) }}
     >
-      {/* The land itself: cool and very dark, a shade off the site's navy so
-          it sits in the same night as the globe above and the road below. */}
+      {/* Seamless transition backdrop into the white studio journey */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(180deg, #060a12 0%, #0a1120 34%, #0d1626 58%, #080d18 100%)",
-        }}
-      />
-      {/* Warmth pooling along the corridor the road runs down, so the ground
-          is not one flat field and the scene has something to be lit by. */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(120% 52% at 50% 74%, rgba(186,142,62,0.16) 0%, rgba(90,84,84,0.07) 38%, rgba(0,0,0,0) 72%)",
-          opacity: (0.35 + near * 0.65).toFixed(3),
-        }}
-      />
-      {/* Edges falling away, which is most of what makes a flat fill read as
-          ground under an open sky rather than as a painted card. */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(130% 100% at 50% 62%, rgba(0,0,0,0) 44%, rgba(0,0,0,0.55) 100%)",
+            "linear-gradient(180deg, #FAF7F2 0%, #F3F4F6 40%, #ffffff 100%)",
         }}
       />
     </div>

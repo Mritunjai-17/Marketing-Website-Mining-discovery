@@ -14,15 +14,18 @@ import type {
   GlobeFocus,
   ProjectedAnchor,
 } from "@/components/ui/globe/EarthGlobe";
-import { Journey2D } from "@/components/journey/Journey2D";
 import { useCreateJourneyProgress } from "@/components/journey/journeyProgress";
 import { AtmosphericCloudLayer } from "@/components/journey/AtmosphericCloudLayer";
 import { DescentBackdrop } from "@/components/journey/DescentBackdrop";
 import {
   deriveDescentCamera,
-  descentTransform,
   JOURNEY_RUNS_FROM,
 } from "@/components/journey/descentCamera";
+
+const Journey3D = dynamic(
+  () => import("@/components/journey/Journey3D"),
+  { ssr: false },
+);
 
 // WebGL has no server render, and the topojson chunk should not block first paint.
 const EarthGlobe = dynamic(
@@ -875,7 +878,6 @@ export const GlobeHero: React.FC = () => {
       journeyProgress.pitch = camera.pitch;
       journeyBox.style.opacity = camera.opacity.toFixed(3);
       journeyBox.style.visibility = camera.opacity <= 0.005 ? "hidden" : "visible";
-      journeyBox.style.transform = descentTransform(camera);
       // Only once the camera has settled into the Journey's own composition;
       // a tilted, half-descended stage should not be catching clicks.
       journeyBox.style.pointerEvents = camera.locked ? "auto" : "none";
@@ -1404,73 +1406,21 @@ export const GlobeHero: React.FC = () => {
 
             <div
               className="pointer-events-none absolute inset-0 z-24 h-full w-full"
-              style={{
-                perspective: "1250px",
-                // Low, because the camera is looking down at ground that sits
-                // below it. Centring this would pitch the scene about the
-                // middle of the frame and read as the world tilting rather
-                // than as the camera craning down over the road.
-                perspectiveOrigin: "50% 62%",
-              }}
             >
               <div
                 ref={journeyBoxRef}
-                className="h-full w-full will-change-transform"
+                className="h-full w-full"
                 style={{
                   opacity: 0,
-                  /*
-                   * Flat, NOT preserve-3d. The camera tilts the journey as one
-                   * rigid plane, which is what a side elevation is. Letting its
-                   * children into 3D space would switch their stacking from
-                   * paint order to depth order, and every layer in the scene —
-                   * sky, road, billboard, truck — sits coplanar at z=0, so
-                   * they would be free to z-fight and reorder among
-                   * themselves. Flat renders the scene once and tilts the
-                   * result, which is both correct and cheaper.
-                   */
-                  transformStyle: "flat",
-                  // The truck's own contact line, so the orbit goes around the
-                  // truck rather than around the middle of the viewport.
-                  transformOrigin: "50% 82%",
                 }}
               >
-                <Journey2D progress={journeyProgress} active={journeyActive} />
+                <Journey3D progress={journeyProgress} active={journeyActive} />
               </div>
             </div>
 
             {/* Layer 6 — Atmospheric cloud deck, above the land it is hiding. */}
             <AtmosphericCloudLayer progress={transitionProgress} />
 
-            {/*
-              Development-only timeline readout.
-
-              Compiled out of production: `process.env.NODE_ENV` is statically
-              replaced at build time, so this whole branch is dead code the
-              bundler drops — it costs nothing in the shipped page and there is
-              no flag to remember to turn off.
-            */}
-            {process.env.NODE_ENV !== "production" && (
-              <div
-                className="pointer-events-none fixed left-3 top-3 z-[999] rounded-md border border-white/15 bg-black/75 px-3 py-2 font-mono text-[11px] leading-tight text-white/90 backdrop-blur-sm"
-                aria-hidden="true"
-              >
-                <div>
-                  transition{" "}
-                  <span className="text-[#FFD700]">
-                    {(transitionProgress * 100).toFixed(1)}%
-                  </span>
-                </div>
-                <div>
-                  state <span className="text-[#7ec8ff]">{transitionState}</span>
-                </div>
-                <div className="mt-1 h-1 w-40 overflow-hidden rounded-full bg-white/15">
-                  <div
-                    className="h-full bg-[#FFD700]"
-                    style={{ width: `${(transitionProgress * 100).toFixed(1)}%` }}
-                  />
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>

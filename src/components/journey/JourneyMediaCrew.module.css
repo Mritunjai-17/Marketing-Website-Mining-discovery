@@ -1,0 +1,96 @@
+/* ─────────────────────────────────────────────────────────────
+   JourneyMediaCrew.module.css
+   Styles for the Point-1 camera-crew animation overlay
+───────────────────────────────────────────────────────────── */
+
+/* Outer wrapper – sits at bottom-center of the highway scene */
+.crewWrap {
+  position: absolute;
+  /* Position on the highway road, right side of truck */
+  bottom: 14%;
+  right: 6%;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  z-index: 28;
+  pointer-events: none;
+  /* Transition controlled by JS opacity */
+  will-change: opacity, transform;
+}
+
+/* Individual crew member container */
+.crewMember {
+  display: flex;
+  align-items: flex-end;
+  will-change: transform;
+  /* drop-shadow for depth */
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.45));
+  transition: filter 0.2s ease;
+}
+
+/* Camera flash — covers the whole scene briefly */
+.cameraFlash {
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 240, 0.55);
+  z-index: 99;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.06s ease-out;
+  mix-blend-mode: screen;
+}
+
+/* Speech bubble */
+.speechBubble {
+  position: absolute;
+  top: -62px;
+  left: 50%;
+  transform: translateX(-50%) scale(0.8);
+  background: linear-gradient(135deg, #fff9e6, #fff3cc);
+  border: 2px solid #d4a017;
+  border-radius: 14px;
+  padding: 8px 14px;
+  white-space: nowrap;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.7rem;
+  color: #1a1a1a;
+  font-family: var(--font-sans, sans-serif);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22);
+  opacity: 0;
+  will-change: opacity, transform;
+  pointer-events: none;
+}
+
+.speechBubble strong {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #8b1a1a;
+  letter-spacing: 0.02em;
+}
+
+/* Tail of the speech bubble */
+.speechBubble::after {
+  content: "";
+  position: absolute;
+  bottom: -11px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 11px solid #d4a017;
+}
+
+.speechBubble::before {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 10px solid #fff9e6;
+  z-index: 1;
+}

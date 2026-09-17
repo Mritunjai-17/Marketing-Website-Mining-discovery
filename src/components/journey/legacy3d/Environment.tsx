@@ -54,8 +54,8 @@ function buildColumns(): number[] {
  * ground that is *readable* but low in contrast, and these values put the
  * terrain where it can actually catch the key light.
  */
-const LOW = new THREE.Color("#1a283e");
-const HIGH = new THREE.Color("#33486a");
+const LOW = new THREE.Color("#2a3e5c");
+const HIGH = new THREE.Color("#4e6c96");
 
 /**
  * The landscape the road runs through.
@@ -176,8 +176,8 @@ function useScatterInstances(
  * ever seen they are silhouettes — the fog takes their detail long before the
  * camera could resolve it. Spending geometry on them would buy nothing.
  */
-const FOLIAGE_DARK = new THREE.Color("#152936");
-const FOLIAGE_LIGHT = new THREE.Color("#25424b");
+const FOLIAGE_DARK = new THREE.Color("#22394a");
+const FOLIAGE_LIGHT = new THREE.Color("#365561");
 
 const Trees: React.FC = () => {
   const trunkRef = useRef<THREE.InstancedMesh>(null);
@@ -287,8 +287,8 @@ const Trees: React.FC = () => {
  * shoulder meets the terrain, which would otherwise read as a seam between two
  * meshes rather than as a roadside.
  */
-const SCRUB_DARK = new THREE.Color("#1c2c3c");
-const SCRUB_LIGHT = new THREE.Color("#2e4152");
+const SCRUB_DARK = new THREE.Color("#263a4c");
+const SCRUB_LIGHT = new THREE.Color("#3d5469");
 
 const Vegetation: React.FC = () => {
   const shrubRef = useRef<THREE.InstancedMesh>(null);
@@ -562,10 +562,10 @@ const SkyDome: React.FC<{ radius?: number }> = ({ radius = 1200 }) => {
          * bright enough behind them to be silhouetted against.
          */
         uniforms: {
-          uHorizon: { value: new THREE.Color("#35618f") },
-          uZenith: { value: new THREE.Color("#0b1628") },
-          uGround: { value: new THREE.Color("#0c1524") },
-          uGlow: { value: new THREE.Color("#8a6c33") },
+          uHorizon: { value: new THREE.Color("#4d7ba8") },
+          uZenith: { value: new THREE.Color("#162844") },
+          uGround: { value: new THREE.Color("#1a2638") },
+          uGlow: { value: new THREE.Color("#d49b42") },
         },
         vertexShader: /* glsl */ `
           varying vec3 vDirection;
@@ -594,7 +594,7 @@ const SkyDome: React.FC<{ radius?: number }> = ({ radius = 1200 }) => {
             // the suggestion of a sun long since set. Tight enough in height
             // that it never reads as a light source of its own.
             float band = exp(-pow(h / 0.085, 2.0));
-            color += uGlow * band * 0.5;
+            color += uGlow * band * 0.75;
 
             gl_FragColor = vec4(color, 1.0);
           }

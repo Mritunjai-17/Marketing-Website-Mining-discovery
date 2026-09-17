@@ -13,7 +13,7 @@
   height: 100%;
   overflow: hidden;
   /* The deepest value in the scene. Everything else sits on top of it. */
-  background: #050b16;
+  background: #ffffff;
   /* Layers are promoted individually; this just establishes the context. */
   isolation: isolate;
 }
@@ -555,4 +555,277 @@
 .stage {
   max-width: 100%;
   overflow-x: hidden;
+}
+
+
+/* ==========================================================================
+   BLACK PART (UNDER THE ROAD)
+   Continuous roadside milestone track:
+   Text cards enter from the right side of the screen and travel across
+   to the left side in sync with the truck and road motion.
+   ========================================================================== */
+
+.underRoadSection {
+  position: absolute;
+  left: 0;
+  right: 0;
+  width: 100%;
+  bottom: clamp(2rem, 6vh, 5.5rem);
+  height: clamp(170px, 28vh, 260px);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 25;
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 6%,
+    black 94%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 6%,
+    black 94%,
+    transparent 100%
+  );
+}
+
+.roadTextTrack {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: clamp(4rem, 8vw, 8rem);
+  padding-left: clamp(2.5rem, 7vw, 7rem);
+  padding-right: clamp(4rem, 15vw, 15rem);
+  width: max-content;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.roadCard {
+  flex: 0 0 clamp(300px, 26vw, 420px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.6rem;
+  pointer-events: auto;
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+  padding-left: clamp(1.4rem, 2.2vw, 2.2rem);
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* "OUR EVOLUTION" (Stage 0): Clean start with generous empty space before Milestone 01 */
+.roadCard:first-child {
+  border-left: none;
+  padding-left: 0;
+  margin-right: clamp(50vw, 65vw, 80vw);
+}
+
+.milestoneIconRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.milestoneIcon {
+  width: 1.45rem;
+  height: 1.45rem;
+  color: #d4af37;
+  flex-shrink: 0;
+}
+
+.milestoneTag {
+  font-family: var(--font-mono-custom), ui-monospace, monospace;
+  font-size: clamp(0.66rem, 0.78vw, 0.74rem);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #d4af37;
+  font-weight: 700;
+}
+
+.milestoneHeadline {
+  font-family: var(--font-sans-custom), system-ui, -apple-system, sans-serif;
+  font-size: clamp(1.2rem, 1.55vw, 1.65rem);
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  line-height: 1.18;
+  color: #ffffff;
+  text-transform: uppercase;
+  margin: 0;
+  max-width: 400px;
+}
+
+.milestoneBar {
+  width: 44px;
+  height: 2px;
+  background: #d4af37;
+  margin: 0.15rem 0 0.2rem;
+}
+
+.milestoneDescription {
+  font-family: var(--font-sans-custom), system-ui, -apple-system, sans-serif;
+  font-size: clamp(0.86rem, 0.96vw, 0.98rem);
+  line-height: 1.62;
+  color: #94a3b8;
+  margin: 0;
+  max-width: 390px;
+}
+
+@media (max-width: 900px) {
+  .underRoadSection {
+    bottom: clamp(3.5rem, 8vh, 5.5rem);
+    height: auto;
+    min-height: 160px;
+  }
+  .roadTextTrack {
+    gap: 2.25rem;
+    padding-left: 1.5rem;
+    padding-right: 2.5rem;
+  }
+  .roadCard {
+    flex: 0 0 clamp(260px, 75vw, 300px);
+    padding-left: 1.25rem;
+  }
+  .milestoneHeadline {
+    font-size: 1.15rem;
+  }
+  .milestoneDescription {
+    font-size: 0.82rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .underRoadSection {
+    bottom: clamp(6.5rem, 16vh, 10rem);
+    min-height: 140px;
+    mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      black 4%,
+      black 96%,
+      transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      black 4%,
+      black 96%,
+      transparent 100%
+    );
+  }
+  .roadTextTrack {
+    gap: 1.75rem;
+    padding-left: 1rem;
+    padding-right: 2rem;
+  }
+  .roadCard {
+    flex: 0 0 clamp(240px, 78vw, 280px);
+    padding-left: 0.95rem;
+    gap: 0.45rem;
+  }
+  .roadCard:first-child {
+    margin-right: clamp(35vw, 48vw, 60vw);
+  }
+  .milestoneIconRow {
+    gap: 0.5rem;
+  }
+  .milestoneIcon {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+  .milestoneTag {
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+  }
+  .milestoneHeadline {
+    font-size: clamp(1rem, 4.2vw, 1.15rem);
+    line-height: 1.2;
+  }
+  .milestoneBar {
+    width: 32px;
+    height: 2px;
+    margin: 0.1rem 0 0.15rem;
+  }
+  .milestoneDescription {
+    font-size: clamp(0.74rem, 3.1vw, 0.82rem);
+    line-height: 1.48;
+  }
+  .speedometerBadge {
+    top: max(1rem, env(safe-area-inset-top, 0px));
+    left: max(1rem, env(safe-area-inset-left, 0px));
+    font-size: 0.68rem;
+  }
+}
+
+/* ==========================================================================
+   TOP-DOWN OVERHEAD VIEW HUD (matching unitedcarriers.com)
+   ========================================================================== */
+
+.speedometerBadge {
+  position: absolute;
+  top: clamp(1.8rem, 4.5vh, 3.8rem);
+  left: clamp(2rem, 5vw, 4.5rem);
+  font-family: var(--font-mono-custom), ui-monospace, monospace;
+  font-size: clamp(0.72rem, 0.86vw, 0.82rem);
+  letter-spacing: 0.22em;
+  font-weight: 700;
+  color: #1e293b;
+  text-transform: uppercase;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 30;
+  transition: opacity 0.3s ease;
+}
+
+.topDownHotspot {
+  position: absolute;
+  top: 55%;
+  left: 56%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 30;
+  transition: opacity 0.3s ease;
+}
+
+.hotspotRing {
+  position: absolute;
+  inset: 0;
+  border: 1.8px solid rgba(255, 255, 255, 0.85);
+  border-radius: 50%;
+  animation: pulseHotspot 2.2s ease-in-out infinite;
+}
+
+.hotspotDot {
+  width: 6px;
+  height: 6px;
+  background: #ffffff;
+  border-radius: 50%;
+}
+
+@keyframes pulseHotspot {
+  0% {
+    transform: scale(0.92);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.92);
+    opacity: 0.8;
+  }
 }

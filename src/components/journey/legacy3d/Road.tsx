@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
+import { useFrame } from "@react-three/fiber";
 import {
   PAVED_HALF_WIDTH,
   ROAD_CROWN,
@@ -9,9 +10,11 @@ import {
   ROAD_WIDTH,
   ROAD_Y,
   SHOULDER_WIDTH,
+  smoothstep,
 } from "./journeyPath";
 import { buildRibbon, evenOffsets, mergeRibbons } from "./ribbon";
 import { createAsphaltNormalMap, createAsphaltRoughnessMap } from "./proceduralTextures";
+import { useJourneyProgress } from "../journeyProgress";
 
 const HALF_ROAD = ROAD_WIDTH / 2;
 
@@ -51,28 +54,54 @@ function shoulderHeight(_t: number, offset: number): number {
  * they do not announce themselves.
  */
 export const Road: React.FC = () => {
+  const progress = useJourneyProgress();
+  const downGroundMatRef = useRef<THREE.MeshBasicMaterial>(null);
+
+  useFrame(() => {
+    const mat = downGroundMatRef.current;
+    if (!mat) return;
+    const t = progress.current;
+    // In side view (t < 0.82), the down side of the road is solid black.
+    // When the camera angle changes (t >= 0.82 to 0.90), smoothly remove the blackness (fade to 0).
+    const blackness = 1 - smoothstep(0.82, 0.90, t);
+    mat.opacity = blackness;
+    mat.visible = blackness > 0.005;
+  });
+
   /*
    * Lateral resolution matters as much as longitudinal here. A single quad
    * across the carriageway would shade the camber as two flat triangles and
    * lose it entirely; 9 columns give the surface something to curve across.
    */
+  const ROAD_FROM = -0.35;
+  const ROAD_TO = 1.35;
+
+  /**
+   * Roadside ground ribbon on the DOWN side (near camera side, +X) of the highway.
+   * Solid dark in side view so milestone text is crisp and readable,
+   * then fades away to seamless white when the camera angle changes to the rear chase view.
+   */
+  const downGround = useMemo(
+    () =>
+      buildRibbon({
+        offsets: [HALF_ROAD - 0.44, HALF_ROAD + 250],
+        segments: ROAD_SEGMENTS,
+        from: ROAD_FROM,
+        to: ROAD_TO,
+        height: (t, offset) => markingHeight(t, offset),
+      }),
+    [],
+  );
+
   const asphalt = useMemo(
     () =>
       buildRibbon({
         offsets: evenOffsets(HALF_ROAD, 0, 9),
         segments: ROAD_SEGMENTS,
+        from: ROAD_FROM,
+        to: ROAD_TO,
         height: camber,
         vScale: 46,
-        /*
-         * Low-frequency surface variation: resurfacing patches, the darker
-         * lane where traffic polishes the aggregate, and a faint seam down the
-         * centre. The roughness map already breaks up the specular, but it
-         * tiles every few metres — this works at the scale of tens of metres,
-         * which is what stops a kilometre of road reading as one extruded
-         * material.
-         *
-         * Multiplied against the base colour, so these stay near white.
-         */
         color: (t, offset) => {
           const s = t * 1003;
           const patch =
@@ -93,6 +122,8 @@ export const Road: React.FC = () => {
       buildRibbon({
         offsets: evenOffsets(SHOULDER_WIDTH / 2, sign * (HALF_ROAD + SHOULDER_WIDTH / 2), 3),
         segments: ROAD_SEGMENTS,
+        from: ROAD_FROM,
+        to: ROAD_TO,
         height: shoulderHeight,
         vScale: 46,
       });
@@ -110,44 +141,50 @@ export const Road: React.FC = () => {
       buildRibbon({
         offsets: [sign * PAVED_HALF_WIDTH, sign * (PAVED_HALF_WIDTH + 0.55)],
         segments: ROAD_SEGMENTS,
+        from: ROAD_FROM,
+        to: ROAD_TO,
         height: (t, offset) =>
           Math.abs(offset) > PAVED_HALF_WIDTH + 0.2 ? -0.75 : shoulderHeight(t, offset),
       });
     return mergeRibbons([build(-1), build(1)]);
   }, []);
 
+
   const edgeLines = useMemo(() => {
     const build = (sign: number) =>
       buildRibbon({
         offsets: [sign * (HALF_ROAD - 0.78), sign * (HALF_ROAD - 0.44)],
         segments: ROAD_SEGMENTS,
+        from: ROAD_FROM,
+        to: ROAD_TO,
         height: markingHeight,
       });
     return mergeRibbons([build(-1), build(1)]);
   }, []);
 
   /*
-   * Dashes are spaced by curve parameter rather than by metres. Because the
-   * curve is arc-length parameterised (see journeyPath), equal steps in t are
-   * equal steps in distance, so the spacing stays even through the bends
-   * instead of bunching up on the inside of each turn.
+   * Dashes are spaced by curve parameter rather than by metres.
+   * Multi-lane dashed white lines on both sides of the truck (-3.6 and +3.6)
+   * matching the highway overhead perspective from unitedcarriers.com.
    */
   const centreDashes = useMemo(() => {
     const DASH_COUNT = 86;
     const DUTY = 0.42; // painted fraction of each dash-plus-gap cycle
     const parts: THREE.BufferGeometry[] = [];
-    for (let i = 0; i < DASH_COUNT; i++) {
-      const from = i / DASH_COUNT;
-      parts.push(
-        buildRibbon({
-          offsets: [-0.19, 0.19],
-          segments: 2,
-          from,
-          to: from + DUTY / DASH_COUNT,
-          height: markingHeight,
-        }),
-      );
-    }
+    [-3.6, 3.6].forEach((laneOffset) => {
+      for (let i = -30; i < DASH_COUNT + 30; i++) {
+        const from = i / DASH_COUNT;
+        parts.push(
+          buildRibbon({
+            offsets: [laneOffset - 0.18, laneOffset + 0.18],
+            segments: 2,
+            from,
+            to: from + DUTY / DASH_COUNT,
+            height: markingHeight,
+          }),
+        );
+      }
+    });
     return mergeRibbons(parts);
   }, []);
 
@@ -155,11 +192,14 @@ export const Road: React.FC = () => {
   const normalMap = useMemo(() => createAsphaltNormalMap(256), []);
 
   useEffect(() => {
-    // The texture repeats along the road's length, not across its width: the
-    // V coordinate is scaled in the ribbon, so only the U side needs setting.
-    for (const map of [roughnessMap, normalMap]) {
-      map.repeat.set(2, 1);
-    }
+    // Tile textures along the highway at realistic aggregate scale to prevent blurry specular noise
+    roughnessMap.wrapS = THREE.RepeatWrapping;
+    roughnessMap.wrapT = THREE.RepeatWrapping;
+    roughnessMap.repeat.set(4, 60);
+
+    normalMap.wrapS = THREE.RepeatWrapping;
+    normalMap.wrapT = THREE.RepeatWrapping;
+    normalMap.repeat.set(4, 60);
   }, [roughnessMap, normalMap]);
 
   // Geometry and textures are built here rather than declared as JSX, so
@@ -169,69 +209,74 @@ export const Road: React.FC = () => {
       asphalt.dispose();
       shoulders.dispose();
       curbs.dispose();
+      downGround.dispose();
       edgeLines.dispose();
       centreDashes.dispose();
       roughnessMap.dispose();
       normalMap.dispose();
     },
-    [asphalt, shoulders, curbs, edgeLines, centreDashes, roughnessMap, normalMap],
+    [asphalt, shoulders, curbs, downGround, edgeLines, centreDashes, roughnessMap, normalMap],
   );
 
   return (
     <group>
+      {/* Down-side ground ribbon: black in side view, fades out when camera angle changes */}
+      <mesh geometry={downGround}>
+        <meshBasicMaterial
+          ref={downGroundMatRef}
+          color="#0b0d13"
+          transparent
+          opacity={1}
+          side={THREE.DoubleSide}
+          depthWrite={false}
+        />
+      </mesh>
+
       <mesh geometry={curbs} receiveShadow castShadow>
-        <meshStandardMaterial color="#19212e" roughness={0.94} metalness={0.05} />
+        <meshStandardMaterial color="#ffffff" roughness={0.9} metalness={0.05} />
       </mesh>
 
       <mesh geometry={shoulders} receiveShadow>
         <meshStandardMaterial
-          color="#242d3c"
-          roughness={0.97}
+          color="#ffffff"
+          roughness={0.95}
           metalness={0.02}
           roughnessMap={roughnessMap}
           normalMap={normalMap}
-          normalScale={new THREE.Vector2(0.8, 0.8)}
+          normalScale={new THREE.Vector2(0.1, 0.1)}
         />
       </mesh>
 
-      {/*
-       * Physical rather than standard material for the carriageway alone.
-       * Clearcoat is what gives asphalt its faint wet sheen under a low key
-       * light — a broad, soft reflection sitting on top of a rough diffuse
-       * base, which a standard material cannot express at any roughness.
-       */}
+      {/* Dark sleek obsidian-charcoal asphalt carriageway matching unitedcarriers.com */}
       <mesh geometry={asphalt} receiveShadow>
-        <meshPhysicalMaterial
-          vertexColors
-          color="#2a3243"
-          roughness={0.7}
-          metalness={0.06}
+        <meshStandardMaterial
+          color="#16191f"
+          roughness={0.88}
+          metalness={0.04}
           roughnessMap={roughnessMap}
           normalMap={normalMap}
-          normalScale={new THREE.Vector2(0.55, 0.55)}
-          clearcoat={0.72}
-          clearcoatRoughness={0.36}
-          envMapIntensity={1.35}
+          normalScale={new THREE.Vector2(0.1, 0.1)}
+          envMapIntensity={0.65}
         />
       </mesh>
 
       <mesh geometry={edgeLines}>
         <meshStandardMaterial
-          color="#d7deea"
-          roughness={0.52}
+          color="#ffffff"
+          roughness={0.4}
           metalness={0.04}
-          emissive="#5a688f"
-          emissiveIntensity={0.5}
+          emissive="#ffffff"
+          emissiveIntensity={0.25}
         />
       </mesh>
 
       <mesh geometry={centreDashes}>
         <meshStandardMaterial
-          color="#e8dcbe"
-          roughness={0.5}
+          color="#ffffff"
+          roughness={0.3}
           metalness={0.04}
-          emissive="#5c5236"
-          emissiveIntensity={0.42}
+          emissive="#ffffff"
+          emissiveIntensity={0.5}
         />
       </mesh>
     </group>

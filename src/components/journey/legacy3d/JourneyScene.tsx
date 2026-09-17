@@ -2,23 +2,18 @@
 
 import React, { useMemo, useRef } from "react";
 import * as THREE from "three";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Environment as DreiEnvironment } from "@react-three/drei";
 import { JourneyCamera } from "./JourneyCamera";
-import { JourneyEnvironment } from "./Environment";
-import { Billboard } from "./Billboard";
-import { Destination } from "./Destination";
-import { DustParticles } from "./DustParticles";
 import { Road } from "./Road";
 import { Truck } from "./Truck";
 import { getJourneyPoint, getJourneySide, getJourneyTangent } from "./journeyPath";
 import { JourneyProgressProvider, type JourneyProgress } from "../journeyProgress";
 
 /**
- * The colour everything resolves to at distance. Matches the sky dome's
- * horizon so terrain fades into the sky rather than into a different navy.
+ * Pure white background matching the editorial website canvas.
  */
-const HAZE = "#24476f";
+const WHITE_BG = "#ffffff";
 
 /**
  * Exponential-squared fog, tuned against the corridor's dimensions.
@@ -116,8 +111,8 @@ const TravellingLights: React.FC<{ progress: JourneyProgress }> = ({ progress })
       <object3D ref={targetRef} />
       <directionalLight
         ref={keyRef}
-        intensity={2.8}
-        color="#ffeacb"
+        intensity={3.2}
+        color="#fffcf5"
         castShadow
         shadow-mapSize={[1024, 1024]}
         shadow-bias={-0.0006}
@@ -129,84 +124,78 @@ const TravellingLights: React.FC<{ progress: JourneyProgress }> = ({ progress })
         shadow-camera-top={34}
         shadow-camera-bottom={-34}
       />
-      <directionalLight ref={rimRef} intensity={2.05} color="#a6c8f5" />
-      <pointLight ref={bounceRef} intensity={22} distance={20} decay={2} color="#d0b078" />
+      <directionalLight ref={rimRef} intensity={1.5} color="#e2e8f0" />
+      <pointLight ref={bounceRef} intensity={16} distance={20} decay={2} color="#f4ede0" />
     </>
   );
 };
 
 /**
- * A procedural image-based light.
- *
- * drei's Environment renders its children into a cubemap, which means a
- * believable IBL with no HDR file to download — worth doing deliberately,
- * because the preset environments fetch several megabytes from a CDN and this
- * is a production marketing page. `frames={1}` bakes it once; nothing in here
- * moves, so re-rendering it per frame would be pure waste.
- *
- * The contents are three soft panels and a gradient shell, which is all an IBL
- * needs: it supplies the broad, soft reflections on the cab paint and glass
- * that separate a physically-shaded vehicle from a flatly-lit one.
+ * A procedural image-based studio light.
  */
 const ProceduralEnvironmentLight: React.FC = () => (
   <DreiEnvironment resolution={128} frames={1} background={false}>
-    {/* Shell: the ambient colour the whole scene sits inside. */}
+    {/* Shell: clean studio ambient shell. */}
     <mesh scale={100}>
       <sphereGeometry args={[1, 24, 16]} />
-      <meshBasicMaterial color="#22395a" side={THREE.BackSide} />
+      <meshBasicMaterial color="#ffffff" side={THREE.BackSide} />
     </mesh>
-    {/* Cool sky panel overhead. */}
+    {/* Clean daylight panel overhead. */}
     <mesh position={[0, 40, 0]} rotation={[Math.PI / 2, 0, 0]} scale={[70, 70, 1]}>
       <planeGeometry />
-      <meshBasicMaterial color="#7fa3d8" />
+      <meshBasicMaterial color="#ffffff" />
     </mesh>
-    {/* Warm key panel, matching the directional key's direction and colour. */}
+    {/* Warm subtle key panel. */}
     <mesh position={[-38, 26, -30]} rotation={[0, Math.PI / 4, 0]} scale={[40, 40, 1]}>
       <planeGeometry />
-      <meshBasicMaterial color="#c2a068" />
+      <meshBasicMaterial color="#fff6e8" />
     </mesh>
-    {/* Dark ground panel, so reflections fall off downward as they should. */}
+    {/* Clean neutral ground bounce panel. */}
     <mesh position={[0, -30, 0]} rotation={[-Math.PI / 2, 0, 0]} scale={[90, 90, 1]}>
       <planeGeometry />
-      <meshBasicMaterial color="#0e1826" />
+      <meshBasicMaterial color="#f1f5f9" />
     </mesh>
   </DreiEnvironment>
 );
 
-/** Everything inside the Canvas. Split out so the Canvas props stay readable. */
+/** Clean white scene canvas matching editorial design */
+const DynamicSceneBackground: React.FC<{ progress: JourneyProgress }> = () => {
+  const { scene } = useThree();
+  const bgColor = useMemo(() => new THREE.Color(WHITE_BG), []);
+
+  useFrame(() => {
+    if (scene.background instanceof THREE.Color) {
+      scene.background.copy(bgColor);
+    }
+    if (scene.fog instanceof THREE.FogExp2) {
+      scene.fog.color.copy(bgColor);
+    }
+  });
+
+  return (
+    <>
+      <color attach="background" args={[WHITE_BG]} />
+      <fogExp2 attach="fog" args={[WHITE_BG, FOG_DENSITY]} />
+    </>
+  );
+};
+
+/** Everything inside the Canvas: Road and Truck on seamless canvas. */
 const SceneContents: React.FC<{ progress: JourneyProgress }> = ({ progress }) => (
   <JourneyProgressProvider value={progress}>
-    <color attach="background" args={[HAZE]} />
-    <fogExp2 attach="fog" args={[HAZE, FOG_DENSITY]} />
+    <DynamicSceneBackground progress={progress} />
 
     <ProceduralEnvironmentLight />
 
-    {/*
-     * Fill, raised substantially. The previous values left everything that the
-     * key light did not directly touch sitting at near-black, which is what
-     * made the scene read as night rather than dusk. At blue hour the sky is a
-     * huge soft source and shadows stay open — so the fill does most of the
-     * work of making terrain and road readable, and the key and rim are left
-     * to do shaping rather than basic visibility.
-     */}
-    <ambientLight intensity={0.62} color="#9db7dc" />
-    {/* Sky/ground bounce: cool from above, warmer off the road surface. */}
-    <hemisphereLight intensity={1.15} color="#7ea0d4" groundColor="#2a2318" />
+    {/* Clean ambient and hemisphere fill for the scene. */}
+    <ambientLight intensity={1.45} color="#ffffff" />
+    <hemisphereLight intensity={1.1} color="#ffffff" groundColor="#cbd5e1" />
 
     <TravellingLights progress={progress} />
 
     <JourneyCamera />
-    <JourneyEnvironment />
-    {/*
-     * The destination sits past the road's end, so it is genuinely distant
-     * early on and genuinely arrived at late — the progression is physical
-     * first, with the reveal ramps only shaping how its lights come up.
-     */}
-    <Destination />
-    <Billboard />
     <Road />
     <Truck />
-    <DustParticles />
   </JourneyProgressProvider>
 );
 
@@ -238,15 +227,14 @@ export const JourneyScene: React.FC<JourneySceneProps> = ({ progress, active }) 
      * shadows and a clean console.
      */
     shadows="percentage"
-    // Capped at 1.6 rather than the full device ratio: a 3x phone screen would
-    // otherwise render nine times the pixels for no visible gain.
-    dpr={[1, 1.6]}
+    // Native crisp resolution up to 2x pixel density, eliminating blurriness
+    dpr={[1, 2]}
     frameloop={active ? "always" : "demand"}
     gl={{
       antialias: true,
       powerPreference: "high-performance",
       toneMapping: THREE.ACESFilmicToneMapping,
-      toneMappingExposure: 1.28,
+      toneMappingExposure: 1.08,
     }}
     style={{ width: "100%", height: "100%", display: "block" }}
   >

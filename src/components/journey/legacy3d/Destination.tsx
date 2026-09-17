@@ -83,8 +83,8 @@ function buildBand(
   return out;
 }
 
-const DARK = new THREE.Color("#16243a");
-const PALE = new THREE.Color("#2b3f5f");
+const DARK = new THREE.Color("#26374f");
+const PALE = new THREE.Color("#486288");
 
 /**
  * Applies structures to an InstancedMesh.

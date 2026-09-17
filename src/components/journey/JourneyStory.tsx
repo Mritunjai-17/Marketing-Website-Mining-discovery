@@ -1,34 +1,135 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
+import { X, Newspaper, BookOpen, TrendingUp, Globe, Sparkles } from "lucide-react";
 import styles from "./Journey2D.module.css";
-import {
-  CHAPTERS,
-  CHAPTER_COUNT,
-  PAGES,
-  PAGE_BLEED,
-  chapterAt,
-} from "./journeyChapters";
-import { METRICS, METRICS_QUALIFIER, SERVICE_GROUPS } from "./journeyContent";
-import { passProgress } from "./JourneyMarkers";
 import { smoothstep } from "./journeySideView";
 import { useJourneyFrame } from "./journeyScroll";
+import { ShowcaseCardCover } from "@/components/sections/MagazineShowcase/MagazineShowcase";
+import { MagazineSpread } from "@/components/sections/MagazineShowcase/MagazineSpread";
+import { getChronologicalMagazines, type MagazineEdition } from "@/data/magazines";
 
-/**
- * The story, in words.
- *
- * The only part of the scene a screen reader should see, so it is the only
- * part not marked aria-hidden. Everything behind it is decoration.
- *
- * Every page is rendered once and kept in the DOM, with only opacity and a
- * small translate changing per frame. Nothing mounts or unmounts as the story
- * advances — mounting mid-scroll costs a layout pass at exactly the moment the
- * frame budget is tightest, and React reconciliation is not something to be
- * doing sixty times a second to swap two paragraphs.
- *
- * PROTOTYPE COPY. The text comes from `journeyChapters.ts` and
- * `journeyContent.ts`, not the CMS, and must not be wired into it.
- */
+const MILESTONE_ICONS = [TrendingUp, Newspaper, BookOpen, Globe, Sparkles, Sparkles];
+
+// Latest 5 single magazines ordered chronologically as shown on port 3001
+const showcaseMagazines: MagazineEdition[] = getChronologicalMagazines(false).slice(0, 5);
+
+export interface StoryPoint {
+  id: string;
+  index: number;
+  year: string;
+  tag: string;
+  shortTitle: string;
+  eyebrow: string;
+  headline: string;
+  emphasis: string;
+  description: string;
+  meta: string;
+  image: string;
+  badge: string;
+  from: number;
+  to: number;
+}
+
+export const STORY_POINTS: StoryPoint[] = [
+  {
+    id: "evolution",
+    index: 0,
+    year: "OUR EVOLUTION",
+    tag: "OUR EVOLUTION",
+    shortTitle: "From Mining News to Global Influence",
+    eyebrow: "OUR EVOLUTION",
+    headline: "FROM MINING NEWS TO GLOBAL INFLUENCE",
+    emphasis: "EVOLUTION",
+    description: "The strategic journey of Mining Discovery from a dedicated digital news outlet into an international full-service media authority.",
+    meta: "GLOBAL MEDIA · STRATEGIC REACH · INDUSTRY AUTHORITY",
+    image: "/cards/bg_card_1.jpg",
+    badge: "ORIGIN",
+    from: 0.0,
+    to: 0.14,
+  },
+  {
+    id: "2022",
+    index: 1,
+    year: "2022",
+    tag: "2022 · FOUNDATION",
+    shortTitle: "Foundation of Mining Media",
+    eyebrow: "01 — FOUNDATION · 2022",
+    headline: "FOUNDATION OF MINING MEDIA",
+    emphasis: "FOUNDATION",
+    description: "Mining Discovery launched as a digital mining news platform in Chandigarh, establishing our foothold in trusted resource reporting.",
+    meta: "DIGITAL NEWS · INDUSTRY INSIGHTS · CHANDIGARH",
+    image: "/cards/bg_card_1.jpg",
+    badge: "2022",
+    from: 0.14,
+    to: 0.28,
+  },
+  {
+    id: "2023",
+    index: 2,
+    year: "2023",
+    tag: "2023 · EXPANSION",
+    shortTitle: "Multi-Channel Media Platform",
+    eyebrow: "02 — MEDIA EXPANSION · 2023",
+    headline: "MULTI-CHANNEL MEDIA PLATFORM",
+    emphasis: "PLATFORM",
+    description: "Expanded into newsletters, monthly magazines, and an interactive digital platform for global mining stakeholders.",
+    meta: "MONTHLY MAGAZINES · NEWSLETTERS · DIGITAL SUITE",
+    image: "/cards/bg_card_2.jpg",
+    badge: "2023",
+    from: 0.28,
+    to: 0.44,
+  },
+  {
+    id: "2024",
+    index: 3,
+    year: "2024",
+    tag: "2024 · ENGAGEMENT",
+    shortTitle: "Branding & Investor Engagement",
+    eyebrow: "03 — INDUSTRY ENGAGEMENT · 2024",
+    headline: "BRANDING & INVESTOR ENGAGEMENT",
+    emphasis: "ENGAGEMENT",
+    description: "Began offering targeted investor campaigns, digital branding, and international conference media coverage.",
+    meta: "INVESTOR CAMPAIGNS · CONFERENCES · BRAND STRATEGY",
+    image: "/cards/bg_card_3.jpg",
+    badge: "2024",
+    from: 0.44,
+    to: 0.60,
+  },
+  {
+    id: "2025",
+    index: 4,
+    year: "2025",
+    tag: "2025 · FULL-SERVICE",
+    shortTitle: "Full-Service Digital Media Agency",
+    eyebrow: "04 — FULL-SERVICE EVOLUTION · 2025",
+    headline: "FULL-SERVICE DIGITAL AGENCY",
+    emphasis: "FULL-SERVICE",
+    description: "Operating as a full-service digital media, global syndication, and investor-engagement agency.",
+    meta: "FULL-SERVICE AGENCY · GLOBAL REACH · 360° DIGITAL",
+    image: "/cards/bg_card_4.jpg",
+    badge: "2025",
+    from: 0.60,
+    to: 0.74,
+  },
+  {
+    id: "future",
+    index: 5,
+    year: "FUTURE",
+    tag: "FUTURE · HORIZON",
+    shortTitle: "The Journey Continues",
+    eyebrow: "05 — WHAT COMES NEXT · FUTURE",
+    headline: "THE JOURNEY CONTINUES",
+    emphasis: "JOURNEY",
+    description: "Expanding global investor networks, AI-driven mining intelligence, and strategic media operations worldwide.",
+    meta: "GLOBAL INVESTOR NETWORKS · AI INTELLIGENCE · STRATEGIC MEDIA",
+    image: "/about/open-pit-golden-hour.png",
+    badge: "FUTURE",
+    from: 0.74,
+    to: 0.88,
+  },
+];
 
 /** Splits a line so one word can carry the accent style. */
 function renderLine(line: string, emphasis: string | null): React.ReactNode {
@@ -44,214 +145,306 @@ function renderLine(line: string, emphasis: string | null): React.ReactNode {
 }
 
 export const JourneyStory: React.FC = () => {
-  const pageRefs = useRef<(HTMLDivElement | null)[]>(PAGES.map(() => null));
-  const beatRefs = useRef<(HTMLDivElement | null)[]>(SERVICE_GROUPS.map(() => null));
-  const resultRefs = useRef<(HTMLDivElement | null)[]>(METRICS.map(() => null));
-  const qualifierRef = useRef<HTMLParagraphElement>(null);
-  const indicatorRef = useRef<HTMLDivElement>(null);
-  const indexRef = useRef<HTMLSpanElement>(null);
-  const nameRef = useRef<HTMLSpanElement>(null);
-  const fillRef = useRef<HTMLSpanElement>(null);
-  const hintRef = useRef<HTMLDivElement>(null);
+  const underRoadRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const speedometerRef = useRef<HTMLDivElement>(null);
+  const hotspotRef = useRef<HTMLDivElement>(null);
+
+  // Magazine row and card refs
+  const rowRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  // Magazine reader modal state
+  const [selectedMagazine, setSelectedMagazine] = useState<MagazineEdition | null>(null);
+  const [readerState, setReaderState] = useState<"closed" | "opening" | "open" | "closing">("closed");
+  const [isMounted, setIsMounted] = useState(false);
+  const totalTravelRef = useRef(3200);
+
+  useEffect(() => {
+    setIsMounted(true);
+    const measure = () => {
+      const trackEl = trackRef.current;
+      if (!trackEl) return;
+      const firstCard = trackEl.firstElementChild as HTMLElement | null;
+      const lastCard = trackEl.lastElementChild as HTMLElement | null;
+      if (firstCard && lastCard) {
+        totalTravelRef.current = Math.max(600, lastCard.offsetLeft - firstCard.offsetLeft);
+      }
+    };
+    measure();
+    window.addEventListener("resize", measure, { passive: true });
+    const timer = setTimeout(measure, 400);
+    return () => {
+      window.removeEventListener("resize", measure);
+      clearTimeout(timer);
+    };
+  }, []);
+
+  const handleOpenReader = useCallback((mag: MagazineEdition) => {
+    setSelectedMagazine(mag);
+    setReaderState("opening");
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setReaderState("open");
+      });
+    });
+  }, []);
+
+  const handleCloseReader = useCallback(() => {
+    if (readerState === "open" || readerState === "opening") {
+      setReaderState("closing");
+      setTimeout(() => {
+        setReaderState("closed");
+        setSelectedMagazine(null);
+      }, 350);
+    }
+  }, [readerState]);
+
+  // Lock scroll & handle Escape key when reader is active
+  useEffect(() => {
+    if (readerState === "open" || readerState === "opening") {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "Escape") {
+          handleCloseReader();
+        }
+      };
+      window.addEventListener("keydown", handleKeyDown);
+
+      return () => {
+        document.body.style.overflow = originalOverflow;
+        window.removeEventListener("keydown", handleKeyDown);
+      };
+    }
+  }, [readerState, handleCloseReader]);
 
   useJourneyFrame((scene) => {
     const p = scene.progress;
 
-    /*
-     * Pages overlap rather than cut. Each starts arriving a little before its
-     * range opens and is still leaving a little after it closes, so at every
-     * boundary one fades up while the other fades down — which is what makes
-     * the story feel continuous instead of slide-based.
-     */
-    PAGES.forEach((page, index) => {
-      const element = pageRefs.current[index];
-      if (!element) return;
-      const span = page.to - page.from;
-      // Story copy only becomes active once the side view is locked and journey advances
-      const entering = smoothstep(page.from, page.from + span * 0.16, p);
-      const leaving =
-        index === PAGES.length - 1
-          ? 0
-          : smoothstep(page.to - span * 0.1, page.to + PAGE_BLEED, p);
+    // Fade out under-road section when truck opens cargo doors (p >= 0.88)
+    // 1. Fade out under-road text cards as the journey completes all text (p >= 0.82 to 0.86)
+    if (underRoadRef.current) {
+      const underRoadFade = 1 - smoothstep(0.82, 0.86, p);
+      underRoadRef.current.style.opacity = underRoadFade.toFixed(3);
+      underRoadRef.current.style.pointerEvents = underRoadFade > 0.1 ? "auto" : "none";
+      underRoadRef.current.style.transform = `translate3d(0, ${((1 - underRoadFade) * 16).toFixed(1)}px, 0)`;
+    }
 
-      element.style.opacity = (entering * (1 - leaving)).toFixed(3);
-      // Rises in, rises away: a consistent direction reads as pages turning.
-      element.style.transform = `translate3d(0, ${(
-        (1 - entering) * 20 -
-        leaving * 14
-      ).toFixed(1)}px, 0)`;
+    // 2. Roadside Milestone Track:
+    // Text cards enter from the right side of the screen, travel across beneath the truck,
+    // and exit off the left side of the screen in lockstep with the truck's forward travel.
+    if (trackRef.current) {
+      const roadProgress = Math.min(1.0, Math.max(0.0, p / 0.82));
+      const currentX = -roadProgress * totalTravelRef.current;
+      trackRef.current.style.transform = `translate3d(${currentX.toFixed(2)}px, 0, 0)`;
+    }
+
+    // 3. Top-Down Overhead HUD (00 KM/H and interactive hotspot circle matching unitedcarriers.com)
+    if (speedometerRef.current) {
+      const showSpeed = smoothstep(0.87, 0.92, p);
+      speedometerRef.current.style.opacity = showSpeed.toFixed(3);
+      speedometerRef.current.style.pointerEvents = showSpeed > 0.5 ? "auto" : "none";
+    }
+
+    if (hotspotRef.current) {
+      const showHotspot = smoothstep(0.89, 0.93, p);
+      hotspotRef.current.style.opacity = showHotspot.toFixed(3);
+      hotspotRef.current.style.pointerEvents = showHotspot > 0.5 ? "auto" : "none";
+    }
+
+    // 3. Cards emerge from truck ONE BY ONE and ALL REMAIN ALIGNED ON SCREEN (NO TEXT)
+    // Every card physically originates directly from the truck's open cargo doors!
+    const cardStep = 0.022; // Staggered arrival for each of the 5 cards
+    const rowEl = rowRef.current;
+    const rowCenter = rowEl ? rowEl.offsetWidth / 2 : (typeof window !== "undefined" ? window.innerWidth / 2 : 600);
+    // Truck's rear cargo doors in viewport coordinates: center-aligned horizontally, slightly below center vertically
+    const truckOffsetX = typeof window !== "undefined" && window.innerWidth < 768 ? 0 : -18;
+    const truckOffsetY = typeof window !== "undefined" ? Math.round(window.innerHeight * 0.125) : 100;
+
+    showcaseMagazines.forEach((_, idx) => {
+      const el = cardRefs.current[idx];
+      if (!el) return;
+
+      const cardStart = 0.880 + idx * cardStep;
+      const cardEnd = cardStart + cardStep;
+
+      // Distance from this card's aligned slot center to the truck's cargo doors
+      const cardCenterInRow = el.offsetLeft + el.offsetWidth / 2;
+      const slotDeltaX = cardCenterInRow - (rowCenter + truckOffsetX);
+
+      if (p < cardStart) {
+        // Hasn't emerged yet: hidden inside the truck cargo bay
+        el.style.opacity = "0";
+        el.style.pointerEvents = "none";
+        el.style.transform = `translate3d(${-slotDeltaX.toFixed(1)}px, ${truckOffsetY}px, 0) scale(0.04) rotateZ(0deg)`;
+        return;
+      }
+
+      if (p >= cardStart && p < cardEnd) {
+        // Emerging directly out of the truck's cargo bay and zooming into its aligned slot
+        const t = smoothstep(cardStart, cardEnd, p);
+
+        // Fast initial burst out of the truck doors, then smooth deceleration into slot
+        const burstProgress = Math.pow(t, 0.72);
+        const easeOut = 1 - Math.pow(1 - t, 3);
+
+        // Scale zooms outward from tiny inside the truck (0.04) up to full size (1.0)
+        const scale = 0.04 + Math.pow(t, 0.82) * 0.96;
+
+        // X moves from truck doors (-slotDeltaX) to aligned slot (0)
+        const curX = -slotDeltaX * (1 - easeOut);
+
+        // Y shoots out from truck doors (+truckOffsetY) with a parabolic flight arc, then lands in row (0)
+        const arc = Math.sin(t * Math.PI) * -34;
+        const curY = truckOffsetY * (1 - burstProgress) + arc;
+
+        // 3D rotations as the card flies toward camera and fans outward to its column
+        const rotZ = (1 - t) * (slotDeltaX < -20 ? -8 : slotDeltaX > 20 ? 8 : 0);
+        const rotY = (1 - t) * (slotDeltaX < -20 ? -14 : slotDeltaX > 20 ? 14 : 0);
+        const rotX = (1 - t) * 12;
+
+        const opacity = Math.min(1, t * 5.5);
+
+        el.style.opacity = opacity.toFixed(3);
+        el.style.transform = `translate3d(${curX.toFixed(1)}px, ${curY.toFixed(1)}px, 0) scale(${scale.toFixed(3)}) rotateX(${rotX.toFixed(1)}deg) rotateY(${rotY.toFixed(1)}deg) rotateZ(${rotZ.toFixed(1)}deg)`;
+        el.style.pointerEvents = opacity > 0.8 ? "auto" : "none";
+      } else {
+        // p >= cardEnd: Arrived in place and REMAINS ALIGNED ON SCREEN
+        el.style.opacity = "1";
+        el.style.transform = "translate3d(0, 0, 0) scale(1) rotateX(0deg) rotateY(0deg) rotateZ(0deg)";
+        el.style.pointerEvents = "auto";
+      }
     });
-
-    /*
-     * Service beats, anchored to the moment the truck draws level with each
-     * marker. Derived from the marker's world position, so moving a sign moves
-     * its copy with it and the two can never drift apart.
-     */
-    SERVICE_GROUPS.forEach((group, index) => {
-      const element = beatRefs.current[index];
-      if (!element) return;
-      const pass = passProgress(group.worldX);
-      const next = SERVICE_GROUPS[index + 1];
-      const until = next ? passProgress(next.worldX) : pass + 0.05;
-
-      const entering = smoothstep(pass - 0.05, pass - 0.012, p);
-      const leaving = smoothstep(until - 0.028, until + 0.01, p);
-      element.style.opacity = (entering * (1 - leaving)).toFixed(3);
-      element.style.transform = `translate3d(0, ${(
-        (1 - entering) * 12 -
-        leaving * 9
-      ).toFixed(1)}px, 0)`;
-    });
-
-    /*
-     * Results accumulate rather than replace: each figure arrives as its post
-     * passes and then stays, so by the end of the chapter all four read as one
-     * set of outcomes instead of four numbers seen one at a time.
-     */
-    METRICS.forEach((metric, index) => {
-      const element = resultRefs.current[index];
-      if (!element) return;
-      const arriving = smoothstep(passProgress(metric.worldX) - 0.035, passProgress(metric.worldX) - 0.004, p);
-      const leaving = smoothstep(0.965, 0.995, p);
-      element.style.opacity = (arriving * (1 - leaving)).toFixed(3);
-      element.style.transform = `translate3d(0, ${((1 - arriving) * 10).toFixed(1)}px, 0)`;
-    });
-    if (qualifierRef.current) {
-      // The qualifier follows the last figure: the numbers mean nothing alone.
-      const arriving = smoothstep(passProgress(METRICS[METRICS.length - 1].worldX), 0.955, p);
-      qualifierRef.current.style.opacity = (arriving * (1 - smoothstep(0.965, 0.995, p)) * 0.75).toFixed(3);
-    }
-
-    /* ----------------------------------------------------------- chrome */
-
-    const active = chapterAt(p);
-    if (indicatorRef.current) {
-      const indOp = smoothstep(0.01, 0.06, p);
-      indicatorRef.current.style.opacity = indOp.toFixed(3);
-    }
-    if (fillRef.current) {
-      fillRef.current.style.transform = `scaleX(${Math.max(0.18, p).toFixed(4)})`;
-    }
-    // textContent invalidates layout, so it is written only when it changes.
-    const label = `0${active.index}`;
-    if (indexRef.current && indexRef.current.textContent !== label) {
-      indexRef.current.textContent = label;
-    }
-    if (nameRef.current && nameRef.current.textContent !== active.label) {
-      nameRef.current.textContent = active.label;
-    }
-    if (hintRef.current) {
-      // Prominent only during the opening, then down to a trace.
-      const hintEnter = smoothstep(0.01, 0.04, p);
-      const hintFade = 1 - smoothstep(0.06, 0.14, p) * 0.88;
-      hintRef.current.style.opacity = (hintEnter * hintFade).toFixed(3);
-    }
   });
 
   return (
     <div className={styles.overlay}>
-      {/* One column on the left; every page stacked in it. */}
-      <div className={styles.copyStack}>
-        {PAGES.map((page, index) => (
+      {/* BLACK PART: ROADSIDE MILESTONE TRACK
+          Text cards enter from the right side of the screen and travel across
+          to the left side as the truck moves forward along the road */}
+      <div ref={underRoadRef} className={styles.underRoadSection} aria-live="polite">
+        <div ref={trackRef} className={styles.roadTextTrack}>
+          {STORY_POINTS.map((point, index) => {
+            const Icon = MILESTONE_ICONS[index] || Globe;
+            return (
+              <div
+                key={point.id}
+                className={styles.roadCard}
+              >
+                <div className={styles.milestoneIconRow}>
+                  <Icon className={styles.milestoneIcon} strokeWidth={1.5} />
+                  <span className={styles.milestoneTag}>{point.eyebrow}</span>
+                </div>
+                <h3 className={styles.milestoneHeadline}>
+                  {point.headline}
+                </h3>
+                <div className={styles.milestoneBar} />
+                <p className={styles.milestoneDescription}>{point.description}</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Top-Down Overhead View Speedometer (00 KM/H) & Hotspot */}
+      <div ref={speedometerRef} className={styles.speedometerBadge}>
+        00 KM/H
+      </div>
+
+      <div ref={hotspotRef} className={styles.topDownHotspot} aria-hidden="true">
+        <div className={styles.hotspotRing} />
+        <div className={styles.hotspotDot} />
+      </div>
+
+      {/* ROAD-TO-SCREEN ANIMATED MAGAZINE SHOWCASE: Hidden to keep top-down view unobstructed */}
+      <div className={styles.magazineRiseWrap} style={{ display: "none" }}>
+        <div ref={rowRef} className={styles.cardsAlignedRow}>
+          {showcaseMagazines.map((mag, idx) => (
+            <div
+              key={mag.id}
+              ref={(el) => {
+                cardRefs.current[idx] = el;
+              }}
+              className={styles.alignedCardItem}
+              onClick={() => handleOpenReader(mag)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleOpenReader(mag);
+                }
+              }}
+              aria-label={`${mag.month} Edition ${mag.year}`}
+              style={{ opacity: 0, transform: "scale(0.15)", pointerEvents: "none" }}
+            >
+              <div className={styles.cardHoverShell}>
+                <ShowcaseCardCover mag={mag} />
+                <div aria-hidden="true" className={styles.magSpine} />
+                <div aria-hidden="true" className={styles.magSheen} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Two-Page Magazine Reader Modal */}
+      {readerState !== "closed" && isMounted && createPortal(
+        <div
+          className={`${styles.readerModalOverlay} ${
+            readerState === "open"
+              ? styles.readerModalOpen
+              : readerState === "opening"
+              ? styles.readerModalOpening
+              : styles.readerModalClosing
+          }`}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              handleCloseReader();
+            }
+          }}
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${selectedMagazine?.title || "Magazine"} Reader`}
+        >
+          <div className={styles.readerModalHeader}>
+            <div className={styles.readerMetaLeft}>
+              <span className={styles.readerBrand}>MINING DISCOVERY</span>
+              <span className={styles.magDotDivider} aria-hidden="true" />
+              <span className={styles.readerIssue}>
+                {selectedMagazine?.month?.toUpperCase()} {selectedMagazine?.year} • ISSUE {selectedMagazine?.issueNumber ?? "14"}
+              </span>
+            </div>
+            <button
+              type="button"
+              className={styles.readerCloseBtn}
+              onClick={handleCloseReader}
+              aria-label="Close magazine reader"
+            >
+              <X className={styles.readerCloseIcon} />
+              <span>CLOSE</span>
+            </button>
+          </div>
           <div
-            key={`${page.eyebrow}-${index}`}
-            ref={(node) => {
-              pageRefs.current[index] = node;
+            className={styles.readerModalBody}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                handleCloseReader();
+              }
             }}
-            className={styles.copy}
-            style={{ opacity: 0 }}
           >
-            <p className={styles.eyebrow}>{page.eyebrow}</p>
-            <h2 className={index === 0 ? styles.headline : styles.chapterHeadline}>
-              {page.headlineLines.map((line, lineIndex) => (
-                <React.Fragment key={line}>
-                  {lineIndex > 0 && <br />}
-                  {renderLine(line, page.emphasis)}
-                </React.Fragment>
-              ))}
-            </h2>
-            {page.supportLines.length > 0 && (
-              <>
-                <div className={styles.rule} />
-                <p className={styles.support}>
-                  {page.supportLines.map((line, lineIndex) => (
-                    <React.Fragment key={line}>
-                      {lineIndex > 0 && <br />}
-                      {line}
-                    </React.Fragment>
-                  ))}
-                </p>
-              </>
+            {selectedMagazine && (
+              <MagazineSpread
+                pdfUrl={selectedMagazine.pdf}
+                title={selectedMagazine.title}
+              />
             )}
           </div>
-        ))}
-      </div>
-
-      {/*
-       * Service and result beats sit low-left, beneath the chapter column.
-       * The right of the frame belongs to the truck and the network, and this
-       * composition exists precisely so words and vehicle never compete.
-       */}
-      <div className={styles.beats}>
-        {SERVICE_GROUPS.map((group, index) => (
-          <div
-            key={group.num}
-            ref={(node) => {
-              beatRefs.current[index] = node;
-            }}
-            className={styles.beat}
-            style={{ opacity: 0 }}
-          >
-            <p className={styles.beatLead}>{group.num}</p>
-            <p className={styles.beatTitle}>{group.title}</p>
-            <p className={styles.beatServices}>{group.services.join(" · ")}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className={styles.results}>
-        {METRICS.map((metric, index) => (
-          <div
-            key={metric.id}
-            ref={(node) => {
-              resultRefs.current[index] = node;
-            }}
-            className={styles.result}
-            style={{ opacity: 0 }}
-          >
-            <p className={styles.resultValue}>{metric.value}</p>
-            <p className={styles.resultLabel}>{metric.label}</p>
-          </div>
-        ))}
-        <p ref={qualifierRef} className={styles.qualifier} style={{ opacity: 0 }}>
-          {METRICS_QUALIFIER.map((line, index) => (
-            <React.Fragment key={line}>
-              {index > 0 && <br />}
-              {line}
-            </React.Fragment>
-          ))}
-        </p>
-      </div>
-
-      <div ref={indicatorRef} className={styles.chapters} style={{ opacity: 1 }} aria-hidden="true">
-        <span ref={indexRef} className={styles.chapterCurrent}>
-          01
-        </span>
-        <span ref={nameRef} className={styles.chapterName}>
-          THE JOURNEY
-        </span>
-        <span className={styles.chapterTrack}>
-          <span ref={fillRef} className={styles.chapterFill} style={{ transform: "scaleX(0.18)" }} />
-        </span>
-        <span>0{CHAPTER_COUNT}</span>
-      </div>
-
-      <div ref={hintRef} className={styles.scrollHint} aria-hidden="true">
-        <span className={styles.scrollLabel}>SCROLL TO EXPLORE</span>
-        <span className={styles.scrollTrack}>
-          <span className={styles.scrollFill} style={{ transform: "scaleY(0.4)" }} />
-        </span>
-      </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 };
