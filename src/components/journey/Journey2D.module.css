@@ -829,3 +829,43 @@
     opacity: 0.8;
   }
 }
+
+/* ==========================================================================
+   EDITORIAL WATERMARK BEHIND TRUCK ("OUR EVOLUTION")
+   Matching unitedcarriers.com reference ("OUR SERVICES" watermark behind truck)
+   ========================================================================== */
+
+.watermarkBg {
+  position: absolute;
+  top: clamp(18%, 28vh, 34%);
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-sans-custom), system-ui, -apple-system, sans-serif;
+  font-size: clamp(4rem, 11vw, 9.8rem);
+  font-weight: 900;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
+  color: #e5e8ec;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  z-index: 1;
+  line-height: 1;
+  will-change: opacity;
+  transition: opacity 0.25s ease-out;
+}
+
+@media (max-width: 900px) {
+  .watermarkBg {
+    top: clamp(20%, 30vh, 36%);
+    font-size: clamp(2.8rem, 11.5vw, 5.5rem);
+    letter-spacing: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .watermarkBg {
+    top: clamp(22%, 32vh, 38%);
+    font-size: clamp(2.4rem, 11vw, 4.2rem);
+  }
+}

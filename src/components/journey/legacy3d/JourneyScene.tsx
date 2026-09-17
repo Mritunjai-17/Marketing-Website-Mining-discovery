@@ -158,25 +158,19 @@ const ProceduralEnvironmentLight: React.FC = () => (
   </DreiEnvironment>
 );
 
-/** Clean white scene canvas matching editorial design */
+/** Fog matching white canvas while allowing background elements behind canvas */
 const DynamicSceneBackground: React.FC<{ progress: JourneyProgress }> = () => {
   const { scene } = useThree();
   const bgColor = useMemo(() => new THREE.Color(WHITE_BG), []);
 
   useFrame(() => {
-    if (scene.background instanceof THREE.Color) {
-      scene.background.copy(bgColor);
-    }
     if (scene.fog instanceof THREE.FogExp2) {
       scene.fog.color.copy(bgColor);
     }
   });
 
   return (
-    <>
-      <color attach="background" args={[WHITE_BG]} />
-      <fogExp2 attach="fog" args={[WHITE_BG, FOG_DENSITY]} />
-    </>
+    <fogExp2 attach="fog" args={[WHITE_BG, FOG_DENSITY]} />
   );
 };
 
@@ -231,12 +225,13 @@ export const JourneyScene: React.FC<JourneySceneProps> = ({ progress, active }) 
     dpr={[1, 2]}
     frameloop={active ? "always" : "demand"}
     gl={{
+      alpha: true,
       antialias: true,
       powerPreference: "high-performance",
       toneMapping: THREE.ACESFilmicToneMapping,
       toneMappingExposure: 1.08,
     }}
-    style={{ width: "100%", height: "100%", display: "block" }}
+    style={{ width: "100%", height: "100%", display: "block", position: "relative", zIndex: 2 }}
   >
     <SceneContents progress={progress} />
   </Canvas>

@@ -25,6 +25,7 @@ export interface Journey3DProps {
  * and live progress tracking that connect the whole website.
  */
 export const Journey3D: React.FC<Journey3DProps> = ({ progress, active }) => {
+  const watermarkRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<SceneState>({
     progress: 0,
     truckWorldX: 0,
@@ -59,6 +60,12 @@ export const Journey3D: React.FC<Journey3DProps> = ({ progress, active }) => {
       scene.time = (performance.now() - start) / 1000;
       scene.pitch = progress.pitch;
       for (const listener of listenersRef.current) listener(scene);
+
+      if (watermarkRef.current) {
+        const t = progress.current;
+        const fade = 1 - Math.max(0, Math.min(1, (t - 0.82) / 0.08));
+        watermarkRef.current.style.opacity = (fade * fade * (3 - 2 * fade)).toFixed(3);
+      }
     };
 
     gsap.ticker.add(tick);
@@ -72,6 +79,9 @@ export const Journey3D: React.FC<Journey3DProps> = ({ progress, active }) => {
   return (
     <JourneySceneContext.Provider value={api}>
       <div className={styles.stage}>
+        <div ref={watermarkRef} className={styles.watermarkBg} aria-hidden="true">
+          OUR EVOLUTION
+        </div>
         <JourneyScene progress={progress} active={active} />
         <JourneyStory />
       </div>
