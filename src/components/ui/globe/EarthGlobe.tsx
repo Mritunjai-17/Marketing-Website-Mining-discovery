@@ -70,6 +70,8 @@ export interface GlobeFocus {
   tiltBias: number;
   /** 0 = free drift, 1 = fully aimed. Blended, so entering focus never snaps. */
   weight: number;
+  /** Camera distance from the globe center (default is 1 / sin(silhouetteAngle) ~ 6.4) */
+  distance?: number;
 }
 
 export interface EarthGlobeProps {
@@ -936,8 +938,9 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
           // Only the arcs touching the region being pointed at respond; the rest hold
           // their resting weight, so one regional network is emphasised at a time.
           const target =
-            emphasised !== null &&
-            (arc.fromId === emphasised || arc.toId === emphasised)
+            emphasised === "__all__" ||
+            (emphasised !== null &&
+              (arc.fromId === emphasised || arc.toId === emphasised))
               ? 1
               : 0;
           if (delta > 0 && arc.emphasis !== target) {
@@ -954,6 +957,14 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
       const focus = focusSourceRef.current?.current ?? null;
       const weight = focus ? Math.min(Math.max(focus.weight, 0), 1) : 0;
       const effectiveWeight = isPointerDown ? 0 : weight;
+
+      const baseCameraZ = 1 / Math.sin(silhouetteAngle);
+      if (focus && focus.distance !== undefined && effectiveWeight > 0) {
+        const targetZ = THREE.MathUtils.lerp(baseCameraZ, focus.distance, effectiveWeight);
+        camera.position.z += (targetZ - camera.position.z) * 0.18;
+      } else {
+        camera.position.z += (baseCameraZ - camera.position.z) * 0.18;
+      }
 
       if (effectiveWeight > 0 && focus) {
         // Ry brings the target's meridian round to face the camera, Rx lifts its

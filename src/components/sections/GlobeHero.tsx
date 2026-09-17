@@ -14,6 +14,15 @@ import type {
   GlobeFocus,
   ProjectedAnchor,
 } from "@/components/ui/globe/EarthGlobe";
+import { Journey2D } from "@/components/journey/Journey2D";
+import { useCreateJourneyProgress } from "@/components/journey/journeyProgress";
+import { AtmosphericCloudLayer } from "@/components/journey/AtmosphericCloudLayer";
+import { DescentBackdrop } from "@/components/journey/DescentBackdrop";
+import {
+  deriveDescentCamera,
+  descentTransform,
+  JOURNEY_RUNS_FROM,
+} from "@/components/journey/descentCamera";
 
 // WebGL has no server render, and the topojson chunk should not block first paint.
 const EarthGlobe = dynamic(
@@ -282,57 +291,32 @@ const HEADLINE_SPAN = 0.32;
 /** Peak blur in px. Past about 3 the type stops reading as type and starts reading as fog. */
 const HEADLINE_BLUR = 3;
 
-const STAGE_COUNT = TOUR.length;
-/**
- * Viewport heights of scroll each continent owns.
- *
- * This is the primary pacing dial. It buys time without touching a single easing curve:
- * every fraction below is a fraction OF a stage, so lengthening the stage stretches the
- * hop and the dwell together and the sequence keeps its shape exactly.
- *
- * 165 puts the range at 7 x 165 = 1155vh, of which 1055vh is actual travel once the
- * sticky card's own viewport is subtracted.
- */
-const STAGE_VH = 100;
+export type TransitionState =
+  | "GLOBE_IDLE"
+  | "GLOBE_LOCATION_SELECTED"
+  | "GLOBE_ZOOMING_IN"
+  | "CLOUDS_IN"
+  | "LAND_DESCENT"
+  | "TRUCK_OVERHEAD_MOVE"
+  | "CAMERA_ANGLE_SHIFT"
+  | "SIDE_VIEW_LOCKED"
+  | "JOURNEY_ACTIVE";
 
-/**
- * Scale held for the whole tour. 1 = the globe never changes size.
- *
- * This was 2.8, magnified in over the first ENGAGE of scroll: the planet arrived at its
- * entry size, then grew to nearly three times it on the first wheel notch and stayed
- * there. The tour is meant to read as scrolling *through* mining locations, not as flying
- * into them, so the sphere now holds exactly the size it has when the section starts and
- * scroll drives orientation alone.
- *
- * Left as a named constant rather than stripped out because it is the one dial the whole
- * magnification hangs off: `stageAt` reports it, `targetScale` interpolates engage toward
- * it, and at 1 every one of those terms collapses to identity — including the
- * zoom-about-the-aim-point correction in `dx`/`dy`, which carries a (1 - scale) factor,
- * and `--unzoom`, which is 1/scale. Nothing downstream needed changing.
- */
-const STOP_ZOOM = 1;
-/**
- * Where inside a stage the hop happens. Up to ARRIVE the globe is still settling onto
- * this stop, past DEPART it has started leaving for the next; the span between is the
- * held stop. The two halves of a hop straddle a stage boundary and meet at its centre.
- *
- * WIDENED BACK OUT, and this is the change that stops the tour reading as a series of
- * jumps. At 0.13/0.87 only 26% of a stage was in motion: the globe sat still for
- * three-quarters of the scroll and then swung a whole continent in the remaining quarter,
- * which is fast angular movement however smooth the interpolation underneath it is.
- *
- * 0.22/0.78 puts 44% of a stage in motion. Paired with STAGE_VH at 220 that is 97vh of
- * scroll behind each hop against 43vh before — 2.26x the distance for the same rotation,
- * so the globe turns at 44% of its old angular speed.
- *
- * The dwell is deliberately unchanged in absolute terms: 56% of 220vh is 123vh, against
- * 74% of 165vh which was 122vh. The stops rest exactly as long as they did; all of the
- * new distance went into the travel between them.
- */
-const STAGE_ARRIVE = 0.22;
-const STAGE_DEPART = 0.78;
-/** Progress over which the globe hands off from free drift to the tour. */
-const ENGAGE = 0.03;
+/** The starting location for the 2D journey: Canada mining region */
+const STARTING_SITE_ID = "north-america";
+const STARTING_SITE = MINING_SITES.find((s) => s.id === STARTING_SITE_ID)!;
+
+/** Cinematic zoom into Canada mining terrain before touching down on the road */
+const MAX_ZOOM = 10.5;
+
+/** Total viewport heights for the entire continuous story */
+const TOTAL_SCROLL_VH = 2500;
+
+/** Easing curve for cinematic camera zoom in/out (power3.inOut) */
+function easeInOutCubic(x: number): number {
+  const t = Math.min(Math.max(x, 0), 1);
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
 /**
  * How the sampled progress follows the true scroll position.
  *
@@ -423,39 +407,6 @@ function stepSpring(
   }
 }
 
-/**
- * Where in the tour the wipe into Stats begins.
- *
- * The last stage has no hop after it, so Antarctica is held from u = STAGE_ARRIVE to the
- * end of the range — the final zoom has fully settled by progress (6 + 0.13) / 7 = 0.876.
- * Starting at 0.90 puts the wipe inside that dwell, a little over 25vh after the motion
- * has stopped, and gives it the last 10% of a 1055vh range: about 105vh of scroll, and no
- * page height added. Lower it to begin earlier still — 0.876 is the floor, where the wipe
- * would start on top of the final zoom rather than after it.
- */
-const CURTAIN_START = 0.90;
-
-
-/**
- * The wipe: the hero's light sky ground softly resolving into Stats' #FBFBFA.
- */
-const STATS_WIPE = [
-  "linear-gradient(180deg,",
-  "rgba(250,247,242,0) 0%,",
-  "rgba(250,247,242,0.25) 12%,",
-  "rgba(250,247,242,0.65) 28%,",
-  "rgba(250,247,242,0.92) 48%,",
-  "#FAF7F2 64%,",
-  "#FBFBFA 88%,",
-  "#FBFBFA 100%)",
-].join(" ");
-
-const TOUR_SITES = TOUR.map((id) => {
-  const site = MINING_SITES.find((entry) => entry.id === id);
-  if (!site) throw new Error(`TOUR references unknown site id: ${id}`);
-  return site;
-});
-
 function smoothstep(edge0: number, edge1: number, x: number) {
   const t = Math.min(Math.max((x - edge0) / (edge1 - edge0), 0), 1);
   return t * t * (3 - 2 * t);
@@ -463,70 +414,11 @@ function smoothstep(edge0: number, edge1: number, x: number) {
 
 /**
  * Quintic ease-in-out. Zero first AND second derivative at both ends, where cubic
- * smoothstep only zeroes the first — so a hop leaves and arrives with no acceleration
- * step, and the join to the flat dwell either side of it is invisible rather than merely
- * continuous. This is the curve doing the work that a CSS cubic-bezier would do; it is a
- * function of scroll position rather than of time, so it cannot be expressed as one.
+ * smoothstep only zeroes the first — so transitions enter and exit with no acceleration step.
  */
 function smootherstep(x: number) {
   const t = Math.min(Math.max(x, 0), 1);
   return t * t * t * (t * (t * 6 - 15) + 10);
-}
-
-/** Shortest-arc interpolation between two longitudes, in degrees. */
-function lerpLongitude(a: number, b: number, k: number) {
-  const delta = ((b - a + 540) % 360) - 180;
-  return a + delta * k;
-}
-
-interface StageState {
-  /** Index of the stop that owns this moment, for the label highlight. */
-  index: number;
-  lat: number;
-  lng: number;
-  zoom: number;
-}
-
-/**
- * Resolves scroll progress into an aim point and a zoom.
- *
- * Progress is cut into STAGE_COUNT equal stages, one per continent. Inside a stage the
- * globe sits on that continent, then hands over to the next across the boundary; the
- * hop is eased and the zoom dips through it, so every stop reads as an arrival.
- */
-function stageAt(progress: number): StageState {
-  const f = Math.min(Math.max(progress, 0), 1) * STAGE_COUNT;
-  const index = Math.min(Math.floor(f), STAGE_COUNT - 1);
-  const u = f - index;
-
-  let from = index;
-  let to = index;
-  let hop = 0;
-
-  if (u < STAGE_ARRIVE && index > 0) {
-    // Second half of the hop that began at the end of the previous stage.
-    from = index - 1;
-    to = index;
-    hop = 0.5 + 0.5 * (u / STAGE_ARRIVE);
-  } else if (u > STAGE_DEPART && index < STAGE_COUNT - 1) {
-    from = index;
-    to = index + 1;
-    hop = 0.5 * ((u - STAGE_DEPART) / (1 - STAGE_DEPART));
-  }
-
-  const a = TOUR_SITES[from];
-  const b = TOUR_SITES[to];
-  const eased = smootherstep(hop);
-
-  return {
-    index: hop > 0.5 ? to : from,
-    lat: a.lat + (b.lat - a.lat) * eased,
-    lng: lerpLongitude(a.lng, b.lng, eased),
-    // Held flat for the whole tour. The zoom happens once, on engage; after that a hop is
-    // pure rotation — only lat/lng move, so the globe's size on screen never changes again
-    // and consecutive stages have nothing to step between.
-    zoom: STOP_ZOOM,
-  };
 }
 
 interface Metrics {
@@ -546,8 +438,19 @@ export const GlobeHero: React.FC = () => {
   const slotRef = useRef<HTMLDivElement>(null);
   const globeBoxRef = useRef<HTMLDivElement>(null);
   const markerLayerRef = useRef<HTMLDivElement>(null);
-  const curtainRef = useRef<HTMLDivElement>(null);
+  const journeyBoxRef = useRef<HTMLDivElement>(null);
   const markerRefs = useRef(new Map<string, HTMLDivElement | null>());
+
+  const journeyProgress = useCreateJourneyProgress();
+  const [journeyActive, setJourneyActive] = useState(false);
+  const journeyActiveRef = useRef(false);
+  const [emphasisId, setEmphasisId] = useState<string | null>(null);
+  const emphasisRef = useRef<string | null>(null);
+  const [isCanadaStarting, setIsCanadaStarting] = useState(false);
+  const [transitionProgress, setTransitionProgress] = useState(0);
+  const lastTransPRef = useRef(0);
+  const [transitionState, setTransitionState] = useState<TransitionState>("GLOBE_IDLE");
+  const transitionStateRef = useRef<TransitionState>("GLOBE_IDLE");
 
   /**
    * Card bounds in the globe canvas's coordinate space. Cached on resize rather than
@@ -759,17 +662,11 @@ export const GlobeHero: React.FC = () => {
    */
   const applyStage = useCallback(() => {
     const box = globeBoxRef.current;
+    const journeyBox = journeyBoxRef.current;
+    const layer = markerLayerRef.current;
     if (!box || reduceMotionRef.current) return;
 
-    const layer = markerLayerRef.current;
-
-    // --- Sample and damp -------------------------------------------------------------
-    // Progress is read here, inside the frame that is about to draw, rather than being
-    // pushed in from a scroll event. Scroll events fire at their own irregular cadence
-    // and land a frame or two behind Lenis's own rAF, so sampling from them meant every
-    // frame drew a slightly stale, unevenly spaced position — which is what read as
-    // stutter. Sampling per frame removes the hop; the damping below absorbs whatever
-    // unevenness is left in the underlying scroll position.
+    // --- Sample and damp scroll progress ---------------------------------------------
     const { top, travel } = rangeMetricsRef.current;
     const target = travel > 0 ? clamp((window.scrollY - top) / travel, 0, 1) : 0;
 
@@ -779,135 +676,211 @@ export const GlobeHero: React.FC = () => {
 
     const progress = progressSpring.current;
     if (gap > RESUME_GAP) {
-      // Parked loop: snap, and kill the velocity with it. Integrating across the skipped
-      // span would play it back as a slide, and a spring would ring on top of that.
       progress.value = target;
       progress.velocity = 0;
     } else if (gap > 0) {
       stepSpring(progress, target, gap, PROGRESS_SPRING);
     }
-    // gap === 0 means a second call inside the same frame: leave the spring untouched.
-    // This used to fall into the snap branch above, so any duplicate sample jumped
-    // progress straight onto the raw scroll position — a visible hitch, and the more
-    // often the scroll listener fired the worse it got.
     const t = clamp(progress.value, 0, 1);
     progressRef.current = t;
 
-    // The wipe, written here rather than through framer-motion's useScroll.
-    //
-    // useScroll with a ref target is what this component already tried and backed out of
-    // — see the progressRef comment above — and the curtain has to be a child of the
-    // sticky card regardless: that card is the only thing on this screen that stays
-    // parked over the globe, so an overlay anywhere else would scroll away from what it
-    // is meant to be covering. Sharing this frame also means the wipe cannot drift from
-    // the tour by even one frame, which a separate scroll listener could.
-    const curtain = curtainRef.current;
-    if (curtain) {
-      const rise = smootherstep((t - CURTAIN_START) / (1 - CURTAIN_START));
-      curtain.style.transform = `translate3d(0, ${((1 - rise) * 100).toFixed(2)}%, 0)`;
+    // --- Master Progress & Phase Partitioning ---------------------------------------
+    // Total pinned scroll is partitioned into:
+    // 1. TRANSITION (0.00 -> 0.40):
+    //    Globe -> Canada emphasis -> 3D camera zoom -> Clouds fill screen -> Clouds part -> Highway & land reveal -> Truck roof -> Truck drive in top-down view -> 3D Camera rotates to side profile -> Lock side view
+    // 2. JOURNEY (0.40 -> 1.00):
+    //    Side view locked, truck drives rightward through the story chapters
+    const TRANSITION_SPAN = 0.52;
+    const transP = t <= TRANSITION_SPAN ? clamp(t / TRANSITION_SPAN, 0, 1) : 1.0;
+
+    /*
+     * The truck is already rolling before the camera finishes settling.
+     *
+     * The brief wants it moving while the camera is still coming round, and
+     * the wrong way to get that is a second driver nudging the truck during
+     * the transition — two things writing the truck's position is how the
+     * handover develops a seam. Instead the journey's own progress simply
+     * starts a little earlier than the transition ends, so it is one ramp
+     * throughout: still monotone, still continuous, and at the moment the
+     * camera locks nothing changes hands because nothing else was ever
+     * driving it.
+     *
+     * Kept small. This much of the journey plays out under a camera that is
+     * still tilted, so anything longer would spend the opening chapter's copy
+     * while it is not yet readable.
+     *
+     * Sized against descentCamera.ts rather than picked: the brief has the
+     * truck rolling at 0.86 of the transition, the descent's HOLD runs
+     * 0.84–0.89, and 0.0728 of the total puts the first turn of the wheels at
+     * exactly 0.86 — inside the hold, so the camera is still overhead and
+     * still when the truck sets off, and moving under its own power before the
+     * orbit begins at 0.89.
+     */
+    const JOURNEY_PREROLL = 0.0728;
+    const journeyFrom = TRANSITION_SPAN - JOURNEY_PREROLL;
+    const journeyP = clamp((t - journeyFrom) / (1.0 - journeyFrom), 0, 1);
+
+    journeyProgress.current = journeyP;
+
+    // Throttle state update to keep React rendering lightweight
+    if (
+      Math.abs(transP - lastTransPRef.current) > 0.002 ||
+      transP === 0 ||
+      transP === 1 ||
+      (transP >= 0.89 && lastTransPRef.current < 0.89)
+    ) {
+      lastTransPRef.current = transP;
+      setTransitionProgress(transP);
     }
 
-    // Only the highlighted stop has to travel through React, and that changes seven
-    // times across the whole tour. The ref is updated here rather than further down,
-    // because the engage <= 0 path below returns early — leaving it stale there would
-    // re-fire setStageIndex every frame once the tour is scrolled back to the top.
-    const stop = stageAt(t).index;
-    if (stop !== stageIndexRef.current) {
-      stageIndexRef.current = stop;
-      setStageIndex(stop);
+    // Explicit Transition State
+    let nextState: TransitionState = "GLOBE_IDLE";
+    // Boundaries follow descentCamera.ts and AtmosphericCloudLayer.tsx; if
+    // those phases move, these are the labels that go stale with them.
+    if (transP < 0.08) nextState = "GLOBE_IDLE";
+    else if (transP < 0.16) nextState = "GLOBE_LOCATION_SELECTED";
+    else if (transP < 0.26) nextState = "GLOBE_ZOOMING_IN";
+    else if (transP < 0.44) nextState = "CLOUDS_IN";
+    else if (transP < 0.66) nextState = "LAND_DESCENT";
+    else if (transP < 0.89) nextState = "TRUCK_OVERHEAD_MOVE";
+    else if (transP < 0.99) nextState = "CAMERA_ANGLE_SHIFT";
+    else if (t <= TRANSITION_SPAN) nextState = "SIDE_VIEW_LOCKED";
+    else nextState = "JOURNEY_ACTIVE";
+
+    if (nextState !== transitionStateRef.current) {
+      transitionStateRef.current = nextState;
+      setTransitionState(nextState);
     }
 
-    const engage = smoothstep(0, ENGAGE, t);
+    /*
+     * The Journey's frame loop has to be running before the Journey can be
+     * seen, not when it takes over.
+     *
+     * Its road, lamps and truck are all drawn from that loop, so starting it
+     * at the handover would mean the clouds part over an empty stage and the
+     * scene pops in a few frames later. It starts while the cloud deck is
+     * still solid, which costs a few hidden frames and is the difference
+     * between revealing something that is already there and switching it on.
+     */
+    const shouldJourneyBeActive = transP >= JOURNEY_RUNS_FROM;
+    if (shouldJourneyBeActive !== journeyActiveRef.current) {
+      journeyActiveRef.current = shouldJourneyBeActive;
+      setJourneyActive(shouldJourneyBeActive);
+    }
 
-    if (engage <= 0) {
-      // Back at the very top: hand the globe back to its free drift and every property
-      // back to the classes, so the entry reveal behaves as if the tour did not exist.
+    // Toggle starting point emphasis tag on Canada
+    const canadaStartingActive = transP >= 0.04 && transP < 0.30;
+    setIsCanadaStarting(canadaStartingActive);
+
+    const nextEmphasis = canadaStartingActive ? STARTING_SITE_ID : null;
+    if (nextEmphasis !== emphasisRef.current) {
+      emphasisRef.current = nextEmphasis;
+      setEmphasisId(nextEmphasis);
+    }
+
+    // --- 1. Camera Aim & Focus (True 3D Perspective Zoom in EarthGlobe) -------------
+    const { centre, visibleY, tiltBias } = geometryRef.current;
+    if (transP < 0.04) {
       focusRef.current = null;
       engagedRef.current = false;
-      // Rest the zoom spring too. Leaving stored velocity here means scrolling back down
-      // re-enters the tour mid-bounce, which reads as a glitch rather than as a settle.
-      zoomSpring.current.value = 1;
-      zoomSpring.current.velocity = 0;
-      box.style.transitionProperty = "";
-      box.style.transform = "";
-      box.style.opacity = "";
-      layer?.style.removeProperty("--unzoom");
-      return;
-    }
-
-    const stage = stageAt(t);
-    const { centre, visibleY, tiltBias } = geometryRef.current;
-
-    focusRef.current = { lat: stage.lat, lng: stage.lng, tiltBias, weight: engage };
-
-    // Scale eases in from 1 alongside the aim, so engaging the tour is one continuous
-    // move rather than a snap to STOP_ZOOM.
-    //
-    // That target then goes through a spring rather than to the element directly, which
-    // gave the magnification its ease and its ~3% settle at an arrival. With STOP_ZOOM at
-    // 1 the target is a constant 1, so the spring latches on the first frame and this
-    // whole path is identity — the aim still moves, the size no longer does. The spring
-    // is left wired up because it is what a non-1 STOP_ZOOM would need again.
-    const targetScale = 1 + (stage.zoom - 1) * engage;
-    if (gap > 0 && gap <= RESUME_GAP) {
-      stepSpring(zoomSpring.current, targetScale, gap, ZOOM_SPRING);
     } else {
-      zoomSpring.current.value = targetScale;
-      zoomSpring.current.velocity = 0;
-    }
-    // Floored just above 1: the overshoot is upward at an arrival, but on the way back
-    // out of the tour the spring can dip under 1 and briefly shrink the globe.
-    const scale = Math.max(1, zoomSpring.current.value);
+      const engageWeight = smoothstep(0.04, 0.16, transP);
+      // As zoom deepens, camera.position.z in EarthGlobe travels from ~6.4 down to 1.30
+      const zoomP = smoothstep(0.10, 0.32, transP);
+      const cameraDist = 6.4 - (6.4 - 1.30) * easeInOutCubic(zoomP);
 
-    // Pin the aimed point at the middle of the visible slice and zoom around it.
-    //
-    // P is where the aim actually landed, reported by the projection rather than assumed
-    // — the axial roll swings the tilt-bias offset sideways, so the aimed point is not on
-    // the vertical centre line, and at STOP_ZOOM that error would carry it off screen.
-    // Scaling happens about the element's own centre O, so:
-    //   position = O + d + scale·(P - O), and we want P + (C - P)·engage
-    //   =>  d = (P - O)·(1 - scale) + (C - P)·engage
-    // which is identity at engage 0 and lands P exactly on C at engage 1.
-    //
-    // HORIZONTALLY THAT SECOND TERM IS GONE. The sphere is mounted on a fixed point: it
-    // may turn under the camera, but its centre must not slide across the viewport, and
-    // (C - P)·engage was sliding it — a standing -130px at 1440 wide, ramped in over the
-    // first 3% of scroll, which read as the globe sidling left the moment you scrolled.
-    // The aim lands wherever the rotation puts it now, and since that offset measured
-    // identical at every stop, every marker is framed the same way rather than each one
-    // dragging the planet somewhere new.
-    //
-    // What is left on x, (P - O)·(1 - scale), is not a pan: it is the compensation that
-    // keeps the aimed point still while the box scales about its own centre. At
-    // STOP_ZOOM 1 it is exactly 0 every frame; it is retained so raising STOP_ZOOM again
-    // magnifies about the marker instead of shoving it off screen.
-    //
-    // y keeps both terms. The vertical offset is what lifts the aim off the disc's centre
-    // and into the middle of the visible slice — the framing that makes a marker visible
-    // at all in a horizon crop, not a sideways drift.
-    //
-    // transform-origin is deliberately left at its default: in Tailwind v4 the box's
-    // -translate-x-1/2 and its reveal scale are the standalone translate/scale
-    // properties, which apply before transform and share its origin.
+      focusRef.current = {
+        lat: STARTING_SITE.lat,
+        lng: STARTING_SITE.lng,
+        tiltBias,
+        distance: cameraDist,
+        weight: engageWeight,
+      };
+      engagedRef.current = true;
+    }
+
+    // --- 2. Globe CSS Scale and Centering -------------------------------------------
+    let scale = 1.0;
+    if (transP >= 0.10 && transP < 0.34) {
+      const zp = (transP - 0.10) / (0.34 - 0.10);
+      scale = 1.0 + (MAX_ZOOM - 1.0) * easeInOutCubic(zp);
+    } else if (transP >= 0.34) {
+      scale = MAX_ZOOM;
+    } else {
+      scale = 1.0;
+    }
+
     const aim = aimPointRef.current;
     const px = aim ? aim.x : centre;
     const py = aim ? aim.y : visibleY;
+    const engage = smoothstep(0.04, 0.16, transP);
     const dx = (px - centre) * (1 - scale);
     const dy = (py - centre) * (1 - scale) + (visibleY - py) * engage;
 
-    if (!engagedRef.current) {
-      // The reveal's 1400ms ease covers opacity; leaving it on would smear every scroll
-      // frame through it instead of tracking the wheel. It has finished by now.
+    if (!engagedRef.current && transP >= 0.04) {
       box.style.transitionProperty = "none";
       engagedRef.current = true;
     }
-    box.style.transform = `translate3d(${dx.toFixed(2)}px, ${dy.toFixed(2)}px, 0) scale(${scale.toFixed(4)})`;
-    box.style.opacity = "";
 
-    // Pins ride inside the scaled box, which is what keeps them glued to their landmass.
-    // This cancels the magnification on the pin art so a marker keeps its designed size.
-    layer?.style.setProperty("--unzoom", (1 / scale).toFixed(4));
-  }, []);
+    // Globe Opacity: fades out cleanly while fully enclosed in dense clouds
+    let globeOpacity = 1.0;
+    if (transP >= 0.34 && transP < 0.44) {
+      globeOpacity = 1.0 - smoothstep(0.34, 0.44, transP);
+    } else if (transP >= 0.44) {
+      globeOpacity = 0.0;
+    } else {
+      globeOpacity = 1.0;
+    }
+
+    box.style.transform = `translate3d(${dx.toFixed(2)}px, ${dy.toFixed(2)}px, 0) scale(${scale.toFixed(4)})`;
+    box.style.opacity = globeOpacity.toFixed(3);
+    box.style.visibility = globeOpacity <= 0.005 ? "hidden" : "visible";
+
+    // Marker Layer Opacity & Unzoom
+    if (layer) {
+      layer.style.setProperty("--unzoom", (1 / Math.max(scale, 1)).toFixed(4));
+      let markerLayerOpacity = 1.0;
+      if (transP >= 0.20 && transP < 0.32) {
+        markerLayerOpacity = 1.0 - smoothstep(0.20, 0.32, transP);
+      } else if (transP >= 0.32) {
+        markerLayerOpacity = 0.0;
+      } else {
+        markerLayerOpacity = 1.0;
+      }
+      layer.style.opacity = markerLayerOpacity.toFixed(3);
+      layer.style.visibility = markerLayerOpacity <= 0.005 ? "hidden" : "visible";
+    }
+
+    // --- 3. The descent camera, flown over the real Journey ---------------------------
+    /*
+     * One camera over one environment. Everything the descent shows — land,
+     * road, markings, truck — is the Journey itself, seen from wherever the
+     * camera currently is, so there is nothing to crossfade into and no second
+     * truck to crossfade from.
+     *
+     * The truck is revealed purely by the camera closing distance: pitch is
+     * held at the overhead angle through the entire reveal and only turns
+     * afterwards. See descentCamera.ts, where that ordering is enforced and
+     * checked.
+     */
+    if (journeyBox) {
+      const camera = deriveDescentCamera(transP);
+      /*
+       * The truck needs to know the camera angle, because which of its faces
+       * is toward camera depends on it. It travels in the same box as
+       * progress and is read on the Journey's own frame, so the truck and the
+       * stage transform are always describing the same camera on the same
+       * frame rather than one lagging the other.
+       */
+      journeyProgress.pitch = camera.pitch;
+      journeyBox.style.opacity = camera.opacity.toFixed(3);
+      journeyBox.style.visibility = camera.opacity <= 0.005 ? "hidden" : "visible";
+      journeyBox.style.transform = descentTransform(camera);
+      // Only once the camera has settled into the Journey's own composition;
+      // a tilted, half-descended stage should not be catching clicks.
+      journeyBox.style.pointerEvents = camera.locked ? "auto" : "none";
+    }
+  }, [journeyProgress]);
 
   useEffect(() => {
     const range = rangeRef.current;
@@ -1259,8 +1232,8 @@ export const GlobeHero: React.FC = () => {
       <div
         ref={rangeRef}
         className="relative -mt-5 lg:-mt-6"
-        // STAGE_VH of travel per stop, derived from the tour so the two cannot drift.
-        style={{ height: reduceMotion ? "100vh" : `${STAGE_COUNT * STAGE_VH}vh` }}
+        // TOTAL_SCROLL_VH of travel for the continuous story.
+        style={{ height: reduceMotion ? "100vh" : `${TOTAL_SCROLL_VH}vh` }}
       >
         {/*
           The pinned frame. It is also what the markers are clipped to, so cardRef lives
@@ -1274,14 +1247,12 @@ export const GlobeHero: React.FC = () => {
           className="sticky top-0 h-screen w-full overflow-hidden bg-transparent"
         >
           {/*
-            The globe slot is now the whole pinned viewport rather than the leftovers
-            under the copy, so horizonDiameter() sizes the planet against a much squarer
-            frame and roughly half the sphere reads instead of a shallow arc. No padding
-            to break out of any more — the copy's gutters are on the block above.
+            The viewport slot is now the single continuous canvas hosting both the
+            3D Globe experience and the 2D Sideways Truck Journey.
           */}
           <div ref={slotRef} className="relative h-full w-full">
 
-            {/* Layer 2 + 3 — globe, clouds and atmosphere */}
+            {/* Layer 2 + 3 — 3D globe, clouds and atmosphere */}
             <div
               ref={globeBoxRef}
               className={`
@@ -1296,12 +1267,7 @@ export const GlobeHero: React.FC = () => {
                 top: metrics.boxSize ? metrics.boxTop : undefined,
               }}
             >
-              {/*
-                Atmosphere bloom. Square box, centred sphere, stops keyed to GLOBE_FIT, so
-                it stays concentric with the silhouette at every size. Sits under the
-                canvas: where the sphere is opaque the planet covers it, and the only part
-                that shows is the ring spilling onto the card.
-              */}
+              {/* Atmosphere bloom */}
               <div
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-0"
@@ -1310,7 +1276,6 @@ export const GlobeHero: React.FC = () => {
 
               {metrics.boxSize > 0 && (
                 <EarthGlobe
-                  // Above the halo, and it composites over it wherever the sphere is lit.
                   style={{ position: "relative" }}
                   className="h-full w-full"
                   anchors={ANCHORS}
@@ -1319,11 +1284,12 @@ export const GlobeHero: React.FC = () => {
                   onBeforeRender={applyStage}
                   onReady={handleReady}
                   focusRef={focusRef}
+                  emphasisId={emphasisId}
                   speedScale={activeId ? 0.25 : 1}
                 />
               )}
 
-              {/* Layer 4 — mining markers, in the same coordinate box as the globe canvas */}
+              {/* Layer 4 — mining markers in globe canvas box space */}
               <div
                 ref={markerLayerRef}
                 className={`
@@ -1333,9 +1299,12 @@ export const GlobeHero: React.FC = () => {
                 `}
               >
                 {MINING_SITES.map((site, index) => {
-                  const isActive =
-                    activeId === site.id || TOUR[stageIndex] === site.id;
+                  const isCanada = site.id === STARTING_SITE_ID;
+                  const isCanadaStartingPoint = isCanada && isCanadaStarting;
+
+                  const isActive = activeId === site.id || isCanadaStartingPoint;
                   const pulse = PIN_PULSE[index % PIN_PULSE.length];
+
                   return (
                     <div
                       key={site.id}
@@ -1348,18 +1317,36 @@ export const GlobeHero: React.FC = () => {
                       }}
                       className="absolute left-0 top-0"
                     >
-                      {/* Location Name Label — small, elegant badge above the marker */}
-                      <span
-                        className={`pointer-events-none absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider shadow-xs backdrop-blur-xs transition-all duration-200 ${
-                          isActive
-                            ? "bg-[#0B1F3A] text-[#FFD700] border border-[#B8860B]/60 shadow-[0_0_8px_rgba(184,134,11,0.3)] opacity-100 scale-105"
-                            : "bg-[#0B1F3A]/80 text-[#FAF7F2] border border-white/10 opacity-90"
-                        }`}
-                      >
-                        {site.country}
-                      </span>
+                      {/* Starting point indicator for Canada */}
+                      {isCanadaStartingPoint && (
+                        <div className="pointer-events-none absolute -top-14 left-1/2 -translate-x-1/2 flex flex-col items-center whitespace-nowrap z-30 transition-all duration-300">
+                          <div className="flex items-center gap-1.5 rounded-md bg-[#0B1F3A]/95 border border-[#B8860B]/70 px-2.5 py-1 shadow-[0_0_16px_rgba(184,134,11,0.5)] backdrop-blur-xs">
+                            <span className="h-1.5 w-1.5 rounded-full bg-[#FFD700] animate-pulse" />
+                            <span className="font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-[#FFD700]">
+                              Starting Point
+                            </span>
+                          </div>
+                          <span className="mt-1 rounded bg-[#0B1F3A]/90 border border-white/10 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-white shadow-xs">
+                            {site.country} · Mining Region
+                          </span>
+                          <div className="h-2 w-[1.5px] bg-gradient-to-b from-[#B8860B] to-transparent" />
+                        </div>
+                      )}
 
-                      {/* Pin — 44px hit target centred on the geographic point */}
+                      {/* Standard Location Label */}
+                      {!isCanadaStartingPoint && (
+                        <span
+                          className={`pointer-events-none absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider shadow-xs backdrop-blur-xs transition-all duration-300 ${
+                            isActive
+                              ? "bg-[#0B1F3A] text-[#FFD700] border border-[#B8860B]/60 shadow-[0_0_8px_rgba(184,134,11,0.3)] opacity-100 scale-105"
+                              : "bg-[#0B1F3A]/80 text-[#FAF7F2] border border-white/10 opacity-90"
+                          }`}
+                        >
+                          {site.country}
+                        </span>
+                      )}
+
+                      {/* Pin — 44px hit target centred on geographic coordinates */}
                       <button
                         type="button"
                         aria-label={`${site.region}, ${site.country}. ${site.detail}.`}
@@ -1388,26 +1375,102 @@ export const GlobeHero: React.FC = () => {
             </div>
 
             {/*
-              Layer 5 — the wipe into Stats.
+              Layer 5 — The one environment, with the one truck in it.
 
-              Last child of the sticky card and above every globe layer, so it covers the
-              planet, the markers and the halo alike, and the card's own overflow-hidden
-              clips it with no extra rule. pointer-events-none: it is scenery, and the
-              markers underneath keep their hit targets until the card unpins.
+              This is the real Journey, and it is the *only* thing the descent
+              reveals. It used to sit above a separate `CameraDescentStage`
+              that drew its own terrain, highway and hand-drawn SVG truck, and
+              the two crossfaded into each other between 0.92 and 0.97 — which
+              is where the second truck came from. There was no illusion to
+              fix: both were on screen together. That stage is gone, and what
+              the camera now flies down to is this.
 
-              Bottom-anchored and 130vh tall so that at rest the soft leading edge has
-              somewhere to go above the card. The initial inline transform is the resting
-              state for reduced motion and for first paint, where applyStage has not run.
+              It is mounted under the cloud deck rather than over it, and made
+              opaque while the deck is still solid, so the land is already
+              there to be uncovered. Nothing about the Journey itself changes:
+              the camera rig is a transform on its container, so its own
+              layout, scroll and composition are untouched, and at the moment
+              the rotation completes the transform is exact identity.
             */}
+            {/*
+              The ground the descent happens over, behind the Journey and in
+              front of nothing else. A plane raked to 78 degrees covers a band
+              across the frame rather than the frame, so without this the
+              Journey read as a lit rectangle floating in the globe section the
+              moment the clouds thinned. It draws no terrain, no road and no
+              vehicle — see DescentBackdrop.tsx.
+            */}
+            <DescentBackdrop progress={transitionProgress} />
+
             <div
-              ref={curtainRef}
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-x-0 bottom-0 z-30 h-[130vh] will-change-transform"
+              className="pointer-events-none absolute inset-0 z-24 h-full w-full"
               style={{
-                transform: "translate3d(0, 100%, 0)",
-                background: STATS_WIPE,
+                perspective: "1250px",
+                // Low, because the camera is looking down at ground that sits
+                // below it. Centring this would pitch the scene about the
+                // middle of the frame and read as the world tilting rather
+                // than as the camera craning down over the road.
+                perspectiveOrigin: "50% 62%",
               }}
-            />
+            >
+              <div
+                ref={journeyBoxRef}
+                className="h-full w-full will-change-transform"
+                style={{
+                  opacity: 0,
+                  /*
+                   * Flat, NOT preserve-3d. The camera tilts the journey as one
+                   * rigid plane, which is what a side elevation is. Letting its
+                   * children into 3D space would switch their stacking from
+                   * paint order to depth order, and every layer in the scene —
+                   * sky, road, billboard, truck — sits coplanar at z=0, so
+                   * they would be free to z-fight and reorder among
+                   * themselves. Flat renders the scene once and tilts the
+                   * result, which is both correct and cheaper.
+                   */
+                  transformStyle: "flat",
+                  // The truck's own contact line, so the orbit goes around the
+                  // truck rather than around the middle of the viewport.
+                  transformOrigin: "50% 82%",
+                }}
+              >
+                <Journey2D progress={journeyProgress} active={journeyActive} />
+              </div>
+            </div>
+
+            {/* Layer 6 — Atmospheric cloud deck, above the land it is hiding. */}
+            <AtmosphericCloudLayer progress={transitionProgress} />
+
+            {/*
+              Development-only timeline readout.
+
+              Compiled out of production: `process.env.NODE_ENV` is statically
+              replaced at build time, so this whole branch is dead code the
+              bundler drops — it costs nothing in the shipped page and there is
+              no flag to remember to turn off.
+            */}
+            {process.env.NODE_ENV !== "production" && (
+              <div
+                className="pointer-events-none fixed left-3 top-3 z-[999] rounded-md border border-white/15 bg-black/75 px-3 py-2 font-mono text-[11px] leading-tight text-white/90 backdrop-blur-sm"
+                aria-hidden="true"
+              >
+                <div>
+                  transition{" "}
+                  <span className="text-[#FFD700]">
+                    {(transitionProgress * 100).toFixed(1)}%
+                  </span>
+                </div>
+                <div>
+                  state <span className="text-[#7ec8ff]">{transitionState}</span>
+                </div>
+                <div className="mt-1 h-1 w-40 overflow-hidden rounded-full bg-white/15">
+                  <div
+                    className="h-full bg-[#FFD700]"
+                    style={{ width: `${(transitionProgress * 100).toFixed(1)}%` }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
