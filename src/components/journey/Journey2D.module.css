@@ -1209,3 +1209,71 @@
   justify-content: space-between;
   margin-bottom: 1.5rem;
 }
+
+/* Horizontal Aligned Cards Row */
+.cardsAlignedRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.5rem, 1.4vw, 1.4rem);
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  perspective: 1200px;
+}
+
+.alignedCardItem {
+  position: relative;
+  height: clamp(200px, 34vh, 330px);
+  aspect-ratio: 17 / 22;
+  border-radius: 5px;
+  overflow: hidden;
+  background-color: #0c0f16;
+  border: 1px solid rgba(247, 244, 237, 0.14);
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.4),
+    0 18px 42px -8px rgba(0, 0, 0, 0.75),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  user-select: none;
+  will-change: transform, opacity;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.alignedCardItem:hover {
+  border-color: rgba(184, 146, 74, 0.5);
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.45),
+    0 22px 50px -10px rgba(0, 0, 0, 0.8),
+    0 0 20px rgba(184, 146, 74, 0.15);
+}
+
+.alignedCardItemActive {
+  border-color: rgba(184, 146, 74, 0.75);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.5),
+    0 28px 64px -10px rgba(0, 0, 0, 0.88),
+    0 0 28px rgba(184, 146, 74, 0.25);
+}
+
+.alignedControls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: clamp(0.75rem, 1.8vh, 1.4rem);
+  will-change: opacity;
+  transition: opacity 0.35s ease;
+}
+
+@media (max-width: 768px) {
+  .cardsAlignedRow {
+    gap: 0.35rem;
+    overflow-x: auto;
+    padding: 0 0.5rem;
+  }
+  .alignedCardItem {
+    height: clamp(130px, 24vh, 180px);
+    flex-shrink: 0;
+  }
+}

@@ -160,14 +160,16 @@ export const JourneyStory: React.FC = () => {
 
   // Magazine Showcase refs
   const magazineWrapRef = useRef<HTMLDivElement>(null);
+  const rowRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const activeIndexRef = useRef(0);
+  const controlsRef = useRef<HTMLDivElement>(null);
+  const activeIndexRef = useRef(1); // Default to June 2026 Edition 13 (matching reference screenshot)
 
   // All 14 magazines and the 5 latest editions
   const allMagazines = useMemo(() => getChronologicalMagazines(false), []);
   const showcaseMagazines = useMemo(() => allMagazines.slice(0, 5), [allMagazines]);
 
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(1);
   const [selectedMagazine, setSelectedMagazine] = useState<MagazineEdition | null>(null);
   const [readerState, setReaderState] = useState<"closed" | "opening" | "open" | "closing">("closed");
   const [spreadLabel, setSpreadLabel] = useState("INSIDE OPENING SPREAD • PAGES 2–3");
@@ -217,63 +219,27 @@ export const JourneyStory: React.FC = () => {
     }
   }, [readerState]);
 
-  // Continuous smooth transform update based on scroll position (0 to 4)
-  const updateCardTransforms = useCallback((s: number) => {
-    const cardElements = cardRefs.current;
-    if (!cardElements) return;
-
-    const width = typeof window !== "undefined" ? window.innerWidth : 1200;
-    const isMobile = width < 640;
-    const isTablet = width >= 640 && width < 1024;
-    const spacing = isMobile ? 96 : isTablet ? 88 : 82;
-
-    for (let i = 0; i < 5; i++) {
-      const el = cardElements[i];
-      if (!el) continue;
-
-      const delta = i - s;
-      const translateX = delta * spacing;
-
-      let scale = 1;
-      if (delta > 0) {
-        scale = Math.max(0.76, 1 - delta * 0.2);
-      } else if (delta < 0) {
-        scale = Math.max(0.72, 1 + delta * 0.25);
-      }
-
-      const absDelta = Math.abs(delta);
-      let opacity = 0;
-      if (absDelta <= 1.0) {
-        opacity = 1 - absDelta * 0.25;
-      } else if (absDelta < 1.7) {
-        opacity = Math.max(0, 0.75 - (absDelta - 1.0) * 1.07);
-      }
-
-      const zIndex = Math.round(30 - absDelta * 6);
-      const isClickable = absDelta < 0.45;
-
-      el.style.transform = `translate3d(${translateX}%, 0, 0) scale(${scale})`;
-      el.style.opacity = `${opacity}`;
-      el.style.zIndex = `${zIndex}`;
-      el.style.pointerEvents = isClickable ? "auto" : "none";
-    }
-  }, []);
-
   const handleSelectPill = useCallback((idx: number) => {
     setActiveIndex(idx);
     activeIndexRef.current = idx;
-    updateCardTransforms(idx);
-  }, [updateCardTransforms]);
+    showcaseMagazines.forEach((_, i) => {
+      const el = cardRefs.current[i];
+      if (!el) return;
+      const isSelected = i === idx;
+      el.style.opacity = isSelected ? "1" : "0.85";
+      el.style.transform = isSelected
+        ? "translate3d(0, -6px, 0) scale(1.04)"
+        : "translate3d(0, 0, 0) scale(0.96)";
+    });
+  }, [showcaseMagazines]);
 
   const handleCardClick = useCallback((idx: number, mag: MagazineEdition) => {
     if (activeIndexRef.current === idx) {
       handleOpenReader(mag);
     } else {
-      setActiveIndex(idx);
-      activeIndexRef.current = idx;
-      updateCardTransforms(idx);
+      handleSelectPill(idx);
     }
-  }, [handleOpenReader, updateCardTransforms]);
+  }, [handleOpenReader, handleSelectPill]);
 
   // Lock scroll & handle Escape key when reader is active
   useEffect(() => {
@@ -315,17 +281,17 @@ export const JourneyStory: React.FC = () => {
 
     // 3. Second Part roadside text (vertical highway run):
     // Smooth entrance as road turns downward, stays visible through highway run,
-    // and cleanly fades out at p = 0.932 to 0.946 ("when this all ends")
+    // and cleanly fades out at p = 0.922 to 0.934 BEFORE the truck doors open
     if (secondPartRef.current) {
       let opacity = 0;
-      if (p >= 0.88 && p <= 0.948) {
-        const fadeIn = smoothstep(0.88, 0.915, p);
-        const fadeOut = 1 - smoothstep(0.932, 0.946, p);
+      if (p >= 0.88 && p <= 0.934) {
+        const fadeIn = smoothstep(0.88, 0.908, p);
+        const fadeOut = 1 - smoothstep(0.922, 0.934, p);
         opacity = fadeIn * fadeOut;
 
         // Auto-scroll the stats track on the right in lockstep with the truck driving down the road
         if (statsTrackRef.current) {
-          const statsProgress = Math.max(0, Math.min(1, (p - 0.90) / 0.035));
+          const statsProgress = Math.max(0, Math.min(1, (p - 0.90) / 0.024));
           const maxScroll = Math.max(0, statsTrackRef.current.scrollHeight - statsTrackRef.current.clientHeight);
           statsTrackRef.current.scrollTop = statsProgress * maxScroll;
         }
@@ -338,34 +304,95 @@ export const JourneyStory: React.FC = () => {
     }
 
     // 4. ROAD-TO-SCREEN ANIMATED MAGAZINE SHOWCASE:
-    // Zooms up directly from the truck's rear cargo doors into center stage,
-    // presenting the cards one by one in series ("single by single")
+    // First, cards fell out of the truck back door onto the road (p = 0.935 to 0.952).
+    // Then, one by one, cards come on screen directly from the fallen cards on the road!
+    // And all remain aligned on screen together!
     if (magazineWrapRef.current) {
-      if (p < 0.938) {
+      if (p < 0.952) {
         magazineWrapRef.current.style.opacity = "0";
         magazineWrapRef.current.style.pointerEvents = "none";
-        magazineWrapRef.current.style.transform = "translate3d(0, 90px, 0) scale(0.6)";
+        showcaseMagazines.forEach((_, idx) => {
+          const el = cardRefs.current[idx];
+          if (el) {
+            el.style.opacity = "0";
+            el.style.pointerEvents = "none";
+          }
+        });
+        if (controlsRef.current) {
+          controlsRef.current.style.opacity = "0";
+          controlsRef.current.style.pointerEvents = "none";
+        }
       } else {
-        // Smoothly zoom forward from truck doors into center screen
-        const entrance = smoothstep(0.938, 0.952, p);
-        const easeIn = entrance * entrance * (3 - 2 * entrance);
-        const curScale = 0.6 + 0.4 * easeIn;
-        const curY = (1 - easeIn) * 90;
+        magazineWrapRef.current.style.opacity = "1";
+        magazineWrapRef.current.style.pointerEvents = p >= 0.982 ? "auto" : "none";
 
-        magazineWrapRef.current.style.opacity = entrance.toFixed(3);
-        magazineWrapRef.current.style.transform = `translate3d(0, ${curY.toFixed(1)}px, 0) scale(${curScale.toFixed(3)})`;
-        magazineWrapRef.current.style.pointerEvents = entrance > 0.6 ? "auto" : "none";
+        const rowEl = rowRef.current;
+        const winW = typeof window !== "undefined" ? window.innerWidth : 1200;
+        const winH = typeof window !== "undefined" ? window.innerHeight : 800;
 
-        // Scroll-driven progression: maps p from 0.950 to 0.998 across the 5 editions (0..4)
-        const scrollNorm = Math.max(0, Math.min(1, (p - 0.950) / 0.048));
-        const scrollPos = scrollNorm * 4;
+        // Position of the fallen cards on the road behind the truck (upper-center of viewport)
+        const fallenCardsX = winW / 2;
+        const fallenCardsY = winH * 0.22;
 
-        updateCardTransforms(scrollPos);
+        const rowRect = rowEl ? rowEl.getBoundingClientRect() : null;
 
-        const targetIdx = Math.min(4, Math.max(0, Math.round(scrollPos)));
-        if (targetIdx !== activeIndexRef.current) {
-          activeIndexRef.current = targetIdx;
-          setActiveIndex(targetIdx);
+        showcaseMagazines.forEach((_, idx) => {
+          const el = cardRefs.current[idx];
+          if (!el) return;
+
+          // Staggered timing: one by one cards come on screen from fallen cards
+          const cardStart = 0.952 + idx * 0.006;
+          const cardEnd = cardStart + 0.006;
+
+          // Slot center on screen
+          const slotX = (rowRect ? rowRect.left : winW * 0.2) + el.offsetLeft + el.offsetWidth / 2;
+          const slotY = (rowRect ? rowRect.top : winH * 0.42) + el.offsetTop + el.offsetHeight / 2;
+
+          const deltaX = slotX - fallenCardsX;
+          const deltaY = slotY - fallenCardsY;
+
+          if (p < cardStart) {
+            // Not on screen yet: still resting among the fallen cards on the road
+            el.style.opacity = "0";
+            el.style.pointerEvents = "none";
+            el.style.transform = `translate3d(${-deltaX.toFixed(1)}px, ${-deltaY.toFixed(1)}px, 0) scale(0.05)`;
+            return;
+          }
+
+          if (p >= cardStart && p < cardEnd) {
+            // Zooming up toward camera onto screen from the fallen cards
+            const t = (p - cardStart) / (cardEnd - cardStart);
+            const easeOut = 1 - Math.pow(1 - t, 3);
+            const burstProgress = Math.pow(t, 0.75);
+
+            const curX = -deltaX * (1 - easeOut);
+            const arc = Math.sin(t * Math.PI) * -45;
+            const curY = -deltaY * (1 - burstProgress) + arc;
+            const curScale = 0.05 + 0.95 * Math.pow(t, 0.85);
+
+            const rotZ = (1 - t) * ((idx - 2) * 10);
+            const rotX = (1 - t) * 22;
+            const opacity = Math.min(1, t * 4.5);
+
+            el.style.opacity = opacity.toFixed(3);
+            el.style.transform = `translate3d(${curX.toFixed(1)}px, ${curY.toFixed(1)}px, 0) scale(${curScale.toFixed(3)}) rotateX(${rotX.toFixed(1)}deg) rotateZ(${rotZ.toFixed(1)}deg)`;
+            el.style.pointerEvents = "none";
+          } else {
+            // p >= cardEnd: Arrived and sits aligned on screen!
+            const isSelected = activeIndexRef.current === idx;
+            el.style.opacity = isSelected ? "1" : "0.85";
+            el.style.transform = isSelected
+              ? "translate3d(0, -6px, 0) scale(1.04)"
+              : "translate3d(0, 0, 0) scale(0.96)";
+            el.style.pointerEvents = "auto";
+          }
+        });
+
+        // Publication controls below fade in once all cards are aligned on screen
+        if (controlsRef.current) {
+          const controlsFade = smoothstep(0.982, 0.988, p);
+          controlsRef.current.style.opacity = controlsFade.toFixed(3);
+          controlsRef.current.style.pointerEvents = controlsFade > 0.6 ? "auto" : "none";
         }
       }
     }
@@ -672,16 +699,16 @@ export const JourneyStory: React.FC = () => {
           Presents the cards one by one in series ("single by single") matching the user reference image. */}
       <div ref={magazineWrapRef} className={styles.magazinePresentationWrap}>
         <div className={magStyles.magazinePresentation}>
-          {/* 5-Card Continuous Carousel Track */}
-          <div className={magStyles.showcaseCardsTrack}>
+          {/* 5 Cards Row - Aligned horizontally across the screen */}
+          <div ref={rowRef} className={styles.cardsAlignedRow}>
             {showcaseMagazines.map((mag, idx) => (
               <div
                 key={mag.id}
                 ref={(el) => {
                   cardRefs.current[idx] = el;
                 }}
-                className={`${magStyles.showcaseCard} ${
-                  activeIndex === idx ? magStyles.showcaseCardActive : ""
+                className={`${styles.alignedCardItem} ${
+                  activeIndex === idx ? styles.alignedCardItemActive : ""
                 }`}
                 onClick={() => handleCardClick(idx, mag)}
                 role="button"
@@ -702,8 +729,8 @@ export const JourneyStory: React.FC = () => {
             ))}
           </div>
 
-          {/* Active Magazine Metadata */}
-          <div className={magStyles.coverMeta}>
+          {/* Active Magazine Metadata & Controls */}
+          <div ref={controlsRef} className={`${magStyles.coverMeta} ${styles.alignedControls}`}>
             <div className={magStyles.editionTag}>
               <span>FEATURED PUBLICATION</span>
               <span className={magStyles.editionDot} aria-hidden="true" />

@@ -258,9 +258,9 @@ const TruckCargoRear: React.FC = () => {
     }
 
     return Array.from({ length: CARD_COUNT }, (_, i) => {
-      // Staggered tumbling out as truck doors swing open (from p = 0.938 to 0.970)
-      const startT = 0.938 + (i / CARD_COUNT) * 0.028;
-      const endT = Math.min(0.998, startT + 0.028);
+      // Staggered tumbling out as truck doors swing open (from p = 0.935 to 0.950)
+      const startT = 0.935 + (i / CARD_COUNT) * 0.012;
+      const endT = Math.min(0.952, startT + 0.012);
 
       return {
         // Starts inside the trailer rear cavity
@@ -302,8 +302,8 @@ const TruckCargoRear: React.FC = () => {
   useFrame(() => {
     const p = progress.current;
 
-    // Keep doors closed and cards hidden until vertical highway finishes (p >= 0.935)
-    if (p < 0.935) {
+    // Keep doors closed and cards hidden until vertical highway text finishes (p >= 0.934)
+    if (p < 0.934) {
       if (leftDoorRef.current) leftDoorRef.current.rotation.y = 0;
       if (rightDoorRef.current) rightDoorRef.current.rotation.y = 0;
       cards.forEach((_, i) => {
@@ -313,8 +313,8 @@ const TruckCargoRear: React.FC = () => {
       return;
     }
 
-    // Door opening: p = 0.935 to 0.958
-    const doorOpen = Math.min(1, Math.max(0, (p - 0.935) / 0.022));
+    // Door opening: p = 0.934 to 0.946
+    const doorOpen = Math.min(1, Math.max(0, (p - 0.934) / 0.012));
     const easeDoor = doorOpen * doorOpen * (3 - 2 * doorOpen);
     if (leftDoorRef.current) leftDoorRef.current.rotation.y = -easeDoor * (Math.PI * 0.72);
     if (rightDoorRef.current) rightDoorRef.current.rotation.y = easeDoor * (Math.PI * 0.72);
@@ -331,7 +331,7 @@ const TruckCargoRear: React.FC = () => {
 
       grp.visible = true;
       if (p >= card.endT) {
-        // Flat on the road surface
+        // Flat on the road surface as fallen cards
         grp.position.set(card.targetX, card.targetY, card.targetZ);
         grp.rotation.set(0, card.targetRotY, 0);
       } else {
@@ -340,7 +340,7 @@ const TruckCargoRear: React.FC = () => {
         const easeT = t * t * (3 - 2 * t);
         const curX = card.startX + (card.targetX - card.startX) * easeT;
         const curZ = card.startZ + (card.targetZ - card.startZ) * easeT;
-        const arc = Math.sin(t * Math.PI) * 1.5;
+        const arc = Math.sin(t * Math.PI) * 1.8;
         const curY = card.startY + (card.targetY - card.startY) * easeT + arc;
 
         grp.position.set(curX, curY, curZ);
@@ -421,15 +421,15 @@ const TruckCargoRear: React.FC = () => {
           }}
           visible={false}
         >
-          {/* Gold foiled card rim */}
+          {/* Gold foiled card rim - scaled for high visibility from overhead camera */}
           <mesh castShadow receiveShadow>
-            <boxGeometry args={[0.92, 0.018, 1.38]} />
+            <boxGeometry args={[1.8, 0.03, 2.5]} />
             <meshStandardMaterial color="#d4af37" metalness={0.85} roughness={0.25} />
           </mesh>
           {/* Front face with marketing/milestone artwork */}
           {cardTextures[card.texIndex] && (
-            <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-              <planeGeometry args={[0.88, 1.34]} />
+            <mesh position={[0, 0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+              <planeGeometry args={[1.72, 2.42]} />
               <meshStandardMaterial
                 map={cardTextures[card.texIndex]}
                 roughness={0.35}
@@ -438,8 +438,8 @@ const TruckCargoRear: React.FC = () => {
             </mesh>
           )}
           {/* Luxury dark back face */}
-          <mesh position={[0, -0.01, 0]} rotation={[Math.PI / 2, 0, 0]}>
-            <planeGeometry args={[0.88, 1.34]} />
+          <mesh position={[0, -0.02, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <planeGeometry args={[1.72, 2.42]} />
             <meshStandardMaterial color="#0b111a" roughness={0.5} metalness={0.2} />
           </mesh>
         </group>
