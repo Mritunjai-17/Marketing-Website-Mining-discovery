@@ -153,6 +153,7 @@ export const JourneyStory: React.FC = () => {
   const leftColRef = useRef<HTMLDivElement>(null);
   const leftSubtextRef = useRef<HTMLDivElement>(null);
   const rightColRef = useRef<HTMLDivElement>(null);
+  const statsTrackRef = useRef<HTMLDivElement>(null);
 
   // Magazine row and card refs
   const rowRef = useRef<HTMLDivElement>(null);
@@ -250,19 +251,19 @@ export const JourneyStory: React.FC = () => {
     // drifts outward and fades away so it is completely gone as the truck goes on.
     if (secondPartRef.current) {
       let opacity = 0;
-      let driftX = 0;
 
-      if (p >= 0.88 && p <= 0.99) {
-        // Smooth entrance (0.88 to 0.92)
-        const fadeIn = smoothstep(0.88, 0.92, p);
-        // Fade out as truck runs vertically down (0.95 to 0.99)
-        const fadeOut = 1 - smoothstep(0.95, 0.99, p);
+      if (p >= 0.88 && p <= 0.995) {
+        // Smooth entrance as road turns downward
+        const fadeIn = smoothstep(0.88, 0.915, p);
+        // Stays visible through the vertical highway run
+        const fadeOut = 1 - smoothstep(0.975, 1.0, p);
         opacity = fadeIn * fadeOut;
 
-        // Clean roadside drift: as truck advances forward, text on sides drifts outward
-        if (p > 0.92) {
-          const passP = Math.min(1, Math.max(0, (p - 0.92) / 0.065));
-          driftX = passP * 50;
+        // Auto-scroll the stats track on the right in lockstep with the truck driving down the road
+        if (statsTrackRef.current) {
+          const statsProgress = Math.max(0, Math.min(1, (p - 0.90) / 0.085));
+          const maxScroll = Math.max(0, statsTrackRef.current.scrollHeight - statsTrackRef.current.clientHeight);
+          statsTrackRef.current.scrollTop = statsProgress * maxScroll;
         }
       } else {
         opacity = 0;
@@ -270,16 +271,6 @@ export const JourneyStory: React.FC = () => {
 
       secondPartRef.current.style.opacity = opacity.toFixed(3);
       secondPartRef.current.style.pointerEvents = opacity > 0.5 ? "auto" : "none";
-
-      if (leftColRef.current) {
-        leftColRef.current.style.transform = `translate3d(${-driftX.toFixed(1)}px, 0, 0)`;
-      }
-      if (leftSubtextRef.current) {
-        leftSubtextRef.current.style.transform = `translate3d(${-driftX.toFixed(1)}px, 0, 0)`;
-      }
-      if (rightColRef.current) {
-        rightColRef.current.style.transform = `translate3d(${driftX.toFixed(1)}px, 0, 0)`;
-      }
     }
 
     // 3. Cards emerge from truck ONE BY ONE and ALL REMAIN ALIGNED ON SCREEN (NO TEXT)
@@ -376,83 +367,86 @@ export const JourneyStory: React.FC = () => {
         </div>
       </div>
 
-      {/* SECOND PART (VERTICAL ROAD HERO): POSTER EDITORIAL MATCHING REFERENCE */}
+      {/* SECOND PART (VERTICAL ROAD HERO): MINING DISCOVERY EDITORIAL & STATS */}
       <div
         ref={secondPartRef}
         className={styles.secondPartSidesWrap}
-        aria-label="Reliability at every milestone"
+        aria-label="One platform. Every major mining audience."
       >
-        {/* Top Gauge Arc (matching reference website) */}
-        <div className={styles.topGaugeMeter} aria-hidden="true">
-          <svg className={styles.topGaugeSvg} viewBox="0 0 100 50">
-            <path
-              d="M 10 50 A 40 40 0 0 1 90 50"
-              fill="none"
-              stroke="#0f172a"
-              strokeWidth="2.5"
-            />
-            <circle cx="50" cy="46" r="3.5" fill="#0f172a" />
-          </svg>
-        </div>
-
-        {/* Left Side: 00 KM/H + Big Bold Poster Headline */}
+        {/* Left Side: Big Heading (Matching user picture) */}
         <div ref={leftColRef} className={styles.secondPartLeftSide}>
-          <div className={styles.speedometerBadge}>00 KM/H</div>
-          <h2 className={styles.secondPartHeadline}>
-            <span className={styles.headlineMuted}>RELIABILITY</span>
-            <span className={styles.headlineDark}>AT EVERY</span>
-            <span className={styles.headlineDark}>MILESTONE</span>
+          <h2 className={styles.secondPartBigHeadline}>
+            &ldquo;One platform. Every major mining audience.&rdquo;
           </h2>
         </div>
 
         {/* Left Side: Subtext Little Down (Bottom-Left) */}
         <div ref={leftSubtextRef} className={styles.secondPartLeftBottom}>
           <p className={styles.secondPartDescription}>
-            With every service under one roof and one accountable team, your supply chain moves the way your business demands: predictably, transparently, and without excuses.
+            Mining Discovery bridges the gap between mining companies and the global investment community through targeted editorial coverage and market intelligence. Connecting global mining companies directly with institutional investors, analysts, and executive decision-makers.
           </p>
         </div>
 
-        {/* Right Side: Features */}
+        {/* Right Side: Stats & Editorial Text Track (Matching user pictures) */}
         <div ref={rightColRef} className={styles.secondPartRightSide}>
-          {/* Feature 1 */}
-          <div className={styles.featureBlock}>
-            <div className={styles.featureIconWrap}>
-              <svg className={styles.featureIconSvg} viewBox="0 0 32 32" fill="currentColor">
-                <circle cx="16" cy="6" r="1.8" />
-                <circle cx="11" cy="11" r="1.8" />
-                <circle cx="16" cy="11" r="2.2" />
-                <circle cx="21" cy="11" r="1.8" />
-                <circle cx="6" cy="16" r="1.8" />
-                <circle cx="11" cy="16" r="2.2" />
-                <circle cx="16" cy="16" r="2.8" />
-                <circle cx="21" cy="16" r="2.2" />
-                <circle cx="26" cy="16" r="1.8" />
-                <circle cx="11" cy="21" r="1.8" />
-                <circle cx="16" cy="21" r="2.2" />
-                <circle cx="21" cy="21" r="1.8" />
-                <circle cx="16" cy="26" r="1.8" />
-              </svg>
+          <div ref={statsTrackRef} className={styles.statsScrollTrack}>
+            {/* Stat 1 */}
+            <div className={styles.statEditorialItem}>
+              <div className={styles.secondPartStatValue}>150,000+</div>
+              <div className={styles.secondPartStatLabel}>ACTIVE MONTHLY AUDIENCE</div>
+              <p className={styles.secondPartStatDesc}>
+                Institutional investors, mining executives, and industry analysts reading market updates.
+              </p>
             </div>
-            <h3 className={styles.featureTitle}>REAL-TIME FREIGHT TRACKING</h3>
-            <p className={styles.featureDesc}>
-              Know exactly where your cargo is at every milestone. Live visibility means faster decisions and zero guesswork.
-            </p>
-          </div>
 
-          <div className={styles.featureDivider} />
-
-          {/* Feature 2 */}
-          <div className={styles.featureBlock}>
-            <div className={styles.featureIconWrap}>
-              <svg className={styles.featureIconSvg} viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.8">
-                <circle cx="16" cy="16" r="13" />
-                <ellipse cx="16" cy="16" rx="6" ry="13" />
-                <line x1="3" y1="16" x2="29" y2="16" />
-                <line x1="5.5" y1="10" x2="26.5" y2="10" />
-                <line x1="5.5" y1="22" x2="26.5" y2="22" />
-              </svg>
+            {/* Stat 2 */}
+            <div className={styles.statEditorialItem}>
+              <div className={styles.secondPartStatValue}>40,000+</div>
+              <div className={styles.secondPartStatLabel}>NEWSLETTER SUBSCRIBERS</div>
+              <p className={styles.secondPartStatDesc}>
+                Weekly executive briefing delivered directly to decision-maker inboxes worldwide.
+              </p>
             </div>
-            <h3 className={styles.featureTitle}>GLOBAL NETWORK</h3>
+
+            {/* Stat 3 */}
+            <div className={styles.statEditorialItem}>
+              <div className={styles.secondPartStatValue}>450+</div>
+              <div className={styles.secondPartStatLabel}>MINING COMPANIES FEATURED</div>
+              <p className={styles.secondPartStatDesc}>
+                From junior exploration companies to Tier-1 global mining producers.
+              </p>
+            </div>
+
+            {/* Stat 4 */}
+            <div className={styles.statEditorialItem}>
+              <div className={styles.secondPartStatValue}>8+</div>
+              <div className={styles.secondPartStatLabel}>YEARS INDUSTRY COVERAGE</div>
+              <p className={styles.secondPartStatDesc}>
+                Established track record of independent editorial authority and market intelligence.
+              </p>
+            </div>
+
+            {/* Stat 5 */}
+            <div className={styles.statEditorialItem}>
+              <div className={styles.secondPartStatValue}>30+</div>
+              <div className={styles.secondPartStatLabel}>MINING JURISDICTIONS</div>
+              <p className={styles.secondPartStatDesc}>
+                Extensive reach across key financial capitals and global mining jurisdictions.
+              </p>
+            </div>
+
+            {/* Editorial Callout Block */}
+            <div className={styles.statCalloutBlock}>
+              <p className={styles.statCalloutHeadline}>
+                With direct access to institutional investors and industry analysts, your company&apos;s news reaches the decision-makers who matter most in global mining.
+              </p>
+              <div className={styles.statCalloutBulletRow}>
+                <span className={styles.statCalloutBullet}>•</span>
+                <p className={styles.statCalloutBulletText}>
+                  That means no fragmented messaging between channels. No news lost in handoffs. Just one dedicated team, accountable for reaching decision-makers worldwide.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>

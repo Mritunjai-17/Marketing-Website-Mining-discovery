@@ -870,13 +870,10 @@
 }
 
 /* ==========================================================================
-   SECOND PART (VERTICAL ROAD HERO): EDITORIAL POSTER
-   Matches unitedcarriers.com reference layout:
-   - Top gauge arc at top edge
-   - 00 KM/H badge
-   - Big bold uppercase headline on left side: "RELIABILITY AT EVERY MILESTONE"
-   - Subtext placed "little down" near bottom-left
-   - Feature blocks with icons on the right side
+   SECOND PART (VERTICAL ROAD HERO): MINING DISCOVERY EDITORIAL & STATS
+   - Left Side: Big editorial headline at top-left
+   - Left Side: Subtext positioned "little down" near bottom-left
+   - Right Side: Complete interactive/auto-scrolling stats and callout track
    ========================================================================== */
 
 .secondPartSidesWrap {
@@ -889,28 +886,12 @@
   transition: opacity 0.2s ease-out;
 }
 
-/* Top Gauge Meter */
-.topGaugeMeter {
-  position: absolute;
-  top: 0;
-  left: clamp(2rem, 5vw, 4.5rem);
-  width: 72px;
-  height: 36px;
-  pointer-events: none;
-}
-
-.topGaugeSvg {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-/* Left Column: 00 KM/H + Big Headline */
+/* Left Column: Big Headline */
 .secondPartLeftSide {
   position: absolute;
-  left: clamp(2rem, 5vw, 4.5rem);
-  top: clamp(3.2rem, 9.5vh, 5.5rem);
-  max-width: clamp(320px, 34vw, 540px);
+  left: clamp(1.8rem, 4vw, 4.5rem);
+  top: clamp(3.5rem, 11vh, 7rem);
+  max-width: clamp(320px, 32vw, 500px);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -918,43 +899,23 @@
   will-change: transform;
 }
 
-.speedometerBadge {
-  font-family: var(--font-mono, monospace), system-ui, sans-serif;
-  font-size: clamp(0.72rem, 0.8vw, 0.82rem);
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: #111827;
-  margin-bottom: 1.1rem;
-}
-
-.secondPartHeadline {
-  font-family: var(--font-sans-custom), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  font-size: clamp(2.5rem, 4.5vw, 4.8rem);
-  font-weight: 800;
-  line-height: 0.94;
-  letter-spacing: -0.035em;
-  text-transform: uppercase;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
+.secondPartBigHeadline {
+  font-family: var(--font-serif, "Playfair Display", Georgia, serif);
+  font-size: clamp(2.3rem, 3.8vw, 4.2rem);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: #0b1f3a;
   margin: 0;
-}
-
-.headlineMuted {
-  color: #8e96a2;
-}
-
-.headlineDark {
-  color: #0f172a;
+  text-shadow: 0 1px 2px rgba(11, 31, 58, 0.05);
 }
 
 /* Left Subtext "little down" (bottom-left) */
 .secondPartLeftBottom {
   position: absolute;
-  left: clamp(2rem, 5vw, 4.5rem);
-  bottom: clamp(2.2rem, 7vh, 4.8rem);
-  max-width: clamp(280px, 26vw, 420px);
+  left: clamp(1.8rem, 4vw, 4.5rem);
+  bottom: clamp(2.5rem, 8vh, 5.5rem);
+  max-width: clamp(280px, 28vw, 420px);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -965,69 +926,114 @@
 .secondPartDescription {
   font-family: var(--font-sans-custom), system-ui, -apple-system, sans-serif;
   font-size: clamp(0.85rem, 0.92vw, 1.02rem);
-  line-height: 1.55;
-  color: #1e293b;
-  font-weight: 500;
+  line-height: 1.6;
+  color: #3a3d42;
+  font-weight: 400;
   margin: 0;
 }
 
-/* Right Column: Features */
+/* Right Column: Stats & Coverage Track */
 .secondPartRightSide {
   position: absolute;
-  right: clamp(2rem, 5vw, 4.5rem);
-  top: clamp(4.5rem, 15vh, 8.5rem);
-  max-width: clamp(250px, 23vw, 340px);
+  right: clamp(1.8rem, 4vw, 4.5rem);
+  top: clamp(3.5rem, 10vh, 6.5rem);
+  bottom: clamp(2rem, 6vh, 4.5rem);
+  width: clamp(280px, 26vw, 380px);
+  pointer-events: auto;
   display: flex;
   flex-direction: column;
-  gap: 2.2rem;
-  align-items: flex-start;
-  text-align: left;
   will-change: transform;
 }
 
-.featureBlock {
+.statsScrollTrack {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2.2rem;
+  padding-right: 0.5rem;
+}
+
+.statsScrollTrack::-webkit-scrollbar {
+  display: none;
+}
+
+.statEditorialItem {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.75rem;
+  text-align: left;
+  padding-bottom: 1.8rem;
+  border-bottom: 1px solid rgba(15, 31, 58, 0.12);
 }
 
-.featureIconWrap {
-  width: 36px;
-  height: 36px;
-  color: #0f172a;
+.secondPartStatValue {
+  font-family: var(--font-serif, "Playfair Display", Georgia, serif);
+  font-size: clamp(2.8rem, 4.2vw, 4.5rem);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: #0b1f3a;
 }
 
-.featureIconSvg {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-.featureTitle {
-  font-family: var(--font-sans-custom), system-ui, sans-serif;
-  font-size: clamp(1.05rem, 1.25vw, 1.35rem);
-  font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: -0.015em;
+.secondPartStatLabel {
+  font-family: var(--font-sans-custom), system-ui, -apple-system, sans-serif;
+  font-size: clamp(0.68rem, 0.76vw, 0.8rem);
+  font-weight: 700;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: #0f172a;
+  color: #b8860b;
+  margin-top: 0.45rem;
+}
+
+.secondPartStatDesc {
+  font-family: var(--font-sans-custom), system-ui, -apple-system, sans-serif;
+  font-size: clamp(0.82rem, 0.9vw, 0.95rem);
+  line-height: 1.5;
+  color: #57595e;
+  margin: 0.35rem 0 0 0;
+}
+
+/* Callout block at bottom of stats */
+.statCalloutBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  padding-top: 0.5rem;
+  text-align: left;
+}
+
+.statCalloutHeadline {
+  font-family: var(--font-sans-custom), system-ui, sans-serif;
+  font-size: clamp(0.92rem, 1.05vw, 1.15rem);
+  font-weight: 600;
+  line-height: 1.45;
+  color: #0b1f3a;
   margin: 0;
 }
 
-.featureDesc {
+.statCalloutBulletRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.statCalloutBullet {
+  color: #0b1f3a;
+  font-size: 1.2rem;
+  line-height: 1.3;
+  font-weight: 700;
+}
+
+.statCalloutBulletText {
   font-family: var(--font-sans-custom), system-ui, sans-serif;
-  font-size: clamp(0.78rem, 0.85vw, 0.92rem);
+  font-size: clamp(0.82rem, 0.9vw, 0.95rem);
   line-height: 1.5;
   color: #475569;
   margin: 0;
-}
-
-.featureDivider {
-  width: 100%;
-  height: 1px;
-  background: rgba(15, 23, 42, 0.1);
-  margin: 0.25rem 0;
 }
 
 /* Responsive */
@@ -1037,7 +1043,7 @@
     top: 3.5rem;
     max-width: 280px;
   }
-  .secondPartHeadline {
+  .secondPartBigHeadline {
     font-size: 2.1rem;
   }
   .secondPartLeftBottom {
@@ -1048,11 +1054,12 @@
   .secondPartRightSide {
     right: 1.25rem;
     top: 3.5rem;
-    max-width: 230px;
+    bottom: 2rem;
+    width: 240px;
     gap: 1.5rem;
   }
-  .featureTitle {
-    font-size: 1.0rem;
+  .secondPartStatValue {
+    font-size: 2.2rem;
   }
 }
 
@@ -1063,7 +1070,7 @@
     top: 3.5rem;
     max-width: calc(100% - 2rem);
   }
-  .secondPartHeadline {
+  .secondPartBigHeadline {
     font-size: 1.9rem;
   }
   .secondPartLeftBottom {
