@@ -449,6 +449,84 @@ const TruckCargoRear: React.FC = () => {
 };
 
 /**
+ * Trailer side branding: "MINING DISCOVERY" in bold yellow livery.
+ */
+const TruckSideBranding: React.FC = () => {
+  const texture = useMemo(() => {
+    if (typeof document === "undefined") return null;
+    const canvas = document.createElement("canvas");
+    canvas.width = 2048;
+    canvas.height = 512;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    // Modern bold sans-serif lettering
+    ctx.font = "900 156px 'Montserrat', 'Inter', 'Segoe UI', Arial, sans-serif";
+    if ("letterSpacing" in ctx) {
+      (ctx as any).letterSpacing = "8px";
+    }
+    // High-visibility crisp shadow for contrast on white paint
+    ctx.shadowColor = "rgba(0, 0, 0, 0.32)";
+    ctx.shadowBlur = 10;
+    ctx.shadowOffsetX = 3;
+    ctx.shadowOffsetY = 4;
+    ctx.fillStyle = "#f5be18"; // Vibrant yellow
+    ctx.fillText("MINING DISCOVERY", canvas.width / 2, canvas.height / 2);
+    ctx.restore();
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.needsUpdate = true;
+    return tex;
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      texture?.dispose();
+    };
+  }, [texture]);
+
+  if (!texture) return null;
+
+  return (
+    <group position={[0, 2.46, 5.2]}>
+      {/* Right side facing camera (+X) */}
+      <mesh position={[1.28, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
+        <planeGeometry args={[9.8, 2.0]} />
+        <meshStandardMaterial
+          map={texture}
+          transparent
+          roughness={0.35}
+          metalness={0.15}
+          depthWrite={false}
+          polygonOffset
+          polygonOffsetFactor={-1}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+      {/* Left side (-X) */}
+      <mesh position={[-1.28, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
+        <planeGeometry args={[9.8, 2.0]} />
+        <meshStandardMaterial
+          map={texture}
+          transparent
+          roughness={0.35}
+          metalness={0.15}
+          depthWrite={false}
+          polygonOffset
+          polygonOffsetFactor={-1}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+    </group>
+  );
+};
+
+/**
  * Built-in truck body.
  *
  * A modern aerodynamic tractor-trailer: rounded cab, roof fairing, side
@@ -615,6 +693,9 @@ const BuiltInTruck: React.FC<{
       >
         <BodyPaint color="#f7f8f9" roughness={0.44} />
       </RoundedBox>
+
+      {/* Side branding: "MINING DISCOVERY" in yellow lettering */}
+      <TruckSideBranding />
 
       {/* Animated rear cargo bay, swinging doors, and cascading falling cards */}
       <TruckCargoRear />
