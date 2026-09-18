@@ -887,9 +887,9 @@
 
 .secondPartLeftSide {
   position: absolute;
-  left: clamp(2rem, 5vw, 6rem);
-  top: clamp(20%, 32vh, 42%);
-  max-width: clamp(280px, 26vw, 380px);
+  left: clamp(1.25rem, 3vw, 3.5rem);
+  top: clamp(4.5rem, 13.5vh, 6.5rem);
+  max-width: clamp(250px, 23vw, 340px);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -898,46 +898,46 @@
 }
 
 .secondPartDivider {
-  width: 44px;
+  width: 40px;
   height: 2px;
   background: #b8860b;
-  margin-bottom: 1rem;
+  margin-bottom: 0.85rem;
 }
 
 .secondPartEyebrow {
   font-family: var(--font-sans-custom), system-ui, -apple-system, sans-serif;
-  font-size: clamp(0.68rem, 0.76vw, 0.78rem);
+  font-size: clamp(0.66rem, 0.74vw, 0.76rem);
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: #b8860b;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.65rem;
   display: block;
 }
 
 .secondPartHeadline {
   font-family: var(--font-serif, "Playfair Display", Georgia, serif);
-  font-size: clamp(1.4rem, 2vw, 2.1rem);
+  font-size: clamp(1.3rem, 1.8vw, 1.95rem);
   font-weight: 400;
   line-height: 1.18;
   letter-spacing: -0.015em;
   color: #0b1f3a;
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.85rem 0;
 }
 
 .secondPartDescription {
   font-family: var(--font-sans-custom), system-ui, -apple-system, sans-serif;
-  font-size: clamp(0.82rem, 0.92vw, 0.96rem);
-  line-height: 1.62;
+  font-size: clamp(0.8rem, 0.88vw, 0.92rem);
+  line-height: 1.58;
   color: #3a3d42;
   margin: 0;
 }
 
 .secondPartRightSide {
   position: absolute;
-  right: clamp(2rem, 5vw, 6rem);
-  top: clamp(24%, 35vh, 44%);
-  max-width: clamp(260px, 24vw, 340px);
+  right: clamp(1.25rem, 3vw, 3.5rem);
+  top: clamp(4.8rem, 15vh, 7.5rem);
+  max-width: clamp(230px, 21vw, 310px);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -947,7 +947,7 @@
 
 .secondPartStatValue {
   font-family: var(--font-serif, "Playfair Display", Georgia, serif);
-  font-size: clamp(2.8rem, 4.5vw, 4.6rem);
+  font-size: clamp(2.6rem, 4.2vw, 4.4rem);
   font-weight: 400;
   line-height: 1;
   letter-spacing: -0.02em;
@@ -956,54 +956,54 @@
 
 .secondPartStatLabel {
   font-family: var(--font-sans-custom), system-ui, -apple-system, sans-serif;
-  font-size: clamp(0.68rem, 0.76vw, 0.78rem);
+  font-size: clamp(0.66rem, 0.74vw, 0.76rem);
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: #b8860b;
-  margin-top: 0.5rem;
+  margin-top: 0.45rem;
 }
 
 .secondPartStatDesc {
   font-family: var(--font-sans-custom), system-ui, -apple-system, sans-serif;
-  font-size: clamp(0.82rem, 0.92vw, 0.94rem);
-  line-height: 1.5;
+  font-size: clamp(0.8rem, 0.88vw, 0.92rem);
+  line-height: 1.48;
   color: #57595e;
   margin: 0.35rem 0 0 0;
 }
 
 @media (max-width: 900px) {
   .secondPartLeftSide {
-    left: 1.5rem;
-    top: 15%;
+    left: 1.25rem;
+    top: 4.25rem;
     max-width: 240px;
   }
   .secondPartRightSide {
-    right: 1.5rem;
-    top: 15%;
-    max-width: 220px;
+    right: 1.25rem;
+    top: 4.25rem;
+    max-width: 210px;
   }
   .secondPartHeadline {
-    font-size: 1.25rem;
+    font-size: 1.15rem;
   }
   .secondPartStatValue {
-    font-size: 2.4rem;
+    font-size: 2.2rem;
   }
 }
 
 @media (max-width: 640px) {
   .secondPartLeftSide {
-    left: 1.25rem;
-    right: 1.25rem;
-    top: 10%;
-    max-width: calc(100% - 2.5rem);
+    left: 1rem;
+    right: 1rem;
+    top: 4rem;
+    max-width: calc(100% - 2rem);
   }
   .secondPartRightSide {
-    left: 1.25rem;
-    right: 1.25rem;
+    left: 1rem;
+    right: 1rem;
     top: auto;
-    bottom: 15%;
-    max-width: calc(100% - 2.5rem);
+    bottom: 12%;
+    max-width: calc(100% - 2rem);
   }
   .secondPartDescription {
     display: none;
