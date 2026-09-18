@@ -150,6 +150,8 @@ export const JourneyStory: React.FC = () => {
   const speedometerRef = useRef<HTMLDivElement>(null);
   const hotspotRef = useRef<HTMLDivElement>(null);
   const secondPartRef = useRef<HTMLDivElement>(null);
+  const leftColRef = useRef<HTMLDivElement>(null);
+  const rightColRef = useRef<HTMLDivElement>(null);
 
   // Magazine row and card refs
   const rowRef = useRef<HTMLDivElement>(null);
@@ -255,13 +257,42 @@ export const JourneyStory: React.FC = () => {
       hotspotRef.current.style.pointerEvents = showHotspot > 0.5 ? "auto" : "none";
     }
 
-    // Second Part (Rear chase view) Market Influence & Reach text data from reference website
+    // Second Part (Rear chase view) roadside text animation:
+    // Text fades in on sides as rear view establishes, then as truck moves forward,
+    // drifts outward and fades away so it is completely gone as the truck goes on.
     if (secondPartRef.current) {
-      const showSecondPart = smoothstep(0.86, 0.91, p);
-      const enterY = (1 - showSecondPart) * 20;
-      secondPartRef.current.style.opacity = showSecondPart.toFixed(3);
-      secondPartRef.current.style.transform = `translate3d(0, ${enterY.toFixed(1)}px, 0)`;
-      secondPartRef.current.style.pointerEvents = showSecondPart > 0.5 ? "auto" : "none";
+      let opacity = 0;
+      let leftX = 0;
+      let rightX = 0;
+      let driftY = 0;
+
+      if (p >= 0.86 && p <= 0.985) {
+        // Smooth entrance (0.86 to 0.905)
+        const fadeIn = smoothstep(0.86, 0.905, p);
+        // Fade out as truck drives on (0.93 to 0.98)
+        const fadeOut = 1 - smoothstep(0.93, 0.98, p);
+        opacity = fadeIn * fadeOut;
+
+        // Roadside drift: as truck advances forward, text on sides drifts outward
+        if (p > 0.905) {
+          const passP = Math.min(1, Math.max(0, (p - 0.905) / 0.075));
+          leftX = -passP * 70;
+          rightX = passP * 70;
+          driftY = passP * 30;
+        }
+      } else {
+        opacity = 0;
+      }
+
+      secondPartRef.current.style.opacity = opacity.toFixed(3);
+      secondPartRef.current.style.pointerEvents = opacity > 0.5 ? "auto" : "none";
+
+      if (leftColRef.current) {
+        leftColRef.current.style.transform = `translate3d(${leftX.toFixed(1)}px, ${driftY.toFixed(1)}px, 0)`;
+      }
+      if (rightColRef.current) {
+        rightColRef.current.style.transform = `translate3d(${rightX.toFixed(1)}px, ${driftY.toFixed(1)}px, 0)`;
+      }
     }
 
     // 3. Cards emerge from truck ONE BY ONE and ALL REMAIN ALIGNED ON SCREEN (NO TEXT)
@@ -368,43 +399,37 @@ export const JourneyStory: React.FC = () => {
         <div className={styles.hotspotDot} />
       </div>
 
-      {/* SECOND PART (REAR CHASE VIEW): MARKET INFLUENCE & REACH TEXT DATA */}
+      {/* SECOND PART (REAR CHASE VIEW): TEXT ON SIDES (NO PICTURE, NO CARD) */}
       <div
         ref={secondPartRef}
-        className={styles.secondPartOverlay}
+        className={styles.secondPartSidesWrap}
         aria-label="Market Influence & Reach"
       >
-        <div className={styles.secondPartCard}>
-          <div className={styles.secondPartImageWrap}>
-            <img
-              src="/images/engine/financial_terminal.jpg"
-              alt="Institutional investors and analysts analyzing real-time financial market terminals and charts"
-              className={styles.secondPartImage}
-            />
+        {/* Left Side: Headline & Description */}
+        <div ref={leftColRef} className={styles.secondPartLeftSide}>
+          <div className={styles.secondPartDivider} />
+          <span className={styles.secondPartEyebrow}>
+            MARKET INFLUENCE &amp; REACH
+          </span>
+          <h2 className={styles.secondPartHeadline}>
+            &ldquo;One platform. Every major mining audience.&rdquo;
+          </h2>
+          <p className={styles.secondPartDescription}>
+            Mining Discovery bridges the gap between mining companies and the global investment community through targeted editorial coverage and market intelligence. Connecting global mining companies directly with institutional investors, analysts, and executive decision-makers.
+          </p>
+        </div>
+
+        {/* Right Side: Stat Metric */}
+        <div ref={rightColRef} className={styles.secondPartRightSide}>
+          <div className={styles.secondPartStatValue}>
+            150,000+
           </div>
-          <div className={styles.secondPartContent}>
-            <div className={styles.secondPartDivider} />
-            <span className={styles.secondPartEyebrow}>
-              MARKET INFLUENCE &amp; REACH
-            </span>
-            <h2 className={styles.secondPartHeadline}>
-              &ldquo;One platform. Every major mining audience.&rdquo;
-            </h2>
-            <p className={styles.secondPartDescription}>
-              Mining Discovery bridges the gap between mining companies and the global investment community through targeted editorial coverage and market intelligence. Connecting global mining companies directly with institutional investors, analysts, and executive decision-makers.
-            </p>
-            <div className={styles.secondPartStat}>
-              <div className={styles.secondPartStatValue}>
-                150,000+
-              </div>
-              <div className={styles.secondPartStatLabel}>
-                ACTIVE MONTHLY AUDIENCE
-              </div>
-              <p className={styles.secondPartStatDesc}>
-                Institutional investors, mining executives, and industry analysts reading market updates.
-              </p>
-            </div>
+          <div className={styles.secondPartStatLabel}>
+            ACTIVE MONTHLY AUDIENCE
           </div>
+          <p className={styles.secondPartStatDesc}>
+            Institutional investors, mining executives, and industry analysts reading market updates.
+          </p>
         </div>
       </div>
 
