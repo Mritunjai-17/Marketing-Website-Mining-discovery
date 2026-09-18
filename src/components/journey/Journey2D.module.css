@@ -966,21 +966,21 @@
   flex-direction: column;
   align-items: flex-start;
   text-align: left;
-  padding-bottom: clamp(2.8rem, 5.5vh, 4.5rem);
-  margin-bottom: clamp(2.2rem, 4.5vh, 3.8rem);
+  padding-bottom: clamp(4.5rem, 9vh, 7rem);
+  margin-bottom: clamp(4rem, 8vh, 6.5rem);
   border-bottom: 1px solid rgba(15, 31, 58, 0.12);
 }
 
 .statEditorialItem:last-child {
   border-bottom: none;
   margin-bottom: 0;
-  padding-bottom: 2rem;
+  padding-bottom: clamp(3rem, 6vh, 5rem);
 }
 
 .statSignWrap {
-  width: 44px;
-  height: 48px;
-  margin-bottom: 1.25rem;
+  width: 46px;
+  height: 46px;
+  margin-bottom: clamp(1.4rem, 2.2vh, 2rem);
   display: flex;
   align-items: center;
   justify-content: flex-start;

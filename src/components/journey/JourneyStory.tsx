@@ -392,60 +392,39 @@ export const JourneyStory: React.FC = () => {
           <div ref={statsTrackRef} className={styles.statsScrollTrack}>
             {/* Point 1: 150,000+ Active Monthly Audience */}
             <div className={styles.statEditorialItem}>
-              {/* Sign 1: Audience Location Beacon (matching Pic 1) */}
+              {/* Sign 1: Audience & Executive Investor Profile */}
               <div className={styles.statSignWrap} aria-hidden="true">
-                <svg className={styles.statItemSign} viewBox="0 0 36 44" fill="none">
+                <svg className={styles.statItemSign} viewBox="0 0 48 48" fill="none">
                   {/* Subtle matrix lattice background */}
-                  <g opacity="0.22" fill="#0b1f3a">
-                    <circle cx="6" cy="6" r="0.85" />
-                    <circle cx="12" cy="6" r="0.85" />
-                    <circle cx="18" cy="6" r="0.85" />
-                    <circle cx="24" cy="6" r="0.85" />
-                    <circle cx="30" cy="6" r="0.85" />
-                    <circle cx="6" cy="12" r="0.85" />
-                    <circle cx="12" cy="12" r="0.85" />
-                    <circle cx="18" cy="12" r="0.85" />
-                    <circle cx="24" cy="12" r="0.85" />
-                    <circle cx="30" cy="12" r="0.85" />
-                    <circle cx="6" cy="18" r="0.85" />
-                    <circle cx="12" cy="18" r="0.85" />
-                    <circle cx="18" cy="18" r="0.85" />
-                    <circle cx="24" cy="18" r="0.85" />
-                    <circle cx="30" cy="18" r="0.85" />
-                    <circle cx="6" cy="24" r="0.85" />
-                    <circle cx="12" cy="24" r="0.85" />
-                    <circle cx="18" cy="24" r="0.85" />
-                    <circle cx="24" cy="24" r="0.85" />
-                    <circle cx="30" cy="24" r="0.85" />
-                    <circle cx="6" cy="30" r="0.85" />
-                    <circle cx="12" cy="30" r="0.85" />
-                    <circle cx="18" cy="30" r="0.85" />
-                    <circle cx="24" cy="30" r="0.85" />
-                    <circle cx="30" cy="30" r="0.85" />
-                    <circle cx="6" cy="36" r="0.85" />
-                    <circle cx="12" cy="36" r="0.85" />
-                    <circle cx="18" cy="36" r="0.85" />
-                    <circle cx="24" cy="36" r="0.85" />
-                    <circle cx="30" cy="36" r="0.85" />
+                  <g opacity="0.18" fill="#0b1f3a">
+                    <circle cx="4" cy="4" r="0.85" /><circle cx="8" cy="4" r="0.85" /><circle cx="12" cy="4" r="0.85" /><circle cx="16" cy="4" r="0.85" /><circle cx="20" cy="4" r="0.85" /><circle cx="24" cy="4" r="0.85" /><circle cx="28" cy="4" r="0.85" /><circle cx="32" cy="4" r="0.85" /><circle cx="36" cy="4" r="0.85" /><circle cx="40" cy="4" r="0.85" /><circle cx="44" cy="4" r="0.85" />
+                    <circle cx="4" cy="8" r="0.85" /><circle cx="8" cy="8" r="0.85" /><circle cx="12" cy="8" r="0.85" /><circle cx="16" cy="8" r="0.85" /><circle cx="20" cy="8" r="0.85" /><circle cx="24" cy="8" r="0.85" /><circle cx="28" cy="8" r="0.85" /><circle cx="32" cy="8" r="0.85" /><circle cx="36" cy="8" r="0.85" /><circle cx="40" cy="8" r="0.85" /><circle cx="44" cy="8" r="0.85" />
+                    <circle cx="4" cy="12" r="0.85" /><circle cx="8" cy="12" r="0.85" /><circle cx="12" cy="12" r="0.85" /><circle cx="16" cy="12" r="0.85" /><circle cx="20" cy="12" r="0.85" /><circle cx="24" cy="12" r="0.85" /><circle cx="28" cy="12" r="0.85" /><circle cx="32" cy="12" r="0.85" /><circle cx="36" cy="12" r="0.85" /><circle cx="40" cy="12" r="0.85" /><circle cx="44" cy="12" r="0.85" />
+                    <circle cx="4" cy="16" r="0.85" /><circle cx="8" cy="16" r="0.85" /><circle cx="12" cy="16" r="0.85" /><circle cx="16" cy="16" r="0.85" /><circle cx="20" cy="16" r="0.85" /><circle cx="24" cy="16" r="0.85" /><circle cx="28" cy="16" r="0.85" /><circle cx="32" cy="16" r="0.85" /><circle cx="36" cy="16" r="0.85" /><circle cx="40" cy="16" r="0.85" /><circle cx="44" cy="16" r="0.85" />
+                    <circle cx="4" cy="20" r="0.85" /><circle cx="8" cy="20" r="0.85" /><circle cx="12" cy="20" r="0.85" /><circle cx="16" cy="20" r="0.85" /><circle cx="20" cy="20" r="0.85" /><circle cx="24" cy="20" r="0.85" /><circle cx="28" cy="20" r="0.85" /><circle cx="32" cy="20" r="0.85" /><circle cx="36" cy="20" r="0.85" /><circle cx="40" cy="20" r="0.85" /><circle cx="44" cy="20" r="0.85" />
+                    <circle cx="4" cy="24" r="0.85" /><circle cx="8" cy="24" r="0.85" /><circle cx="12" cy="24" r="0.85" /><circle cx="16" cy="24" r="0.85" /><circle cx="20" cy="24" r="0.85" /><circle cx="24" cy="24" r="0.85" /><circle cx="28" cy="24" r="0.85" /><circle cx="32" cy="24" r="0.85" /><circle cx="36" cy="24" r="0.85" /><circle cx="40" cy="24" r="0.85" /><circle cx="44" cy="24" r="0.85" />
+                    <circle cx="4" cy="28" r="0.85" /><circle cx="8" cy="28" r="0.85" /><circle cx="12" cy="28" r="0.85" /><circle cx="16" cy="28" r="0.85" /><circle cx="20" cy="28" r="0.85" /><circle cx="24" cy="28" r="0.85" /><circle cx="28" cy="28" r="0.85" /><circle cx="32" cy="28" r="0.85" /><circle cx="36" cy="28" r="0.85" /><circle cx="40" cy="28" r="0.85" /><circle cx="44" cy="28" r="0.85" />
+                    <circle cx="4" cy="32" r="0.85" /><circle cx="8" cy="32" r="0.85" /><circle cx="12" cy="32" r="0.85" /><circle cx="16" cy="32" r="0.85" /><circle cx="20" cy="32" r="0.85" /><circle cx="24" cy="32" r="0.85" /><circle cx="28" cy="32" r="0.85" /><circle cx="32" cy="32" r="0.85" /><circle cx="36" cy="32" r="0.85" /><circle cx="40" cy="32" r="0.85" /><circle cx="44" cy="32" r="0.85" />
+                    <circle cx="4" cy="36" r="0.85" /><circle cx="8" cy="36" r="0.85" /><circle cx="12" cy="36" r="0.85" /><circle cx="16" cy="36" r="0.85" /><circle cx="20" cy="36" r="0.85" /><circle cx="24" cy="36" r="0.85" /><circle cx="28" cy="36" r="0.85" /><circle cx="32" cy="36" r="0.85" /><circle cx="36" cy="36" r="0.85" /><circle cx="40" cy="36" r="0.85" /><circle cx="44" cy="36" r="0.85" />
+                    <circle cx="4" cy="40" r="0.85" /><circle cx="8" cy="40" r="0.85" /><circle cx="12" cy="40" r="0.85" /><circle cx="16" cy="40" r="0.85" /><circle cx="20" cy="40" r="0.85" /><circle cx="24" cy="40" r="0.85" /><circle cx="28" cy="40" r="0.85" /><circle cx="32" cy="40" r="0.85" /><circle cx="36" cy="40" r="0.85" /><circle cx="40" cy="40" r="0.85" /><circle cx="44" cy="40" r="0.85" />
+                    <circle cx="4" cy="44" r="0.85" /><circle cx="8" cy="44" r="0.85" /><circle cx="12" cy="44" r="0.85" /><circle cx="16" cy="44" r="0.85" /><circle cx="20" cy="44" r="0.85" /><circle cx="24" cy="44" r="0.85" /><circle cx="28" cy="44" r="0.85" /><circle cx="32" cy="44" r="0.85" /><circle cx="36" cy="44" r="0.85" /><circle cx="40" cy="44" r="0.85" /><circle cx="44" cy="44" r="0.85" />
                   </g>
-                  {/* Dark dot matrix beacon pin */}
+                  {/* Dark Audience / Executive Investor Profile dots */}
                   <g fill="#0b1f3a">
-                    <circle cx="18" cy="8" r="2.1" />
-                    <circle cx="14" cy="10" r="2.1" />
-                    <circle cx="22" cy="10" r="2.1" />
-                    <circle cx="11" cy="14" r="2.1" />
-                    <circle cx="25" cy="14" r="2.1" />
-                    <circle cx="11" cy="19" r="2.1" />
-                    <circle cx="25" cy="19" r="2.1" />
-                    <circle cx="14" cy="24" r="2.1" />
-                    <circle cx="22" cy="24" r="2.1" />
-                    <circle cx="18" cy="28" r="2.2" />
-                    {/* Baseline indicator dots */}
-                    <circle cx="10" cy="36" r="1.5" />
-                    <circle cx="14" cy="36" r="1.5" />
-                    <circle cx="18" cy="36" r="1.5" />
-                    <circle cx="22" cy="36" r="1.5" />
-                    <circle cx="26" cy="36" r="1.5" />
+                    {/* Head */}
+                    <circle cx="24" cy="6" r="2.1" />
+                    <circle cx="20" cy="9" r="2.0" /><circle cx="24" cy="9" r="2.1" /><circle cx="28" cy="9" r="2.0" />
+                    <circle cx="18" cy="13" r="2.0" /><circle cx="22" cy="13" r="2.0" /><circle cx="26" cy="13" r="2.0" /><circle cx="30" cy="13" r="2.0" />
+                    <circle cx="20" cy="17" r="2.0" /><circle cx="24" cy="17" r="2.1" /><circle cx="28" cy="17" r="2.0" />
+                    <circle cx="24" cy="20" r="2.1" />
+                    {/* Shoulders & Mantle */}
+                    <circle cx="20" cy="24" r="2.0" /><circle cx="24" cy="24" r="2.1" /><circle cx="28" cy="24" r="2.0" />
+                    <circle cx="15" cy="27" r="2.0" /><circle cx="33" cy="27" r="2.0" />
+                    <circle cx="11" cy="31" r="2.0" /><circle cx="37" cy="31" r="2.0" />
+                    <circle cx="8" cy="36" r="2.0" /><circle cx="40" cy="36" r="2.0" />
+                    {/* Base */}
+                    <circle cx="8" cy="40" r="1.8" /><circle cx="12" cy="40" r="1.8" /><circle cx="16" cy="40" r="1.8" /><circle cx="20" cy="40" r="1.8" />
+                    <circle cx="24" cy="40" r="1.8" /><circle cx="28" cy="40" r="1.8" /><circle cx="32" cy="40" r="1.8" /><circle cx="36" cy="40" r="1.8" /><circle cx="40" cy="40" r="1.8" />
                   </g>
                 </svg>
               </div>
@@ -458,60 +437,38 @@ export const JourneyStory: React.FC = () => {
 
             {/* Point 2: 40,000+ Newsletter Subscribers */}
             <div className={styles.statEditorialItem}>
-              {/* Sign 2: Global Network Globe (matching Pic 1) */}
+              {/* Sign 2: Newsletter Mail Envelope */}
               <div className={styles.statSignWrap} aria-hidden="true">
-                <svg className={styles.statItemSign} viewBox="0 0 40 40" fill="none">
+                <svg className={styles.statItemSign} viewBox="0 0 48 48" fill="none">
                   {/* Subtle matrix lattice background */}
-                  <g opacity="0.22" fill="#0b1f3a">
-                    <circle cx="8" cy="8" r="0.85" />
-                    <circle cx="14" cy="8" r="0.85" />
-                    <circle cx="20" cy="8" r="0.85" />
-                    <circle cx="26" cy="8" r="0.85" />
-                    <circle cx="32" cy="8" r="0.85" />
-                    <circle cx="8" cy="14" r="0.85" />
-                    <circle cx="14" cy="14" r="0.85" />
-                    <circle cx="20" cy="14" r="0.85" />
-                    <circle cx="26" cy="14" r="0.85" />
-                    <circle cx="32" cy="14" r="0.85" />
-                    <circle cx="8" cy="20" r="0.85" />
-                    <circle cx="14" cy="20" r="0.85" />
-                    <circle cx="20" cy="20" r="0.85" />
-                    <circle cx="26" cy="20" r="0.85" />
-                    <circle cx="32" cy="20" r="0.85" />
-                    <circle cx="8" cy="26" r="0.85" />
-                    <circle cx="14" cy="26" r="0.85" />
-                    <circle cx="20" cy="26" r="0.85" />
-                    <circle cx="26" cy="26" r="0.85" />
-                    <circle cx="32" cy="26" r="0.85" />
-                    <circle cx="8" cy="32" r="0.85" />
-                    <circle cx="14" cy="32" r="0.85" />
-                    <circle cx="20" cy="32" r="0.85" />
-                    <circle cx="26" cy="32" r="0.85" />
-                    <circle cx="32" cy="32" r="0.85" />
+                  <g opacity="0.18" fill="#0b1f3a">
+                    <circle cx="4" cy="4" r="0.85" /><circle cx="8" cy="4" r="0.85" /><circle cx="12" cy="4" r="0.85" /><circle cx="16" cy="4" r="0.85" /><circle cx="20" cy="4" r="0.85" /><circle cx="24" cy="4" r="0.85" /><circle cx="28" cy="4" r="0.85" /><circle cx="32" cy="4" r="0.85" /><circle cx="36" cy="4" r="0.85" /><circle cx="40" cy="4" r="0.85" /><circle cx="44" cy="4" r="0.85" />
+                    <circle cx="4" cy="8" r="0.85" /><circle cx="8" cy="8" r="0.85" /><circle cx="12" cy="8" r="0.85" /><circle cx="16" cy="8" r="0.85" /><circle cx="20" cy="8" r="0.85" /><circle cx="24" cy="8" r="0.85" /><circle cx="28" cy="8" r="0.85" /><circle cx="32" cy="8" r="0.85" /><circle cx="36" cy="8" r="0.85" /><circle cx="40" cy="8" r="0.85" /><circle cx="44" cy="8" r="0.85" />
+                    <circle cx="4" cy="12" r="0.85" /><circle cx="8" cy="12" r="0.85" /><circle cx="12" cy="12" r="0.85" /><circle cx="16" cy="12" r="0.85" /><circle cx="20" cy="12" r="0.85" /><circle cx="24" cy="12" r="0.85" /><circle cx="28" cy="12" r="0.85" /><circle cx="32" cy="12" r="0.85" /><circle cx="36" cy="12" r="0.85" /><circle cx="40" cy="12" r="0.85" /><circle cx="44" cy="12" r="0.85" />
+                    <circle cx="4" cy="16" r="0.85" /><circle cx="8" cy="16" r="0.85" /><circle cx="12" cy="16" r="0.85" /><circle cx="16" cy="16" r="0.85" /><circle cx="20" cy="16" r="0.85" /><circle cx="24" cy="16" r="0.85" /><circle cx="28" cy="16" r="0.85" /><circle cx="32" cy="16" r="0.85" /><circle cx="36" cy="16" r="0.85" /><circle cx="40" cy="16" r="0.85" /><circle cx="44" cy="16" r="0.85" />
+                    <circle cx="4" cy="20" r="0.85" /><circle cx="8" cy="20" r="0.85" /><circle cx="12" cy="20" r="0.85" /><circle cx="16" cy="20" r="0.85" /><circle cx="20" cy="20" r="0.85" /><circle cx="24" cy="20" r="0.85" /><circle cx="28" cy="20" r="0.85" /><circle cx="32" cy="20" r="0.85" /><circle cx="36" cy="20" r="0.85" /><circle cx="40" cy="20" r="0.85" /><circle cx="44" cy="20" r="0.85" />
+                    <circle cx="4" cy="24" r="0.85" /><circle cx="8" cy="24" r="0.85" /><circle cx="12" cy="24" r="0.85" /><circle cx="16" cy="24" r="0.85" /><circle cx="20" cy="24" r="0.85" /><circle cx="24" cy="24" r="0.85" /><circle cx="28" cy="24" r="0.85" /><circle cx="32" cy="24" r="0.85" /><circle cx="36" cy="24" r="0.85" /><circle cx="40" cy="24" r="0.85" /><circle cx="44" cy="24" r="0.85" />
+                    <circle cx="4" cy="28" r="0.85" /><circle cx="8" cy="28" r="0.85" /><circle cx="12" cy="28" r="0.85" /><circle cx="16" cy="28" r="0.85" /><circle cx="20" cy="28" r="0.85" /><circle cx="24" cy="28" r="0.85" /><circle cx="28" cy="28" r="0.85" /><circle cx="32" cy="28" r="0.85" /><circle cx="36" cy="28" r="0.85" /><circle cx="40" cy="28" r="0.85" /><circle cx="44" cy="28" r="0.85" />
+                    <circle cx="4" cy="32" r="0.85" /><circle cx="8" cy="32" r="0.85" /><circle cx="12" cy="32" r="0.85" /><circle cx="16" cy="32" r="0.85" /><circle cx="20" cy="32" r="0.85" /><circle cx="24" cy="32" r="0.85" /><circle cx="28" cy="32" r="0.85" /><circle cx="32" cy="32" r="0.85" /><circle cx="36" cy="32" r="0.85" /><circle cx="40" cy="32" r="0.85" /><circle cx="44" cy="32" r="0.85" />
+                    <circle cx="4" cy="36" r="0.85" /><circle cx="8" cy="36" r="0.85" /><circle cx="12" cy="36" r="0.85" /><circle cx="16" cy="36" r="0.85" /><circle cx="20" cy="36" r="0.85" /><circle cx="24" cy="36" r="0.85" /><circle cx="28" cy="36" r="0.85" /><circle cx="32" cy="36" r="0.85" /><circle cx="36" cy="36" r="0.85" /><circle cx="40" cy="36" r="0.85" /><circle cx="44" cy="36" r="0.85" />
+                    <circle cx="4" cy="40" r="0.85" /><circle cx="8" cy="40" r="0.85" /><circle cx="12" cy="40" r="0.85" /><circle cx="16" cy="40" r="0.85" /><circle cx="20" cy="40" r="0.85" /><circle cx="24" cy="40" r="0.85" /><circle cx="28" cy="40" r="0.85" /><circle cx="32" cy="40" r="0.85" /><circle cx="36" cy="40" r="0.85" /><circle cx="40" cy="40" r="0.85" /><circle cx="44" cy="40" r="0.85" />
+                    <circle cx="4" cy="44" r="0.85" /><circle cx="8" cy="44" r="0.85" /><circle cx="12" cy="44" r="0.85" /><circle cx="16" cy="44" r="0.85" /><circle cx="20" cy="44" r="0.85" /><circle cx="24" cy="44" r="0.85" /><circle cx="28" cy="44" r="0.85" /><circle cx="32" cy="44" r="0.85" /><circle cx="36" cy="44" r="0.85" /><circle cx="40" cy="44" r="0.85" /><circle cx="44" cy="44" r="0.85" />
                   </g>
-                  {/* Dark globe matrix dots */}
+                  {/* Dark Newsletter Mail Envelope dots */}
                   <g fill="#0b1f3a">
-                    <circle cx="20" cy="6" r="1.9" />
-                    <circle cx="27" cy="8" r="1.9" />
-                    <circle cx="32" cy="13" r="1.9" />
-                    <circle cx="34" cy="20" r="1.9" />
-                    <circle cx="32" cy="27" r="1.9" />
-                    <circle cx="27" cy="32" r="1.9" />
-                    <circle cx="20" cy="34" r="1.9" />
-                    <circle cx="13" cy="32" r="1.9" />
-                    <circle cx="8" cy="27" r="1.9" />
-                    <circle cx="6" cy="20" r="1.9" />
-                    <circle cx="8" cy="13" r="1.9" />
-                    <circle cx="13" cy="8" r="1.9" />
-                    <circle cx="20" cy="13" r="1.9" />
-                    <circle cx="20" cy="20" r="2.1" />
-                    <circle cx="20" cy="27" r="1.9" />
-                    <circle cx="13" cy="20" r="1.9" />
-                    <circle cx="27" cy="20" r="1.9" />
-                    <circle cx="15" cy="14" r="1.7" />
-                    <circle cx="25" cy="14" r="1.7" />
-                    <circle cx="15" cy="26" r="1.7" />
-                    <circle cx="25" cy="26" r="1.7" />
+                    {/* Envelope Rectangle */}
+                    <circle cx="8" cy="12" r="2.0" /><circle cx="12" cy="12" r="2.0" /><circle cx="16" cy="12" r="2.0" /><circle cx="20" cy="12" r="2.0" /><circle cx="24" cy="12" r="2.0" /><circle cx="28" cy="12" r="2.0" /><circle cx="32" cy="12" r="2.0" /><circle cx="36" cy="12" r="2.0" /><circle cx="40" cy="12" r="2.0" />
+                    <circle cx="8" cy="16" r="2.0" /><circle cx="8" cy="20" r="2.0" /><circle cx="8" cy="24" r="2.0" /><circle cx="8" cy="28" r="2.0" /><circle cx="8" cy="32" r="2.0" />
+                    <circle cx="40" cy="16" r="2.0" /><circle cx="40" cy="20" r="2.0" /><circle cx="40" cy="24" r="2.0" /><circle cx="40" cy="28" r="2.0" /><circle cx="40" cy="32" r="2.0" />
+                    <circle cx="8" cy="36" r="2.0" /><circle cx="12" cy="36" r="2.0" /><circle cx="16" cy="36" r="2.0" /><circle cx="20" cy="36" r="2.0" /><circle cx="24" cy="36" r="2.0" /><circle cx="28" cy="36" r="2.0" /><circle cx="32" cy="36" r="2.0" /><circle cx="36" cy="36" r="2.0" /><circle cx="40" cy="36" r="2.0" />
+                    {/* Flap V fold */}
+                    <circle cx="12" cy="16" r="2.0" /><circle cx="36" cy="16" r="2.0" />
+                    <circle cx="16" cy="20" r="2.0" /><circle cx="32" cy="20" r="2.0" />
+                    <circle cx="20" cy="24" r="2.0" /><circle cx="28" cy="24" r="2.0" />
+                    <circle cx="24" cy="28" r="2.2" />
+                    {/* Inner bottom folds */}
+                    <circle cx="12" cy="32" r="1.8" /><circle cx="36" cy="32" r="1.8" />
+                    <circle cx="16" cy="28" r="1.8" /><circle cx="32" cy="28" r="1.8" />
                   </g>
                 </svg>
               </div>
@@ -524,52 +481,35 @@ export const JourneyStory: React.FC = () => {
 
             {/* Point 3: 450+ Mining Companies Featured */}
             <div className={styles.statEditorialItem}>
-              {/* Sign 3: Featured Enterprise Diamond Matrix */}
+              {/* Sign 3: Mining Industry Crossed Pickaxes */}
               <div className={styles.statSignWrap} aria-hidden="true">
-                <svg className={styles.statItemSign} viewBox="0 0 40 40" fill="none">
+                <svg className={styles.statItemSign} viewBox="0 0 48 48" fill="none">
                   {/* Subtle matrix lattice background */}
-                  <g opacity="0.22" fill="#0b1f3a">
-                    <circle cx="8" cy="8" r="0.85" />
-                    <circle cx="14" cy="8" r="0.85" />
-                    <circle cx="20" cy="8" r="0.85" />
-                    <circle cx="26" cy="8" r="0.85" />
-                    <circle cx="32" cy="8" r="0.85" />
-                    <circle cx="8" cy="14" r="0.85" />
-                    <circle cx="14" cy="14" r="0.85" />
-                    <circle cx="20" cy="14" r="0.85" />
-                    <circle cx="26" cy="14" r="0.85" />
-                    <circle cx="32" cy="14" r="0.85" />
-                    <circle cx="8" cy="20" r="0.85" />
-                    <circle cx="14" cy="20" r="0.85" />
-                    <circle cx="20" cy="20" r="0.85" />
-                    <circle cx="26" cy="20" r="0.85" />
-                    <circle cx="32" cy="20" r="0.85" />
-                    <circle cx="8" cy="26" r="0.85" />
-                    <circle cx="14" cy="26" r="0.85" />
-                    <circle cx="20" cy="26" r="0.85" />
-                    <circle cx="26" cy="26" r="0.85" />
-                    <circle cx="32" cy="26" r="0.85" />
-                    <circle cx="8" cy="32" r="0.85" />
-                    <circle cx="14" cy="32" r="0.85" />
-                    <circle cx="20" cy="32" r="0.85" />
-                    <circle cx="26" cy="32" r="0.85" />
-                    <circle cx="32" cy="32" r="0.85" />
+                  <g opacity="0.18" fill="#0b1f3a">
+                    <circle cx="4" cy="4" r="0.85" /><circle cx="8" cy="4" r="0.85" /><circle cx="12" cy="4" r="0.85" /><circle cx="16" cy="4" r="0.85" /><circle cx="20" cy="4" r="0.85" /><circle cx="24" cy="4" r="0.85" /><circle cx="28" cy="4" r="0.85" /><circle cx="32" cy="4" r="0.85" /><circle cx="36" cy="4" r="0.85" /><circle cx="40" cy="4" r="0.85" /><circle cx="44" cy="4" r="0.85" />
+                    <circle cx="4" cy="8" r="0.85" /><circle cx="8" cy="8" r="0.85" /><circle cx="12" cy="8" r="0.85" /><circle cx="16" cy="8" r="0.85" /><circle cx="20" cy="8" r="0.85" /><circle cx="24" cy="8" r="0.85" /><circle cx="28" cy="8" r="0.85" /><circle cx="32" cy="8" r="0.85" /><circle cx="36" cy="8" r="0.85" /><circle cx="40" cy="8" r="0.85" /><circle cx="44" cy="8" r="0.85" />
+                    <circle cx="4" cy="12" r="0.85" /><circle cx="8" cy="12" r="0.85" /><circle cx="12" cy="12" r="0.85" /><circle cx="16" cy="12" r="0.85" /><circle cx="20" cy="12" r="0.85" /><circle cx="24" cy="12" r="0.85" /><circle cx="28" cy="12" r="0.85" /><circle cx="32" cy="12" r="0.85" /><circle cx="36" cy="12" r="0.85" /><circle cx="40" cy="12" r="0.85" /><circle cx="44" cy="12" r="0.85" />
+                    <circle cx="4" cy="16" r="0.85" /><circle cx="8" cy="16" r="0.85" /><circle cx="12" cy="16" r="0.85" /><circle cx="16" cy="16" r="0.85" /><circle cx="20" cy="16" r="0.85" /><circle cx="24" cy="16" r="0.85" /><circle cx="28" cy="16" r="0.85" /><circle cx="32" cy="16" r="0.85" /><circle cx="36" cy="16" r="0.85" /><circle cx="40" cy="16" r="0.85" /><circle cx="44" cy="16" r="0.85" />
+                    <circle cx="4" cy="20" r="0.85" /><circle cx="8" cy="20" r="0.85" /><circle cx="12" cy="20" r="0.85" /><circle cx="16" cy="20" r="0.85" /><circle cx="20" cy="20" r="0.85" /><circle cx="24" cy="20" r="0.85" /><circle cx="28" cy="20" r="0.85" /><circle cx="32" cy="20" r="0.85" /><circle cx="36" cy="20" r="0.85" /><circle cx="40" cy="20" r="0.85" /><circle cx="44" cy="20" r="0.85" />
+                    <circle cx="4" cy="24" r="0.85" /><circle cx="8" cy="24" r="0.85" /><circle cx="12" cy="24" r="0.85" /><circle cx="16" cy="24" r="0.85" /><circle cx="20" cy="24" r="0.85" /><circle cx="24" cy="24" r="0.85" /><circle cx="28" cy="24" r="0.85" /><circle cx="32" cy="24" r="0.85" /><circle cx="36" cy="24" r="0.85" /><circle cx="40" cy="24" r="0.85" /><circle cx="44" cy="24" r="0.85" />
+                    <circle cx="4" cy="28" r="0.85" /><circle cx="8" cy="28" r="0.85" /><circle cx="12" cy="28" r="0.85" /><circle cx="16" cy="28" r="0.85" /><circle cx="20" cy="28" r="0.85" /><circle cx="24" cy="28" r="0.85" /><circle cx="28" cy="28" r="0.85" /><circle cx="32" cy="28" r="0.85" /><circle cx="36" cy="28" r="0.85" /><circle cx="40" cy="28" r="0.85" /><circle cx="44" cy="28" r="0.85" />
+                    <circle cx="4" cy="32" r="0.85" /><circle cx="8" cy="32" r="0.85" /><circle cx="12" cy="32" r="0.85" /><circle cx="16" cy="32" r="0.85" /><circle cx="20" cy="32" r="0.85" /><circle cx="24" cy="32" r="0.85" /><circle cx="28" cy="32" r="0.85" /><circle cx="32" cy="32" r="0.85" /><circle cx="36" cy="32" r="0.85" /><circle cx="40" cy="32" r="0.85" /><circle cx="44" cy="32" r="0.85" />
+                    <circle cx="4" cy="36" r="0.85" /><circle cx="8" cy="36" r="0.85" /><circle cx="12" cy="36" r="0.85" /><circle cx="16" cy="36" r="0.85" /><circle cx="20" cy="36" r="0.85" /><circle cx="24" cy="36" r="0.85" /><circle cx="28" cy="36" r="0.85" /><circle cx="32" cy="36" r="0.85" /><circle cx="36" cy="36" r="0.85" /><circle cx="40" cy="36" r="0.85" /><circle cx="44" cy="36" r="0.85" />
+                    <circle cx="4" cy="40" r="0.85" /><circle cx="8" cy="40" r="0.85" /><circle cx="12" cy="40" r="0.85" /><circle cx="16" cy="40" r="0.85" /><circle cx="20" cy="40" r="0.85" /><circle cx="24" cy="40" r="0.85" /><circle cx="28" cy="40" r="0.85" /><circle cx="32" cy="40" r="0.85" /><circle cx="36" cy="40" r="0.85" /><circle cx="40" cy="40" r="0.85" /><circle cx="44" cy="40" r="0.85" />
+                    <circle cx="4" cy="44" r="0.85" /><circle cx="8" cy="44" r="0.85" /><circle cx="12" cy="44" r="0.85" /><circle cx="16" cy="44" r="0.85" /><circle cx="20" cy="44" r="0.85" /><circle cx="24" cy="44" r="0.85" /><circle cx="28" cy="44" r="0.85" /><circle cx="32" cy="44" r="0.85" /><circle cx="36" cy="44" r="0.85" /><circle cx="40" cy="44" r="0.85" /><circle cx="44" cy="44" r="0.85" />
                   </g>
-                  {/* Dark diamond matrix dots */}
+                  {/* Dark Mining Crossed Pickaxes (⚒) dots */}
                   <g fill="#0b1f3a">
-                    <circle cx="20" cy="6" r="2.0" />
-                    <circle cx="15" cy="11" r="2.0" />
-                    <circle cx="25" cy="11" r="2.0" />
-                    <circle cx="10" cy="16" r="2.0" />
-                    <circle cx="30" cy="16" r="2.0" />
-                    <circle cx="6" cy="20" r="2.0" />
-                    <circle cx="20" cy="20" r="2.2" />
-                    <circle cx="34" cy="20" r="2.0" />
-                    <circle cx="10" cy="25" r="2.0" />
-                    <circle cx="30" cy="25" r="2.0" />
-                    <circle cx="15" cy="30" r="2.0" />
-                    <circle cx="25" cy="30" r="2.0" />
-                    <circle cx="20" cy="35" r="2.0" />
+                    {/* Center crossing point */}
+                    <circle cx="24" cy="22" r="2.1" /><circle cx="24" cy="26" r="2.1" />
+                    {/* Handle A (slanted / ) */}
+                    <circle cx="8" cy="42" r="1.9" /><circle cx="12" cy="38" r="1.9" /><circle cx="16" cy="34" r="1.9" /><circle cx="20" cy="30" r="1.9" /><circle cx="28" cy="18" r="1.9" /><circle cx="32" cy="14" r="1.9" /><circle cx="36" cy="10" r="2.0" />
+                    {/* Handle B (slanted \ ) */}
+                    <circle cx="40" cy="42" r="1.9" /><circle cx="36" cy="38" r="1.9" /><circle cx="32" cy="34" r="1.9" /><circle cx="28" cy="30" r="1.9" /><circle cx="20" cy="18" r="1.9" /><circle cx="16" cy="14" r="1.9" /><circle cx="12" cy="10" r="2.0" />
+                    {/* Pick Head A (top-right curved pick head) */}
+                    <circle cx="28" cy="6" r="2.0" /><circle cx="32" cy="5" r="2.0" /><circle cx="36" cy="6" r="2.1" /><circle cx="40" cy="8" r="2.0" /><circle cx="43" cy="12" r="2.0" /><circle cx="44" cy="17" r="1.9" /><circle cx="41" cy="14" r="1.9" />
+                    {/* Pick Head B (top-left curved pick head) */}
+                    <circle cx="20" cy="6" r="2.0" /><circle cx="16" cy="5" r="2.0" /><circle cx="12" cy="6" r="2.1" /><circle cx="8" cy="8" r="2.0" /><circle cx="5" cy="12" r="2.0" /><circle cx="4" cy="17" r="1.9" /><circle cx="7" cy="14" r="1.9" />
                   </g>
                 </svg>
               </div>
