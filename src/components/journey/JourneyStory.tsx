@@ -149,6 +149,7 @@ export const JourneyStory: React.FC = () => {
   const trackRef = useRef<HTMLDivElement>(null);
   const speedometerRef = useRef<HTMLDivElement>(null);
   const hotspotRef = useRef<HTMLDivElement>(null);
+  const secondPartRef = useRef<HTMLDivElement>(null);
 
   // Magazine row and card refs
   const rowRef = useRef<HTMLDivElement>(null);
@@ -254,6 +255,15 @@ export const JourneyStory: React.FC = () => {
       hotspotRef.current.style.pointerEvents = showHotspot > 0.5 ? "auto" : "none";
     }
 
+    // Second Part (Rear chase view) Market Influence & Reach text data from reference website
+    if (secondPartRef.current) {
+      const showSecondPart = smoothstep(0.86, 0.91, p);
+      const enterY = (1 - showSecondPart) * 20;
+      secondPartRef.current.style.opacity = showSecondPart.toFixed(3);
+      secondPartRef.current.style.transform = `translate3d(0, ${enterY.toFixed(1)}px, 0)`;
+      secondPartRef.current.style.pointerEvents = showSecondPart > 0.5 ? "auto" : "none";
+    }
+
     // 3. Cards emerge from truck ONE BY ONE and ALL REMAIN ALIGNED ON SCREEN (NO TEXT)
     // Every card physically originates directly from the truck's open cargo doors!
     const cardStep = 0.022; // Staggered arrival for each of the 5 cards
@@ -356,6 +366,46 @@ export const JourneyStory: React.FC = () => {
       <div ref={hotspotRef} className={styles.topDownHotspot} aria-hidden="true">
         <div className={styles.hotspotRing} />
         <div className={styles.hotspotDot} />
+      </div>
+
+      {/* SECOND PART (REAR CHASE VIEW): MARKET INFLUENCE & REACH TEXT DATA */}
+      <div
+        ref={secondPartRef}
+        className={styles.secondPartOverlay}
+        aria-label="Market Influence & Reach"
+      >
+        <div className={styles.secondPartCard}>
+          <div className={styles.secondPartImageWrap}>
+            <img
+              src="/images/engine/financial_terminal.jpg"
+              alt="Institutional investors and analysts analyzing real-time financial market terminals and charts"
+              className={styles.secondPartImage}
+            />
+          </div>
+          <div className={styles.secondPartContent}>
+            <div className={styles.secondPartDivider} />
+            <span className={styles.secondPartEyebrow}>
+              MARKET INFLUENCE &amp; REACH
+            </span>
+            <h2 className={styles.secondPartHeadline}>
+              &ldquo;One platform. Every major mining audience.&rdquo;
+            </h2>
+            <p className={styles.secondPartDescription}>
+              Mining Discovery bridges the gap between mining companies and the global investment community through targeted editorial coverage and market intelligence. Connecting global mining companies directly with institutional investors, analysts, and executive decision-makers.
+            </p>
+            <div className={styles.secondPartStat}>
+              <div className={styles.secondPartStatValue}>
+                150,000+
+              </div>
+              <div className={styles.secondPartStatLabel}>
+                ACTIVE MONTHLY AUDIENCE
+              </div>
+              <p className={styles.secondPartStatDesc}>
+                Institutional investors, mining executives, and industry analysts reading market updates.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* ROAD-TO-SCREEN ANIMATED MAGAZINE SHOWCASE: Hidden to keep top-down view unobstructed */}
