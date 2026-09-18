@@ -870,9 +870,10 @@
 }
 
 /* ==========================================================================
-   SECOND PART (REAR CHASE VIEW): TEXT ON SIDES
-   Text placed on left & right sides of the road. No picture, no card.
-   Fades out and drifts past as truck moves forward.
+   SECOND PART (REAR CHASE VIEW): 3D SIDEWAYS WALL TEXT
+   Angled in 3D perspective along the sides of the road, matching
+   the reference corridor wall mural ("Be so good they can't ignore you").
+   As the truck advances forward, text passes by and fades away.
    ========================================================================== */
 
 .secondPartSidesWrap {
@@ -880,6 +881,8 @@
   inset: 0;
   pointer-events: none;
   z-index: 25;
+  perspective: 1100px;
+  perspective-origin: 50% 45%;
   opacity: 0;
   will-change: opacity;
   transition: opacity 0.2s ease-out;
@@ -887,18 +890,21 @@
 
 .secondPartLeftSide {
   position: absolute;
-  left: clamp(1.25rem, 3vw, 3.5rem);
-  top: clamp(4.5rem, 13.5vh, 6.5rem);
-  max-width: clamp(250px, 23vw, 340px);
+  left: clamp(1.25rem, 3.2vw, 3.8rem);
+  top: clamp(4.5rem, 14vh, 7rem);
+  max-width: clamp(250px, 24vw, 360px);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   text-align: left;
+  transform-origin: left center;
+  transform: rotateY(36deg) skewY(-2.5deg);
+  transform-style: preserve-3d;
   will-change: transform;
 }
 
 .secondPartDivider {
-  width: 40px;
+  width: 42px;
   height: 2px;
   background: #b8860b;
   margin-bottom: 0.85rem;
@@ -917,12 +923,13 @@
 
 .secondPartHeadline {
   font-family: var(--font-serif, "Playfair Display", Georgia, serif);
-  font-size: clamp(1.3rem, 1.8vw, 1.95rem);
+  font-size: clamp(1.35rem, 1.9vw, 2.05rem);
   font-weight: 400;
   line-height: 1.18;
   letter-spacing: -0.015em;
   color: #0b1f3a;
   margin: 0 0 0.85rem 0;
+  text-shadow: 0 1px 2px rgba(11, 31, 58, 0.06);
 }
 
 .secondPartDescription {
@@ -935,13 +942,16 @@
 
 .secondPartRightSide {
   position: absolute;
-  right: clamp(1.25rem, 3vw, 3.5rem);
+  right: clamp(1.25rem, 3.2vw, 3.8rem);
   top: clamp(4.8rem, 15vh, 7.5rem);
-  max-width: clamp(230px, 21vw, 310px);
+  max-width: clamp(230px, 22vw, 320px);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   text-align: left;
+  transform-origin: right center;
+  transform: rotateY(-36deg) skewY(2.5deg);
+  transform-style: preserve-3d;
   will-change: transform;
 }
 
@@ -952,6 +962,7 @@
   line-height: 1;
   letter-spacing: -0.02em;
   color: #0b1f3a;
+  text-shadow: 0 1px 2px rgba(11, 31, 58, 0.06);
 }
 
 .secondPartStatLabel {
@@ -974,14 +985,16 @@
 
 @media (max-width: 900px) {
   .secondPartLeftSide {
-    left: 1.25rem;
-    top: 4.25rem;
+    left: 1rem;
+    top: 4rem;
     max-width: 240px;
+    transform: rotateY(20deg);
   }
   .secondPartRightSide {
-    right: 1.25rem;
-    top: 4.25rem;
+    right: 1rem;
+    top: 4rem;
     max-width: 210px;
+    transform: rotateY(-20deg);
   }
   .secondPartHeadline {
     font-size: 1.15rem;
@@ -995,8 +1008,9 @@
   .secondPartLeftSide {
     left: 1rem;
     right: 1rem;
-    top: 4rem;
+    top: 3.8rem;
     max-width: calc(100% - 2rem);
+    transform: none;
   }
   .secondPartRightSide {
     left: 1rem;
@@ -1004,6 +1018,7 @@
     top: auto;
     bottom: 12%;
     max-width: calc(100% - 2rem);
+    transform: none;
   }
   .secondPartDescription {
     display: none;

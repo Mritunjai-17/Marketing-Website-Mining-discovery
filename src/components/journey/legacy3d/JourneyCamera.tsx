@@ -91,9 +91,9 @@ export const JourneyCamera: React.FC = () => {
       sidePos: new THREE.Vector3(),
       sideTarget: new THREE.Vector3(),
       sideUp: new THREE.Vector3(0, 1, 0),
-      backPos: new THREE.Vector3(),
-      backTarget: new THREE.Vector3(),
-      backUp: new THREE.Vector3(0, 1, 0),
+      overheadPos: new THREE.Vector3(),
+      overheadTarget: new THREE.Vector3(),
+      overheadUp: new THREE.Vector3(0, 0, 1),
       currentUp: new THREE.Vector3(),
     }),
     [],
@@ -125,21 +125,16 @@ export const JourneyCamera: React.FC = () => {
       ? 1.15
       : 1.0;
 
-    const rearDistanceScale = isPortrait
-      ? Math.min(1.42, 0.72 / Math.max(0.48, aspect))
-      : size.width < 1200
-      ? 1.12
-      : 1.0;
-
     // On tall mobile screens, aim the side view slightly lower so the truck is centered in the upper portion
     // with plenty of clearance above the under-road text cards.
     const effectiveLookHeight = isPortrait ? -3.0 : LOOK_HEIGHT;
 
-    // After all text has passed (t >= 0.82), the camera turns smoothly to behind the truck by t = 0.90
+    // After Milestone 05 (t >= 0.82), the camera smoothly turns 90 degrees downward by t = 0.90
+    // so the road aligns vertically from top to bottom, and the truck runs vertically down the screen!
     const turnS = smoothstep(0.82, 0.90, t);
     const easeTurn = turnS * turnS * (3 - 2 * turnS);
 
-    // 1. Profile Side View
+    // 1. Profile Side View (t <= 0.82)
     scratch.sidePos
       .copy(state.truckPosition)
       .addScaledVector(state.side, CHASE_SIDE * sideDistanceScale)
@@ -151,25 +146,41 @@ export const JourneyCamera: React.FC = () => {
 
     scratch.sideUp.set(0, 1, 0);
 
-    // 2. Rear Chase View (positioned behind the truck looking forward down the highway)
-    const REAR_DISTANCE = 46 * rearDistanceScale;
-    const REAR_HEIGHT = 7.4 * rearDistanceScale;
-    scratch.backPos
+    // 2. Downward Vertical Overhead View (t >= 0.90)
+    // Camera is positioned directly above the highway.
+    // By setting overheadUp = -state.tangent (+Z), the highway runs vertically from top to bottom,
+    // and the truck (heading along -Z) points straight down and runs vertically down the screen!
+    const OVERHEAD_HEIGHT = 56 * (isPortrait ? 1.45 : 1.0);
+
+    // As user scrolls from t = 0.90 to 0.99, the truck visibly advances downward across the screen
+    const runProgress = smoothstep(0.90, 0.99, t);
+    const camLead = (1 - runProgress * 2) * 7.2;
+
+    scratch.overheadPos
       .copy(state.truckPosition)
-      .addScaledVector(state.tangent, -REAR_DISTANCE)
-      .addScaledVector(UP, REAR_HEIGHT);
+      .addScaledVector(UP, OVERHEAD_HEIGHT)
+      .addScaledVector(state.tangent, camLead * 0.35);
 
-    scratch.backTarget
+    scratch.overheadTarget
       .copy(state.truckPosition)
-      .addScaledVector(state.tangent, 12)
-      .addScaledVector(UP, isPortrait ? 3.4 : 2.6);
+      .addScaledVector(state.tangent, camLead);
 
-    scratch.backUp.set(0, 1, 0);
+    scratch.overheadUp.copy(state.tangent).negate(); // (0, 0, 1)
 
-    // 3. Smoothly blend positions, targets, and up vector
-    state.desiredPosition.lerpVectors(scratch.sidePos, scratch.backPos, easeTurn);
-    state.desiredTarget.lerpVectors(scratch.sideTarget, scratch.backTarget, easeTurn);
-    scratch.currentUp.lerpVectors(scratch.sideUp, scratch.backUp, easeTurn).normalize();
+    // 3. Smooth 90° circular arc sweep from side profile view to downward vertical road
+    const angle = easeTurn * (Math.PI / 2);
+    const arcSide = Math.cos(angle) * (CHASE_SIDE * sideDistanceScale);
+    const arcHeight = Math.sin(angle) * OVERHEAD_HEIGHT + (1 - easeTurn) * (CHASE_HEIGHT * (isPortrait ? 1.0 : sideDistanceScale));
+
+    state.desiredPosition
+      .copy(state.truckPosition)
+      .addScaledVector(state.side, arcSide)
+      .addScaledVector(UP, arcHeight)
+      .addScaledVector(state.tangent, easeTurn * camLead * 0.35);
+
+    state.desiredTarget.lerpVectors(scratch.sideTarget, scratch.overheadTarget, easeTurn);
+
+    scratch.currentUp.lerpVectors(scratch.sideUp, scratch.overheadUp, easeTurn).normalize();
 
     state.smoothedPosition.copy(state.desiredPosition);
     state.smoothedTarget.copy(state.desiredTarget);

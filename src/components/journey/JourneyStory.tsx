@@ -244,21 +244,8 @@ export const JourneyStory: React.FC = () => {
       trackRef.current.style.transform = `translate3d(${currentX.toFixed(2)}px, 0, 0)`;
     }
 
-    // 3. Top-Down Overhead HUD (00 KM/H and interactive hotspot circle matching unitedcarriers.com)
-    if (speedometerRef.current) {
-      const showSpeed = smoothstep(0.87, 0.92, p);
-      speedometerRef.current.style.opacity = showSpeed.toFixed(3);
-      speedometerRef.current.style.pointerEvents = showSpeed > 0.5 ? "auto" : "none";
-    }
-
-    if (hotspotRef.current) {
-      const showHotspot = smoothstep(0.89, 0.93, p);
-      hotspotRef.current.style.opacity = showHotspot.toFixed(3);
-      hotspotRef.current.style.pointerEvents = showHotspot > 0.5 ? "auto" : "none";
-    }
-
-    // Second Part (Rear chase view) roadside text animation:
-    // Text fades in on sides as rear view establishes, then as truck moves forward,
+    // Second Part roadside text animation:
+    // Text fades in smoothly on sides as road turns downward, then as truck runs vertically down the highway,
     // drifts outward and fades away so it is completely gone as the truck goes on.
     if (secondPartRef.current) {
       let opacity = 0;
@@ -266,19 +253,19 @@ export const JourneyStory: React.FC = () => {
       let rightX = 0;
       let driftY = 0;
 
-      if (p >= 0.86 && p <= 0.985) {
-        // Smooth entrance (0.86 to 0.905)
-        const fadeIn = smoothstep(0.86, 0.905, p);
-        // Fade out as truck drives on (0.93 to 0.98)
-        const fadeOut = 1 - smoothstep(0.93, 0.98, p);
+      if (p >= 0.88 && p <= 0.985) {
+        // Smooth entrance (0.88 to 0.92)
+        const fadeIn = smoothstep(0.88, 0.92, p);
+        // Fade out as truck runs vertically down (0.94 to 0.98)
+        const fadeOut = 1 - smoothstep(0.94, 0.98, p);
         opacity = fadeIn * fadeOut;
 
         // Roadside drift: as truck advances forward, text on sides drifts outward
-        if (p > 0.905) {
-          const passP = Math.min(1, Math.max(0, (p - 0.905) / 0.075));
-          leftX = -passP * 70;
-          rightX = passP * 70;
-          driftY = passP * 30;
+        if (p > 0.92) {
+          const passP = Math.min(1, Math.max(0, (p - 0.92) / 0.06));
+          leftX = -passP * 60;
+          rightX = passP * 60;
+          driftY = passP * 25;
         }
       } else {
         opacity = 0;
@@ -287,11 +274,15 @@ export const JourneyStory: React.FC = () => {
       secondPartRef.current.style.opacity = opacity.toFixed(3);
       secondPartRef.current.style.pointerEvents = opacity > 0.5 ? "auto" : "none";
 
+      const isMobile = typeof window !== "undefined" && window.innerWidth <= 640;
+      const leftRot = isMobile ? "" : " rotateY(36deg) skewY(-2.5deg)";
+      const rightRot = isMobile ? "" : " rotateY(-36deg) skewY(2.5deg)";
+
       if (leftColRef.current) {
-        leftColRef.current.style.transform = `translate3d(${leftX.toFixed(1)}px, ${driftY.toFixed(1)}px, 0)`;
+        leftColRef.current.style.transform = `translate3d(${leftX.toFixed(1)}px, ${driftY.toFixed(1)}px, 0)${leftRot}`;
       }
       if (rightColRef.current) {
-        rightColRef.current.style.transform = `translate3d(${rightX.toFixed(1)}px, ${driftY.toFixed(1)}px, 0)`;
+        rightColRef.current.style.transform = `translate3d(${rightX.toFixed(1)}px, ${driftY.toFixed(1)}px, 0)${rightRot}`;
       }
     }
 
@@ -389,17 +380,7 @@ export const JourneyStory: React.FC = () => {
         </div>
       </div>
 
-      {/* Top-Down Overhead View Speedometer (00 KM/H) & Hotspot */}
-      <div ref={speedometerRef} className={styles.speedometerBadge}>
-        00 KM/H
-      </div>
-
-      <div ref={hotspotRef} className={styles.topDownHotspot} aria-hidden="true">
-        <div className={styles.hotspotRing} />
-        <div className={styles.hotspotDot} />
-      </div>
-
-      {/* SECOND PART (REAR CHASE VIEW): TEXT ON SIDES (NO PICTURE, NO CARD) */}
+      {/* SECOND PART: TEXT ON SIDES (NO PICTURE, NO CARD) */}
       <div
         ref={secondPartRef}
         className={styles.secondPartSidesWrap}
