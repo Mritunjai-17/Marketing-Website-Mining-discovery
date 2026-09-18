@@ -1019,6 +1019,99 @@
   margin: 0.35rem 0 0 0;
 }
 
+/* Streamlined Editorial Callout Block */
+.statCalloutBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  gap: 1.5rem;
+  padding-top: 0.5rem;
+  padding-bottom: clamp(3rem, 6vh, 5rem);
+}
+
+.statCalloutHeadline {
+  font-family: var(--font-sans-custom), system-ui, -apple-system, sans-serif;
+  font-size: clamp(0.98rem, 1.15vw, 1.25rem);
+  font-weight: 600;
+  line-height: 1.5;
+  color: #0b1f3a;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.statCalloutBulletRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-top: 0.25rem;
+}
+
+.statCalloutBulletBadge {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(15, 31, 58, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+  background: transparent;
+}
+
+.statCalloutBulletDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: #0b1f3a;
+}
+
+.statCalloutBulletText {
+  font-family: var(--font-sans-custom), system-ui, -apple-system, sans-serif;
+  font-size: clamp(0.85rem, 0.95vw, 1.02rem);
+  line-height: 1.6;
+  color: #334155;
+  margin: 0;
+}
+
+.statCalloutBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  border: 1px solid rgba(15, 31, 58, 0.28);
+  border-radius: 9999px;
+  padding: 0.7rem 1.45rem;
+  font-family: var(--font-sans-custom), system-ui, -apple-system, sans-serif;
+  font-size: clamp(0.68rem, 0.75vw, 0.8rem);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #0b1f3a;
+  background: transparent;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  margin-top: 0.5rem;
+}
+
+.statCalloutBtn:hover {
+  background: #0b1f3a;
+  color: #ffffff;
+  border-color: #0b1f3a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(11, 31, 58, 0.15);
+}
+
+.statCalloutBtnArrow {
+  transition: transform 0.25s ease;
+  font-size: 0.9em;
+}
+
+.statCalloutBtn:hover .statCalloutBtnArrow {
+  transform: translateX(3px);
+}
+
 /* Responsive */
 @media (max-width: 900px) {
   .secondPartLeftSide {

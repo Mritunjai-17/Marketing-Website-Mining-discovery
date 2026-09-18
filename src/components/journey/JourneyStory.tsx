@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { createPortal } from "react-dom";
 import { X, Newspaper, BookOpen, TrendingUp, Globe, Sparkles } from "lucide-react";
 import styles from "./Journey2D.module.css";
@@ -518,6 +519,25 @@ export const JourneyStory: React.FC = () => {
               <p className={styles.secondPartStatDesc}>
                 From junior exploration companies to Tier-1 global mining producers.
               </p>
+            </div>
+
+            {/* Streamlined Editorial Callout Block (matching user picture) */}
+            <div className={styles.statCalloutBlock}>
+              <p className={styles.statCalloutHeadline}>
+                With direct access to institutional investors and industry analysts, your company&apos;s news reaches the decision-makers who matter most in global mining.
+              </p>
+              <div className={styles.statCalloutBulletRow}>
+                <div className={styles.statCalloutBulletBadge} aria-hidden="true">
+                  <span className={styles.statCalloutBulletDot} />
+                </div>
+                <p className={styles.statCalloutBulletText}>
+                  No fragmented messaging between channels. Just one dedicated team accountable for reaching decision-makers worldwide.
+                </p>
+              </div>
+              <Link href="/about" className={styles.statCalloutBtn}>
+                <span>LEARN MORE ABOUT US</span>
+                <span className={styles.statCalloutBtnArrow} aria-hidden="true">&rarr;</span>
+              </Link>
             </div>
           </div>
         </div>
