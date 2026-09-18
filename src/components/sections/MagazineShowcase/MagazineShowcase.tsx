@@ -146,13 +146,13 @@ export const ShowcaseCardCover: React.FC<{ mag: MagazineEdition }> = ({ mag }) =
 /* --------------------------------------------------------------------------
    EditionCoverCard - Lazy rendered thumbnail for complete archive library
    -------------------------------------------------------------------------- */
-interface EditionCoverCardProps {
+export interface EditionCoverCardProps {
   edition: MagazineEdition;
   isSelected: boolean;
   onSelect: (edition: MagazineEdition) => void;
 }
 
-const EditionCoverCard: React.FC<EditionCoverCardProps> = ({
+export const EditionCoverCard: React.FC<EditionCoverCardProps> = ({
   edition,
   isSelected,
   onSelect,

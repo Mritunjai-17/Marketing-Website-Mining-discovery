@@ -250,7 +250,7 @@ const TruckCargoRear: React.FC = () => {
   const cardRefs = useRef<(THREE.Group | null)[]>([]);
 
   // Pre-calculated deterministic card trajectories
-  // Many cards cascade & spill out of the truck onto the road behind it
+  // 14 milestone cards cascade & spill out of the truck onto the road behind it
   const cards = useMemo<CardTrajectory[]>(() => {
     function prng(seed: number) {
       const x = Math.sin(seed * 127.1 + 311.7) * 43758.5453;
@@ -258,19 +258,19 @@ const TruckCargoRear: React.FC = () => {
     }
 
     return Array.from({ length: CARD_COUNT }, (_, i) => {
-      // Staggered tumbling out as truck doors open (from p = 0.865 to 0.945)
-      const startT = 0.865 + (i / CARD_COUNT) * 0.075;
-      const endT = Math.min(0.995, startT + 0.055);
+      // Staggered tumbling out as truck doors swing open (from p = 0.938 to 0.970)
+      const startT = 0.938 + (i / CARD_COUNT) * 0.028;
+      const endT = Math.min(0.998, startT + 0.028);
 
       return {
-        // Starts inside the truck cargo bay
-        startX: (prng(i * 3 + 1) - 0.5) * 1.6,
-        startY: 1.8 + prng(i * 5 + 2) * 1.2,
-        startZ: 4.8 + prng(i * 7 + 3) * 1.8,
+        // Starts inside the trailer rear cavity
+        startX: (prng(i * 3 + 1) - 0.5) * 1.5,
+        startY: 1.6 + prng(i * 5 + 2) * 1.2,
+        startZ: 10.5 + prng(i * 7 + 3) * 0.9,
         // Tumbles out through the rear doors and scatters onto the road behind the truck
-        targetX: (prng(i * 11 + 2) - 0.5) * 5.2,
-        targetY: 0.12 + prng(i * 13 + 4) * 0.06,
-        targetZ: 8.5 + i * 1.1 + prng(i * 17 + 5) * 3.5,
+        targetX: (prng(i * 11 + 2) - 0.5) * 4.6,
+        targetY: 0.12 + prng(i * 13 + 4) * 0.04,
+        targetZ: 13.0 + i * 0.75 + prng(i * 17 + 5) * 2.2,
         targetRotY: (prng(i * 19 + 4) - 0.5) * 3.1,
         tumbleSpinX: (prng(i * 23) > 0.5 ? 1 : -1) * (Math.PI * 2.5 + prng(i * 29) * 2.0),
         tumbleSpinZ: (prng(i * 31) - 0.5) * 3.0,
@@ -300,45 +300,88 @@ const TruckCargoRear: React.FC = () => {
   }, []);
 
   useFrame(() => {
-    // Keep cargo doors closed and clean so the truck remains a solid container trailer in top-down view
-    if (leftDoorRef.current) leftDoorRef.current.rotation.y = 0;
-    if (rightDoorRef.current) rightDoorRef.current.rotation.y = 0;
-    cards.forEach((_, i) => {
+    const p = progress.current;
+
+    // Keep doors closed and cards hidden until vertical highway finishes (p >= 0.935)
+    if (p < 0.935) {
+      if (leftDoorRef.current) leftDoorRef.current.rotation.y = 0;
+      if (rightDoorRef.current) rightDoorRef.current.rotation.y = 0;
+      cards.forEach((_, i) => {
+        const grp = cardRefs.current[i];
+        if (grp) grp.visible = false;
+      });
+      return;
+    }
+
+    // Door opening: p = 0.935 to 0.958
+    const doorOpen = Math.min(1, Math.max(0, (p - 0.935) / 0.022));
+    const easeDoor = doorOpen * doorOpen * (3 - 2 * doorOpen);
+    if (leftDoorRef.current) leftDoorRef.current.rotation.y = -easeDoor * (Math.PI * 0.72);
+    if (rightDoorRef.current) rightDoorRef.current.rotation.y = easeDoor * (Math.PI * 0.72);
+
+    // Cards tumbling out through the rear doors onto the road behind the truck
+    cards.forEach((card, i) => {
       const grp = cardRefs.current[i];
-      if (grp) grp.visible = false;
+      if (!grp) return;
+
+      if (p < card.startT) {
+        grp.visible = false;
+        return;
+      }
+
+      grp.visible = true;
+      if (p >= card.endT) {
+        // Flat on the road surface
+        grp.position.set(card.targetX, card.targetY, card.targetZ);
+        grp.rotation.set(0, card.targetRotY, 0);
+      } else {
+        // Tumble flight arc
+        const t = (p - card.startT) / (card.endT - card.startT);
+        const easeT = t * t * (3 - 2 * t);
+        const curX = card.startX + (card.targetX - card.startX) * easeT;
+        const curZ = card.startZ + (card.targetZ - card.startZ) * easeT;
+        const arc = Math.sin(t * Math.PI) * 1.5;
+        const curY = card.startY + (card.targetY - card.startY) * easeT + arc;
+
+        grp.position.set(curX, curY, curZ);
+        grp.rotation.set(
+          card.tumbleSpinX * (1 - t),
+          card.targetRotY * t,
+          card.tumbleSpinZ * (1 - t)
+        );
+      }
     });
   });
 
   return (
     <group>
       {/* Trailer cargo bay interior cavity */}
-      <group position={[0, 2.46, 5.2]}>
+      <group position={[0, 2.46, 10.0]}>
         <mesh position={[0, -1.36, 0]} receiveShadow>
-          <boxGeometry args={[2.42, 0.04, 3.5]} />
+          <boxGeometry args={[2.42, 0.04, 3.2]} />
           <meshStandardMaterial color="#2d2218" roughness={0.88} metalness={0.1} />
         </mesh>
         <mesh position={[0, 1.36, 0]}>
-          <boxGeometry args={[2.42, 0.04, 3.5]} />
+          <boxGeometry args={[2.42, 0.04, 3.2]} />
           <meshStandardMaterial color="#1a202c" roughness={0.7} metalness={0.3} />
         </mesh>
         <mesh position={[-1.21, 0, 0]}>
-          <boxGeometry args={[0.04, 2.68, 3.5]} />
+          <boxGeometry args={[0.04, 2.68, 3.2]} />
           <meshStandardMaterial color="#1e293b" roughness={0.65} metalness={0.35} />
         </mesh>
         <mesh position={[1.21, 0, 0]}>
-          <boxGeometry args={[0.04, 2.68, 3.5]} />
+          <boxGeometry args={[0.04, 2.68, 3.2]} />
           <meshStandardMaterial color="#1e293b" roughness={0.65} metalness={0.35} />
         </mesh>
-        <mesh position={[0, 0, -1.75]}>
+        <mesh position={[0, 0, -1.6]}>
           <boxGeometry args={[2.42, 2.68, 0.04]} />
           <meshStandardMaterial color="#0f172a" roughness={0.8} metalness={0.2} />
         </mesh>
-        {/* Interior cargo bay ambient light when doors open */}
-        <pointLight position={[0, 0.8, 0]} intensity={3.5} distance={7} decay={2} color="#f59e0b" />
+        <pointLight position={[0, 0.8, 0]} intensity={4.5} distance={8} decay={2} color="#f59e0b" />
       </group>
 
-      {/* Left rear door hinged at x = -1.24 */}
-      <group ref={leftDoorRef} position={[-1.24, 2.46, 7.0]}>
+      {/* Left rear door hinged at x = -1.24, z = 11.62 */}
+      <group ref={leftDoorRef} position={[-1.24, 2.46, 11.62]}>
         <mesh position={[0.61, 0, 0]} castShadow receiveShadow>
           <boxGeometry args={[1.22, 2.76, 0.08]} />
           <meshStandardMaterial color="#d8dce3" roughness={0.52} metalness={0.14} />
@@ -353,8 +396,8 @@ const TruckCargoRear: React.FC = () => {
         </mesh>
       </group>
 
-      {/* Right rear door hinged at x = +1.24 */}
-      <group ref={rightDoorRef} position={[1.24, 2.46, 7.0]}>
+      {/* Right rear door hinged at x = +1.24, z = 11.62 */}
+      <group ref={rightDoorRef} position={[1.24, 2.46, 11.62]}>
         <mesh position={[-0.61, 0, 0]} castShadow receiveShadow>
           <boxGeometry args={[1.22, 2.76, 0.08]} />
           <meshStandardMaterial color="#d8dce3" roughness={0.52} metalness={0.14} />
@@ -572,6 +615,9 @@ const BuiltInTruck: React.FC<{
       >
         <BodyPaint color="#f7f8f9" roughness={0.44} />
       </RoundedBox>
+
+      {/* Animated rear cargo bay, swinging doors, and cascading falling cards */}
+      <TruckCargoRear />
 
       {/* Shipping container corrugated roof ribs for overhead top-down view (56 ribs across 12.4m length) */}
       {Array.from({ length: 54 }, (_, i) => {

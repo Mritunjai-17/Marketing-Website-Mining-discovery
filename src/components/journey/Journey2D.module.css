@@ -1159,3 +1159,53 @@
     display: none;
   }
 }
+
+/* ==========================================================================
+   ROAD-TO-SCREEN ANIMATED MAGAZINE SHOWCASE
+   Zooms up directly from the truck's rear cargo doors into center stage
+   ========================================================================== */
+
+.magazinePresentationWrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 40;
+  will-change: transform, opacity;
+  padding: clamp(1rem, 2.8vh, 2.5rem) 1.5rem;
+  box-sizing: border-box;
+}
+
+.archiveModalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(6, 10, 18, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+  padding: clamp(2rem, 5vh, 4rem) 1.5rem;
+  box-sizing: border-box;
+}
+
+.archiveModalContent {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.archiveModalHeader {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}

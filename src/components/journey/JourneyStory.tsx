@@ -1,13 +1,17 @@
 "use client";
 
-import React, { useRef, useState, useEffect, useCallback } from "react";
+import React, { useRef, useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { createPortal } from "react-dom";
-import { X, Newspaper, BookOpen, TrendingUp, Globe, Sparkles } from "lucide-react";
+import { ArrowRight, X, Newspaper, BookOpen, TrendingUp, Globe, Sparkles } from "lucide-react";
 import styles from "./Journey2D.module.css";
+import magStyles from "@/components/sections/MagazineShowcase/MagazineShowcase.module.css";
 import { smoothstep } from "./journeySideView";
 import { useJourneyFrame } from "./journeyScroll";
-import { ShowcaseCardCover } from "@/components/sections/MagazineShowcase/MagazineShowcase";
+import {
+  ShowcaseCardCover,
+  EditionCoverCard,
+} from "@/components/sections/MagazineShowcase/MagazineShowcase";
 import { MagazineSpread } from "@/components/sections/MagazineShowcase/MagazineSpread";
 import { getChronologicalMagazines, type MagazineEdition } from "@/data/magazines";
 
@@ -148,23 +152,30 @@ function renderLine(line: string, emphasis: string | null): React.ReactNode {
 export const JourneyStory: React.FC = () => {
   const underRoadRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
-  const speedometerRef = useRef<HTMLDivElement>(null);
-  const hotspotRef = useRef<HTMLDivElement>(null);
   const secondPartRef = useRef<HTMLDivElement>(null);
   const leftColRef = useRef<HTMLDivElement>(null);
   const leftSubtextRef = useRef<HTMLDivElement>(null);
   const rightColRef = useRef<HTMLDivElement>(null);
   const statsTrackRef = useRef<HTMLDivElement>(null);
 
-  // Magazine row and card refs
-  const rowRef = useRef<HTMLDivElement>(null);
+  // Magazine Showcase refs
+  const magazineWrapRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const activeIndexRef = useRef(0);
 
-  // Magazine reader modal state
+  // All 14 magazines and the 5 latest editions
+  const allMagazines = useMemo(() => getChronologicalMagazines(false), []);
+  const showcaseMagazines = useMemo(() => allMagazines.slice(0, 5), [allMagazines]);
+
+  const [activeIndex, setActiveIndex] = useState(0);
   const [selectedMagazine, setSelectedMagazine] = useState<MagazineEdition | null>(null);
   const [readerState, setReaderState] = useState<"closed" | "opening" | "open" | "closing">("closed");
+  const [spreadLabel, setSpreadLabel] = useState("INSIDE OPENING SPREAD • PAGES 2–3");
+  const [showAllArchive, setShowAllArchive] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const totalTravelRef = useRef(3200);
+
+  const activeMagazine = selectedMagazine || showcaseMagazines[activeIndex] || showcaseMagazines[0];
 
   useEffect(() => {
     setIsMounted(true);
@@ -206,6 +217,64 @@ export const JourneyStory: React.FC = () => {
     }
   }, [readerState]);
 
+  // Continuous smooth transform update based on scroll position (0 to 4)
+  const updateCardTransforms = useCallback((s: number) => {
+    const cardElements = cardRefs.current;
+    if (!cardElements) return;
+
+    const width = typeof window !== "undefined" ? window.innerWidth : 1200;
+    const isMobile = width < 640;
+    const isTablet = width >= 640 && width < 1024;
+    const spacing = isMobile ? 96 : isTablet ? 88 : 82;
+
+    for (let i = 0; i < 5; i++) {
+      const el = cardElements[i];
+      if (!el) continue;
+
+      const delta = i - s;
+      const translateX = delta * spacing;
+
+      let scale = 1;
+      if (delta > 0) {
+        scale = Math.max(0.76, 1 - delta * 0.2);
+      } else if (delta < 0) {
+        scale = Math.max(0.72, 1 + delta * 0.25);
+      }
+
+      const absDelta = Math.abs(delta);
+      let opacity = 0;
+      if (absDelta <= 1.0) {
+        opacity = 1 - absDelta * 0.25;
+      } else if (absDelta < 1.7) {
+        opacity = Math.max(0, 0.75 - (absDelta - 1.0) * 1.07);
+      }
+
+      const zIndex = Math.round(30 - absDelta * 6);
+      const isClickable = absDelta < 0.45;
+
+      el.style.transform = `translate3d(${translateX}%, 0, 0) scale(${scale})`;
+      el.style.opacity = `${opacity}`;
+      el.style.zIndex = `${zIndex}`;
+      el.style.pointerEvents = isClickable ? "auto" : "none";
+    }
+  }, []);
+
+  const handleSelectPill = useCallback((idx: number) => {
+    setActiveIndex(idx);
+    activeIndexRef.current = idx;
+    updateCardTransforms(idx);
+  }, [updateCardTransforms]);
+
+  const handleCardClick = useCallback((idx: number, mag: MagazineEdition) => {
+    if (activeIndexRef.current === idx) {
+      handleOpenReader(mag);
+    } else {
+      setActiveIndex(idx);
+      activeIndexRef.current = idx;
+      updateCardTransforms(idx);
+    }
+  }, [handleOpenReader, updateCardTransforms]);
+
   // Lock scroll & handle Escape key when reader is active
   useEffect(() => {
     if (readerState === "open" || readerState === "opening") {
@@ -229,8 +298,7 @@ export const JourneyStory: React.FC = () => {
   useJourneyFrame((scene) => {
     const p = scene.progress;
 
-    // Fade out under-road section when truck opens cargo doors (p >= 0.88)
-    // 1. Fade out under-road text cards as the journey completes all text (p >= 0.82 to 0.86)
+    // 1. Under-road horizontal milestone cards fade out as road turns downward (p >= 0.82 to 0.86)
     if (underRoadRef.current) {
       const underRoadFade = 1 - smoothstep(0.82, 0.86, p);
       underRoadRef.current.style.opacity = underRoadFade.toFixed(3);
@@ -238,31 +306,26 @@ export const JourneyStory: React.FC = () => {
       underRoadRef.current.style.transform = `translate3d(0, ${((1 - underRoadFade) * 16).toFixed(1)}px, 0)`;
     }
 
-    // 2. Roadside Milestone Track:
-    // Text cards enter from the right side of the screen, travel across beneath the truck,
-    // and exit off the left side of the screen in lockstep with the truck's forward travel.
+    // 2. Roadside Milestone Track (horizontal travel)
     if (trackRef.current) {
       const roadProgress = Math.min(1.0, Math.max(0.0, p / 0.82));
       const currentX = -roadProgress * totalTravelRef.current;
       trackRef.current.style.transform = `translate3d(${currentX.toFixed(2)}px, 0, 0)`;
     }
 
-    // Second Part roadside text animation:
-    // Text fades in smoothly on sides as road turns downward, then as truck runs vertically down the highway,
-    // drifts outward and fades away so it is completely gone as the truck goes on.
+    // 3. Second Part roadside text (vertical highway run):
+    // Smooth entrance as road turns downward, stays visible through highway run,
+    // and cleanly fades out at p = 0.932 to 0.946 ("when this all ends")
     if (secondPartRef.current) {
       let opacity = 0;
-
-      if (p >= 0.88 && p <= 0.995) {
-        // Smooth entrance as road turns downward
+      if (p >= 0.88 && p <= 0.948) {
         const fadeIn = smoothstep(0.88, 0.915, p);
-        // Stays visible through the vertical highway run
-        const fadeOut = 1 - smoothstep(0.975, 1.0, p);
+        const fadeOut = 1 - smoothstep(0.932, 0.946, p);
         opacity = fadeIn * fadeOut;
 
         // Auto-scroll the stats track on the right in lockstep with the truck driving down the road
         if (statsTrackRef.current) {
-          const statsProgress = Math.max(0, Math.min(1, (p - 0.90) / 0.085));
+          const statsProgress = Math.max(0, Math.min(1, (p - 0.90) / 0.035));
           const maxScroll = Math.max(0, statsTrackRef.current.scrollHeight - statsTrackRef.current.clientHeight);
           statsTrackRef.current.scrollTop = statsProgress * maxScroll;
         }
@@ -274,69 +337,38 @@ export const JourneyStory: React.FC = () => {
       secondPartRef.current.style.pointerEvents = opacity > 0.5 ? "auto" : "none";
     }
 
-    // 3. Cards emerge from truck ONE BY ONE and ALL REMAIN ALIGNED ON SCREEN (NO TEXT)
-    // Every card physically originates directly from the truck's open cargo doors!
-    const cardStep = 0.022; // Staggered arrival for each of the 5 cards
-    const rowEl = rowRef.current;
-    const rowCenter = rowEl ? rowEl.offsetWidth / 2 : (typeof window !== "undefined" ? window.innerWidth / 2 : 600);
-    // Truck's rear cargo doors in viewport coordinates: center-aligned horizontally, slightly below center vertically
-    const truckOffsetX = typeof window !== "undefined" && window.innerWidth < 768 ? 0 : -18;
-    const truckOffsetY = typeof window !== "undefined" ? Math.round(window.innerHeight * 0.125) : 100;
-
-    showcaseMagazines.forEach((_, idx) => {
-      const el = cardRefs.current[idx];
-      if (!el) return;
-
-      const cardStart = 0.880 + idx * cardStep;
-      const cardEnd = cardStart + cardStep;
-
-      // Distance from this card's aligned slot center to the truck's cargo doors
-      const cardCenterInRow = el.offsetLeft + el.offsetWidth / 2;
-      const slotDeltaX = cardCenterInRow - (rowCenter + truckOffsetX);
-
-      if (p < cardStart) {
-        // Hasn't emerged yet: hidden inside the truck cargo bay
-        el.style.opacity = "0";
-        el.style.pointerEvents = "none";
-        el.style.transform = `translate3d(${-slotDeltaX.toFixed(1)}px, ${truckOffsetY}px, 0) scale(0.04) rotateZ(0deg)`;
-        return;
-      }
-
-      if (p >= cardStart && p < cardEnd) {
-        // Emerging directly out of the truck's cargo bay and zooming into its aligned slot
-        const t = smoothstep(cardStart, cardEnd, p);
-
-        // Fast initial burst out of the truck doors, then smooth deceleration into slot
-        const burstProgress = Math.pow(t, 0.72);
-        const easeOut = 1 - Math.pow(1 - t, 3);
-
-        // Scale zooms outward from tiny inside the truck (0.04) up to full size (1.0)
-        const scale = 0.04 + Math.pow(t, 0.82) * 0.96;
-
-        // X moves from truck doors (-slotDeltaX) to aligned slot (0)
-        const curX = -slotDeltaX * (1 - easeOut);
-
-        // Y shoots out from truck doors (+truckOffsetY) with a parabolic flight arc, then lands in row (0)
-        const arc = Math.sin(t * Math.PI) * -34;
-        const curY = truckOffsetY * (1 - burstProgress) + arc;
-
-        // 3D rotations as the card flies toward camera and fans outward to its column
-        const rotZ = (1 - t) * (slotDeltaX < -20 ? -8 : slotDeltaX > 20 ? 8 : 0);
-        const rotY = (1 - t) * (slotDeltaX < -20 ? -14 : slotDeltaX > 20 ? 14 : 0);
-        const rotX = (1 - t) * 12;
-
-        const opacity = Math.min(1, t * 5.5);
-
-        el.style.opacity = opacity.toFixed(3);
-        el.style.transform = `translate3d(${curX.toFixed(1)}px, ${curY.toFixed(1)}px, 0) scale(${scale.toFixed(3)}) rotateX(${rotX.toFixed(1)}deg) rotateY(${rotY.toFixed(1)}deg) rotateZ(${rotZ.toFixed(1)}deg)`;
-        el.style.pointerEvents = opacity > 0.8 ? "auto" : "none";
+    // 4. ROAD-TO-SCREEN ANIMATED MAGAZINE SHOWCASE:
+    // Zooms up directly from the truck's rear cargo doors into center stage,
+    // presenting the cards one by one in series ("single by single")
+    if (magazineWrapRef.current) {
+      if (p < 0.938) {
+        magazineWrapRef.current.style.opacity = "0";
+        magazineWrapRef.current.style.pointerEvents = "none";
+        magazineWrapRef.current.style.transform = "translate3d(0, 90px, 0) scale(0.6)";
       } else {
-        // p >= cardEnd: Arrived in place and REMAINS ALIGNED ON SCREEN
-        el.style.opacity = "1";
-        el.style.transform = "translate3d(0, 0, 0) scale(1) rotateX(0deg) rotateY(0deg) rotateZ(0deg)";
-        el.style.pointerEvents = "auto";
+        // Smoothly zoom forward from truck doors into center screen
+        const entrance = smoothstep(0.938, 0.952, p);
+        const easeIn = entrance * entrance * (3 - 2 * entrance);
+        const curScale = 0.6 + 0.4 * easeIn;
+        const curY = (1 - easeIn) * 90;
+
+        magazineWrapRef.current.style.opacity = entrance.toFixed(3);
+        magazineWrapRef.current.style.transform = `translate3d(0, ${curY.toFixed(1)}px, 0) scale(${curScale.toFixed(3)})`;
+        magazineWrapRef.current.style.pointerEvents = entrance > 0.6 ? "auto" : "none";
+
+        // Scroll-driven progression: maps p from 0.950 to 0.998 across the 5 editions (0..4)
+        const scrollNorm = Math.max(0, Math.min(1, (p - 0.950) / 0.048));
+        const scrollPos = scrollNorm * 4;
+
+        updateCardTransforms(scrollPos);
+
+        const targetIdx = Math.min(4, Math.max(0, Math.round(scrollPos)));
+        if (targetIdx !== activeIndexRef.current) {
+          activeIndexRef.current = targetIdx;
+          setActiveIndex(targetIdx);
+        }
       }
-    });
+    }
   });
 
   return (
@@ -635,47 +667,164 @@ export const JourneyStory: React.FC = () => {
         </div>
       </div>
 
-      {/* ROAD-TO-SCREEN ANIMATED MAGAZINE SHOWCASE: Hidden to keep top-down view unobstructed */}
-      <div className={styles.magazineRiseWrap} style={{ display: "none" }}>
-        <div ref={rowRef} className={styles.cardsAlignedRow}>
-          {showcaseMagazines.map((mag, idx) => (
+      {/* ROAD-TO-SCREEN ANIMATED MAGAZINE SHOWCASE:
+          Directly emerges and zooms up from the truck's rear cargo doors into center stage.
+          Presents the cards one by one in series ("single by single") matching the user reference image. */}
+      <div ref={magazineWrapRef} className={styles.magazinePresentationWrap}>
+        <div className={magStyles.magazinePresentation}>
+          {/* 5-Card Continuous Carousel Track */}
+          <div className={magStyles.showcaseCardsTrack}>
+            {showcaseMagazines.map((mag, idx) => (
+              <div
+                key={mag.id}
+                ref={(el) => {
+                  cardRefs.current[idx] = el;
+                }}
+                className={`${magStyles.showcaseCard} ${
+                  activeIndex === idx ? magStyles.showcaseCardActive : ""
+                }`}
+                onClick={() => handleCardClick(idx, mag)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    handleCardClick(idx, mag);
+                  }
+                }}
+                aria-label={`Open ${mag.month} Edition ${mag.year}`}
+              >
+                <ShowcaseCardCover mag={mag} />
+                <div aria-hidden="true" className={magStyles.coverSpine} />
+                <div aria-hidden="true" className={magStyles.coverSheen} />
+                <div aria-hidden="true" className={magStyles.coverShield} />
+              </div>
+            ))}
+          </div>
+
+          {/* Active Magazine Metadata */}
+          <div className={magStyles.coverMeta}>
+            <div className={magStyles.editionTag}>
+              <span>FEATURED PUBLICATION</span>
+              <span className={magStyles.editionDot} aria-hidden="true" />
+              <span>EDITION {activeMagazine.issueNumber ?? (14 - activeIndex)}</span>
+            </div>
+
+            <h3 className={magStyles.editionTitle}>
+              {activeMagazine.month?.toUpperCase()} EDITION {activeMagazine.year}
+            </h3>
+
+            {/* Interactive Open Edition button */}
             <div
-              key={mag.id}
-              ref={(el) => {
-                cardRefs.current[idx] = el;
-              }}
-              className={styles.alignedCardItem}
-              onClick={() => handleOpenReader(mag)}
-              role="button"
-              tabIndex={0}
+              className={magStyles.openAffordance}
+              onClick={() => handleOpenReader(activeMagazine)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
-                  handleOpenReader(mag);
+                  handleOpenReader(activeMagazine);
                 }
               }}
-              aria-label={`${mag.month} Edition ${mag.year}`}
-              style={{ opacity: 0, transform: "scale(0.15)", pointerEvents: "none" }}
+              role="button"
+              tabIndex={0}
+              aria-label={`Open ${activeMagazine.title}`}
             >
-              <div className={styles.cardHoverShell}>
-                <ShowcaseCardCover mag={mag} />
-                <div aria-hidden="true" className={styles.magSpine} />
-                <div aria-hidden="true" className={styles.magSheen} />
-              </div>
+              <span>OPEN EDITION</span>
+              <ArrowRight className={magStyles.openAffordanceIcon} />
             </div>
-          ))}
+
+            {/* Progress Indicator Dots */}
+            <div className={magStyles.progressRow} aria-label="Magazine sequence progress">
+              {showcaseMagazines.map((mag, idx) => (
+                <button
+                  key={mag.id}
+                  type="button"
+                  onClick={() => handleSelectPill(idx)}
+                  className={`${magStyles.progressDot} ${
+                    activeIndex === idx ? magStyles.progressDotActive : ""
+                  }`}
+                  aria-label={`Show Edition ${idx + 1}`}
+                >
+                  {String(idx + 1).padStart(2, "0")}
+                </button>
+              ))}
+            </div>
+
+            {/* View All Magazines CTA */}
+            <button
+              type="button"
+              className={magStyles.viewAllCtaBtn}
+              onClick={() => setShowAllArchive((prev) => !prev)}
+              aria-expanded={showAllArchive}
+            >
+              <span>
+                {showAllArchive
+                  ? "HIDE COMPLETE ARCHIVE"
+                  : `VIEW ALL MAGAZINES (${allMagazines.length})`}
+              </span>
+              <ArrowRight className={magStyles.viewAllCtaIcon} />
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Complete Magazine Archive Modal */}
+      {showAllArchive && isMounted && createPortal(
+        <div
+          className={styles.archiveModalOverlay}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowAllArchive(false);
+          }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Complete Magazine Catalog"
+        >
+          <div className={styles.archiveModalContent}>
+            <div className={styles.archiveModalHeader}>
+              <div className={magStyles.archiveEyebrow}>
+                <span className={magStyles.archiveEyebrowRule} aria-hidden="true" />
+                <span>Complete Catalog</span>
+                <span className={magStyles.archiveEyebrowRule} aria-hidden="true" />
+              </div>
+              <button
+                type="button"
+                className={magStyles.readerCloseBtn}
+                onClick={() => setShowAllArchive(false)}
+                aria-label="Close archive"
+              >
+                <X className={magStyles.readerCloseIcon} />
+                <span>CLOSE</span>
+              </button>
+            </div>
+            <h3 className={magStyles.archiveTitle}>All Published Editions</h3>
+            <p className={magStyles.archiveSubtitle}>
+              Explore all {allMagazines.length} monthly publications from the Mining Discovery library. Select any edition to open the complete magazine reader.
+            </p>
+            <div className={magStyles.archiveGrid}>
+              {allMagazines.map((edition) => (
+                <EditionCoverCard
+                  key={edition.id}
+                  edition={edition}
+                  isSelected={activeMagazine.id === edition.id}
+                  onSelect={(ed) => {
+                    handleOpenReader(ed);
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
 
       {/* Two-Page Magazine Reader Modal */}
       {readerState !== "closed" && isMounted && createPortal(
         <div
-          className={`${styles.readerModalOverlay} ${
+          className={`${magStyles.readerOverlay} ${
             readerState === "open"
-              ? styles.readerModalOpen
+              ? magStyles.readerOverlayOpen
               : readerState === "opening"
-              ? styles.readerModalOpening
-              : styles.readerModalClosing
+              ? magStyles.readerOverlayOpening
+              : magStyles.readerOverlayClosing
           }`}
           onClick={(e) => {
             if (e.target === e.currentTarget) {
@@ -684,40 +833,44 @@ export const JourneyStory: React.FC = () => {
           }}
           role="dialog"
           aria-modal="true"
-          aria-label={`${selectedMagazine?.title || "Magazine"} Reader`}
+          aria-label={`${activeMagazine?.title || "Magazine"} Reader`}
         >
-          <div className={styles.readerModalHeader}>
-            <div className={styles.readerMetaLeft}>
-              <span className={styles.readerBrand}>MINING DISCOVERY</span>
-              <span className={styles.magDotDivider} aria-hidden="true" />
-              <span className={styles.readerIssue}>
-                {selectedMagazine?.month?.toUpperCase()} {selectedMagazine?.year} • ISSUE {selectedMagazine?.issueNumber ?? "14"}
+          <div className={magStyles.readerHeader}>
+            <div className={magStyles.readerMetaLeft}>
+              <span className={magStyles.readerBrand}>MINING DISCOVERY</span>
+              <span className={magStyles.editionDot} aria-hidden="true" />
+              <span className={magStyles.readerIssue}>
+                {activeMagazine?.month?.toUpperCase()} {activeMagazine?.year} • ISSUE {activeMagazine?.issueNumber ?? "13"}
               </span>
             </div>
             <button
               type="button"
-              className={styles.readerCloseBtn}
+              className={magStyles.readerCloseBtn}
               onClick={handleCloseReader}
               aria-label="Close magazine reader"
             >
-              <X className={styles.readerCloseIcon} />
+              <X className={magStyles.readerCloseIcon} />
               <span>CLOSE</span>
             </button>
           </div>
           <div
-            className={styles.readerModalBody}
+            className={magStyles.readerStage}
             onClick={(e) => {
               if (e.target === e.currentTarget) {
                 handleCloseReader();
               }
             }}
           >
-            {selectedMagazine && (
+            {activeMagazine && (
               <MagazineSpread
-                pdfUrl={selectedMagazine.pdf}
-                title={selectedMagazine.title}
+                pdfUrl={activeMagazine.pdf}
+                title={activeMagazine.title}
+                onSpreadChange={setSpreadLabel}
               />
             )}
+          </div>
+          <div className={magStyles.readerFooter}>
+            <span>{spreadLabel}</span>
           </div>
         </div>,
         document.body
