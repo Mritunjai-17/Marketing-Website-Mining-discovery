@@ -148,22 +148,26 @@ export const JourneyCamera: React.FC = () => {
 
     // 2. Downward Vertical Overhead View (t >= 0.90)
     // Camera is positioned directly above the highway.
-    // By setting overheadUp = -state.tangent (+Z), the highway runs vertically from top to bottom,
-    // and the truck (heading along -Z) points straight down and runs vertically down the screen!
-    const OVERHEAD_HEIGHT = 56 * (isPortrait ? 1.45 : 1.0);
+    // Height of 82 ensures the full truck (cab + trailer + wheels) is completely visible with ample breathing room.
+    const OVERHEAD_HEIGHT = 82 * (isPortrait ? 1.45 : 1.0);
+
+    // The truck body's geometric midpoint is 4.2 units behind the truck group origin along tangent.
+    // Offsetting the target to the midpoint ensures the full tractor + trailer is perfectly centered.
+    const TRUCK_MIDPOINT_OFFSET = -4.2;
 
     // As user scrolls from t = 0.90 to 0.99, the truck visibly advances downward across the screen
     const runProgress = smoothstep(0.90, 0.99, t);
-    const camLead = (1 - runProgress * 2) * 7.2;
+    const camLead = (1 - runProgress * 2) * 3.5;
+    const totalOffset = TRUCK_MIDPOINT_OFFSET + camLead;
 
     scratch.overheadPos
       .copy(state.truckPosition)
       .addScaledVector(UP, OVERHEAD_HEIGHT)
-      .addScaledVector(state.tangent, camLead * 0.35);
+      .addScaledVector(state.tangent, TRUCK_MIDPOINT_OFFSET + camLead * 0.35);
 
     scratch.overheadTarget
       .copy(state.truckPosition)
-      .addScaledVector(state.tangent, camLead);
+      .addScaledVector(state.tangent, totalOffset);
 
     scratch.overheadUp.copy(state.tangent).negate(); // (0, 0, 1)
 
@@ -176,7 +180,7 @@ export const JourneyCamera: React.FC = () => {
       .copy(state.truckPosition)
       .addScaledVector(state.side, arcSide)
       .addScaledVector(UP, arcHeight)
-      .addScaledVector(state.tangent, easeTurn * camLead * 0.35);
+      .addScaledVector(state.tangent, easeTurn * (TRUCK_MIDPOINT_OFFSET + camLead * 0.35));
 
     state.desiredTarget.lerpVectors(scratch.sideTarget, scratch.overheadTarget, easeTurn);
 
