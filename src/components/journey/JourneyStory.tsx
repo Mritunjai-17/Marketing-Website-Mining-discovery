@@ -17,8 +17,20 @@ import { getChronologicalMagazines, type MagazineEdition } from "@/data/magazine
 
 const MILESTONE_ICONS = [TrendingUp, Newspaper, BookOpen, Globe, Sparkles, Sparkles];
 
-// Latest 5 single magazines ordered chronologically as shown on port 3001
-const showcaseMagazines: MagazineEdition[] = getChronologicalMagazines(false).slice(0, 5);
+export interface RevealCard {
+  id: number;
+  type: "magazine" | "newsletter" | "placeholder";
+}
+
+export const REVEAL_CARDS: RevealCard[] = [
+  { id: 1, type: "magazine" },
+  { id: 2, type: "newsletter" },
+  { id: 3, type: "placeholder" },
+  { id: 4, type: "placeholder" },
+  { id: 5, type: "placeholder" },
+  { id: 6, type: "placeholder" },
+  { id: 7, type: "placeholder" },
+];
 
 export interface StoryPoint {
   id: string;
@@ -158,11 +170,11 @@ export const JourneyStory: React.FC = () => {
   const rightColRef = useRef<HTMLDivElement>(null);
   const statsTrackRef = useRef<HTMLDivElement>(null);
 
-  // Magazine Showcase refs
   const magazineWrapRef = useRef<HTMLDivElement>(null);
   const rowRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const activeIndexRef = useRef(1); // Default to June 2026 Edition 13 (matching reference screenshot)
+  const servicesTitleRef = useRef<HTMLDivElement>(null);
 
   // All 14 magazines and the 5 latest editions
   const allMagazines = useMemo(() => getChronologicalMagazines(false), []);
@@ -286,20 +298,23 @@ export const JourneyStory: React.FC = () => {
       secondPartRef.current.style.pointerEvents = opacity > 0.5 ? "auto" : "none";
     }
 
-    // 4. ROAD-TO-SCREEN ANIMATED MAGAZINE SHOWCASE:
+    // 4. ROAD-TO-SCREEN ANIMATED CARD SHOWCASE:
     // Phase 2: Cards tumble out of truck back doors onto the road (p = 0.935 to 0.950).
-    // Phase 3: One by one, cards come on screen directly from the fallen cards (p = 0.950 to 0.970).
-    // Phase 4: All 5 cards align together (p = 0.970 to 0.974), then zoom to fill the full screen (p = 0.974 to 1.000)!
+    // Phase 3: One by one, 7 cards come on screen directly from the fallen cards (p = 0.950 to 0.970).
+    // Phase 4: All 7 cards align together across the screen (p = 0.970 to 1.000)!
     if (magazineWrapRef.current) {
       const rowEl = rowRef.current;
 
-      if (p < 0.950) {
+      if (p < 0.948) {
         magazineWrapRef.current.style.opacity = "0";
         magazineWrapRef.current.style.pointerEvents = "none";
         magazineWrapRef.current.style.backgroundColor = "transparent";
         magazineWrapRef.current.style.backdropFilter = "none";
+        if (servicesTitleRef.current) {
+          servicesTitleRef.current.style.opacity = "0";
+        }
         if (rowEl) rowEl.style.transform = "scale(1)";
-        showcaseMagazines.forEach((_, idx) => {
+        REVEAL_CARDS.forEach((_, idx) => {
           const el = cardRefs.current[idx];
           if (el) {
             el.style.opacity = "0";
@@ -313,59 +328,154 @@ export const JourneyStory: React.FC = () => {
         const winW = typeof window !== "undefined" ? window.innerWidth : 1200;
         const winH = typeof window !== "undefined" ? window.innerHeight : 800;
 
-        // Position of the fallen cards on the road behind the truck (upper-center of viewport)
-        const fallenCardsX = winW / 2;
-        const fallenCardsY = winH * 0.22;
+        // Position of the card emission point on the road behind the truck (right-side offset)
+        const startX = winW * 0.52;
+        const startY = winH * 0.22;
 
         const rowRect = rowEl ? rowEl.getBoundingClientRect() : null;
 
-        showcaseMagazines.forEach((_, idx) => {
+        const isMobile = winW < 768;
+
+        const originX = winW / 2;
+        const originY = isMobile ? winH * 0.46 : winH * 0.50;
+
+        // Base coordinate for the right-side queue
+        const queueBaseX = originX + (isMobile ? winW * 0.18 : Math.min(winW * 0.20, 260));
+        const queueBaseY = originY;
+
+        // Stable slot definitions for the right-side queue (slots 0 to 6)
+        const getQueueX = (i: number) => queueBaseX + i * (isMobile ? 18 : 26);
+        const getQueueY = (i: number) => queueBaseY + (i - 3) * 5;
+        const getQueueRotZ = (i: number) => (i - 2.5) * 1.6;
+        const getQueueScale = (i: number) => (isMobile ? 0.68 : 0.76) - i * 0.012;
+        const getQueueZIndex = (i: number) => 16 - i;
+
+        // Center slot definition (Slot 0 - Featured Position)
+        const centerX = originX;
+        const centerY = originY;
+        const centerScale = isMobile ? 0.85 : 1.0;
+
+        // 1. Emergence from truck into initial state (Card 1 at center, Cards 2-7 in queue): 0.948 -> 0.952
+        const EMERGE_START = 0.948;
+        const EMERGE_END = 0.952;
+
+        // 2. Sequential Carousel transitions (6 transitions between adjacent cards): 0.952 -> 1.000
+        const CAROUSEL_START = 0.952;
+        const CAROUSEL_END = 1.000;
+        const TRANSITION_SPAN = (CAROUSEL_END - CAROUSEL_START) / 6;
+
+        let activeTransition = 0;
+        let easeT = 0;
+
+        if (p >= CAROUSEL_START) {
+          const progressInTransitions = (p - CAROUSEL_START) / TRANSITION_SPAN;
+          activeTransition = Math.min(5, Math.max(0, Math.floor(progressInTransitions)));
+          const subT = progressInTransitions - activeTransition;
+          const MOVE_RATIO = 0.65; // 65% smooth handoff travel, 35% solid center hold
+
+          let rawT = 0;
+          if (subT < MOVE_RATIO) {
+            rawT = subT / MOVE_RATIO;
+          } else {
+            rawT = 1.0;
+          }
+          easeT = rawT * rawT * (3 - 2 * rawT);
+        }
+
+        REVEAL_CARDS.forEach((_, idx) => {
           const el = cardRefs.current[idx];
           if (!el) return;
 
-          // Staggered timing: one by one cards come on screen from fallen cards (0.950 to 0.970)
-          const cardStart = 0.950 + idx * 0.004;
-          const cardEnd = cardStart + 0.004;
-
-          // Slot center on screen
+          // Card slot in DOM flow
           const slotX = (rowRect ? rowRect.left : winW * 0.2) + el.offsetLeft + el.offsetWidth / 2;
           const slotY = (rowRect ? rowRect.top : winH * 0.5) + el.offsetTop + el.offsetHeight / 2;
 
-          const deltaX = slotX - fallenCardsX;
-          const deltaY = slotY - fallenCardsY;
+          let curX = getQueueX(idx);
+          let curY = getQueueY(idx);
+          let curScale = getQueueScale(idx);
+          let curRotX = 0;
+          let curRotZ = getQueueRotZ(idx);
+          let opacity = 0;
+          let zIndex = getQueueZIndex(idx);
+          let isInteractive = false;
 
-          if (p < cardStart) {
-            // Not on screen yet: resting among the fallen cards on the road
+          if (p < EMERGE_START) {
+            // Hidden before truck stops
             el.style.opacity = "0";
             el.style.pointerEvents = "none";
-            el.style.transform = `translate3d(${-deltaX.toFixed(1)}px, ${-deltaY.toFixed(1)}px, 0) scale(0.05)`;
+            const tx = startX - slotX;
+            const ty = startY - slotY;
+            el.style.transform = `translate3d(${tx.toFixed(1)}px, ${ty.toFixed(1)}px, 0) scale(0.05)`;
             return;
           }
 
-          if (p >= cardStart && p < cardEnd) {
-            // Zooming up toward camera onto screen from the fallen cards
-            const t = (p - cardStart) / (cardEnd - cardStart);
-            const easeOut = 1 - Math.pow(1 - t, 3);
-            const burstProgress = Math.pow(t, 0.75);
+          if (p >= EMERGE_START && p < EMERGE_END) {
+            // Emerges from truck directly into the initial state:
+            // Card 1 (idx 0) emerges to CENTER, Cards 2-7 (idx 1-6) emerge to their right queue slots
+            const emergeP = (p - EMERGE_START) / (EMERGE_END - EMERGE_START);
+            const easeEmerge = 1 - Math.pow(1 - emergeP, 2.5);
 
-            const curX = -deltaX * (1 - easeOut);
-            const arc = Math.sin(t * Math.PI) * -45;
-            const curY = -deltaY * (1 - burstProgress) + arc;
-            const curScale = 0.05 + 0.95 * Math.pow(t, 0.85);
-
-            const rotZ = (1 - t) * ((idx - 2) * 10);
-            const rotX = (1 - t) * 22;
-            const opacity = Math.min(1, t * 4.5);
-
-            el.style.opacity = opacity.toFixed(3);
-            el.style.transform = `translate3d(${curX.toFixed(1)}px, ${curY.toFixed(1)}px, 0) scale(${curScale.toFixed(3)}) rotateX(${rotX.toFixed(1)}deg) rotateZ(${rotZ.toFixed(1)}deg)`;
-            el.style.pointerEvents = "none";
+            if (idx === 0) {
+              curX = (1 - easeEmerge) * startX + easeEmerge * centerX;
+              curY = (1 - easeEmerge) * startY + easeEmerge * centerY;
+              curScale = (0.05 + 0.95 * easeEmerge) * centerScale;
+              curRotZ = 0;
+              curRotX = (1 - easeEmerge) * 16;
+              zIndex = 25;
+            } else {
+              curX = (1 - easeEmerge) * startX + easeEmerge * getQueueX(idx);
+              curY = (1 - easeEmerge) * startY + easeEmerge * getQueueY(idx);
+              curScale = (0.05 + 0.95 * easeEmerge) * getQueueScale(idx);
+              curRotZ = easeEmerge * getQueueRotZ(idx);
+              curRotX = (1 - easeEmerge) * 16;
+              zIndex = getQueueZIndex(idx);
+            }
+            opacity = Math.min(1, emergeP * 3.5);
           } else {
-            // p >= cardEnd: Arrived and sits aligned on screen in the row!
-            el.style.opacity = "1";
-            el.style.transform = "translate3d(0, 0, 0) scale(1)";
-            el.style.pointerEvents = "auto";
+            // Carousel State:
+            // During transition `k`:
+            // - Outgoing card (idx === k) moves from CENTER to queue slot
+            // - Incoming card (idx === k + 1) moves from queue slot to CENTER
+            // - ALL other 5 cards remain completely stationary in their right queue slots!
+            opacity = 1;
+            const k = activeTransition;
+
+            if (idx === k) {
+              // Outgoing card: CENTER -> its queue slot
+              curX = (1 - easeT) * centerX + easeT * getQueueX(k);
+              curY = (1 - easeT) * centerY + easeT * getQueueY(k);
+              curRotZ = easeT * getQueueRotZ(k);
+              curScale = (1 - easeT) * centerScale + easeT * getQueueScale(k);
+              curRotX = Math.sin(easeT * Math.PI) * 8;
+              zIndex = 22;
+              isInteractive = easeT < 0.2;
+            } else if (idx === k + 1) {
+              // Incoming card: its queue slot -> CENTER
+              curX = (1 - easeT) * getQueueX(k + 1) + easeT * centerX;
+              curY = (1 - easeT) * getQueueY(k + 1) + easeT * centerY;
+              curRotZ = (1 - easeT) * getQueueRotZ(k + 1);
+              curScale = (1 - easeT) * getQueueScale(k + 1) + easeT * centerScale;
+              curRotX = Math.sin(easeT * Math.PI) * 10;
+              zIndex = 25; // Elevated in front
+              isInteractive = easeT > 0.8;
+            } else {
+              // Non-transitioning cards remain completely stationary in their assigned queue slots
+              curX = getQueueX(idx);
+              curY = getQueueY(idx);
+              curRotZ = getQueueRotZ(idx);
+              curScale = getQueueScale(idx);
+              curRotX = 0;
+              zIndex = getQueueZIndex(idx);
+            }
           }
+
+          const tx = curX - slotX;
+          const ty = curY - slotY;
+
+          el.style.opacity = opacity.toFixed(3);
+          el.style.pointerEvents = isInteractive ? "auto" : "none";
+          el.style.zIndex = `${zIndex}`;
+          el.style.transform = `translate3d(${tx.toFixed(1)}px, ${ty.toFixed(1)}px, 0) scale(${curScale.toFixed(3)}) rotateX(${curRotX.toFixed(1)}deg) rotateZ(${curRotZ.toFixed(1)}deg)`;
         });
 
         // Phase 4: Display all five cards at once on screen without overzooming!
@@ -385,6 +495,19 @@ export const JourneyStory: React.FC = () => {
           }
           magazineWrapRef.current.style.backgroundColor = "transparent";
           magazineWrapRef.current.style.backdropFilter = "none";
+        }
+
+        // Animate OUR SERVICES background text behind cards
+        if (servicesTitleRef.current) {
+          if (p < 0.960) {
+            servicesTitleRef.current.style.opacity = "0";
+          } else {
+            const titleP = smoothstep(0.960, 0.988, p);
+            const titleY = (1 - titleP) * 16;
+            const titleScale = 0.97 + titleP * 0.03;
+            servicesTitleRef.current.style.opacity = (titleP * 0.24).toFixed(3);
+            servicesTitleRef.current.style.transform = `translate3d(-50%, calc(-50% + ${titleY.toFixed(1)}px), 0) scale(${titleScale.toFixed(3)})`;
+          }
         }
       }
     }
@@ -690,30 +813,35 @@ export const JourneyStory: React.FC = () => {
           Directly emerges and zooms up from the truck's rear cargo doors into center stage.
           Presents the cards one by one in series ("single by single") matching the user reference image. */}
       <div ref={magazineWrapRef} className={styles.magazinePresentationWrap}>
+        {/* Large background typography behind the 7 cards */}
+        <div ref={servicesTitleRef} className={styles.servicesBackgroundText} aria-hidden="true">
+          OUR SERVICES
+        </div>
+
         <div className={magStyles.magazinePresentation}>
-          {/* 5 Cards Row - Aligned horizontally across the screen */}
+          {/* 7 Cards Row - Aligned horizontally across the screen */}
           <div ref={rowRef} className={styles.cardsAlignedRow}>
-            {showcaseMagazines.map((mag, idx) => (
+            {REVEAL_CARDS.map((card, idx) => (
               <div
-                key={mag.id}
+                key={card.id}
                 ref={(el) => {
                   cardRefs.current[idx] = el;
                 }}
                 className={`${styles.alignedCardItem} ${
                   activeIndex === idx ? styles.alignedCardItemActive : ""
                 }`}
-                onClick={() => handleCardClick(idx, mag)}
+                onClick={() => setActiveIndex(idx)}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
-                    handleCardClick(idx, mag);
+                    setActiveIndex(idx);
                   }
                 }}
-                aria-label={`Open ${mag.month} Edition ${mag.year}`}
+                aria-label={`Card ${card.id}`}
               >
-                <ShowcaseCardCover mag={mag} />
+                {/* Clean blank card shell preserving exact frame, spine, sheen, and shield */}
                 <div aria-hidden="true" className={magStyles.coverSpine} />
                 <div aria-hidden="true" className={magStyles.coverSheen} />
                 <div aria-hidden="true" className={magStyles.coverShield} />
