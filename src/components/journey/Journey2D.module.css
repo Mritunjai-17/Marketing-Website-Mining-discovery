@@ -1174,8 +1174,9 @@
   justify-content: center;
   pointer-events: none;
   z-index: 40;
-  will-change: transform, opacity;
-  padding: clamp(1rem, 2.8vh, 2.5rem) 1.5rem;
+  will-change: transform, opacity, background-color;
+  padding: 0;
+  overflow: hidden;
   box-sizing: border-box;
 }
 
@@ -1215,21 +1216,23 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(0.5rem, 1.4vw, 1.4rem);
+  gap: clamp(0.6rem, 1.8vw, 2rem);
   width: 100%;
-  max-width: 1280px;
+  max-width: 1320px;
   margin: 0 auto;
   perspective: 1200px;
+  transform-origin: center center;
+  will-change: transform;
 }
 
 .alignedCardItem {
   position: relative;
-  height: clamp(200px, 34vh, 330px);
+  height: clamp(240px, 38vh, 390px);
   aspect-ratio: 17 / 22;
-  border-radius: 5px;
+  border-radius: 6px;
   overflow: hidden;
   background-color: #0c0f16;
-  border: 1px solid rgba(247, 244, 237, 0.14);
+  border: 1px solid rgba(247, 244, 237, 0.16);
   box-shadow:
     0 4px 14px rgba(0, 0, 0, 0.4),
     0 18px 42px -8px rgba(0, 0, 0, 0.75),

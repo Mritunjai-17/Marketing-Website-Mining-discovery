@@ -162,7 +162,6 @@ export const JourneyStory: React.FC = () => {
   const magazineWrapRef = useRef<HTMLDivElement>(null);
   const rowRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const controlsRef = useRef<HTMLDivElement>(null);
   const activeIndexRef = useRef(1); // Default to June 2026 Edition 13 (matching reference screenshot)
 
   // All 14 magazines and the 5 latest editions
@@ -219,27 +218,11 @@ export const JourneyStory: React.FC = () => {
     }
   }, [readerState]);
 
-  const handleSelectPill = useCallback((idx: number) => {
+  const handleCardClick = useCallback((idx: number, mag: MagazineEdition) => {
     setActiveIndex(idx);
     activeIndexRef.current = idx;
-    showcaseMagazines.forEach((_, i) => {
-      const el = cardRefs.current[i];
-      if (!el) return;
-      const isSelected = i === idx;
-      el.style.opacity = isSelected ? "1" : "0.85";
-      el.style.transform = isSelected
-        ? "translate3d(0, -6px, 0) scale(1.04)"
-        : "translate3d(0, 0, 0) scale(0.96)";
-    });
-  }, [showcaseMagazines]);
-
-  const handleCardClick = useCallback((idx: number, mag: MagazineEdition) => {
-    if (activeIndexRef.current === idx) {
-      handleOpenReader(mag);
-    } else {
-      handleSelectPill(idx);
-    }
-  }, [handleOpenReader, handleSelectPill]);
+    handleOpenReader(mag);
+  }, [handleOpenReader]);
 
   // Lock scroll & handle Escape key when reader is active
   useEffect(() => {
@@ -304,13 +287,18 @@ export const JourneyStory: React.FC = () => {
     }
 
     // 4. ROAD-TO-SCREEN ANIMATED MAGAZINE SHOWCASE:
-    // First, cards fell out of the truck back door onto the road (p = 0.935 to 0.952).
-    // Then, one by one, cards come on screen directly from the fallen cards on the road!
-    // And all remain aligned on screen together!
+    // Phase 2: Cards tumble out of truck back doors onto the road (p = 0.935 to 0.950).
+    // Phase 3: One by one, cards come on screen directly from the fallen cards (p = 0.950 to 0.970).
+    // Phase 4: All 5 cards align together (p = 0.970 to 0.974), then zoom to fill the full screen (p = 0.974 to 1.000)!
     if (magazineWrapRef.current) {
-      if (p < 0.952) {
+      const rowEl = rowRef.current;
+
+      if (p < 0.950) {
         magazineWrapRef.current.style.opacity = "0";
         magazineWrapRef.current.style.pointerEvents = "none";
+        magazineWrapRef.current.style.backgroundColor = "transparent";
+        magazineWrapRef.current.style.backdropFilter = "none";
+        if (rowEl) rowEl.style.transform = "scale(1)";
         showcaseMagazines.forEach((_, idx) => {
           const el = cardRefs.current[idx];
           if (el) {
@@ -318,15 +306,10 @@ export const JourneyStory: React.FC = () => {
             el.style.pointerEvents = "none";
           }
         });
-        if (controlsRef.current) {
-          controlsRef.current.style.opacity = "0";
-          controlsRef.current.style.pointerEvents = "none";
-        }
       } else {
         magazineWrapRef.current.style.opacity = "1";
-        magazineWrapRef.current.style.pointerEvents = p >= 0.982 ? "auto" : "none";
+        magazineWrapRef.current.style.pointerEvents = "auto";
 
-        const rowEl = rowRef.current;
         const winW = typeof window !== "undefined" ? window.innerWidth : 1200;
         const winH = typeof window !== "undefined" ? window.innerHeight : 800;
 
@@ -340,19 +323,19 @@ export const JourneyStory: React.FC = () => {
           const el = cardRefs.current[idx];
           if (!el) return;
 
-          // Staggered timing: one by one cards come on screen from fallen cards
-          const cardStart = 0.952 + idx * 0.006;
-          const cardEnd = cardStart + 0.006;
+          // Staggered timing: one by one cards come on screen from fallen cards (0.950 to 0.970)
+          const cardStart = 0.950 + idx * 0.004;
+          const cardEnd = cardStart + 0.004;
 
           // Slot center on screen
           const slotX = (rowRect ? rowRect.left : winW * 0.2) + el.offsetLeft + el.offsetWidth / 2;
-          const slotY = (rowRect ? rowRect.top : winH * 0.42) + el.offsetTop + el.offsetHeight / 2;
+          const slotY = (rowRect ? rowRect.top : winH * 0.5) + el.offsetTop + el.offsetHeight / 2;
 
           const deltaX = slotX - fallenCardsX;
           const deltaY = slotY - fallenCardsY;
 
           if (p < cardStart) {
-            // Not on screen yet: still resting among the fallen cards on the road
+            // Not on screen yet: resting among the fallen cards on the road
             el.style.opacity = "0";
             el.style.pointerEvents = "none";
             el.style.transform = `translate3d(${-deltaX.toFixed(1)}px, ${-deltaY.toFixed(1)}px, 0) scale(0.05)`;
@@ -378,21 +361,32 @@ export const JourneyStory: React.FC = () => {
             el.style.transform = `translate3d(${curX.toFixed(1)}px, ${curY.toFixed(1)}px, 0) scale(${curScale.toFixed(3)}) rotateX(${rotX.toFixed(1)}deg) rotateZ(${rotZ.toFixed(1)}deg)`;
             el.style.pointerEvents = "none";
           } else {
-            // p >= cardEnd: Arrived and sits aligned on screen!
-            const isSelected = activeIndexRef.current === idx;
-            el.style.opacity = isSelected ? "1" : "0.85";
-            el.style.transform = isSelected
-              ? "translate3d(0, -6px, 0) scale(1.04)"
-              : "translate3d(0, 0, 0) scale(0.96)";
+            // p >= cardEnd: Arrived and sits aligned on screen in the row!
+            el.style.opacity = "1";
+            el.style.transform = "translate3d(0, 0, 0) scale(1)";
             el.style.pointerEvents = "auto";
           }
         });
 
-        // Publication controls below fade in once all cards are aligned on screen
-        if (controlsRef.current) {
-          const controlsFade = smoothstep(0.982, 0.988, p);
-          controlsRef.current.style.opacity = controlsFade.toFixed(3);
-          controlsRef.current.style.pointerEvents = controlsFade > 0.6 ? "auto" : "none";
+        // Phase 4: After they are all shown (p >= 0.974), zoom to fill the full screen!
+        if (p >= 0.974) {
+          const zoomProgress = smoothstep(0.974, 0.998, p);
+          // Scale smoothly from 1.0 up to 3.2 to completely fill the screen
+          const zoomScale = 1 + zoomProgress * 2.2;
+          if (rowEl) {
+            rowEl.style.transform = `scale(${zoomScale.toFixed(3)})`;
+          }
+          // Deepen background to dark cinematic backdrop with backdrop blur
+          const bgAlpha = (zoomProgress * 0.88).toFixed(3);
+          magazineWrapRef.current.style.backgroundColor = `rgba(6, 10, 18, ${bgAlpha})`;
+          const blurPx = (zoomProgress * 12).toFixed(1);
+          magazineWrapRef.current.style.backdropFilter = zoomProgress > 0.02 ? `blur(${blurPx}px)` : "none";
+        } else {
+          if (rowEl) {
+            rowEl.style.transform = "scale(1)";
+          }
+          magazineWrapRef.current.style.backgroundColor = "transparent";
+          magazineWrapRef.current.style.backdropFilter = "none";
         }
       }
     }
@@ -727,69 +721,6 @@ export const JourneyStory: React.FC = () => {
                 <div aria-hidden="true" className={magStyles.coverShield} />
               </div>
             ))}
-          </div>
-
-          {/* Active Magazine Metadata & Controls */}
-          <div ref={controlsRef} className={`${magStyles.coverMeta} ${styles.alignedControls}`}>
-            <div className={magStyles.editionTag}>
-              <span>FEATURED PUBLICATION</span>
-              <span className={magStyles.editionDot} aria-hidden="true" />
-              <span>EDITION {activeMagazine.issueNumber ?? (14 - activeIndex)}</span>
-            </div>
-
-            <h3 className={magStyles.editionTitle}>
-              {activeMagazine.month?.toUpperCase()} EDITION {activeMagazine.year}
-            </h3>
-
-            {/* Interactive Open Edition button */}
-            <div
-              className={magStyles.openAffordance}
-              onClick={() => handleOpenReader(activeMagazine)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  handleOpenReader(activeMagazine);
-                }
-              }}
-              role="button"
-              tabIndex={0}
-              aria-label={`Open ${activeMagazine.title}`}
-            >
-              <span>OPEN EDITION</span>
-              <ArrowRight className={magStyles.openAffordanceIcon} />
-            </div>
-
-            {/* Progress Indicator Dots */}
-            <div className={magStyles.progressRow} aria-label="Magazine sequence progress">
-              {showcaseMagazines.map((mag, idx) => (
-                <button
-                  key={mag.id}
-                  type="button"
-                  onClick={() => handleSelectPill(idx)}
-                  className={`${magStyles.progressDot} ${
-                    activeIndex === idx ? magStyles.progressDotActive : ""
-                  }`}
-                  aria-label={`Show Edition ${idx + 1}`}
-                >
-                  {String(idx + 1).padStart(2, "0")}
-                </button>
-              ))}
-            </div>
-
-            {/* View All Magazines CTA */}
-            <button
-              type="button"
-              className={magStyles.viewAllCtaBtn}
-              onClick={() => setShowAllArchive((prev) => !prev)}
-              aria-expanded={showAllArchive}
-            >
-              <span>
-                {showAllArchive
-                  ? "HIDE COMPLETE ARCHIVE"
-                  : `VIEW ALL MAGAZINES (${allMagazines.length})`}
-              </span>
-              <ArrowRight className={magStyles.viewAllCtaIcon} />
-            </button>
           </div>
         </div>
       </div>
