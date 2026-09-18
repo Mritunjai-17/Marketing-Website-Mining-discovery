@@ -870,10 +870,13 @@
 }
 
 /* ==========================================================================
-   SECOND PART (REAR CHASE VIEW): 3D SIDEWAYS WALL TEXT
-   Angled in 3D perspective along the sides of the road, matching
-   the reference corridor wall mural ("Be so good they can't ignore you").
-   As the truck advances forward, text passes by and fades away.
+   SECOND PART (VERTICAL ROAD HERO): EDITORIAL POSTER
+   Matches unitedcarriers.com reference layout:
+   - Top gauge arc at top edge
+   - 00 KM/H badge
+   - Big bold uppercase headline on left side: "RELIABILITY AT EVERY MILESTONE"
+   - Subtext placed "little down" near bottom-left
+   - Feature blocks with icons on the right side
    ========================================================================== */
 
 .secondPartSidesWrap {
@@ -881,126 +884,175 @@
   inset: 0;
   pointer-events: none;
   z-index: 25;
-  perspective: 1100px;
-  perspective-origin: 50% 45%;
   opacity: 0;
   will-change: opacity;
   transition: opacity 0.2s ease-out;
 }
 
+/* Top Gauge Meter */
+.topGaugeMeter {
+  position: absolute;
+  top: 0;
+  left: clamp(2rem, 5vw, 4.5rem);
+  width: 72px;
+  height: 36px;
+  pointer-events: none;
+}
+
+.topGaugeSvg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Left Column: 00 KM/H + Big Headline */
 .secondPartLeftSide {
   position: absolute;
-  left: clamp(1.25rem, 3.2vw, 3.8rem);
-  top: clamp(4.5rem, 14vh, 7rem);
-  max-width: clamp(250px, 24vw, 360px);
+  left: clamp(2rem, 5vw, 4.5rem);
+  top: clamp(3.2rem, 9.5vh, 5.5rem);
+  max-width: clamp(320px, 34vw, 540px);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   text-align: left;
-  transform-origin: left center;
-  transform: rotateY(36deg) skewY(-2.5deg);
-  transform-style: preserve-3d;
   will-change: transform;
 }
 
-.secondPartDivider {
-  width: 42px;
-  height: 2px;
-  background: #b8860b;
-  margin-bottom: 0.85rem;
-}
-
-.secondPartEyebrow {
-  font-family: var(--font-sans-custom), system-ui, -apple-system, sans-serif;
-  font-size: clamp(0.66rem, 0.74vw, 0.76rem);
+.speedometerBadge {
+  font-family: var(--font-mono, monospace), system-ui, sans-serif;
+  font-size: clamp(0.72rem, 0.8vw, 0.82rem);
   font-weight: 700;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: #b8860b;
-  margin-bottom: 0.65rem;
-  display: block;
+  color: #111827;
+  margin-bottom: 1.1rem;
 }
 
 .secondPartHeadline {
-  font-family: var(--font-serif, "Playfair Display", Georgia, serif);
-  font-size: clamp(1.35rem, 1.9vw, 2.05rem);
-  font-weight: 400;
-  line-height: 1.18;
-  letter-spacing: -0.015em;
-  color: #0b1f3a;
-  margin: 0 0 0.85rem 0;
-  text-shadow: 0 1px 2px rgba(11, 31, 58, 0.06);
+  font-family: var(--font-sans-custom), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: clamp(2.5rem, 4.5vw, 4.8rem);
+  font-weight: 800;
+  line-height: 0.94;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0;
+}
+
+.headlineMuted {
+  color: #8e96a2;
+}
+
+.headlineDark {
+  color: #0f172a;
+}
+
+/* Left Subtext "little down" (bottom-left) */
+.secondPartLeftBottom {
+  position: absolute;
+  left: clamp(2rem, 5vw, 4.5rem);
+  bottom: clamp(2.2rem, 7vh, 4.8rem);
+  max-width: clamp(280px, 26vw, 420px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  will-change: transform;
 }
 
 .secondPartDescription {
   font-family: var(--font-sans-custom), system-ui, -apple-system, sans-serif;
-  font-size: clamp(0.8rem, 0.88vw, 0.92rem);
-  line-height: 1.58;
-  color: #3a3d42;
+  font-size: clamp(0.85rem, 0.92vw, 1.02rem);
+  line-height: 1.55;
+  color: #1e293b;
+  font-weight: 500;
   margin: 0;
 }
 
+/* Right Column: Features */
 .secondPartRightSide {
   position: absolute;
-  right: clamp(1.25rem, 3.2vw, 3.8rem);
-  top: clamp(4.8rem, 15vh, 7.5rem);
-  max-width: clamp(230px, 22vw, 320px);
+  right: clamp(2rem, 5vw, 4.5rem);
+  top: clamp(4.5rem, 15vh, 8.5rem);
+  max-width: clamp(250px, 23vw, 340px);
   display: flex;
   flex-direction: column;
+  gap: 2.2rem;
   align-items: flex-start;
   text-align: left;
-  transform-origin: right center;
-  transform: rotateY(-36deg) skewY(2.5deg);
-  transform-style: preserve-3d;
   will-change: transform;
 }
 
-.secondPartStatValue {
-  font-family: var(--font-serif, "Playfair Display", Georgia, serif);
-  font-size: clamp(2.6rem, 4.2vw, 4.4rem);
-  font-weight: 400;
-  line-height: 1;
-  letter-spacing: -0.02em;
-  color: #0b1f3a;
-  text-shadow: 0 1px 2px rgba(11, 31, 58, 0.06);
+.featureBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
 }
 
-.secondPartStatLabel {
-  font-family: var(--font-sans-custom), system-ui, -apple-system, sans-serif;
-  font-size: clamp(0.66rem, 0.74vw, 0.76rem);
-  font-weight: 700;
-  letter-spacing: 0.16em;
+.featureIconWrap {
+  width: 36px;
+  height: 36px;
+  color: #0f172a;
+}
+
+.featureIconSvg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.featureTitle {
+  font-family: var(--font-sans-custom), system-ui, sans-serif;
+  font-size: clamp(1.05rem, 1.25vw, 1.35rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
   text-transform: uppercase;
-  color: #b8860b;
-  margin-top: 0.45rem;
+  color: #0f172a;
+  margin: 0;
 }
 
-.secondPartStatDesc {
-  font-family: var(--font-sans-custom), system-ui, -apple-system, sans-serif;
-  font-size: clamp(0.8rem, 0.88vw, 0.92rem);
-  line-height: 1.48;
-  color: #57595e;
-  margin: 0.35rem 0 0 0;
+.featureDesc {
+  font-family: var(--font-sans-custom), system-ui, sans-serif;
+  font-size: clamp(0.78rem, 0.85vw, 0.92rem);
+  line-height: 1.5;
+  color: #475569;
+  margin: 0;
 }
 
+.featureDivider {
+  width: 100%;
+  height: 1px;
+  background: rgba(15, 23, 42, 0.1);
+  margin: 0.25rem 0;
+}
+
+/* Responsive */
 @media (max-width: 900px) {
   .secondPartLeftSide {
-    left: 1rem;
-    top: 4rem;
-    max-width: 240px;
-    transform: rotateY(20deg);
-  }
-  .secondPartRightSide {
-    right: 1rem;
-    top: 4rem;
-    max-width: 210px;
-    transform: rotateY(-20deg);
+    left: 1.25rem;
+    top: 3.5rem;
+    max-width: 280px;
   }
   .secondPartHeadline {
-    font-size: 1.15rem;
+    font-size: 2.1rem;
   }
-  .secondPartStatValue {
-    font-size: 2.2rem;
+  .secondPartLeftBottom {
+    left: 1.25rem;
+    bottom: 2rem;
+    max-width: 260px;
+  }
+  .secondPartRightSide {
+    right: 1.25rem;
+    top: 3.5rem;
+    max-width: 230px;
+    gap: 1.5rem;
+  }
+  .featureTitle {
+    font-size: 1.0rem;
   }
 }
 
@@ -1008,19 +1060,19 @@
   .secondPartLeftSide {
     left: 1rem;
     right: 1rem;
-    top: 3.8rem;
+    top: 3.5rem;
     max-width: calc(100% - 2rem);
-    transform: none;
   }
-  .secondPartRightSide {
+  .secondPartHeadline {
+    font-size: 1.9rem;
+  }
+  .secondPartLeftBottom {
     left: 1rem;
     right: 1rem;
-    top: auto;
-    bottom: 12%;
+    bottom: 3.5rem;
     max-width: calc(100% - 2rem);
-    transform: none;
   }
-  .secondPartDescription {
+  .secondPartRightSide {
     display: none;
   }
 }
