@@ -192,6 +192,22 @@ export const JourneyStory: React.FC = () => {
   // The Golden Dust Transition (Idea 6): Fine mineral dust & mountain stage refs
   const dustCanvasRef = useRef<HTMLCanvasElement>(null);
   const settleStageRef = useRef<HTMLDivElement>(null);
+  const controlsRef = useRef<HTMLDivElement>(null);
+  const mountainPhotoRef = useRef<HTMLImageElement>(null);
+  const spotlightRef = useRef<HTMLDivElement>(null);
+
+  // Interactive mouse tracker for spotlight, parallax, and dust physics
+  const mousePosRef = useRef({
+    x: 0.5,
+    y: 0.5,
+    targetX: 0.5,
+    targetY: 0.5,
+    px: 600,
+    py: 400,
+    targetPx: 600,
+    targetPy: 400,
+    active: false,
+  });
 
   // Deterministic pool of fine mineral dust / photographic grain particles
   const dustParticles = useMemo<DustParticle[]>(() => {
@@ -281,8 +297,28 @@ export const JourneyStory: React.FC = () => {
     measure();
     window.addEventListener("resize", measure, { passive: true });
     const timer = setTimeout(measure, 400);
+    const handlePointerMove = (e: PointerEvent) => {
+      const m = mousePosRef.current;
+      const w = window.innerWidth || 1200;
+      const h = window.innerHeight || 800;
+      m.targetX = Math.max(0, Math.min(1, e.clientX / w));
+      m.targetY = Math.max(0, Math.min(1, e.clientY / h));
+      m.targetPx = e.clientX;
+      m.targetPy = e.clientY;
+      m.active = true;
+    };
+    const handlePointerLeave = () => {
+      const m = mousePosRef.current;
+      m.targetX = 0.5;
+      m.targetY = 0.5;
+    };
+    window.addEventListener("pointermove", handlePointerMove, { passive: true });
+    window.addEventListener("pointerleave", handlePointerLeave, { passive: true });
+
     return () => {
       window.removeEventListener("resize", measure);
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerleave", handlePointerLeave);
       clearTimeout(timer);
     };
   }, []);
@@ -570,10 +606,51 @@ export const JourneyStory: React.FC = () => {
           setActiveIndex(currentDominant);
         }
 
-        // Deepen background to dark cinematic backdrop with subtle blur
-        const bgAlpha = (Math.min(1, (p - 0.938) / 0.035) * 0.88).toFixed(3);
-        magazineWrapRef.current.style.backgroundColor = `rgba(6, 10, 18, ${bgAlpha})`;
-        magazineWrapRef.current.style.backdropFilter = p > 0.945 ? "blur(12px)" : "none";
+        // Smooth mouse lerp for interactive dynamic spotlight, parallax, and dust deflection
+        const m = mousePosRef.current;
+        m.x += (m.targetX - m.x) * 0.08;
+        m.y += (m.targetY - m.y) * 0.08;
+        m.px += (m.targetPx - m.px) * 0.08;
+        m.py += (m.targetPy - m.py) * 0.08;
+
+        // Interactive subtle mountain parallax: responds seamlessly to mouse movement
+        if (mountainPhotoRef.current) {
+          const pX = (m.x - 0.5) * -22;
+          const pY = (m.y - 0.5) * -14;
+          mountainPhotoRef.current.style.transform = `scale(1.08) translate3d(${pX.toFixed(1)}px, ${pY.toFixed(1)}px, 0)`;
+        }
+
+        // Interactive golden spotlight following cursor
+        if (spotlightRef.current) {
+          if (p < 0.966) {
+            spotlightRef.current.style.opacity = "0";
+          } else {
+            const spotAlpha = Math.min(1, (p - 0.966) / 0.012);
+            spotlightRef.current.style.opacity = spotAlpha.toFixed(3);
+            spotlightRef.current.style.background = `radial-gradient(circle 560px at ${(m.x * 100).toFixed(1)}% ${(m.y * 100).toFixed(1)}%, rgba(255, 215, 110, 0.26) 0%, rgba(212, 175, 55, 0.12) 36%, rgba(14, 32, 64, 0.04) 65%, transparent 82%)`;
+          }
+        }
+
+        // Controls visibility: cleanly hide 6 dots when cards dissolve into mountain stage
+        if (controlsRef.current) {
+          if (p < 0.948 || p >= 0.966) {
+            controlsRef.current.style.opacity = "0";
+            controlsRef.current.style.pointerEvents = "none";
+          } else {
+            controlsRef.current.style.opacity = "1";
+            controlsRef.current.style.pointerEvents = "auto";
+          }
+        }
+
+        // Deepen background to dark cinematic backdrop during cards, transparent during mountain stage so rich alpine dawn breathes
+        if (p >= 0.966) {
+          magazineWrapRef.current.style.backgroundColor = "transparent";
+          magazineWrapRef.current.style.backdropFilter = "none";
+        } else {
+          const bgAlpha = (Math.min(1, (p - 0.938) / 0.035) * 0.88).toFixed(3);
+          magazineWrapRef.current.style.backgroundColor = `rgba(6, 10, 18, ${bgAlpha})`;
+          magazineWrapRef.current.style.backdropFilter = p > 0.945 ? "blur(12px)" : "none";
+        }
 
         // Background typography ("OUR SERVICES")
         if (servicesTitleRef.current) {
@@ -650,19 +727,32 @@ export const JourneyStory: React.FC = () => {
                 const curX = driftX * (1 - easeSettle) + targetX * easeSettle;
                 const curY = driftY * (1 - easeSettle) + targetY * easeSettle;
 
+                // Interactive cursor deflection: particles physically part and swirl around cursor
+                const mouseCanvasX = m.px;
+                const mouseCanvasY = m.py;
+                const distToMouse = Math.hypot(curX - mouseCanvasX, curY - mouseCanvasY);
+                let drawX = curX;
+                let drawY = curY;
+                if (m.active && distToMouse < 140 && distToMouse > 0.001) {
+                  const force = (1 - distToMouse / 140) * 35;
+                  const angle = Math.atan2(curY - mouseCanvasY, curX - mouseCanvasX);
+                  drawX += Math.cos(angle) * force;
+                  drawY += Math.sin(angle) * force;
+                }
+
                 const particleAlpha = pt.alpha * systemAlpha;
                 if (particleAlpha <= 0.01) return;
 
                 ctx.fillStyle = `${pt.color}${particleAlpha.toFixed(3)})`;
                 ctx.beginPath();
-                ctx.arc(curX, curY, pt.size, 0, Math.PI * 2);
+                ctx.arc(drawX, drawY, pt.size, 0, Math.PI * 2);
                 ctx.fill();
 
                 // Specular glint on larger flecks
                 if (pt.size > 2.0) {
                   ctx.fillStyle = `rgba(255, 255, 255, ${(particleAlpha * 0.6).toFixed(3)})`;
                   ctx.beginPath();
-                  ctx.arc(curX - 0.5, curY - 0.5, pt.size * 0.45, 0, Math.PI * 2);
+                  ctx.arc(drawX - 0.5, drawY - 0.5, pt.size * 0.45, 0, Math.PI * 2);
                   ctx.fill();
                 }
               });
@@ -1051,7 +1141,7 @@ export const JourneyStory: React.FC = () => {
         </div>
 
         {/* Minimal dot navigation indicator */}
-        <div className={styles.alignedControls}>
+        <div ref={controlsRef} className={styles.alignedControls}>
           {REVEAL_CARDS.map((card, idx) => (
             <button
               key={card.id}
@@ -1072,12 +1162,17 @@ export const JourneyStory: React.FC = () => {
         <div ref={settleStageRef} className={styles.settleMountainStage}>
           {/* Photorealistic alpine mountain landscape with golden morning sunlight */}
           <img
+            ref={mountainPhotoRef}
             src="/images/alpine_gold_mountain.jpg"
             alt="Alpine Mountain Horizon"
             className={styles.settleMountainPhoto}
             aria-hidden="true"
           />
+          {/* Luminous dawn & twilight sapphire atmospheric mist gradient */}
           <div className={styles.settleBackdropGradient} aria-hidden="true" />
+
+          {/* Interactive Mouse-Follow Amber/Gold Spotlight */}
+          <div ref={spotlightRef} className={styles.settleInteractiveSpotlight} aria-hidden="true" />
 
           {/* Settled Editorial Content — Progressively written down as the golden dust moves across */}
           <div className={styles.settleContent}>
