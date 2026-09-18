@@ -30,20 +30,6 @@ export const REVEAL_CARDS: RevealCard[] = [
   { id: 6 },
 ];
 
-export interface DustParticle {
-  cardIndex: number;
-  edgeX: number;
-  edgeY: number;
-  size: number;
-  alpha: number;
-  color: string;
-  driftSpeed: number;
-  waveFreq: number;
-  waveAmp: number;
-  phase: number;
-  settleRatioX: number;
-  settleRatioY: number;
-}
 
 export interface StoryPoint {
   id: string;
@@ -189,14 +175,13 @@ export const JourneyStory: React.FC = () => {
   const activeIndexRef = useRef(1); // Default to June 2026 Edition 13 (matching reference screenshot)
   const servicesTitleRef = useRef<HTMLDivElement>(null);
 
-  // The Golden Dust Transition (Idea 6): Fine mineral dust & mountain stage refs
-  const dustCanvasRef = useRef<HTMLCanvasElement>(null);
+  // Settle stage, controls, and interactive elements
   const settleStageRef = useRef<HTMLDivElement>(null);
   const controlsRef = useRef<HTMLDivElement>(null);
   const mountainPhotoRef = useRef<HTMLImageElement>(null);
   const spotlightRef = useRef<HTMLDivElement>(null);
 
-  // Interactive mouse tracker for spotlight, parallax, and dust physics
+  // Interactive mouse tracker for spotlight and mountain parallax
   const mousePosRef = useRef({
     x: 0.5,
     y: 0.5,
@@ -208,66 +193,6 @@ export const JourneyStory: React.FC = () => {
     targetPy: 400,
     active: false,
   });
-
-  // Deterministic pool of fine mineral dust / photographic grain particles
-  const dustParticles = useMemo<DustParticle[]>(() => {
-    const particles: DustParticle[] = [];
-    const colors = [
-      "rgba(212, 175, 55,",   // Classic Gold Ore #D4AF37
-      "rgba(243, 229, 171,",  // Pale Vanilla Gold #F3E5AB
-      "rgba(197, 155, 39,",   // Deep Amber Ore #C59B27
-      "rgba(230, 202, 101,",  // Champagne Gold #E6CA65
-      "rgba(255, 248, 220,",  // Specular Fleck #FFF8DC
-    ];
-
-    let seed = 42;
-    const rand = () => {
-      seed = (seed * 16807) % 2147483647;
-      return (seed - 1) / 2147483646;
-    };
-
-    for (let i = 0; i < 340; i++) {
-      const cardIndex = i % 6;
-      const edgeChoice = rand();
-      let edgeX = 0;
-      let edgeY = 0;
-      const inset = (rand() - 0.5) * 0.15;
-
-      if (edgeChoice < 0.25) {
-        edgeX = rand() * 2 - 1;
-        edgeY = -1 + inset;
-      } else if (edgeChoice < 0.5) {
-        edgeX = 1 + inset;
-        edgeY = rand() * 2 - 1;
-      } else if (edgeChoice < 0.75) {
-        edgeX = rand() * 2 - 1;
-        edgeY = 1 + inset;
-      } else {
-        edgeX = -1 + inset;
-        edgeY = rand() * 2 - 1;
-      }
-
-      const size = 0.8 + rand() * 1.8;
-      const colorBase = colors[Math.floor(rand() * colors.length)];
-      const alpha = 0.45 + rand() * 0.5;
-
-      particles.push({
-        cardIndex,
-        edgeX,
-        edgeY,
-        size,
-        alpha,
-        color: colorBase,
-        driftSpeed: 0.75 + rand() * 0.65,
-        waveFreq: 1.0 + rand() * 1.6,
-        waveAmp: 10 + rand() * 25,
-        phase: rand() * Math.PI * 2,
-        settleRatioX: 0.05 + rand() * 0.9,
-        settleRatioY: 0.62 + rand() * 0.22,
-      });
-    }
-    return particles;
-  }, []);
 
   // All 14 magazines and the 5 latest editions
   const allMagazines = useMemo(() => getChronologicalMagazines(false), []);
@@ -664,127 +589,8 @@ export const JourneyStory: React.FC = () => {
         }
 
         // ====================================================================
-        // THE GOLDEN DUST TRANSITION (IDEA 6): Fine mineral dust canvas
-        // ====================================================================
-        const canvas = dustCanvasRef.current;
-        if (canvas) {
-          const ctx = canvas.getContext("2d");
-          if (ctx) {
-            if (p < 0.965) {
-              ctx.clearRect(0, 0, canvas.width, canvas.height);
-            } else {
-              const dpr = typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
-              const targetW = Math.round(winW * dpr);
-              const targetH = Math.round(winH * dpr);
-              if (canvas.width !== targetW || canvas.height !== targetH) {
-                canvas.width = targetW;
-                canvas.height = targetH;
-              }
-
-              ctx.save();
-              ctx.scale(dpr, dpr);
-              ctx.clearRect(0, 0, winW, winH);
-
-              // Phase 1: Detach & Stream Horizontally: 0.966 -> 0.982
-              // Phase 2: Decelerate & Settle into Mountain: 0.982 -> 1.000
-              const driftP = Math.max(0, Math.min(1, (p - 0.966) / (0.982 - 0.966)));
-              const settleP = Math.max(0, Math.min(1, (p - 0.982) / (1.000 - 0.982)));
-
-              let systemAlpha = 0;
-              if (p >= 0.966 && p < 0.972) {
-                systemAlpha = (p - 0.966) / 0.006;
-              } else if (p >= 0.972 && p <= 0.990) {
-                systemAlpha = 1;
-              } else if (p > 0.990) {
-                systemAlpha = Math.max(0, 1 - (p - 0.990) / 0.010);
-              }
-
-              const easeSettle = settleP * settleP * (3 - 2 * settleP);
-
-              dustParticles.forEach((pt) => {
-                const cardCoord = cardScreenCoords[pt.cardIndex] || {
-                  x: winW * 0.5,
-                  y: winH * 0.5,
-                  width: 300,
-                  height: 420,
-                  opacity: 1,
-                };
-
-                // Origin at perimeter of the card
-                const startX = cardCoord.x + pt.edgeX * cardCoord.width * 0.5;
-                const startY = cardCoord.y + pt.edgeY * cardCoord.height * 0.5;
-
-                // Horizontal drift across the screen to the right
-                const maxDriftDist = winW * 0.72 * pt.driftSpeed;
-                const driftX = startX + driftP * maxDriftDist;
-                const waveY = Math.sin(driftP * Math.PI * pt.waveFreq + pt.phase) * pt.waveAmp;
-                const driftY = startY + waveY - driftP * 35;
-
-                // Natural atmospheric mist dispersion across the mountain landscape
-                const targetX = pt.settleRatioX * winW;
-                const targetY = pt.settleRatioY * winH + Math.sin(pt.settleRatioX * 2.5 * Math.PI) * 16;
-
-                const curX = driftX * (1 - easeSettle) + targetX * easeSettle;
-                const curY = driftY * (1 - easeSettle) + targetY * easeSettle;
-
-                // Interactive cursor deflection: particles physically part and swirl around cursor
-                const mouseCanvasX = m.px;
-                const mouseCanvasY = m.py;
-                const distToMouse = Math.hypot(curX - mouseCanvasX, curY - mouseCanvasY);
-                let drawX = curX;
-                let drawY = curY;
-                if (m.active && distToMouse < 140 && distToMouse > 0.001) {
-                  const force = (1 - distToMouse / 140) * 35;
-                  const angle = Math.atan2(curY - mouseCanvasY, curX - mouseCanvasX);
-                  drawX += Math.cos(angle) * force;
-                  drawY += Math.sin(angle) * force;
-                }
-
-                const particleAlpha = pt.alpha * systemAlpha;
-                if (particleAlpha <= 0.01) return;
-
-                ctx.fillStyle = `${pt.color}${particleAlpha.toFixed(3)})`;
-                ctx.beginPath();
-                ctx.arc(drawX, drawY, pt.size, 0, Math.PI * 2);
-                ctx.fill();
-
-                // Specular glint on larger flecks
-                if (pt.size > 2.0) {
-                  ctx.fillStyle = `rgba(255, 255, 255, ${(particleAlpha * 0.6).toFixed(3)})`;
-                  ctx.beginPath();
-                  ctx.arc(drawX - 0.5, drawY - 0.5, pt.size * 0.45, 0, Math.PI * 2);
-                  ctx.fill();
-                }
-              });
-
-              // Golden dust "writing quill" particles active at the leading reveal edge
-              const writeProgress = Math.max(0, Math.min(1, (p - 0.966) / (0.985 - 0.966)));
-              const easeWrite = 1 - Math.pow(1 - writeProgress, 2.2);
-
-              if (writeProgress > 0.02 && writeProgress < 0.99) {
-                const brushX = easeWrite * winW;
-                ctx.fillStyle = "rgba(243, 229, 171, 0.85)";
-                for (let b = 0; b < 28; b++) {
-                  const bSeed = (b * 9301 + Math.round(p * 10000)) % 233280;
-                  const bRand1 = (bSeed % 1000) / 1000;
-                  const bRand2 = ((bSeed * 13) % 1000) / 1000;
-                  const px = brushX + (bRand1 - 0.5) * 50;
-                  const py = winH * 0.15 + bRand2 * winH * 0.7;
-                  const psize = 0.8 + bRand1 * 1.6;
-                  ctx.beginPath();
-                  ctx.arc(px, py, psize, 0, Math.PI * 2);
-                  ctx.fill();
-                }
-              }
-
-              ctx.restore();
-            }
-          }
-        }
-
-        // ====================================================================
         // MOUNTAIN LANDSCAPE & EDITORIAL FOCUS AREAS
-        // The text is progressively written down as the golden dust moves across
+        // Progressively revealed across the screen
         // ====================================================================
         if (settleStageRef.current) {
           if (p < 0.966) {
@@ -1155,8 +961,6 @@ export const JourneyStory: React.FC = () => {
           ))}
         </div>
 
-        {/* THE GOLDEN DUST TRANSITION (IDEA 6): Fine mineral dust canvas */}
-        <canvas ref={dustCanvasRef} className={styles.dustCanvas} aria-hidden="true" />
 
         {/* MOUNTAIN LANDSCAPE & EDITORIAL SETTLE STAGE */}
         <div ref={settleStageRef} className={styles.settleMountainStage}>
