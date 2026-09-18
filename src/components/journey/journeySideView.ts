@@ -183,6 +183,8 @@ export function clamp01(x: number): number {
  */
 export interface SceneState {
   progress: number;
+  /** Sky-to-land camera descent progress (0..1) */
+  descent?: number;
   /** The truck's position along the route, in world units. */
   truckWorldX: number;
   /** The camera's left edge, in world units. */

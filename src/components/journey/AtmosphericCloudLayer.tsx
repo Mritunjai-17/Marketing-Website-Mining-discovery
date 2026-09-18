@@ -34,7 +34,9 @@ uniform float u_time;
 uniform float u_progress;
 uniform float u_part;
 uniform float u_opacity;
+uniform float u_isMobile;
 uniform sampler2D u_cloudTex;
+uniform sampler2D u_cloudMobileTex;
 uniform sampler2D u_wispTex;
 
 // Fast Simplex-style noise for organic fluid turbulence
@@ -76,42 +78,76 @@ float fbm(vec2 p) {
 }
 
 void main() {
-  vec2 uv = v_uv;
+  vec2 screenUV = v_uv;
   float aspect = u_resolution.x / u_resolution.y;
+  bool isMobile = u_isMobile > 0.5 || aspect < 1.0;
 
-  // Center coordinate
-  float distFromCenter = abs(uv.x - 0.5);
-  float side = sign(uv.x - 0.5);
+  // Center coordinate in screen space
+  float distFromCenter = abs(screenUV.x - 0.5);
+  float side = sign(screenUV.x - 0.5);
+
+  // Fit textures to cover viewport perfectly without stretching or empty borders
+  vec2 baseUV = screenUV;
+  if (isMobile) {
+    // Dedicated mobile texture is 9:16 portrait (aspect = 0.5625)
+    float mobileAspect = 9.0 / 16.0;
+    if (aspect < mobileAspect) {
+      // Very tall screen (e.g. 9:19.5, iPhone)
+      float scale = aspect / mobileAspect;
+      baseUV.x = (screenUV.x - 0.5) * scale + 0.5;
+    } else {
+      // Slightly wider portrait screen
+      float scale = mobileAspect / aspect;
+      baseUV.y = (screenUV.y - 0.5) * scale + 0.5;
+    }
+  } else {
+    // Desktop texture is 16:9 landscape
+    float desktopAspect = 16.0 / 9.0;
+    if (aspect > desktopAspect) {
+      // Ultrawide screen
+      float scale = desktopAspect / aspect;
+      baseUV.y = (screenUV.y - 0.46) * scale + 0.46;
+    } else {
+      // Standard or squarer desktop screen
+      float scale = aspect / desktopAspect;
+      baseUV.x = (screenUV.x - 0.5) * scale + 0.5;
+    }
+  }
 
   // Living fluid turbulence in the atmosphere
-  vec2 noiseCoord = uv * vec2(aspect * 2.2, 2.2) + vec2(0.0, u_time * 0.035);
+  vec2 noiseCoord = screenUV * vec2(aspect * 2.2, 2.2) + vec2(0.0, u_time * 0.035);
   float n1 = fbm(noiseCoord);
   float n2 = fbm(noiseCoord + vec2(4.3, 1.8) + vec2(n1 * 0.35, n1 * 0.35));
 
-  // Lateral drift: clouds roll away to the sides as u_part increases
+  // Atmospheric descent: perspective expansion outwards from center as camera dives down
   float easePart = pow(u_part, 1.25);
-  float pushX = side * easePart * 0.65 * (1.0 + n1 * 0.22);
-  float pushY = (n2 - 0.2) * easePart * 0.16;
+  vec2 centeredUV = baseUV - vec2(0.5, 0.5);
+  float zoomFactor = 1.0 + easePart * 0.78;
+  vec2 zoomedUV = centeredUV * zoomFactor + vec2(0.5, 0.5);
 
-  vec2 displacedUV = uv - vec2(pushX, pushY);
+  // Lateral and vertical organic billowing dispersal outward to the sides
+  float pushX = side * easePart * (isMobile ? 0.95 : 0.85) * (1.0 + n1 * 0.25);
+  float pushY = (n2 - 0.2) * easePart * 0.22 - easePart * 0.10;
 
-  // Sample authentic cloud photography textures
-  vec4 cloudCol = texture2D(u_cloudTex, displacedUV);
+  vec2 displacedUV = zoomedUV - vec2(pushX, pushY);
+
+  // Sample authentic cloud textures: dedicated vertical portrait texture on mobile, landscape on desktop
+  vec4 cloudCol = isMobile ? texture2D(u_cloudMobileTex, displacedUV) : texture2D(u_cloudTex, displacedUV);
   vec4 wispCol = texture2D(u_wispTex, displacedUV * 1.35 + vec2(n1 * 0.06, n2 * 0.06));
 
   // Volumetric cloud blend
-  vec3 rgb = mix(cloudCol.rgb, wispCol.rgb + vec3(0.06, 0.04, 0.02), 0.32);
+  vec3 rgb = mix(cloudCol.rgb, wispCol.rgb + vec3(0.06, 0.04, 0.02), isMobile ? 0.20 : 0.32);
 
-  // Sunlight highlight on the inner crests of the parting clouds
-  float edgeLight = smoothstep(0.08, 0.35, distFromCenter) * (1.0 - smoothstep(0.35, 0.65, distFromCenter));
-  rgb += vec3(0.9, 0.7, 0.4) * edgeLight * u_part * 0.45;
+  // Sunlight highlight on the inner crests of the parting clouds as land appears
+  float edgeLight = smoothstep(0.06, 0.32, distFromCenter) * (1.0 - smoothstep(0.32, 0.62, distFromCenter));
+  rgb += vec3(0.92, 0.72, 0.42) * edgeLight * u_part * 0.45;
 
   // Organic cloud parting opening:
-  // Shredded, wispy fractal boundary instead of geometric cuts
+  // Clouds swiftly roll away to the left and right sides
   float voidNoise = n1 * 0.18 + n2 * 0.12;
-  float openingRadius = easePart * 0.58 + voidNoise;
+  float openingRadius = easePart * 0.74 + voidNoise;
   
-  float centerAlpha = smoothstep(openingRadius - 0.18, openingRadius + 0.14, distFromCenter);
+  float centerAlpha = smoothstep(openingRadius - 0.20, openingRadius + 0.14, distFromCenter);
 
   // Initial solid coverage: 100% full screen blanket when u_part == 0
   if (u_part <= 0.005) {
@@ -120,8 +156,8 @@ void main() {
 
   // Flank fadeout as clouds reach screen boundaries
   float flankFade = 1.0;
-  if (u_part > 0.65) {
-    flankFade = 1.0 - smoothstep(0.65, 1.0, u_part);
+  if (u_part > 0.62) {
+    flankFade = 1.0 - smoothstep(0.62, 1.0, u_part);
   }
 
   float finalAlpha = centerAlpha * flankFade * u_opacity;
@@ -212,6 +248,7 @@ export const AtmosphericCloudLayer: React.FC<AtmosphericCloudLayerProps> = ({ pr
   const glRef = useRef<WebGLRenderingContext | null>(null);
   const programRef = useRef<WebGLProgram | null>(null);
   const texCloudRef = useRef<WebGLTexture | null>(null);
+  const texCloudMobileRef = useRef<WebGLTexture | null>(null);
   const texWispRef = useRef<WebGLTexture | null>(null);
   const startTimeRef = useRef(performance.now());
   const rafRef = useRef<number | null>(null);
@@ -259,6 +296,7 @@ export const AtmosphericCloudLayer: React.FC<AtmosphericCloudLayerProps> = ({ pr
 
     // Load textures
     texCloudRef.current = loadTexture(gl, "/clouds/cloud_blanket.jpg");
+    texCloudMobileRef.current = loadTexture(gl, "/clouds/cloud_blanket_mobile.jpg");
     texWispRef.current = loadTexture(gl, "/clouds/cloud_puff_1.png");
 
     gl.enable(gl.BLEND);
@@ -306,10 +344,10 @@ export const AtmosphericCloudLayer: React.FC<AtmosphericCloudLayerProps> = ({ pr
         gl.viewport(0, 0, targetW, targetH);
       }
 
-      // Progress calculations
-      const enterP = smoothstep(0.18, 0.30, p);
-      const partP = smoothstep(0.40, 0.72, p);
-      const fadeOut = 1 - smoothstep(0.66, 0.76, p);
+      // Progress calculations: on one scroll the clouds get to the sides
+      const enterP = smoothstep(0.12, 0.22, p);
+      const partP = smoothstep(0.24, 0.46, p);
+      const fadeOut = 1 - smoothstep(0.42, 0.52, p);
       const masterOpacity = enterP * fadeOut;
 
       if (masterOpacity <= 0.002) {
@@ -326,14 +364,19 @@ export const AtmosphericCloudLayer: React.FC<AtmosphericCloudLayerProps> = ({ pr
       const uProg = gl.getUniformLocation(program, "u_progress");
       const uPart = gl.getUniformLocation(program, "u_part");
       const uOpac = gl.getUniformLocation(program, "u_opacity");
+      const uIsMobile = gl.getUniformLocation(program, "u_isMobile");
       const uCloudTex = gl.getUniformLocation(program, "u_cloudTex");
+      const uCloudMobileTex = gl.getUniformLocation(program, "u_cloudMobileTex");
       const uWispTex = gl.getUniformLocation(program, "u_wispTex");
+
+      const isMobile = targetW < targetH || (typeof window !== "undefined" && window.innerWidth < 768);
 
       gl.uniform2f(uRes, targetW, targetH);
       gl.uniform1f(uTime, (performance.now() - startTimeRef.current) * 0.001);
       gl.uniform1f(uProg, p);
       gl.uniform1f(uPart, partP);
       gl.uniform1f(uOpac, masterOpacity);
+      gl.uniform1f(uIsMobile, isMobile ? 1.0 : 0.0);
 
       // Bind textures
       if (texCloudRef.current) {
@@ -341,10 +384,15 @@ export const AtmosphericCloudLayer: React.FC<AtmosphericCloudLayerProps> = ({ pr
         gl.bindTexture(gl.TEXTURE_2D, texCloudRef.current);
         gl.uniform1i(uCloudTex, 0);
       }
-      if (texWispRef.current) {
+      if (texCloudMobileRef.current) {
         gl.activeTexture(gl.TEXTURE1);
+        gl.bindTexture(gl.TEXTURE_2D, texCloudMobileRef.current);
+        gl.uniform1i(uCloudMobileTex, 1);
+      }
+      if (texWispRef.current) {
+        gl.activeTexture(gl.TEXTURE2);
         gl.bindTexture(gl.TEXTURE_2D, texWispRef.current);
-        gl.uniform1i(uWispTex, 1);
+        gl.uniform1i(uWispTex, 2);
       }
 
       gl.clearColor(0, 0, 0, 0);

@@ -26,6 +26,11 @@ export interface JourneyProgress {
    * camera, not about the truck.
    */
   pitch: number;
+  /**
+   * Master transition progress (0..1) during the Globe->Journey flydown transition.
+   * Drives the camera swooping down from the sky to the land as clouds part.
+   */
+  descent?: number;
 }
 
 const JourneyProgressContext = createContext<JourneyProgress | null>(null);
@@ -44,7 +49,7 @@ export function useCreateJourneyProgress(): JourneyProgress {
   // Lazy useState rather than useRef: both give a stable object, but reading a
   // ref during render is exactly the pattern React's lint rules forbid, and
   // the setter is simply never called.
-  const [box] = useState<JourneyProgress>(() => ({ current: 0, pitch: 0 }));
+  const [box] = useState<JourneyProgress>(() => ({ current: 0, pitch: 0, descent: 0 }));
   return box;
 }
 
@@ -56,6 +61,6 @@ export function useCreateJourneyProgress(): JourneyProgress {
  * without needing the scroll controller mounted above it.
  */
 export function useJourneyProgress(): JourneyProgress {
-  const fallback = useMemo<JourneyProgress>(() => ({ current: 0, pitch: 0 }), []);
+  const fallback = useMemo<JourneyProgress>(() => ({ current: 0, pitch: 0, descent: 1 }), []);
   return useContext(JourneyProgressContext) ?? fallback;
 }

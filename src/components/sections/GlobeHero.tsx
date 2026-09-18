@@ -742,6 +742,7 @@ export const GlobeHero: React.FC = () => {
     const journeyP = clamp((t - journeyFrom) / (1.0 - journeyFrom), 0, 1);
 
     journeyProgress.current = journeyP;
+    journeyProgress.descent = transP;
 
     // Throttle state update to keep React rendering lightweight
     if (
@@ -894,6 +895,7 @@ export const GlobeHero: React.FC = () => {
        * frame rather than one lagging the other.
        */
       journeyProgress.pitch = camera.pitch;
+      journeyProgress.descent = transP;
       journeyBox.style.opacity = camera.opacity.toFixed(3);
       journeyBox.style.visibility = camera.opacity <= 0.005 ? "hidden" : "visible";
       // Only once the camera has settled into the Journey's own composition;
@@ -1127,7 +1129,7 @@ export const GlobeHero: React.FC = () => {
           So these three values are not free. Changing one without moving the eyebrow's own
           spacing takes the difference straight out of the planet.
         */
-        className="flex flex-col items-center px-6 pb-8 pt-[74px] text-center sm:px-10 sm:pt-[clamp(89px,calc(34vh-163px),149px)] lg:pt-[clamp(97px,calc(36vh-183px),169px)]"
+        className="flex flex-col items-center px-4 pb-6 sm:pb-8 pt-[70px] text-center sm:px-10 sm:pt-[clamp(89px,calc(34vh-163px),149px)] lg:pt-[clamp(97px,calc(36vh-183px),169px)]"
       >
         {/*
           Eyebrow, headline, support, CTAs. The wrapper above is untouched - same padding,
@@ -1137,7 +1139,7 @@ export const GlobeHero: React.FC = () => {
           adds a scroll listener, and nothing here holds a transform that could become a
           containing block for the sticky globe frame below.
         */}
-        <p className="hero-rise [animation-delay:60ms] font-mono text-[10px] font-semibold uppercase leading-none tracking-[0.2em] text-[#B8860B] sm:text-[11px] sm:tracking-[0.22em]">
+        <p className="hero-rise [animation-delay:60ms] font-mono text-[9.5px] font-semibold uppercase leading-none tracking-[0.18em] text-[#B8860B] sm:text-[11px] sm:tracking-[0.22em]">
           Mining Media <span aria-hidden="true">&times;</span> Marketing{" "}
           <span aria-hidden="true">&times;</span> Investor Reach
         </p>
@@ -1154,7 +1156,7 @@ export const GlobeHero: React.FC = () => {
           paragraph box. Reading order is unchanged: a screen reader still gets one
           continuous sentence.
         */}
-        <h1 className="hero-rise [animation-delay:160ms] mt-2 max-w-[1040px] font-geist text-[clamp(1.2rem,6vw,2.5rem)] font-bold uppercase leading-[0.92] sm:text-[clamp(2.5rem,5vw,4.5rem)] tracking-[-0.02em] text-[#0B1F3A] sm:mt-2">
+        <h1 className="hero-rise [animation-delay:160ms] mt-2 max-w-[1040px] font-geist text-[clamp(1.75rem,7.5vw,2.75rem)] font-bold uppercase leading-[0.94] sm:text-[clamp(2.5rem,5vw,4.5rem)] tracking-[-0.02em] text-[#0B1F3A] sm:mt-2">
           {HEADLINE_LINES.map((line, index) => {
             // Where the underlined word starts, so the line can be printed as three runs.
             const at = line.underlineWord
@@ -1220,7 +1222,7 @@ export const GlobeHero: React.FC = () => {
           })}
         </h1>
 
-        <p className="hero-rise [animation-delay:260ms] mt-4 max-w-[740px] font-geist text-[clamp(0.95rem,1.2vw,1.125rem)] font-normal leading-[1.55] tracking-[-0.005em] text-[#4A5568] sm:mt-4">
+        <p className="hero-rise [animation-delay:260ms] mt-3.5 max-w-[740px] font-geist text-[clamp(0.88rem,3.4vw,1.125rem)] font-normal leading-[1.52] tracking-[-0.005em] text-[#4A5568] sm:mt-4">
           Mining Discovery combines industry media, digital marketing and investor-focused
           communication to put mining companies in front of the audiences that matter.
         </p>
@@ -1229,10 +1231,10 @@ export const GlobeHero: React.FC = () => {
           CTA row. Full-width stacked on phones, side by side from 640px. Gold solid for
           the commercial action, hairline outline for the browse - dark navy on white.
         */}
-        <div className="hero-rise [animation-delay:360ms] mt-5 flex w-full flex-col items-stretch gap-3 sm:mt-5 sm:w-auto sm:flex-row sm:items-center sm:gap-4">
+        <div className="hero-rise [animation-delay:360ms] mt-4 sm:mt-5 flex w-full flex-col items-stretch gap-2.5 sm:w-auto sm:flex-row sm:items-center sm:gap-4">
           <Link
             href="/contact"
-            className="group inline-flex items-center justify-center gap-2 rounded-lg bg-[#A87E2C] px-7 py-3.5 font-sans text-[13px] font-semibold uppercase tracking-[0.08em] text-white shadow-sm transition-colors duration-200 hover:bg-[#8F6B24] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A87E2C] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF7F2]"
+            className="group inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-[#A87E2C] px-6 py-3 font-sans text-[12.5px] sm:text-[13px] font-semibold uppercase tracking-[0.08em] text-white shadow-sm transition-colors duration-200 hover:bg-[#8F6B24] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A87E2C] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF7F2]"
           >
             Start a Campaign
             <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -1240,7 +1242,7 @@ export const GlobeHero: React.FC = () => {
 
           <Link
             href="/services"
-            className="group inline-flex items-center justify-center gap-2 rounded-lg border border-[#0B1F3A]/20 bg-white/40 backdrop-blur-xs px-7 py-3.5 font-sans text-[13px] font-semibold uppercase tracking-[0.08em] text-[#0B1F3A] transition-colors duration-200 hover:border-[#0B1F3A]/50 hover:bg-white/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0B1F3A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF7F2]"
+            className="group inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-[#0B1F3A]/20 bg-white/40 backdrop-blur-xs px-6 py-3 font-sans text-[12.5px] sm:text-[13px] font-semibold uppercase tracking-[0.08em] text-[#0B1F3A] transition-colors duration-200 hover:border-[#0B1F3A]/50 hover:bg-white/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0B1F3A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF7F2]"
           >
             Explore Our Services
             <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />

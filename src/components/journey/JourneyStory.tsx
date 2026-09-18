@@ -206,6 +206,29 @@ export const JourneyStory: React.FC = () => {
   const [isMounted, setIsMounted] = useState(false);
   const totalTravelRef = useRef(3200);
 
+  // Focus Area Pillars Mobile Carousel State & Ref
+  const pillarsTrackRef = useRef<HTMLDivElement>(null);
+  const [activePillar, setActivePillar] = useState(0);
+
+  const scrollToPillar = useCallback((idx: number) => {
+    setActivePillar(idx);
+    if (pillarsTrackRef.current) {
+      const card = pillarsTrackRef.current.children[idx] as HTMLElement;
+      if (card) {
+        card.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+      }
+    }
+  }, []);
+
+  const handlePillarsScroll = useCallback(() => {
+    if (!pillarsTrackRef.current) return;
+    const scrollLeft = pillarsTrackRef.current.scrollLeft;
+    const firstChild = pillarsTrackRef.current.children[0] as HTMLElement;
+    const cardWidth = firstChild ? firstChild.offsetWidth + 14 : 280;
+    const index = Math.round(scrollLeft / cardWidth);
+    setActivePillar(Math.min(3, Math.max(0, index)));
+  }, []);
+
   const activeMagazine = selectedMagazine || showcaseMagazines[activeIndex] || showcaseMagazines[0];
 
   useEffect(() => {
@@ -297,9 +320,13 @@ export const JourneyStory: React.FC = () => {
   useJourneyFrame((scene) => {
     const p = scene.progress;
 
-    // 1. Under-road horizontal milestone cards fade out as road turns downward (p >= 0.82 to 0.86)
+    // 1. Under-road horizontal milestone cards:
+    // When camera is far, NO text is shown! After camera zooms down (descent >= 0.82), text smoothly reveals!
+    // And fades out as road turns downward (p >= 0.82 to 0.86)
     if (underRoadRef.current) {
-      const underRoadFade = 1 - smoothstep(0.82, 0.86, p);
+      const descentP = scene.descent ?? 1.0;
+      const zoomReveal = smoothstep(0.82, 0.89, descentP);
+      const underRoadFade = (1 - smoothstep(0.82, 0.86, p)) * zoomReveal;
       underRoadRef.current.style.opacity = underRoadFade.toFixed(3);
       underRoadRef.current.style.pointerEvents = underRoadFade > 0.1 ? "auto" : "none";
       underRoadRef.current.style.transform = `translate3d(0, ${((1 - underRoadFade) * 16).toFixed(1)}px, 0)`;
@@ -322,11 +349,21 @@ export const JourneyStory: React.FC = () => {
         const fadeOut = 1 - smoothstep(0.922, 0.934, p);
         opacity = fadeIn * fadeOut;
 
-        // Auto-scroll the stats track on the right in lockstep with the truck driving down the road
+        // Auto-scroll the stats track upward from the bottom in lockstep with the truck driving down the road
         if (statsTrackRef.current) {
           const statsProgress = Math.max(0, Math.min(1, (p - 0.90) / 0.024));
           const maxScroll = Math.max(0, statsTrackRef.current.scrollHeight - statsTrackRef.current.clientHeight);
           statsTrackRef.current.scrollTop = statsProgress * maxScroll;
+        }
+
+        // Entrance upward float: text gracefully rises up as truck begins vertical highway run
+        if (leftColRef.current) {
+          const enterY = (1 - fadeIn) * 20;
+          leftColRef.current.style.transform = `translate3d(0, ${enterY.toFixed(1)}px, 0)`;
+        }
+        if (rightColRef.current) {
+          const enterY = (1 - fadeIn) * 32;
+          rightColRef.current.style.transform = `translate3d(0, ${enterY.toFixed(1)}px, 0)`;
         }
       } else {
         opacity = 0;
@@ -1001,8 +1038,35 @@ export const JourneyStory: React.FC = () => {
               </div>
             </div>
 
+            {/* Mobile Pillar Navigation Tabs */}
+            <div className={styles.settlePillarsNav} aria-label="Focus Areas Navigation">
+              {[
+                { num: "01", label: "Associations" },
+                { num: "02", label: "Tech & Platforms" },
+                { num: "03", label: "Growth & Capital" },
+                { num: "04", label: "ESG & Policy" },
+              ].map((tab, idx) => (
+                <button
+                  key={tab.num}
+                  type="button"
+                  className={`${styles.settlePillarTab} ${
+                    activePillar === idx ? styles.settlePillarTabActive : ""
+                  }`}
+                  onClick={() => scrollToPillar(idx)}
+                  aria-label={`View Focus Area ${tab.num}: ${tab.label}`}
+                >
+                  <span className={styles.settleTabNum}>{tab.num}</span>
+                  <span className={styles.settleTabLabel}>{tab.label}</span>
+                </button>
+              ))}
+            </div>
+
             {/* 4 Pillars Non-Card Editorial Ledger */}
-            <div className={styles.settlePillarsRow}>
+            <div
+              ref={pillarsTrackRef}
+              onScroll={handlePillarsScroll}
+              className={styles.settlePillarsRow}
+            >
               {/* Pillar 01 */}
               <div className={styles.settlePillarItem}>
                 <span className={styles.settlePillarBadge}>01 — CONFERENCE &amp; POLICY</span>

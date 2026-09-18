@@ -59,9 +59,15 @@ export const Journey3D: React.FC<Journey3DProps> = ({ progress, active }) => {
       scene.progress = progress.current;
       scene.time = (performance.now() - start) / 1000;
       scene.pitch = progress.pitch;
+      scene.descent = progress.descent ?? 1.0;
       for (const listener of listenersRef.current) listener(scene);
 
       if (watermarkRef.current) {
+        const descentP = progress.descent ?? 1.0;
+        // When camera is far, no text will be shown. After zoom (descent >= 0.82), text will reveal!
+        const zoomT = Math.max(0, Math.min(1, (descentP - 0.82) / (0.89 - 0.82)));
+        const zoomReveal = zoomT * zoomT * (3 - 2 * zoomT);
+
         const t = progress.current;
         const roadP = Math.min(1.0, Math.max(0.0, t / 0.82));
         const winW = typeof window !== "undefined" ? window.innerWidth : 1400;
@@ -70,7 +76,7 @@ export const Journey3D: React.FC<Journey3DProps> = ({ progress, active }) => {
         const currentX = startX - roadP * travelDistance;
 
         const fade = 1 - Math.max(0, Math.min(1, (t - 0.82) / 0.08));
-        const opacity = (fade * fade * (3 - 2 * fade)).toFixed(3);
+        const opacity = (zoomReveal * fade * fade * (3 - 2 * fade)).toFixed(3);
 
         watermarkRef.current.style.opacity = opacity;
         watermarkRef.current.style.transform = `translate3d(calc(-50% + ${currentX.toFixed(1)}px), -84%, 0)`;

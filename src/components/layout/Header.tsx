@@ -74,12 +74,14 @@ export const Header: React.FC = () => {
           backdropFilter: scrollProgress > 0.1 || isDarkInitialRoute ? "blur(12px)" : "none",
           WebkitBackdropFilter: scrollProgress > 0.1 || isDarkInitialRoute ? "blur(12px)" : "none",
           borderBottom: `1px solid rgba(255, 255, 255, ${(scrollProgress * 0.06).toFixed(2)})`,
-          paddingTop: isScrolled ? "10px" : "14px",
+          paddingTop: isScrolled
+            ? "max(10px, env(safe-area-inset-top, 10px))"
+            : "max(14px, env(safe-area-inset-top, 14px))",
           paddingBottom: isScrolled ? "10px" : "14px",
         }}
       >
-        {/* Full-width container */}
-        <div className="w-full px-4 sm:px-8 lg:px-16 flex items-center justify-between">
+        {/* Full-width container with responsive horizontal padding */}
+        <div className="w-full px-3.5 sm:px-8 lg:px-16 flex items-center justify-between">
           {/* Brand Logo */}
           <Link
             href="/"
@@ -168,7 +170,7 @@ export const Header: React.FC = () => {
             onClick={() => setMobileMenuOpen(false)}
           />
 
-          <div className="fixed inset-y-0 right-0 w-full max-w-xs bg-[#080909] text-[#FAF7F2] shadow-2xl p-6 flex flex-col justify-between transform transition-transform duration-300 ease-out border-l border-white/10 font-sans overflow-y-auto overscroll-contain">
+          <div className="fixed inset-y-0 right-0 w-full max-w-xs bg-[#080909] text-[#FAF7F2] shadow-2xl p-6 pt-[max(1.5rem,env(safe-area-inset-top,1.5rem))] pb-[max(1.5rem,env(safe-area-inset-bottom,1.5rem))] flex flex-col justify-between transform transition-transform duration-300 ease-out border-l border-white/10 font-sans overflow-y-auto overscroll-contain">
             <div>
               <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
                 <Link

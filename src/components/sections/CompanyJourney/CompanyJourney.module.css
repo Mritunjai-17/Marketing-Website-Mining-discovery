@@ -462,54 +462,72 @@
   .section {
     /* Higher road line than desktop: a phone frame is tall, and centring the road
        leaves the year stranded halfway down the screen. */
-    --road-y: 46%;
-    --road-half: 26px;
-    --marker-h: 36px;
-    --col-w: min(84vw, 440px);
+    --road-y: 44%;
+    --road-half: 24px;
+    --marker-h: 32px;
+    --col-w: min(90vw, 420px);
   }
 
   .intro {
-    padding: 4rem 1.5rem 2rem;
+    padding: 3rem 1.25rem 1.75rem;
   }
 
   .outro {
-    padding: 3rem 1.5rem 4rem;
+    padding: 2.5rem 1.25rem 3.5rem;
   }
 
   /* Shorter journey: the same five milestones, less scrolling to get through them. */
   .scrollArea {
-    height: 460vh;
+    height: 440vh;
   }
 
   .roadEdge {
-    stroke-width: 52;
+    stroke-width: 50;
   }
 
   .roadSurface {
-    stroke-width: 38;
+    stroke-width: 36;
   }
 
   .roadCentreLine {
-    stroke-width: 3.5;
-    stroke-dasharray: 18 16;
+    stroke-width: 3;
+    stroke-dasharray: 16 14;
   }
 
   .year {
-    font-size: clamp(3.25rem, 22vw, 6.5rem);
+    font-size: clamp(3rem, 19vw, 5.2rem);
   }
 
   .marker {
-    height: calc(var(--marker-h) + 7px);
+    height: calc(var(--marker-h) + 6px);
   }
 
   .markerDot {
-    width: 14px;
-    height: 14px;
+    width: 13px;
+    height: 13px;
     border-width: 2px;
   }
 
   .detailBlock {
-    top: calc(var(--road-y) + var(--road-half) + 1.85rem);
+    top: calc(var(--road-y) + var(--road-half) + 1.35rem);
+    padding: 0 0.5rem;
+  }
+
+  .chapterLabel {
+    font-size: 0.625rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .storyTitle {
+    font-size: clamp(1.05rem, 4.8vw, 1.35rem);
+    line-height: 1.25;
+    margin-bottom: 0.6rem;
+  }
+
+  .storyText {
+    font-size: clamp(0.82rem, 3.4vw, 0.92rem);
+    line-height: 1.5;
+    max-width: 96%;
   }
 
   .atmosphereStage {
@@ -517,14 +535,14 @@
   }
 
   .editorialMeta {
-    font-size: 0.59375rem;
-    letter-spacing: 0.12em;
-    margin-top: 0.65rem;
+    font-size: clamp(0.52rem, 2.2vw, 0.62rem);
+    letter-spacing: 0.1em;
+    margin-top: 0.5rem;
   }
 
   .rail {
-    bottom: 1.25rem;
-    width: 78vw;
+    bottom: max(1rem, env(safe-area-inset-bottom, 14px));
+    width: 84vw;
   }
 }
 

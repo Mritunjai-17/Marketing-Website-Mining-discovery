@@ -39,7 +39,7 @@ import { clamp01, smoothstep } from "./journeySideView";
  * difference: this ramp finishes at 0.42, and the clouds do not begin parting
  * until 0.44.
  */
-const MATERIALISE = { from: 0.3, to: 0.42 };
+const MATERIALISE = { from: 0.16, to: 0.25 };
 
 /**
  * The camera's fall from altitude. Runs under the cloud and past it.
