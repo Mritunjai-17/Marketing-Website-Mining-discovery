@@ -49,6 +49,8 @@ export const MagazineSpread: React.FC<MagazineSpreadProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pdfDocRef = useRef<any>(null);
+  const isAnimatingRef = useRef(false);
+  const safetyTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Spread Index: 0 = First inside spread (PDF page 2 = Pages 2-3)
   const [currentSpreadIndex, setCurrentSpreadIndex] = useState(0);
@@ -87,13 +89,22 @@ export const MagazineSpread: React.FC<MagazineSpreadProps> = ({
     }
   }, [currentSpreadIndex, mobileSide, isMobile, leftPageNum, rightPageNum, onSpreadChange]);
 
+  // Clean up timer on unmount
+  useEffect(() => {
+    return () => {
+      if (safetyTimerRef.current) clearTimeout(safetyTimerRef.current);
+    };
+  }, []);
+
   // Reset spread index when magazine changes
   useEffect(() => {
     setCurrentSpreadIndex(0);
     setCachedImg(null);
     setFlipState(null);
     setIsAnimating(false);
+    isAnimatingRef.current = false;
     setMobileSide("left");
+    if (safetyTimerRef.current) clearTimeout(safetyTimerRef.current);
   }, [pdfUrl]);
 
   // Load PDF document and discover spread count
@@ -127,19 +138,41 @@ export const MagazineSpread: React.FC<MagazineSpreadProps> = ({
     };
   }, [pdfUrl]);
 
-  // Preload a specific spread in background
-  const preloadSpread = useCallback(
-    async (spreadIdx: number) => {
-      if (spreadIdx < 0 || spreadIdx >= totalSpreads) return;
-      const cacheKey = `${pdfUrl}_spread_${spreadIdx}`;
-      if (spreadCache.has(cacheKey)) return;
+  // Animation & Flip State
+  interface FlipAnimationState {
+    direction: "forward" | "backward";
+    fromImg: string;
+    toImg: string;
+    targetSpreadIndex: number;
+    targetMobileSide?: "left" | "right";
+  }
+  const [flipState, setFlipState] = useState<FlipAnimationState | null>(null);
+  const [isAnimating, setIsAnimating] = useState(false);
 
-      const doc = pdfDocRef.current;
-      if (!doc) return;
+  // Render and cache a specific spread
+  const renderSpreadImage = useCallback(
+    async (spreadIdx: number): Promise<string | null> => {
+      if (spreadIdx < 0 || spreadIdx >= totalSpreads) return null;
+      const cacheKey = `${pdfUrl}_spread_${spreadIdx}`;
+      if (spreadCache.has(cacheKey)) {
+        return spreadCache.get(cacheKey)!;
+      }
+
+      let doc = pdfDocRef.current;
+      if (!doc) {
+        try {
+          const pdfjsLib = await loadPdfJs();
+          doc = await pdfjsLib.getDocument(pdfUrl).promise;
+          pdfDocRef.current = doc;
+        } catch {
+          return null;
+        }
+      }
+      if (!doc) return null;
 
       try {
-        const pdfPageNum = spreadIdx + 2;
-        if (pdfPageNum > doc.numPages) return;
+        const pdfPageNum = Math.min(spreadIdx + 2, doc.numPages);
+        if (pdfPageNum > doc.numPages) return null;
 
         const page = await doc.getPage(pdfPageNum);
         const unscaledViewport = page.getViewport({ scale: 1 });
@@ -151,29 +184,35 @@ export const MagazineSpread: React.FC<MagazineSpreadProps> = ({
         offscreenCanvas.width = viewport.width;
         offscreenCanvas.height = viewport.height;
         const ctx = offscreenCanvas.getContext("2d", { alpha: false });
-        if (!ctx) return;
+        if (!ctx) return null;
 
         await page.render({ canvasContext: ctx, viewport }).promise;
-        const dataUrl = offscreenCanvas.toDataURL("image/webp", 0.9);
+        const dataUrl = offscreenCanvas.toDataURL("image/webp", 0.92);
         spreadCache.set(cacheKey, dataUrl);
-      } catch {
-        // Silent fail on background preload
+        return dataUrl;
+      } catch (err) {
+        console.error("Failed to render spread:", err);
+        return null;
       }
     },
     [pdfUrl, totalSpreads]
   );
 
-  // Render current spread
+  const preloadSpread = useCallback(
+    (spreadIdx: number) => {
+      renderSpreadImage(spreadIdx).catch(() => {});
+    },
+    [renderSpreadImage]
+  );
+
+  // Render current spread on load or spread index change
   useEffect(() => {
     let isCancelled = false;
-    let renderTask: any = null;
-
     const cacheKey = `${pdfUrl}_spread_${currentSpreadIndex}`;
 
     if (spreadCache.has(cacheKey)) {
       setCachedImg(spreadCache.get(cacheKey)!);
       setIsLoading(false);
-      // Preload next and previous spreads
       preloadSpread(currentSpreadIndex + 1);
       preloadSpread(currentSpreadIndex - 1);
       return;
@@ -184,64 +223,22 @@ export const MagazineSpread: React.FC<MagazineSpreadProps> = ({
         setIsLoading(true);
         setHasError(false);
 
-        const pdfjsLib = await loadPdfJs();
-        if (isCancelled) return;
-
-        let doc = pdfDocRef.current;
-        if (!doc) {
-          doc = await pdfjsLib.getDocument(pdfUrl).promise;
-          pdfDocRef.current = doc;
-        }
-        if (isCancelled) return;
-
-        const pdfPageNum = Math.min(currentSpreadIndex + 2, doc.numPages);
-        const page = await doc.getPage(pdfPageNum);
-        if (isCancelled) return;
-
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-
-        // Target high-res width (2448px for 2-page spread at 2x Retina resolution)
-        const unscaledViewport = page.getViewport({ scale: 1 });
-        const targetWidth = unscaledViewport.width > unscaledViewport.height * 1.2 ? 2448 : 1224;
-        const scale = targetWidth / unscaledViewport.width;
-        const viewport = page.getViewport({ scale });
-
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-
-        const ctx = canvas.getContext("2d", { alpha: false });
-        if (!ctx) return;
-
-        renderTask = page.render({
-          canvasContext: ctx,
-          viewport: viewport,
-        });
-
-        await renderTask.promise;
+        const dataUrl = await renderSpreadImage(currentSpreadIndex);
         if (!isCancelled) {
-          try {
-            const dataUrl = canvas.toDataURL("image/webp", 0.92);
-            spreadCache.set(cacheKey, dataUrl);
+          if (dataUrl) {
             setCachedImg(dataUrl);
-          } catch {
-            // Canvas remains visible
-          }
-          setIsLoading(false);
-
-          // Preload adjacent spreads
-          setTimeout(() => {
+            setIsLoading(false);
             preloadSpread(currentSpreadIndex + 1);
             preloadSpread(currentSpreadIndex - 1);
-          }, 100);
-        }
-      } catch (err: any) {
-        if (err?.name !== "RenderingCancelledException") {
-          console.error("Failed to render magazine spread:", err);
-          if (!isCancelled) {
+          } else {
             setHasError(true);
             setIsLoading(false);
           }
+        }
+      } catch (err) {
+        if (!isCancelled) {
+          setHasError(true);
+          setIsLoading(false);
         }
       }
     }
@@ -250,20 +247,8 @@ export const MagazineSpread: React.FC<MagazineSpreadProps> = ({
 
     return () => {
       isCancelled = true;
-      if (renderTask) {
-        renderTask.cancel();
-      }
     };
-  }, [pdfUrl, currentSpreadIndex, preloadSpread]);
-
-  // Animation & Flip State
-  interface FlipAnimationState {
-    direction: "forward" | "backward";
-    fromImg: string;
-    toImg: string;
-  }
-  const [flipState, setFlipState] = useState<FlipAnimationState | null>(null);
-  const [isAnimating, setIsAnimating] = useState(false);
+  }, [pdfUrl, currentSpreadIndex, renderSpreadImage, preloadSpread]);
 
   // Navigation Handlers
   const hasNext = isMobile
@@ -274,93 +259,78 @@ export const MagazineSpread: React.FC<MagazineSpreadProps> = ({
     ? mobileSide === "right" || currentSpreadIndex > 0
     : currentSpreadIndex > 0;
 
-  // Animation end handler
-  const handleAnimationEnd = useCallback(() => {
-    if (!flipState) return;
+  // Complete page flip transition atomically
+  const finishFlip = useCallback(() => {
+    setFlipState((currentFlip) => {
+      if (!currentFlip) return null;
 
-    if (flipState.direction === "forward") {
-      if (isMobile) {
-        if (mobileSide === "left") {
-          setMobileSide("right");
-        } else if (currentSpreadIndex < totalSpreads - 1) {
-          setCurrentSpreadIndex((prev) => prev + 1);
-          setMobileSide("left");
-        }
-      } else {
-        if (currentSpreadIndex < totalSpreads - 1) {
-          setCurrentSpreadIndex((prev) => prev + 1);
-        }
+      // 1. Immediately set the new spread image as cachedImg to prevent any reversion
+      setCachedImg(currentFlip.toImg);
+
+      // 2. Update current spread index to target spread index
+      setCurrentSpreadIndex(currentFlip.targetSpreadIndex);
+
+      if (isMobile && currentFlip.targetMobileSide) {
+        setMobileSide(currentFlip.targetMobileSide);
+      }
+
+      isAnimatingRef.current = false;
+      setIsAnimating(false);
+      return null;
+    });
+  }, [isMobile]);
+
+  const handleNext = useCallback(async () => {
+    if (isAnimatingRef.current || isAnimating || isLoading) return;
+    if (!hasNext) return;
+
+    let targetSpreadIdx = currentSpreadIndex;
+    let targetMobileSide: "left" | "right" = mobileSide;
+
+    if (isMobile) {
+      if (mobileSide === "left") {
+        targetMobileSide = "right";
+      } else if (currentSpreadIndex < totalSpreads - 1) {
+        targetSpreadIdx = currentSpreadIndex + 1;
+        targetMobileSide = "left";
       }
     } else {
-      if (isMobile) {
-        if (mobileSide === "right") {
-          setMobileSide("left");
-        } else if (currentSpreadIndex > 0) {
-          setCurrentSpreadIndex((prev) => prev - 1);
-          setMobileSide("right");
-        }
-      } else {
-        if (currentSpreadIndex > 0) {
-          setCurrentSpreadIndex((prev) => prev - 1);
-        }
+      if (currentSpreadIndex < totalSpreads - 1) {
+        targetSpreadIdx = currentSpreadIndex + 1;
       }
     }
 
-    setFlipState(null);
-    setIsAnimating(false);
-  }, [flipState, isMobile, mobileSide, currentSpreadIndex, totalSpreads]);
-
-  const handleNext = useCallback(async () => {
-    if (isAnimating || isLoading) return;
-    if (!hasNext) return;
+    if (targetSpreadIdx === currentSpreadIndex && targetMobileSide === mobileSide) return;
+    if (targetSpreadIdx >= totalSpreads) return;
 
     const currentImg = cachedImg;
     if (!currentImg) {
-      if (currentSpreadIndex < totalSpreads - 1) {
-        setCurrentSpreadIndex((prev) => prev + 1);
-      }
+      setCurrentSpreadIndex(targetSpreadIdx);
+      if (isMobile) setMobileSide(targetMobileSide);
       return;
     }
 
-    // Determine target spread
-    let targetSpreadIdx = currentSpreadIndex;
-    if (isMobile) {
-      if (mobileSide === "right") {
-        targetSpreadIdx = currentSpreadIndex + 1;
-      }
-    } else {
-      targetSpreadIdx = currentSpreadIndex + 1;
-    }
+    isAnimatingRef.current = true;
+    setIsAnimating(true);
 
-    if (targetSpreadIdx >= totalSpreads && !isMobile) return;
-
-    // Get target image from cache or preload
-    const targetKey = `${pdfUrl}_spread_${targetSpreadIdx}`;
-    let targetImg = spreadCache.get(targetKey) || currentImg;
-
-    if (!spreadCache.has(targetKey) && targetSpreadIdx < totalSpreads) {
-      setIsLoading(true);
-      await preloadSpread(targetSpreadIdx);
-      targetImg = spreadCache.get(targetKey) || currentImg;
-      setIsLoading(false);
+    let targetImg = await renderSpreadImage(targetSpreadIdx);
+    if (!targetImg) {
+      targetImg = currentImg;
     }
 
     // Trigger physical 3D page turn
-    setIsAnimating(true);
     setFlipState({
       direction: "forward",
       fromImg: currentImg,
       toImg: targetImg,
+      targetSpreadIndex: targetSpreadIdx,
+      targetMobileSide,
     });
 
-    // Fallback safety timeout (690ms) in case animationend is skipped
-    setTimeout(() => {
-      setIsAnimating((animating) => {
-        if (animating) {
-          handleAnimationEnd();
-        }
-        return false;
-      });
+    // Safety timeout in case animationend is skipped
+    if (safetyTimerRef.current) clearTimeout(safetyTimerRef.current);
+    safetyTimerRef.current = setTimeout(() => {
+      finishFlip();
     }, 720);
   }, [
     isAnimating,
@@ -371,62 +341,60 @@ export const MagazineSpread: React.FC<MagazineSpreadProps> = ({
     totalSpreads,
     isMobile,
     mobileSide,
-    pdfUrl,
-    preloadSpread,
-    handleAnimationEnd,
+    renderSpreadImage,
+    finishFlip,
   ]);
 
   const handlePrev = useCallback(async () => {
-    if (isAnimating || isLoading) return;
+    if (isAnimatingRef.current || isAnimating || isLoading) return;
     if (!hasPrev) return;
+
+    let targetSpreadIdx = currentSpreadIndex;
+    let targetMobileSide: "left" | "right" = mobileSide;
+
+    if (isMobile) {
+      if (mobileSide === "right") {
+        targetMobileSide = "left";
+      } else if (currentSpreadIndex > 0) {
+        targetSpreadIdx = currentSpreadIndex - 1;
+        targetMobileSide = "right";
+      }
+    } else {
+      if (currentSpreadIndex > 0) {
+        targetSpreadIdx = currentSpreadIndex - 1;
+      }
+    }
+
+    if (targetSpreadIdx === currentSpreadIndex && targetMobileSide === mobileSide) return;
+    if (targetSpreadIdx < 0) return;
 
     const currentImg = cachedImg;
     if (!currentImg) {
-      if (currentSpreadIndex > 0) {
-        setCurrentSpreadIndex((prev) => prev - 1);
-      }
+      setCurrentSpreadIndex(targetSpreadIdx);
+      if (isMobile) setMobileSide(targetMobileSide);
       return;
     }
 
-    // Determine target spread
-    let targetSpreadIdx = currentSpreadIndex;
-    if (isMobile) {
-      if (mobileSide === "left") {
-        targetSpreadIdx = currentSpreadIndex - 1;
-      }
-    } else {
-      targetSpreadIdx = currentSpreadIndex - 1;
-    }
+    isAnimatingRef.current = true;
+    setIsAnimating(true);
 
-    if (targetSpreadIdx < 0) return;
-
-    // Get target image from cache or preload
-    const targetKey = `${pdfUrl}_spread_${targetSpreadIdx}`;
-    let targetImg = spreadCache.get(targetKey) || currentImg;
-
-    if (!spreadCache.has(targetKey) && targetSpreadIdx >= 0) {
-      setIsLoading(true);
-      await preloadSpread(targetSpreadIdx);
-      targetImg = spreadCache.get(targetKey) || currentImg;
-      setIsLoading(false);
+    let targetImg = await renderSpreadImage(targetSpreadIdx);
+    if (!targetImg) {
+      targetImg = currentImg;
     }
 
     // Trigger physical reverse 3D page turn
-    setIsAnimating(true);
     setFlipState({
       direction: "backward",
       fromImg: currentImg,
       toImg: targetImg,
+      targetSpreadIndex: targetSpreadIdx,
+      targetMobileSide,
     });
 
-    // Fallback safety timeout (690ms)
-    setTimeout(() => {
-      setIsAnimating((animating) => {
-        if (animating) {
-          handleAnimationEnd();
-        }
-        return false;
-      });
+    if (safetyTimerRef.current) clearTimeout(safetyTimerRef.current);
+    safetyTimerRef.current = setTimeout(() => {
+      finishFlip();
     }, 720);
   }, [
     isAnimating,
@@ -436,10 +404,24 @@ export const MagazineSpread: React.FC<MagazineSpreadProps> = ({
     currentSpreadIndex,
     isMobile,
     mobileSide,
-    pdfUrl,
-    preloadSpread,
-    handleAnimationEnd,
+    renderSpreadImage,
+    finishFlip,
   ]);
+
+  // Keyboard navigation for page turning
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        handleNext();
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        handlePrev();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleNext, handlePrev]);
 
   return (
     <div className={styles.spreadWrapper}>
@@ -461,7 +443,6 @@ export const MagazineSpread: React.FC<MagazineSpreadProps> = ({
           /* ================= STEP 5: 3D REALISTIC PAGE TURN ================= */
           <div
             className={styles.flipContainer}
-            onAnimationEnd={handleAnimationEnd}
             aria-hidden="true"
           >
             {/* Underneath Base Left Page */}
@@ -493,6 +474,12 @@ export const MagazineSpread: React.FC<MagazineSpreadProps> = ({
               className={`${styles.turningLeaf} ${
                 flipState.direction === "forward" ? styles.leafForward : styles.leafBackward
               }`}
+              onAnimationEnd={(e) => {
+                if (e.target === e.currentTarget) {
+                  if (safetyTimerRef.current) clearTimeout(safetyTimerRef.current);
+                  finishFlip();
+                }
+              }}
             >
               {/* Front Face: Current page turning away */}
               <div className={`${styles.leafFace} ${styles.leafFaceFront}`}>
