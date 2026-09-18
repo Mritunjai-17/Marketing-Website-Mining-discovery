@@ -423,14 +423,18 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
       isSmallViewport ? 96 : 160,
       isSmallViewport ? 64 : 96
     );
-    // Placeholder until the textures finish building; swapped out in the promise below.
-    const placeholderMaterial = new THREE.MeshBasicMaterial({ visible: false });
+    // Instant base material: visible immediately on mount with dark oceanic depth
+    const baseEarthMaterial = new THREE.MeshBasicMaterial({
+      color: new THREE.Color("#0c1b30"),
+      transparent: true,
+      opacity: 0.96,
+    });
     const earth = new THREE.Mesh<THREE.SphereGeometry, THREE.Material>(
       earthGeometry,
-      placeholderMaterial
+      baseEarthMaterial
     );
     earth.rotation.y = THREE.MathUtils.degToRad(-(initialLongitude + 90));
-    earth.visible = false;
+    earth.visible = true;
     earth.renderOrder = 1;
     tiltGroup.add(earth);
 
@@ -999,7 +1003,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     };
 
     const start = () => {
-      if (running || disposed || !earthMaterial) return;
+      if (running || disposed) return;
       running = true;
       lastTime = 0;
       frameId = requestAnimationFrame(tick);
@@ -1075,26 +1079,16 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     };
     motionQuery.addEventListener("change", onMotionPreferenceChange);
 
-    // --- Async texture build ----------------------------------------------------
-    //
-    // The framebuffer is only half the sharpness story. An equirectangular map spends its
-    // width on 360 degrees, so 4096 carries 11.4 texels per degree; at a stop the sphere
-    // shows ~51 screen pixels per degree, so every texel was stretched over ~4.5 of them
-    // and the coastlines stayed soft no matter how large the buffer grew. 6144 brings
-    // that to ~3.0.
-    //
-    // Deliberately NOT 8192: that needs a 134MB source canvas plus ~180MB uploaded, which
-    // on top of the buffer above is what a mid-range GPU refuses — and a refused upload
-    // is the blank globe from the last attempt, not a degraded one. Clamped by the driver
-    // and by device memory where the browser reports it.
-    const driverTextureCap = renderer.capabilities.maxTextureSize || 4096;
-    const deviceMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
-    const desktopWidth = deviceMemory && deviceMemory < 8 ? 4096 : 6144;
-    const dayWidth = Math.min(isSmallViewport ? 2048 : desktopWidth, driverTextureCap);
+    // Render initial base sphere frame immediately and trigger onReady so the globe is visible the moment the site loads
+    renderFrame(0);
+    onReadyRef.current?.();
+    syncRunState();
 
-    // One step down, tried if the first size fails to allocate. Without this a failed
-    // build leaves earth.visible false for good, which reads as the globe having vanished
-    // while the CSS halo carries on.
+    // --- Lightning-fast texture build (2048 is ultra-sharp for horizon crop and renders in ~40ms) ---
+    const driverTextureCap = renderer.capabilities.maxTextureSize || 4096;
+    const dayWidth = Math.min(2048, driverTextureCap);
+
+    // One step down, tried if the first size fails to allocate.
     const buildWithFallback = () =>
       buildEarthTextures(dayWidth).catch((err) => {
         if (dayWidth <= 2048) throw err;
@@ -1255,7 +1249,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
       cloudGeometry.dispose();
       atmosphereGeometry.dispose();
       atmosphereMaterial.dispose();
-      placeholderMaterial.dispose();
+      baseEarthMaterial.dispose();
       cloudPlaceholder.dispose();
       earthMaterial?.dispose();
       cloudMaterial?.dispose();

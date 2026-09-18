@@ -783,36 +783,48 @@ function paintCloudMap(w: number): HTMLCanvasElement {
   return canvas;
 }
 
+let cachedTextures: Promise<EarthTextureResult> | null = null;
+
+if (typeof window !== "undefined") {
+  // Preload atlas and night lights image immediately on browser load
+  import("world-atlas/countries-50m.json").catch(() => {});
+  const preImg = new Image();
+  preImg.src = "/textures/earth_lights_2048.jpg";
+}
+
 /**
  * Builds the maps. The TopoJSON is pulled in via dynamic import so the ~750KB atlas
  * lands in its own chunk, fetched after the hero has already painted.
  */
-export async function buildEarthTextures(dayWidth: number): Promise<EarthTextureResult> {
-  // Started before the atlas import and awaited alongside it, so the image download
-  // overlaps the topology chunk rather than being serialised after it.
-  const nightLights = loadNightLights(dayWidth);
-  const atlas = await import("world-atlas/countries-50m.json");
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  const topology = ((atlas as any).default ?? atlas) as any;
+export function buildEarthTextures(dayWidth = 2048): Promise<EarthTextureResult> {
+  if (cachedTextures) return cachedTextures;
 
-  const land = topojson.merge(
-    topology,
-    topology.objects.countries.geometries
-  ) as unknown as GeoPermissibleObjects;
+  cachedTextures = (async () => {
+    const nightLights = loadNightLights(dayWidth);
+    const atlas = await import("world-atlas/countries-50m.json");
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    const topology = ((atlas as any).default ?? atlas) as any;
 
-  const borders = topojson.mesh(
-    topology,
-    topology.objects.countries,
-    (a: any, b: any) => a !== b
-  ) as unknown as GeoPermissibleObjects;
-  /* eslint-enable @typescript-eslint/no-explicit-any */
+    const land = topojson.merge(
+      topology,
+      topology.objects.countries.geometries
+    ) as unknown as GeoPermissibleObjects;
 
-  return {
-    day: paintDayMap(land, borders, dayWidth, await nightLights),
-    mask: paintMaskMap(land, Math.max(1024, Math.round(dayWidth / 2))),
-    // Clouds are soft, low-frequency shapes with nothing to resolve, so they are pinned
-    // rather than scaled with the day map. Following it to 3072 would cost ~19MB and a
-    // per-pixel alpha remap over 2.25x the area to render the same blurry puffs.
-    clouds: paintCloudMap(Math.max(1024, Math.min(2048, Math.round(dayWidth / 2)))),
-  };
+    const borders = topojson.mesh(
+      topology,
+      topology.objects.countries,
+      (a: any, b: any) => a !== b
+    ) as unknown as GeoPermissibleObjects;
+    /* eslint-enable @typescript-eslint/no-explicit-any */
+
+    return {
+      day: paintDayMap(land, borders, dayWidth, await nightLights),
+      mask: paintMaskMap(land, Math.max(1024, Math.round(dayWidth / 2))),
+      // Clouds are soft, low-frequency shapes with nothing to resolve, so they are pinned
+      // rather than scaled with the day map.
+      clouds: paintCloudMap(Math.max(1024, Math.min(2048, Math.round(dayWidth / 2)))),
+    };
+  })();
+
+  return cachedTextures;
 }

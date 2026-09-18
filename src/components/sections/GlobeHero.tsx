@@ -33,6 +33,14 @@ const EarthGlobe = dynamic(
   { ssr: false },
 );
 
+if (typeof window !== "undefined") {
+  // Preload EarthGlobe chunk, world atlas, and textures as soon as the client bundle loads
+  import("@/components/ui/globe/EarthGlobe");
+  import("world-atlas/countries-50m.json").catch(() => {});
+  const preLights = new Image();
+  preLights.src = "/textures/earth_lights_2048.jpg";
+}
+
 interface MiningSite extends GlobeAnchor {
   /** Continent, used as the primary label. */
   region: string;
@@ -467,8 +475,18 @@ export const GlobeHero: React.FC = () => {
     fadeY: 130,
   });
 
-  const [metrics, setMetrics] = useState<Metrics>({ boxSize: 0, boxTop: 0 });
-  const [ready, setReady] = useState(false);
+  const [metrics, setMetrics] = useState<Metrics>(() => {
+    if (typeof window !== "undefined") {
+      const w = window.innerWidth || 1200;
+      const h = window.innerHeight || 800;
+      const sphereSize = horizonDiameter(w, h * 0.75);
+      const boxSize = sphereSize / GLOBE_FIT;
+      const boxTop = -(boxSize - sphereSize) / 2 + boxSize * HALO_HEADROOM;
+      return { boxSize, boxTop };
+    }
+    return { boxSize: 1400, boxTop: -200 };
+  });
+  const [ready, setReady] = useState(true);
   const [activeId, setActiveId] = useState<string | null>(null);
 
   // --- Headline exit ---------------------------------------------------------------
@@ -1259,9 +1277,9 @@ export const GlobeHero: React.FC = () => {
               ref={globeBoxRef}
               className={`
                 absolute left-1/2 z-10 -translate-x-1/2 will-change-transform
-                transition-[opacity,scale] duration-[1400ms] ease-[cubic-bezier(0.16,1,0.3,1)]
+                transition-[opacity,scale] duration-300 ease-out
                 motion-reduce:transition-none
-                ${ready ? "opacity-100 scale-100" : "opacity-0 scale-[0.94] motion-reduce:scale-100"}
+                ${ready ? "opacity-100 scale-100" : "opacity-0 scale-[0.98] motion-reduce:scale-100"}
               `}
               style={{
                 width: metrics.boxSize || undefined,
@@ -1296,7 +1314,7 @@ export const GlobeHero: React.FC = () => {
                 ref={markerLayerRef}
                 className={`
                   pointer-events-none absolute inset-0 z-10
-                  transition-opacity duration-700 delay-500
+                  transition-opacity duration-300 delay-100
                   ${ready ? "opacity-100" : "opacity-0"}
                 `}
               >
