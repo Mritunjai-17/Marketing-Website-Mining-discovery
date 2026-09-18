@@ -33,7 +33,7 @@ export interface JourneySectionProps {
  * server-renders its markup happily, which gets the editorial copy into the
  * initial HTML and the backdrop onto the screen a round trip sooner.
  */
-export const JourneySection: React.FC<JourneySectionProps> = ({ scrollLength = 17 }) => {
+export const JourneySection: React.FC<JourneySectionProps> = ({ scrollLength = 21 }) => {
   const progress = useCreateJourneyProgress();
   const [active, setActive] = useState(false);
 

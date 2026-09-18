@@ -3,7 +3,7 @@
 import React, { useRef, useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { createPortal } from "react-dom";
-import { ArrowRight, X, Newspaper, BookOpen, TrendingUp, Globe, Sparkles } from "lucide-react";
+import { X, Newspaper, BookOpen, TrendingUp, Globe, Sparkles } from "lucide-react";
 import styles from "./Journey2D.module.css";
 import magStyles from "@/components/sections/MagazineShowcase/MagazineShowcase.module.css";
 import { smoothstep } from "./journeySideView";
@@ -19,18 +19,31 @@ const MILESTONE_ICONS = [TrendingUp, Newspaper, BookOpen, Globe, Sparkles, Spark
 
 export interface RevealCard {
   id: number;
-  type: "magazine" | "newsletter" | "placeholder";
 }
 
 export const REVEAL_CARDS: RevealCard[] = [
-  { id: 1, type: "magazine" },
-  { id: 2, type: "newsletter" },
-  { id: 3, type: "placeholder" },
-  { id: 4, type: "placeholder" },
-  { id: 5, type: "placeholder" },
-  { id: 6, type: "placeholder" },
-  { id: 7, type: "placeholder" },
+  { id: 1 },
+  { id: 2 },
+  { id: 3 },
+  { id: 4 },
+  { id: 5 },
+  { id: 6 },
 ];
+
+export interface DustParticle {
+  cardIndex: number;
+  edgeX: number;
+  edgeY: number;
+  size: number;
+  alpha: number;
+  color: string;
+  driftSpeed: number;
+  waveFreq: number;
+  waveAmp: number;
+  phase: number;
+  settleRatioX: number;
+  settleRatioY: number;
+}
 
 export interface StoryPoint {
   id: string;
@@ -176,6 +189,70 @@ export const JourneyStory: React.FC = () => {
   const activeIndexRef = useRef(1); // Default to June 2026 Edition 13 (matching reference screenshot)
   const servicesTitleRef = useRef<HTMLDivElement>(null);
 
+  // The Golden Dust Transition (Idea 6): Fine mineral dust & mountain stage refs
+  const dustCanvasRef = useRef<HTMLCanvasElement>(null);
+  const settleStageRef = useRef<HTMLDivElement>(null);
+
+  // Deterministic pool of fine mineral dust / photographic grain particles
+  const dustParticles = useMemo<DustParticle[]>(() => {
+    const particles: DustParticle[] = [];
+    const colors = [
+      "rgba(212, 175, 55,",   // Classic Gold Ore #D4AF37
+      "rgba(243, 229, 171,",  // Pale Vanilla Gold #F3E5AB
+      "rgba(197, 155, 39,",   // Deep Amber Ore #C59B27
+      "rgba(230, 202, 101,",  // Champagne Gold #E6CA65
+      "rgba(255, 248, 220,",  // Specular Fleck #FFF8DC
+    ];
+
+    let seed = 42;
+    const rand = () => {
+      seed = (seed * 16807) % 2147483647;
+      return (seed - 1) / 2147483646;
+    };
+
+    for (let i = 0; i < 340; i++) {
+      const cardIndex = i % 6;
+      const edgeChoice = rand();
+      let edgeX = 0;
+      let edgeY = 0;
+      const inset = (rand() - 0.5) * 0.15;
+
+      if (edgeChoice < 0.25) {
+        edgeX = rand() * 2 - 1;
+        edgeY = -1 + inset;
+      } else if (edgeChoice < 0.5) {
+        edgeX = 1 + inset;
+        edgeY = rand() * 2 - 1;
+      } else if (edgeChoice < 0.75) {
+        edgeX = rand() * 2 - 1;
+        edgeY = 1 + inset;
+      } else {
+        edgeX = -1 + inset;
+        edgeY = rand() * 2 - 1;
+      }
+
+      const size = 0.8 + rand() * 1.8;
+      const colorBase = colors[Math.floor(rand() * colors.length)];
+      const alpha = 0.45 + rand() * 0.5;
+
+      particles.push({
+        cardIndex,
+        edgeX,
+        edgeY,
+        size,
+        alpha,
+        color: colorBase,
+        driftSpeed: 0.75 + rand() * 0.65,
+        waveFreq: 1.0 + rand() * 1.6,
+        waveAmp: 10 + rand() * 25,
+        phase: rand() * Math.PI * 2,
+        settleRatioX: 0.05 + rand() * 0.9,
+        settleRatioY: 0.62 + rand() * 0.22,
+      });
+    }
+    return particles;
+  }, []);
+
   // All 14 magazines and the 5 latest editions
   const allMagazines = useMemo(() => getChronologicalMagazines(false), []);
   const showcaseMagazines = useMemo(() => allMagazines.slice(0, 5), [allMagazines]);
@@ -298,14 +375,23 @@ export const JourneyStory: React.FC = () => {
       secondPartRef.current.style.pointerEvents = opacity > 0.5 ? "auto" : "none";
     }
 
-    // 4. ROAD-TO-SCREEN ANIMATED CARD SHOWCASE:
-    // Phase 2: Cards tumble out of truck back doors onto the road (p = 0.935 to 0.950).
-    // Phase 3: One by one, 7 cards come on screen directly from the fallen cards (p = 0.950 to 0.970).
-    // Phase 4: All 7 cards align together across the screen (p = 0.970 to 1.000)!
+    // 4. ROAD-TO-SCREEN 3D CARD GALLERY (HUGE INC PERSPECTIVE CAROUSEL):
+    // 6 tall cards arranged along a shallow 3D semicircular/cylindrical arc in perspective.
+    // The current center card remains dominant:
+    // - faces almost directly toward the viewer
+    // - appears larger and closer
+    // - has the strongest visual hierarchy
+    // Cards toward the LEFT:
+    // - progressively move farther into depth
+    // - rotate slightly inward toward the center
+    // - become smaller as they move away from the center
+    // Cards toward the RIGHT:
+    // - mirror the same behavior
+    // - progressively move farther into depth
+    // - rotate inward toward the center
+    // Scrolling drives the 3D camera travel through all 6 cards.
     if (magazineWrapRef.current) {
-      const rowEl = rowRef.current;
-
-      if (p < 0.948) {
+      if (p < 0.938) {
         magazineWrapRef.current.style.opacity = "0";
         magazineWrapRef.current.style.pointerEvents = "none";
         magazineWrapRef.current.style.backgroundColor = "transparent";
@@ -313,7 +399,6 @@ export const JourneyStory: React.FC = () => {
         if (servicesTitleRef.current) {
           servicesTitleRef.current.style.opacity = "0";
         }
-        if (rowEl) rowEl.style.transform = "scale(1)";
         REVEAL_CARDS.forEach((_, idx) => {
           const el = cardRefs.current[idx];
           if (el) {
@@ -328,185 +413,302 @@ export const JourneyStory: React.FC = () => {
         const winW = typeof window !== "undefined" ? window.innerWidth : 1200;
         const winH = typeof window !== "undefined" ? window.innerHeight : 800;
 
-        // Position of the card emission point on the road behind the truck (right-side offset)
-        const startX = winW * 0.52;
-        const startY = winH * 0.22;
-
-        const rowRect = rowEl ? rowEl.getBoundingClientRect() : null;
-
         const isMobile = winW < 768;
+        const isTablet = winW < 1024;
 
-        const originX = winW / 2;
-        const originY = isMobile ? winH * 0.46 : winH * 0.50;
+        // Position of the card emission point on the road behind the truck
+        const startX = winW * 0.04;
+        const startY = -winH * 0.26;
 
-        // Base coordinate for the right-side queue
-        const queueBaseX = originX + (isMobile ? winW * 0.18 : Math.min(winW * 0.20, 260));
-        const queueBaseY = originY;
+        // Arch Geometry matching Huge Inc reference
+        // Balanced "little gap" (~50px-65px) so cards never touch or crowd
+        const deltaX = isMobile
+          ? winW * 0.46
+          : isTablet
+          ? Math.min(360, winW * 0.38)
+          : Math.min(460, winW * 0.325);
 
-        // Stable slot definitions for the right-side queue (slots 0 to 6)
-        const getQueueX = (i: number) => queueBaseX + i * (isMobile ? 18 : 26);
-        const getQueueY = (i: number) => queueBaseY + (i - 3) * 5;
-        const getQueueRotZ = (i: number) => (i - 2.5) * 1.6;
-        const getQueueScale = (i: number) => (isMobile ? 0.68 : 0.76) - i * 0.012;
-        const getQueueZIndex = (i: number) => 16 - i;
+        // Apex Y position: center card sits high up
+        const originY = isMobile ? -winH * 0.05 : -winH * 0.07;
+        const baseDrop = isMobile ? 105 : isTablet ? 125 : 150;
+        const rotZAngle = isMobile ? 15 : isTablet ? 14 : 13;
 
-        // Center slot definition (Slot 0 - Featured Position)
-        const centerX = originX;
-        const centerY = originY;
-        const centerScale = isMobile ? 0.85 : 1.0;
+        // 1. Emergence from truck: 0.938 -> 0.948
+        const EMERGE_START = 0.938;
+        const EMERGE_END = 0.948;
 
-        // 1. Emergence from truck into initial state (Card 1 at center, Cards 2-7 in queue): 0.948 -> 0.952
-        const EMERGE_START = 0.948;
-        const EMERGE_END = 0.952;
+        // 2. Continuous semicircle rotation across cards driven by scroll: 0.948 -> 0.968
+        const CARDS_ACTIVE_END = 0.968;
+        const totalCards = REVEAL_CARDS.length; // 6
+        let focal = 0;
 
-        // 2. Sequential Carousel transitions (6 transitions between adjacent cards): 0.952 -> 1.000
-        const CAROUSEL_START = 0.952;
-        const CAROUSEL_END = 1.000;
-        const TRANSITION_SPAN = (CAROUSEL_END - CAROUSEL_START) / 6;
+        if (p >= EMERGE_END && p < CARDS_ACTIVE_END) {
+          const galleryP = (p - EMERGE_END) / (CARDS_ACTIVE_END - EMERGE_END);
+          const rawTarget = galleryP * totalCards;
 
-        let activeTransition = 0;
-        let easeT = 0;
+          const k = Math.floor(rawTarget);
+          const sub = rawTarget - k;
 
-        if (p >= CAROUSEL_START) {
-          const progressInTransitions = (p - CAROUSEL_START) / TRANSITION_SPAN;
-          activeTransition = Math.min(5, Math.max(0, Math.floor(progressInTransitions)));
-          const subT = progressInTransitions - activeTransition;
-          const MOVE_RATIO = 0.65; // 65% smooth handoff travel, 35% solid center hold
-
-          let rawT = 0;
-          if (subT < MOVE_RATIO) {
-            rawT = subT / MOVE_RATIO;
+          // Cinematic dwell at apex & smooth rotation along arc
+          let stepT = 0;
+          if (sub <= 0.16) {
+            stepT = 0;
+          } else if (sub >= 0.84) {
+            stepT = 1;
           } else {
-            rawT = 1.0;
+            const tau = (sub - 0.16) / 0.68;
+            stepT = tau * tau * (3 - 2 * tau);
           }
-          easeT = rawT * rawT * (3 - 2 * rawT);
+
+          focal = k + stepT;
+        } else if (p >= CARDS_ACTIVE_END) {
+          focal = totalCards;
         }
+
+        // Dissolve cards into golden mineral dust: 0.966 -> 0.978
+        const cardExitP = smoothstep(0.966, 0.978, p);
+
+        // Track card positions for particle emission
+        const cardScreenCoords: { x: number; y: number; width: number; height: number; opacity: number }[] = [];
+        const cardW = isMobile ? 250 : isTablet ? 290 : Math.min(370, winW * 0.25);
+        const cardH = cardW * 1.38;
 
         REVEAL_CARDS.forEach((_, idx) => {
           const el = cardRefs.current[idx];
           if (!el) return;
 
-          // Card slot in DOM flow
-          const slotX = (rowRect ? rowRect.left : winW * 0.2) + el.offsetLeft + el.offsetWidth / 2;
-          const slotY = (rowRect ? rowRect.top : winH * 0.5) + el.offsetTop + el.offsetHeight / 2;
+          // Wrapped circular distance so all transitions are continuous
+          let d = ((idx - focal) % totalCards + totalCards) % totalCards;
+          if (d > totalCards / 2) {
+            d -= totalCards;
+          }
 
-          let curX = getQueueX(idx);
-          let curY = getQueueY(idx);
-          let curScale = getQueueScale(idx);
-          let curRotX = 0;
-          let curRotZ = getQueueRotZ(idx);
-          let opacity = 0;
-          let zIndex = getQueueZIndex(idx);
-          let isInteractive = false;
+          // Trajectory: Parabolic Arch from bottom-right -> up into center -> down into bottom-left
+          // Center card (d = 0): Apex peak (arcX = 0, arcY = originY, rotZ = 0)
+          // Left card (d < 0): Moves LEFT and plunges DOWN, tilted counter-clockwise (rotZ < 0)
+          // Right card (d > 0): Plunges DOWN to the right, tilted clockwise (rotZ > 0), rising UP into center as scroll advances
+          const archDrop = Math.pow(Math.abs(d), 1.38) * baseDrop;
+          const arcX = d * deltaX;
+          const arcY = originY + archDrop;
+
+          // 3D Rotations matching Huge Inc (media_1789728259487.png):
+          // Left card (d < 0): tilts counter-clockwise (arcRotZ < 0) & faces inward (arcRotY > 0)
+          // Right card (d > 0): tilts clockwise (arcRotZ > 0) & faces inward (arcRotY < 0)
+          const arcRotZ = Math.max(-32, Math.min(32, d * rotZAngle));
+          const arcRotY = Math.max(-20, Math.min(20, -d * 14));
+          const arcZ = -Math.abs(d) * (isMobile ? 35 : 55);
+
+          // Scale: Center card is 1.0, flanks scale down subtly to 0.89, far edges to ~0.76
+          const arcScale = Math.max(0.74, Math.min(1.0, 1.0 - Math.abs(d) * 0.11));
+          const zIndex = Math.round(50 - Math.abs(d) * 15);
+
+          // Card Visibility: 3 main cards dominant, incoming card from bottom-right and outgoing card to bottom-left visible at edges
+          const absD = Math.abs(d);
+          let arcOpacity = 0;
+          if (absD <= 1.15) {
+            arcOpacity = 1.0;
+          } else if (absD < 1.75) {
+            arcOpacity = 1.0 - (absD - 1.15) / 0.60;
+          } else {
+            arcOpacity = 0;
+          }
+
+          let curX = arcX;
+          let curY = arcY;
+          let curZ = arcZ;
+          let curRotY = arcRotY;
+          let curRotZ = arcRotZ;
+          let curScale = arcScale;
+          let curOpacity = arcOpacity;
 
           if (p < EMERGE_START) {
-            // Hidden before truck stops
             el.style.opacity = "0";
             el.style.pointerEvents = "none";
-            const tx = startX - slotX;
-            const ty = startY - slotY;
-            el.style.transform = `translate3d(${tx.toFixed(1)}px, ${ty.toFixed(1)}px, 0) scale(0.05)`;
+            el.style.transform = `translate3d(calc(-50% + ${startX.toFixed(1)}px), calc(-50% + ${startY.toFixed(1)}px), -500px) scale(0.05)`;
+            cardScreenCoords[idx] = { x: winW * 0.5 + startX, y: winH * 0.5 + startY, width: cardW, height: cardH, opacity: 0 };
             return;
           }
 
           if (p >= EMERGE_START && p < EMERGE_END) {
-            // Emerges from truck directly into the initial state:
-            // Card 1 (idx 0) emerges to CENTER, Cards 2-7 (idx 1-6) emerge to their right queue slots
             const emergeP = (p - EMERGE_START) / (EMERGE_END - EMERGE_START);
             const easeEmerge = 1 - Math.pow(1 - emergeP, 2.5);
 
-            if (idx === 0) {
-              curX = (1 - easeEmerge) * startX + easeEmerge * centerX;
-              curY = (1 - easeEmerge) * startY + easeEmerge * centerY;
-              curScale = (0.05 + 0.95 * easeEmerge) * centerScale;
-              curRotZ = 0;
-              curRotX = (1 - easeEmerge) * 16;
-              zIndex = 25;
-            } else {
-              curX = (1 - easeEmerge) * startX + easeEmerge * getQueueX(idx);
-              curY = (1 - easeEmerge) * startY + easeEmerge * getQueueY(idx);
-              curScale = (0.05 + 0.95 * easeEmerge) * getQueueScale(idx);
-              curRotZ = easeEmerge * getQueueRotZ(idx);
-              curRotX = (1 - easeEmerge) * 16;
-              zIndex = getQueueZIndex(idx);
-            }
-            opacity = Math.min(1, emergeP * 3.5);
-          } else {
-            // Carousel State:
-            // During transition `k`:
-            // - Outgoing card (idx === k) moves from CENTER to queue slot
-            // - Incoming card (idx === k + 1) moves from queue slot to CENTER
-            // - ALL other 5 cards remain completely stationary in their right queue slots!
-            opacity = 1;
-            const k = activeTransition;
-
-            if (idx === k) {
-              // Outgoing card: CENTER -> its queue slot
-              curX = (1 - easeT) * centerX + easeT * getQueueX(k);
-              curY = (1 - easeT) * centerY + easeT * getQueueY(k);
-              curRotZ = easeT * getQueueRotZ(k);
-              curScale = (1 - easeT) * centerScale + easeT * getQueueScale(k);
-              curRotX = Math.sin(easeT * Math.PI) * 8;
-              zIndex = 22;
-              isInteractive = easeT < 0.2;
-            } else if (idx === k + 1) {
-              // Incoming card: its queue slot -> CENTER
-              curX = (1 - easeT) * getQueueX(k + 1) + easeT * centerX;
-              curY = (1 - easeT) * getQueueY(k + 1) + easeT * centerY;
-              curRotZ = (1 - easeT) * getQueueRotZ(k + 1);
-              curScale = (1 - easeT) * getQueueScale(k + 1) + easeT * centerScale;
-              curRotX = Math.sin(easeT * Math.PI) * 10;
-              zIndex = 25; // Elevated in front
-              isInteractive = easeT > 0.8;
-            } else {
-              // Non-transitioning cards remain completely stationary in their assigned queue slots
-              curX = getQueueX(idx);
-              curY = getQueueY(idx);
-              curRotZ = getQueueRotZ(idx);
-              curScale = getQueueScale(idx);
-              curRotX = 0;
-              zIndex = getQueueZIndex(idx);
-            }
+            curX = (1 - easeEmerge) * startX + easeEmerge * arcX;
+            curY = (1 - easeEmerge) * startY + easeEmerge * arcY;
+            curZ = (1 - easeEmerge) * -500 + easeEmerge * arcZ;
+            curRotY = easeEmerge * arcRotY;
+            curRotZ = easeEmerge * arcRotZ;
+            curScale = (0.05 + 0.95 * easeEmerge) * arcScale;
+            curOpacity = Math.min(arcOpacity, emergeP * 3.5);
           }
 
-          const tx = curX - slotX;
-          const ty = curY - slotY;
+          // Dissolve smoothly into golden dust
+          curOpacity *= (1 - cardExitP);
+          curScale *= (1 - cardExitP * 0.08);
+          curX += cardExitP * 30; // Subtle eastward drift into the dust
 
-          el.style.opacity = opacity.toFixed(3);
+          const isInteractive = absD < 0.7 && cardExitP < 0.1;
+
+          el.style.opacity = curOpacity.toFixed(3);
           el.style.pointerEvents = isInteractive ? "auto" : "none";
           el.style.zIndex = `${zIndex}`;
-          el.style.transform = `translate3d(${tx.toFixed(1)}px, ${ty.toFixed(1)}px, 0) scale(${curScale.toFixed(3)}) rotateX(${curRotX.toFixed(1)}deg) rotateZ(${curRotZ.toFixed(1)}deg)`;
+          el.style.transform = `translate3d(calc(-50% + ${curX.toFixed(1)}px), calc(-50% + ${curY.toFixed(1)}px), ${curZ.toFixed(1)}px) rotateY(${curRotY.toFixed(2)}deg) rotateZ(${curRotZ.toFixed(2)}deg) scale(${curScale.toFixed(3)})`;
+
+          cardScreenCoords[idx] = {
+            x: winW * 0.5 + curX,
+            y: winH * 0.5 + curY,
+            width: cardW * curScale,
+            height: cardH * curScale,
+            opacity: curOpacity,
+          };
         });
 
-        // Phase 4: Display all five cards at once on screen without overzooming!
-        if (p >= 0.970) {
-          const focusProgress = smoothstep(0.970, 0.995, p);
-          if (rowEl) {
-            rowEl.style.transform = "scale(1)";
-          }
-          // Deepen background to dark cinematic backdrop with backdrop blur
-          const bgAlpha = (focusProgress * 0.85).toFixed(3);
-          magazineWrapRef.current.style.backgroundColor = `rgba(6, 10, 18, ${bgAlpha})`;
-          const blurPx = (focusProgress * 12).toFixed(1);
-          magazineWrapRef.current.style.backdropFilter = focusProgress > 0.02 ? `blur(${blurPx}px)` : "none";
-        } else {
-          if (rowEl) {
-            rowEl.style.transform = "scale(1)";
-          }
-          magazineWrapRef.current.style.backgroundColor = "transparent";
-          magazineWrapRef.current.style.backdropFilter = "none";
+        // Update active index
+        const currentDominant = ((Math.round(focal) % totalCards) + totalCards) % totalCards;
+        if (currentDominant !== activeIndexRef.current) {
+          activeIndexRef.current = currentDominant;
+          setActiveIndex(currentDominant);
         }
 
-        // Animate OUR SERVICES background text behind cards
+        // Deepen background to dark cinematic backdrop with subtle blur
+        const bgAlpha = (Math.min(1, (p - 0.938) / 0.035) * 0.88).toFixed(3);
+        magazineWrapRef.current.style.backgroundColor = `rgba(6, 10, 18, ${bgAlpha})`;
+        magazineWrapRef.current.style.backdropFilter = p > 0.945 ? "blur(12px)" : "none";
+
+        // Background typography ("OUR SERVICES")
         if (servicesTitleRef.current) {
-          if (p < 0.960) {
+          if (p < 0.948) {
             servicesTitleRef.current.style.opacity = "0";
           } else {
-            const titleP = smoothstep(0.960, 0.988, p);
-            const titleY = (1 - titleP) * 16;
-            const titleScale = 0.97 + titleP * 0.03;
-            servicesTitleRef.current.style.opacity = (titleP * 0.24).toFixed(3);
-            servicesTitleRef.current.style.transform = `translate3d(-50%, calc(-50% + ${titleY.toFixed(1)}px), 0) scale(${titleScale.toFixed(3)})`;
+            const titleP = smoothstep(0.948, 0.965, p) * (1 - cardExitP);
+            servicesTitleRef.current.style.opacity = (titleP * 0.12).toFixed(3);
+            servicesTitleRef.current.style.transform = `translate3d(-50%, -50%, 0)`;
+          }
+        }
+
+        // ====================================================================
+        // THE GOLDEN DUST TRANSITION (IDEA 6): Fine mineral dust canvas
+        // ====================================================================
+        const canvas = dustCanvasRef.current;
+        if (canvas) {
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            if (p < 0.965) {
+              ctx.clearRect(0, 0, canvas.width, canvas.height);
+            } else {
+              const dpr = typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
+              const targetW = Math.round(winW * dpr);
+              const targetH = Math.round(winH * dpr);
+              if (canvas.width !== targetW || canvas.height !== targetH) {
+                canvas.width = targetW;
+                canvas.height = targetH;
+              }
+
+              ctx.save();
+              ctx.scale(dpr, dpr);
+              ctx.clearRect(0, 0, winW, winH);
+
+              // Phase 1: Detach & Stream Horizontally: 0.966 -> 0.982
+              // Phase 2: Decelerate & Settle into Mountain: 0.982 -> 1.000
+              const driftP = Math.max(0, Math.min(1, (p - 0.966) / (0.982 - 0.966)));
+              const settleP = Math.max(0, Math.min(1, (p - 0.982) / (1.000 - 0.982)));
+
+              let systemAlpha = 0;
+              if (p >= 0.966 && p < 0.972) {
+                systemAlpha = (p - 0.966) / 0.006;
+              } else if (p >= 0.972 && p <= 0.990) {
+                systemAlpha = 1;
+              } else if (p > 0.990) {
+                systemAlpha = Math.max(0, 1 - (p - 0.990) / 0.010);
+              }
+
+              const easeSettle = settleP * settleP * (3 - 2 * settleP);
+
+              dustParticles.forEach((pt) => {
+                const cardCoord = cardScreenCoords[pt.cardIndex] || {
+                  x: winW * 0.5,
+                  y: winH * 0.5,
+                  width: 300,
+                  height: 420,
+                  opacity: 1,
+                };
+
+                // Origin at perimeter of the card
+                const startX = cardCoord.x + pt.edgeX * cardCoord.width * 0.5;
+                const startY = cardCoord.y + pt.edgeY * cardCoord.height * 0.5;
+
+                // Horizontal drift across the screen to the right
+                const maxDriftDist = winW * 0.72 * pt.driftSpeed;
+                const driftX = startX + driftP * maxDriftDist;
+                const waveY = Math.sin(driftP * Math.PI * pt.waveFreq + pt.phase) * pt.waveAmp;
+                const driftY = startY + waveY - driftP * 35;
+
+                // Natural atmospheric mist dispersion across the mountain landscape
+                const targetX = pt.settleRatioX * winW;
+                const targetY = pt.settleRatioY * winH + Math.sin(pt.settleRatioX * 2.5 * Math.PI) * 16;
+
+                const curX = driftX * (1 - easeSettle) + targetX * easeSettle;
+                const curY = driftY * (1 - easeSettle) + targetY * easeSettle;
+
+                const particleAlpha = pt.alpha * systemAlpha;
+                if (particleAlpha <= 0.01) return;
+
+                ctx.fillStyle = `${pt.color}${particleAlpha.toFixed(3)})`;
+                ctx.beginPath();
+                ctx.arc(curX, curY, pt.size, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Specular glint on larger flecks
+                if (pt.size > 2.0) {
+                  ctx.fillStyle = `rgba(255, 255, 255, ${(particleAlpha * 0.6).toFixed(3)})`;
+                  ctx.beginPath();
+                  ctx.arc(curX - 0.5, curY - 0.5, pt.size * 0.45, 0, Math.PI * 2);
+                  ctx.fill();
+                }
+              });
+
+              // Golden dust "writing quill" particles active at the leading reveal edge
+              const writeProgress = Math.max(0, Math.min(1, (p - 0.966) / (0.985 - 0.966)));
+              const easeWrite = 1 - Math.pow(1 - writeProgress, 2.2);
+
+              if (writeProgress > 0.02 && writeProgress < 0.99) {
+                const brushX = easeWrite * winW;
+                ctx.fillStyle = "rgba(243, 229, 171, 0.85)";
+                for (let b = 0; b < 28; b++) {
+                  const bSeed = (b * 9301 + Math.round(p * 10000)) % 233280;
+                  const bRand1 = (bSeed % 1000) / 1000;
+                  const bRand2 = ((bSeed * 13) % 1000) / 1000;
+                  const px = brushX + (bRand1 - 0.5) * 50;
+                  const py = winH * 0.15 + bRand2 * winH * 0.7;
+                  const psize = 0.8 + bRand1 * 1.6;
+                  ctx.beginPath();
+                  ctx.arc(px, py, psize, 0, Math.PI * 2);
+                  ctx.fill();
+                }
+              }
+
+              ctx.restore();
+            }
+          }
+        }
+
+        // ====================================================================
+        // MOUNTAIN LANDSCAPE & EDITORIAL FOCUS AREAS
+        // The text is progressively written down as the golden dust moves across
+        // ====================================================================
+        if (settleStageRef.current) {
+          if (p < 0.966) {
+            settleStageRef.current.style.opacity = "0";
+            settleStageRef.current.style.pointerEvents = "none";
+            settleStageRef.current.style.clipPath = "inset(0 100% 0 0)";
+          } else {
+            const writeProgress = Math.max(0, Math.min(1, (p - 0.966) / (0.985 - 0.966)));
+            const easeWrite = 1 - Math.pow(1 - writeProgress, 2.2);
+            const revealPct = (easeWrite * 100).toFixed(1);
+
+            settleStageRef.current.style.opacity = "1";
+            settleStageRef.current.style.clipPath = `inset(0 calc(100% - ${revealPct}%) 0 0)`;
+            settleStageRef.current.style.pointerEvents = writeProgress > 0.85 ? "auto" : "none";
           }
         }
       }
@@ -809,44 +1011,155 @@ export const JourneyStory: React.FC = () => {
         </div>
       </div>
 
-      {/* ROAD-TO-SCREEN ANIMATED MAGAZINE SHOWCASE:
-          Directly emerges and zooms up from the truck's rear cargo doors into center stage.
-          Presents the cards one by one in series ("single by single") matching the user reference image. */}
+      {/* 3D CYLINDRICAL ARC CARD GALLERY (HUGE INC PERSPECTIVE INTERACTION):
+          6 tall cards arranged along a shallow 3D semicircular arc in perspective.
+          Scrolling drives the 3D camera travel through all 6 cards. */}
       <div ref={magazineWrapRef} className={styles.magazinePresentationWrap}>
-        {/* Large background typography behind the 7 cards */}
+        {/* Subtle background typography behind the 6 cards */}
         <div ref={servicesTitleRef} className={styles.servicesBackgroundText} aria-hidden="true">
           OUR SERVICES
         </div>
 
-        <div className={magStyles.magazinePresentation}>
-          {/* 7 Cards Row - Aligned horizontally across the screen */}
-          <div ref={rowRef} className={styles.cardsAlignedRow}>
-            {REVEAL_CARDS.map((card, idx) => (
-              <div
-                key={card.id}
-                ref={(el) => {
-                  cardRefs.current[idx] = el;
-                }}
-                className={`${styles.alignedCardItem} ${
-                  activeIndex === idx ? styles.alignedCardItemActive : ""
-                }`}
-                onClick={() => setActiveIndex(idx)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    setActiveIndex(idx);
-                  }
-                }}
-                aria-label={`Card ${card.id}`}
-              >
-                {/* Clean blank card shell preserving exact frame, spine, sheen, and shield */}
-                <div aria-hidden="true" className={magStyles.coverSpine} />
-                <div aria-hidden="true" className={magStyles.coverSheen} />
-                <div aria-hidden="true" className={magStyles.coverShield} />
+        {/* Pure Semicircular Arc Gallery (Exactly 3 Cards Seen Rotating) */}
+        <div ref={rowRef} className={styles.cardsAlignedRow}>
+          {REVEAL_CARDS.map((card, idx) => (
+            <div
+              key={card.id}
+              ref={(el) => {
+                cardRefs.current[idx] = el;
+              }}
+              className={`${styles.alignedCardItem} ${
+                activeIndex === idx ? styles.alignedCardItemActive : ""
+              }`}
+              onClick={() => setActiveIndex(idx)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setActiveIndex(idx);
+                }
+              }}
+              aria-label={`Service Card 0${card.id}`}
+            >
+              {/* Clean blank card shell preserving exact frame, spine, sheen, and shield */}
+              <div aria-hidden="true" className={magStyles.coverSpine} />
+              <div aria-hidden="true" className={magStyles.coverSheen} />
+              <div aria-hidden="true" className={magStyles.coverShield} />
+            </div>
+          ))}
+        </div>
+
+        {/* Minimal dot navigation indicator */}
+        <div className={styles.alignedControls}>
+          {REVEAL_CARDS.map((card, idx) => (
+            <button
+              key={card.id}
+              type="button"
+              className={`${styles.alignedDot} ${
+                activeIndex === idx ? styles.alignedDotActive : ""
+              }`}
+              onClick={() => setActiveIndex(idx)}
+              aria-label={`Focus card ${idx + 1}`}
+            />
+          ))}
+        </div>
+
+        {/* THE GOLDEN DUST TRANSITION (IDEA 6): Fine mineral dust canvas */}
+        <canvas ref={dustCanvasRef} className={styles.dustCanvas} aria-hidden="true" />
+
+        {/* MOUNTAIN LANDSCAPE & EDITORIAL SETTLE STAGE */}
+        <div ref={settleStageRef} className={styles.settleMountainStage}>
+          {/* Photorealistic alpine mountain landscape with golden morning sunlight */}
+          <img
+            src="/images/alpine_gold_mountain.jpg"
+            alt="Alpine Mountain Horizon"
+            className={styles.settleMountainPhoto}
+            aria-hidden="true"
+          />
+          <div className={styles.settleBackdropGradient} aria-hidden="true" />
+
+          {/* Settled Editorial Content — Progressively written down as the golden dust moves across */}
+          <div className={styles.settleContent}>
+            {/* Top Row: Eyebrow + Headline on Left, Editorial Subtitle on Right */}
+            <div className={styles.settleTopRow}>
+              <div className={styles.settleTopLeft}>
+                <div className={styles.settleEyebrowRow}>
+                  <span className={styles.settleEyebrowBar} aria-hidden="true" />
+                  <span className={styles.settleEyebrowText}>OUR FOCUS AREAS</span>
+                </div>
+                <h2 className={styles.settleHeadline}>
+                  Driving Sustainable
+                  <br />
+                  Growth in Mining
+                </h2>
               </div>
-            ))}
+
+              <div className={styles.settleTopRight}>
+                <p className={styles.settleDescription}>
+                  We connect industry leaders, foster collaboration and create opportunities for a stronger, more sustainable mining future.
+                </p>
+              </div>
+            </div>
+
+            {/* 4 Pillars Non-Card Editorial Ledger */}
+            <div className={styles.settlePillarsRow}>
+              {/* Pillar 01 */}
+              <div className={styles.settlePillarItem}>
+                <span className={styles.settlePillarBadge}>01 — CONFERENCE &amp; POLICY</span>
+                <p className={styles.settlePillarCategory}>STRATEGIC ALLIANCE</p>
+                <h3 className={styles.settlePillarTitle}>Leading Mining Associations</h3>
+                <p className={styles.settlePillarText}>
+                  Knowledge sharing, policy alignment, and keynote conference partnerships.
+                </p>
+                <Link href="/contact" className={styles.settlePillarLink}>
+                  <span>EXPLORE ALLIANCE</span>
+                  <span aria-hidden="true">&rarr;</span>
+                </Link>
+              </div>
+
+              {/* Pillar 02 */}
+              <div className={styles.settlePillarItem}>
+                <span className={styles.settlePillarBadge}>02 — TECH &amp; PLATFORMS</span>
+                <p className={styles.settlePillarCategory}>INTEGRATED INFRASTRUCTURE</p>
+                <h3 className={styles.settlePillarTitle}>Service &amp; Technology Providers</h3>
+                <p className={styles.settlePillarText}>
+                  Co-branded digital campaigns, software integration, and investor showcase events.
+                </p>
+                <Link href="/contact" className={styles.settlePillarLink}>
+                  <span>EXPLORE ALLIANCE</span>
+                  <span aria-hidden="true">&rarr;</span>
+                </Link>
+              </div>
+
+              {/* Pillar 03 */}
+              <div className={styles.settlePillarItem}>
+                <span className={styles.settlePillarBadge}>03 — GROWTH &amp; CAPITAL</span>
+                <p className={styles.settlePillarCategory}>CORPORATE EXPANSION</p>
+                <h3 className={styles.settlePillarTitle}>Corporate Growth Partners</h3>
+                <p className={styles.settlePillarText}>
+                  Digital transformation in marketing, corporate re-branding, and liquidity acceleration.
+                </p>
+                <Link href="/contact" className={styles.settlePillarLink}>
+                  <span>EXPLORE ALLIANCE</span>
+                  <span aria-hidden="true">&rarr;</span>
+                </Link>
+              </div>
+
+              {/* Pillar 04 */}
+              <div className={styles.settlePillarItem}>
+                <span className={styles.settlePillarBadge}>04 — ESG &amp; GOVERNANCE</span>
+                <p className={styles.settlePillarCategory}>MARKET INTEGRITY</p>
+                <h3 className={styles.settlePillarTitle}>Regulatory &amp; Transparency Bodies</h3>
+                <p className={styles.settlePillarText}>
+                  Promoting ESG reporting standards, investor trust, and verified market intelligence.
+                </p>
+                <Link href="/contact" className={styles.settlePillarLink}>
+                  <span>EXPLORE ALLIANCE</span>
+                  <span aria-hidden="true">&rarr;</span>
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </div>

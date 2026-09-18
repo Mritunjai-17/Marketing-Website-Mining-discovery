@@ -1211,82 +1211,110 @@
   margin-bottom: 1.5rem;
 }
 
-/* Horizontal Aligned Cards Row - guaranteed to fit all 5 cards at once on screen */
+/* Pure Semicircular Arc Gallery (Matching 3-Card Semicircle Drawing) */
 .cardsAlignedRow {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: clamp(480px, 64vh, 740px);
+  perspective: 1200px;
+  perspective-origin: 50% 50%;
+  transform-style: preserve-3d;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(4px, 0.9vw, 12px);
-  width: 95%;
-  max-width: 1380px;
   margin: 0 auto;
-  perspective: 1200px;
-  transform-origin: center center;
-  will-change: transform;
+  pointer-events: auto;
   box-sizing: border-box;
 }
 
 .alignedCardItem {
-  position: relative;
-  /* Large square card scale matching reference (approx 600px x 600px desktop, responsive clamp) */
-  width: clamp(280px, 42vw, 600px);
-  height: clamp(280px, 42vw, 600px);
-  max-width: 600px;
-  max-height: 600px;
-  aspect-ratio: 1 / 1;
-  flex: 0 0 clamp(280px, 42vw, 600px);
-  border-radius: clamp(18px, 1.8vw, 24px);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  /* Well-balanced editorial cards with clean, distinct gap matching Huge Inc */
+  width: clamp(260px, 26vw, 380px);
+  height: clamp(360px, 36vw, 530px);
+  max-width: 390px;
+  max-height: 540px;
+  aspect-ratio: 3 / 4.1;
+  border-radius: clamp(18px, 1.8vw, 26px);
   overflow: hidden;
-  background-color: #0c0f16;
-  border: 1px solid rgba(247, 244, 237, 0.16);
+  background: linear-gradient(155deg, #131b2a 0%, #0c101a 50%, #070a10 100%);
+  border: 1px solid rgba(212, 175, 55, 0.28);
   box-shadow:
-    0 4px 14px rgba(0, 0, 0, 0.4),
-    0 18px 42px -8px rgba(0, 0, 0, 0.75),
-    0 0 0 1px rgba(255, 255, 255, 0.04);
+    0 24px 60px -12px rgba(0, 0, 0, 0.8),
+    0 8px 24px -6px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0 0 1px rgba(255, 255, 255, 0.03);
   cursor: pointer;
   user-select: none;
   will-change: transform, opacity;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
 }
 
 .alignedCardItem:hover {
-  border-color: rgba(184, 146, 74, 0.5);
+  border-color: rgba(212, 175, 55, 0.55);
   box-shadow:
-    0 6px 18px rgba(0, 0, 0, 0.45),
-    0 22px 50px -10px rgba(0, 0, 0, 0.8),
-    0 0 20px rgba(184, 146, 74, 0.15);
+    0 30px 70px -10px rgba(0, 0, 0, 0.88),
+    0 12px 30px -6px rgba(0, 0, 0, 0.6),
+    0 0 24px rgba(212, 175, 55, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .alignedCardItemActive {
-  border-color: rgba(184, 146, 74, 0.75);
+  border-color: rgba(212, 175, 55, 0.8);
   box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.5),
-    0 28px 64px -10px rgba(0, 0, 0, 0.88),
-    0 0 28px rgba(184, 146, 74, 0.25);
+    0 36px 85px -10px rgba(0, 0, 0, 0.95),
+    0 16px 36px -6px rgba(0, 0, 0, 0.7),
+    0 0 32px rgba(212, 175, 55, 0.25),
+    inset 0 1px 0 rgba(255, 215, 0, 0.25);
 }
 
 .alignedControls {
+  position: absolute;
+  bottom: clamp(1.5rem, 4vh, 3rem);
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 0.35rem;
-  margin-top: clamp(0.75rem, 1.8vh, 1.4rem);
-  will-change: opacity;
-  transition: opacity 0.35s ease;
+  gap: 0.5rem;
+  z-index: 50;
+  pointer-events: auto;
 }
 
-/* Background typography behind 7-card reveal ("OUR SERVICES") */
+.alignedDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.22);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.alignedDotActive {
+  width: 24px;
+  background-color: #d4af37;
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+}
+
+/* Background typography behind 3D gallery ("OUR SERVICES") */
 .servicesBackgroundText {
   position: absolute;
-  top: 36%;
+  top: 18%;
   left: 50%;
   transform: translate3d(-50%, -50%, 0);
   font-family: var(--font-sans-custom), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  font-size: clamp(3.5rem, 11vw, 9.5rem);
+  font-size: clamp(3rem, 9vw, 8rem);
   font-weight: 900;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(240, 244, 248, 0.9);
+  color: rgba(212, 175, 55, 0.13);
   white-space: nowrap;
   pointer-events: none;
   user-select: none;
@@ -1298,23 +1326,255 @@
 
 @media (max-width: 900px) {
   .servicesBackgroundText {
-    top: 32%;
-    font-size: clamp(2.5rem, 12vw, 6rem);
-    letter-spacing: 0.03em;
+    top: 16%;
+    font-size: clamp(2.2rem, 10vw, 5rem);
+    letter-spacing: 0.04em;
   }
 }
 
 @media (max-width: 768px) {
   .cardsAlignedRow {
-    gap: 0.35rem;
-    overflow-x: auto;
-    padding: 0 0.5rem;
+    overflow: visible;
   }
   .alignedCardItem {
-    width: clamp(220px, 52vw, 320px);
-    height: clamp(220px, 52vw, 320px);
-    border-radius: 16px;
-    flex-shrink: 0;
+    width: clamp(240px, 66vw, 320px);
+    height: clamp(330px, 90vw, 440px);
+    border-radius: 20px;
   }
 }
+
+/* ==========================================================================
+   THE GOLDEN DUST TRANSITION (IDEA 6)
+   Subtle photographic grain & fine mineral particles that drift across
+   the screen as cards dissolve, settling into a mountain horizon landscape.
+   ========================================================================== */
+
+.dustCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 55;
+}
+
+.settleMountainStage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 45;
+  overflow: hidden;
+  will-change: opacity, transform, clip-path;
+  background-color: #060a12;
+}
+
+.settleMountainPhoto {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 25%;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.62;
+  filter: contrast(1.15) brightness(0.9);
+}
+
+.settleBackdropGradient {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(ellipse at 50% 15%, rgba(212, 175, 55, 0.15) 0%, rgba(6, 10, 18, 0.4) 45%, rgba(6, 10, 18, 0.95) 85%),
+    linear-gradient(to top, #060a12 0%, rgba(6, 10, 18, 0.82) 40%, rgba(6, 10, 18, 0.25) 100%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.settleContent {
+  position: relative;
+  z-index: 10;
+  width: 92%;
+  max-width: 1440px;
+  padding: clamp(1rem, 2.5vh, 2.5rem) 1.5rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.25rem, 2.5vh, 2.75rem);
+}
+
+.settleTopRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 2rem;
+  width: 100%;
+}
+
+.settleTopLeft {
+  max-width: 620px;
+}
+
+.settleTopRight {
+  max-width: 460px;
+}
+
+.settleEyebrowRow {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+}
+
+.settleEyebrowBar {
+  width: 2px;
+  height: 14px;
+  background: #d4af37;
+}
+
+.settleEyebrowText {
+  font-family: var(--font-mono-custom), ui-monospace, monospace;
+  font-size: clamp(0.68rem, 0.8vw, 0.76rem);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #d4af37;
+  font-weight: 700;
+}
+
+.settleHeadline {
+  font-family: var(--font-display-custom), "Times New Roman", Georgia, serif;
+  font-size: clamp(2rem, 3.4vw, 3.5rem);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  line-height: 1.12;
+  color: #ffffff;
+  margin: 0;
+}
+
+.settleDescription {
+  font-size: clamp(0.9rem, 1.05vw, 1.05rem);
+  line-height: 1.6;
+  color: #94a3b8;
+  margin: 0;
+}
+
+/* 4 Pillars Non-Card Ledger Row */
+.settlePillarsRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(1rem, 1.8vw, 2.2rem);
+  width: 100%;
+}
+
+.settlePillarItem {
+  display: flex;
+  flex-direction: column;
+  padding: 1.35rem 1.15rem 1.15rem;
+  border-top: 1.5px solid rgba(212, 175, 55, 0.35);
+  background: linear-gradient(180deg, rgba(17, 24, 39, 0.45) 0%, rgba(9, 13, 22, 0.2) 100%);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: 6px;
+  position: relative;
+  transition: all 0.35s ease;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.35);
+}
+
+.settlePillarItem:hover {
+  border-top-color: #f3e5ab;
+  background: linear-gradient(180deg, rgba(212, 175, 55, 0.08) 0%, rgba(17, 24, 39, 0.3) 100%);
+  transform: translateY(-2px);
+}
+
+.settlePillarItem:hover {
+  border-top-color: #d4af37;
+}
+
+.settlePillarBadge {
+  display: inline-flex;
+  font-family: var(--font-mono-custom), ui-monospace, monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #d4af37;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+
+.settlePillarCategory {
+  font-family: var(--font-mono-custom), ui-monospace, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.20em;
+  text-transform: uppercase;
+  color: #8c93a0;
+  font-weight: 600;
+  margin: 0 0 0.4rem;
+}
+
+.settlePillarTitle {
+  font-family: var(--font-display-custom), "Times New Roman", Georgia, serif;
+  font-size: clamp(1.15rem, 1.45vw, 1.55rem);
+  line-height: 1.22;
+  color: #ffffff;
+  margin: 0 0 0.65rem;
+  font-weight: 400;
+}
+
+.settlePillarText {
+  font-size: clamp(0.82rem, 0.92vw, 0.92rem);
+  line-height: 1.55;
+  color: #94a3b8;
+  margin: 0 0 1rem;
+  flex-grow: 1;
+}
+
+.settlePillarLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono-custom), ui-monospace, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #d4af37;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.settlePillarLink:hover {
+  color: #fce08b;
+  transform: translateX(3px);
+}
+
+@media (max-width: 960px) {
+  .settleTopRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  .settlePillarsRow {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .settlePillarsRow {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+
+
+
 
