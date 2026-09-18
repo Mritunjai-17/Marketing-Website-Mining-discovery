@@ -63,8 +63,17 @@ export const Journey3D: React.FC<Journey3DProps> = ({ progress, active }) => {
 
       if (watermarkRef.current) {
         const t = progress.current;
+        const roadP = Math.min(1.0, Math.max(0.0, t / 0.82));
+        const winW = typeof window !== "undefined" ? window.innerWidth : 1400;
+        const travelDistance = winW * 1.05;
+        const startX = winW * 0.20;
+        const currentX = startX - roadP * travelDistance;
+
         const fade = 1 - Math.max(0, Math.min(1, (t - 0.82) / 0.08));
-        watermarkRef.current.style.opacity = (fade * fade * (3 - 2 * fade)).toFixed(3);
+        const opacity = (fade * fade * (3 - 2 * fade)).toFixed(3);
+
+        watermarkRef.current.style.opacity = opacity;
+        watermarkRef.current.style.transform = `translate3d(calc(-50% + ${currentX.toFixed(1)}px), -84%, 0)`;
       }
     };
 
