@@ -387,11 +387,68 @@ export const JourneyStory: React.FC = () => {
           </p>
         </div>
 
-        {/* Right Side: Stats & Editorial Text Track (Matching user pictures) */}
+        {/* Right Side: Main Data with Signs (matching Pic 1 reference) */}
         <div ref={rightColRef} className={styles.secondPartRightSide}>
           <div ref={statsTrackRef} className={styles.statsScrollTrack}>
-            {/* Stat 1 */}
+            {/* Point 1: 150,000+ Active Monthly Audience */}
             <div className={styles.statEditorialItem}>
+              {/* Sign 1: Audience Location Beacon (matching Pic 1) */}
+              <div className={styles.statSignWrap} aria-hidden="true">
+                <svg className={styles.statItemSign} viewBox="0 0 36 44" fill="none">
+                  {/* Subtle matrix lattice background */}
+                  <g opacity="0.22" fill="#0b1f3a">
+                    <circle cx="6" cy="6" r="0.85" />
+                    <circle cx="12" cy="6" r="0.85" />
+                    <circle cx="18" cy="6" r="0.85" />
+                    <circle cx="24" cy="6" r="0.85" />
+                    <circle cx="30" cy="6" r="0.85" />
+                    <circle cx="6" cy="12" r="0.85" />
+                    <circle cx="12" cy="12" r="0.85" />
+                    <circle cx="18" cy="12" r="0.85" />
+                    <circle cx="24" cy="12" r="0.85" />
+                    <circle cx="30" cy="12" r="0.85" />
+                    <circle cx="6" cy="18" r="0.85" />
+                    <circle cx="12" cy="18" r="0.85" />
+                    <circle cx="18" cy="18" r="0.85" />
+                    <circle cx="24" cy="18" r="0.85" />
+                    <circle cx="30" cy="18" r="0.85" />
+                    <circle cx="6" cy="24" r="0.85" />
+                    <circle cx="12" cy="24" r="0.85" />
+                    <circle cx="18" cy="24" r="0.85" />
+                    <circle cx="24" cy="24" r="0.85" />
+                    <circle cx="30" cy="24" r="0.85" />
+                    <circle cx="6" cy="30" r="0.85" />
+                    <circle cx="12" cy="30" r="0.85" />
+                    <circle cx="18" cy="30" r="0.85" />
+                    <circle cx="24" cy="30" r="0.85" />
+                    <circle cx="30" cy="30" r="0.85" />
+                    <circle cx="6" cy="36" r="0.85" />
+                    <circle cx="12" cy="36" r="0.85" />
+                    <circle cx="18" cy="36" r="0.85" />
+                    <circle cx="24" cy="36" r="0.85" />
+                    <circle cx="30" cy="36" r="0.85" />
+                  </g>
+                  {/* Dark dot matrix beacon pin */}
+                  <g fill="#0b1f3a">
+                    <circle cx="18" cy="8" r="2.1" />
+                    <circle cx="14" cy="10" r="2.1" />
+                    <circle cx="22" cy="10" r="2.1" />
+                    <circle cx="11" cy="14" r="2.1" />
+                    <circle cx="25" cy="14" r="2.1" />
+                    <circle cx="11" cy="19" r="2.1" />
+                    <circle cx="25" cy="19" r="2.1" />
+                    <circle cx="14" cy="24" r="2.1" />
+                    <circle cx="22" cy="24" r="2.1" />
+                    <circle cx="18" cy="28" r="2.2" />
+                    {/* Baseline indicator dots */}
+                    <circle cx="10" cy="36" r="1.5" />
+                    <circle cx="14" cy="36" r="1.5" />
+                    <circle cx="18" cy="36" r="1.5" />
+                    <circle cx="22" cy="36" r="1.5" />
+                    <circle cx="26" cy="36" r="1.5" />
+                  </g>
+                </svg>
+              </div>
               <div className={styles.secondPartStatValue}>150,000+</div>
               <div className={styles.secondPartStatLabel}>ACTIVE MONTHLY AUDIENCE</div>
               <p className={styles.secondPartStatDesc}>
@@ -399,8 +456,65 @@ export const JourneyStory: React.FC = () => {
               </p>
             </div>
 
-            {/* Stat 2 */}
+            {/* Point 2: 40,000+ Newsletter Subscribers */}
             <div className={styles.statEditorialItem}>
+              {/* Sign 2: Global Network Globe (matching Pic 1) */}
+              <div className={styles.statSignWrap} aria-hidden="true">
+                <svg className={styles.statItemSign} viewBox="0 0 40 40" fill="none">
+                  {/* Subtle matrix lattice background */}
+                  <g opacity="0.22" fill="#0b1f3a">
+                    <circle cx="8" cy="8" r="0.85" />
+                    <circle cx="14" cy="8" r="0.85" />
+                    <circle cx="20" cy="8" r="0.85" />
+                    <circle cx="26" cy="8" r="0.85" />
+                    <circle cx="32" cy="8" r="0.85" />
+                    <circle cx="8" cy="14" r="0.85" />
+                    <circle cx="14" cy="14" r="0.85" />
+                    <circle cx="20" cy="14" r="0.85" />
+                    <circle cx="26" cy="14" r="0.85" />
+                    <circle cx="32" cy="14" r="0.85" />
+                    <circle cx="8" cy="20" r="0.85" />
+                    <circle cx="14" cy="20" r="0.85" />
+                    <circle cx="20" cy="20" r="0.85" />
+                    <circle cx="26" cy="20" r="0.85" />
+                    <circle cx="32" cy="20" r="0.85" />
+                    <circle cx="8" cy="26" r="0.85" />
+                    <circle cx="14" cy="26" r="0.85" />
+                    <circle cx="20" cy="26" r="0.85" />
+                    <circle cx="26" cy="26" r="0.85" />
+                    <circle cx="32" cy="26" r="0.85" />
+                    <circle cx="8" cy="32" r="0.85" />
+                    <circle cx="14" cy="32" r="0.85" />
+                    <circle cx="20" cy="32" r="0.85" />
+                    <circle cx="26" cy="32" r="0.85" />
+                    <circle cx="32" cy="32" r="0.85" />
+                  </g>
+                  {/* Dark globe matrix dots */}
+                  <g fill="#0b1f3a">
+                    <circle cx="20" cy="6" r="1.9" />
+                    <circle cx="27" cy="8" r="1.9" />
+                    <circle cx="32" cy="13" r="1.9" />
+                    <circle cx="34" cy="20" r="1.9" />
+                    <circle cx="32" cy="27" r="1.9" />
+                    <circle cx="27" cy="32" r="1.9" />
+                    <circle cx="20" cy="34" r="1.9" />
+                    <circle cx="13" cy="32" r="1.9" />
+                    <circle cx="8" cy="27" r="1.9" />
+                    <circle cx="6" cy="20" r="1.9" />
+                    <circle cx="8" cy="13" r="1.9" />
+                    <circle cx="13" cy="8" r="1.9" />
+                    <circle cx="20" cy="13" r="1.9" />
+                    <circle cx="20" cy="20" r="2.1" />
+                    <circle cx="20" cy="27" r="1.9" />
+                    <circle cx="13" cy="20" r="1.9" />
+                    <circle cx="27" cy="20" r="1.9" />
+                    <circle cx="15" cy="14" r="1.7" />
+                    <circle cx="25" cy="14" r="1.7" />
+                    <circle cx="15" cy="26" r="1.7" />
+                    <circle cx="25" cy="26" r="1.7" />
+                  </g>
+                </svg>
+              </div>
               <div className={styles.secondPartStatValue}>40,000+</div>
               <div className={styles.secondPartStatLabel}>NEWSLETTER SUBSCRIBERS</div>
               <p className={styles.secondPartStatDesc}>
@@ -408,44 +522,62 @@ export const JourneyStory: React.FC = () => {
               </p>
             </div>
 
-            {/* Stat 3 */}
+            {/* Point 3: 450+ Mining Companies Featured */}
             <div className={styles.statEditorialItem}>
+              {/* Sign 3: Featured Enterprise Diamond Matrix */}
+              <div className={styles.statSignWrap} aria-hidden="true">
+                <svg className={styles.statItemSign} viewBox="0 0 40 40" fill="none">
+                  {/* Subtle matrix lattice background */}
+                  <g opacity="0.22" fill="#0b1f3a">
+                    <circle cx="8" cy="8" r="0.85" />
+                    <circle cx="14" cy="8" r="0.85" />
+                    <circle cx="20" cy="8" r="0.85" />
+                    <circle cx="26" cy="8" r="0.85" />
+                    <circle cx="32" cy="8" r="0.85" />
+                    <circle cx="8" cy="14" r="0.85" />
+                    <circle cx="14" cy="14" r="0.85" />
+                    <circle cx="20" cy="14" r="0.85" />
+                    <circle cx="26" cy="14" r="0.85" />
+                    <circle cx="32" cy="14" r="0.85" />
+                    <circle cx="8" cy="20" r="0.85" />
+                    <circle cx="14" cy="20" r="0.85" />
+                    <circle cx="20" cy="20" r="0.85" />
+                    <circle cx="26" cy="20" r="0.85" />
+                    <circle cx="32" cy="20" r="0.85" />
+                    <circle cx="8" cy="26" r="0.85" />
+                    <circle cx="14" cy="26" r="0.85" />
+                    <circle cx="20" cy="26" r="0.85" />
+                    <circle cx="26" cy="26" r="0.85" />
+                    <circle cx="32" cy="26" r="0.85" />
+                    <circle cx="8" cy="32" r="0.85" />
+                    <circle cx="14" cy="32" r="0.85" />
+                    <circle cx="20" cy="32" r="0.85" />
+                    <circle cx="26" cy="32" r="0.85" />
+                    <circle cx="32" cy="32" r="0.85" />
+                  </g>
+                  {/* Dark diamond matrix dots */}
+                  <g fill="#0b1f3a">
+                    <circle cx="20" cy="6" r="2.0" />
+                    <circle cx="15" cy="11" r="2.0" />
+                    <circle cx="25" cy="11" r="2.0" />
+                    <circle cx="10" cy="16" r="2.0" />
+                    <circle cx="30" cy="16" r="2.0" />
+                    <circle cx="6" cy="20" r="2.0" />
+                    <circle cx="20" cy="20" r="2.2" />
+                    <circle cx="34" cy="20" r="2.0" />
+                    <circle cx="10" cy="25" r="2.0" />
+                    <circle cx="30" cy="25" r="2.0" />
+                    <circle cx="15" cy="30" r="2.0" />
+                    <circle cx="25" cy="30" r="2.0" />
+                    <circle cx="20" cy="35" r="2.0" />
+                  </g>
+                </svg>
+              </div>
               <div className={styles.secondPartStatValue}>450+</div>
               <div className={styles.secondPartStatLabel}>MINING COMPANIES FEATURED</div>
               <p className={styles.secondPartStatDesc}>
                 From junior exploration companies to Tier-1 global mining producers.
               </p>
-            </div>
-
-            {/* Stat 4 */}
-            <div className={styles.statEditorialItem}>
-              <div className={styles.secondPartStatValue}>8+</div>
-              <div className={styles.secondPartStatLabel}>YEARS INDUSTRY COVERAGE</div>
-              <p className={styles.secondPartStatDesc}>
-                Established track record of independent editorial authority and market intelligence.
-              </p>
-            </div>
-
-            {/* Stat 5 */}
-            <div className={styles.statEditorialItem}>
-              <div className={styles.secondPartStatValue}>30+</div>
-              <div className={styles.secondPartStatLabel}>MINING JURISDICTIONS</div>
-              <p className={styles.secondPartStatDesc}>
-                Extensive reach across key financial capitals and global mining jurisdictions.
-              </p>
-            </div>
-
-            {/* Editorial Callout Block */}
-            <div className={styles.statCalloutBlock}>
-              <p className={styles.statCalloutHeadline}>
-                With direct access to institutional investors and industry analysts, your company&apos;s news reaches the decision-makers who matter most in global mining.
-              </p>
-              <div className={styles.statCalloutBulletRow}>
-                <span className={styles.statCalloutBullet}>•</span>
-                <p className={styles.statCalloutBulletText}>
-                  That means no fragmented messaging between channels. No news lost in handoffs. Just one dedicated team, accountable for reaching decision-makers worldwide.
-                </p>
-              </div>
             </div>
           </div>
         </div>
