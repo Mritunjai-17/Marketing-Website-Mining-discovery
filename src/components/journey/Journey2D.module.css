@@ -1211,23 +1211,27 @@
   margin-bottom: 1.5rem;
 }
 
-/* Horizontal Aligned Cards Row */
+/* Horizontal Aligned Cards Row - guaranteed to fit all 5 cards at once on screen */
 .cardsAlignedRow {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(0.6rem, 1.8vw, 2rem);
-  width: 100%;
-  max-width: 1320px;
+  gap: clamp(6px, 1.2vw, 16px);
+  width: 95%;
+  max-width: 1380px;
   margin: 0 auto;
   perspective: 1200px;
   transform-origin: center center;
   will-change: transform;
+  box-sizing: border-box;
 }
 
 .alignedCardItem {
   position: relative;
-  height: clamp(240px, 38vh, 390px);
+  /* Dynamically size each card so all 5 always fit within the screen width */
+  flex: 0 1 calc((100% - 4 * clamp(6px, 1.2vw, 16px)) / 5);
+  max-width: 245px;
+  height: clamp(180px, 38vh, 340px);
   aspect-ratio: 17 / 22;
   border-radius: 6px;
   overflow: hidden;

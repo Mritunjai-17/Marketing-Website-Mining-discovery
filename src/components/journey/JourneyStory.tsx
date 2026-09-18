@@ -368,19 +368,17 @@ export const JourneyStory: React.FC = () => {
           }
         });
 
-        // Phase 4: After they are all shown (p >= 0.974), zoom to fill the full screen!
-        if (p >= 0.974) {
-          const zoomProgress = smoothstep(0.974, 0.998, p);
-          // Scale smoothly from 1.0 up to 3.2 to completely fill the screen
-          const zoomScale = 1 + zoomProgress * 2.2;
+        // Phase 4: Display all five cards at once on screen without overzooming!
+        if (p >= 0.970) {
+          const focusProgress = smoothstep(0.970, 0.995, p);
           if (rowEl) {
-            rowEl.style.transform = `scale(${zoomScale.toFixed(3)})`;
+            rowEl.style.transform = "scale(1)";
           }
           // Deepen background to dark cinematic backdrop with backdrop blur
-          const bgAlpha = (zoomProgress * 0.88).toFixed(3);
+          const bgAlpha = (focusProgress * 0.85).toFixed(3);
           magazineWrapRef.current.style.backgroundColor = `rgba(6, 10, 18, ${bgAlpha})`;
-          const blurPx = (zoomProgress * 12).toFixed(1);
-          magazineWrapRef.current.style.backdropFilter = zoomProgress > 0.02 ? `blur(${blurPx}px)` : "none";
+          const blurPx = (focusProgress * 12).toFixed(1);
+          magazineWrapRef.current.style.backdropFilter = focusProgress > 0.02 ? `blur(${blurPx}px)` : "none";
         } else {
           if (rowEl) {
             rowEl.style.transform = "scale(1)";
