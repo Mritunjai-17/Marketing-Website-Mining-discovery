@@ -1,0 +1,80 @@
+.workerRigContainer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 56;
+  overflow: hidden;
+}
+
+/* Three.js 3D WebGL Canvas for rigged pulling character */
+.worker3DCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  display: block;
+  z-index: 1;
+}
+
+/* Real Business Person Pulling Rig (Photorealistic, Sized & Stationed at Bottom) */
+.realPersonWrapper {
+  position: absolute;
+  bottom: clamp(15px, 2.5vh, 32px);
+  left: 0;
+  width: clamp(180px, 17vw, 240px);
+  aspect-ratio: 303 / 376;
+  pointer-events: none;
+  z-index: 63;
+  will-change: transform, opacity;
+  transform-origin: 30% 90%;
+}
+
+.realPersonImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(-4px 8px 16px rgba(0, 0, 0, 0.35));
+  will-change: opacity, transform;
+}
+
+.personFloorShadow {
+  position: absolute;
+  bottom: -4px;
+  left: 5%;
+  width: 90%;
+  height: 20px;
+  background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.55) 0%, rgba(15, 23, 42, 0.18) 45%, transparent 72%);
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(5px);
+  will-change: transform, opacity;
+}
+
+/* Heavy Braided Industrial Rope SVG */
+.ropeSvg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 2;
+}
+
+
+/* Paper Leading Edge Drop Shadow SVG */
+.paperEdgeShadowSvg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 54;
+}

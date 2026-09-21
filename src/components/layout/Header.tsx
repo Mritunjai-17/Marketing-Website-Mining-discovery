@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
@@ -22,7 +22,9 @@ const navLinks = [
 export const Header: React.FC = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const lastScrollYRef = useRef(0);
 
   const router = useRouter();
   const pathname = usePathname();
@@ -50,24 +52,58 @@ export const Header: React.FC = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      const y = window.scrollY;
-      setIsScrolled(y > 30);
+      const currentScrollY = Math.max(0, window.scrollY);
+      setIsScrolled(currentScrollY > 30);
 
       // Smooth transition progress over 140px of scrolling away from top of Hero
-      const progress = Math.min(1, y / 140);
+      const progress = Math.min(1, currentScrollY / 140);
       setScrollProgress(progress);
+
+      const prevScrollY = lastScrollYRef.current;
+      const diff = currentScrollY - prevScrollY;
+
+      // Always show near the top of the page
+      if (currentScrollY <= 40) {
+        setIsVisible(true);
+      } else if (Math.abs(diff) > 3) {
+        // Scrolling downward -> hide navbar
+        // Scrolling upward -> show navbar
+        if (diff > 0) {
+          setIsVisible(false);
+        } else {
+          setIsVisible(true);
+        }
+      }
+
+      lastScrollYRef.current = currentScrollY;
     };
 
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+
+    const lenis = (window as any).lenis;
+    if (lenis) {
+      lenis.on("scroll", handleScroll);
+    }
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (lenis) {
+        lenis.off("scroll", handleScroll);
+      }
+    };
   }, []);
+
+  const shouldShow = isVisible || mobileMenuOpen;
 
   return (
     <>
       <header
         className="fixed top-0 z-50 w-full font-sans transition-all duration-300 ease-out"
         style={{
+          transform: shouldShow ? "translateY(0)" : "translateY(-100%)",
+          opacity: shouldShow ? 1 : 0,
+          pointerEvents: shouldShow ? "auto" : "none",
           backgroundColor: isDarkInitialRoute
             ? "rgba(8, 9, 9, 0.72)"
             : scrollProgress > 0.1
