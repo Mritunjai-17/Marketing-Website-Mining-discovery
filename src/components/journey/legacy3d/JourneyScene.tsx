@@ -11,9 +11,9 @@ import { getJourneyPoint, getJourneySide, getJourneyTangent } from "./journeyPat
 import { JourneyProgressProvider, type JourneyProgress } from "../journeyProgress";
 
 /**
- * Pure white background matching the editorial website canvas.
+ * Deep obsidian dark background matching Boon Global and Huge Inc theme.
  */
-const WHITE_BG = "#ffffff";
+const WHITE_BG = "#030509";
 
 /**
  * Exponential-squared fog, tuned against the corridor's dimensions.

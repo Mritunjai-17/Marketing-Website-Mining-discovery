@@ -31,7 +31,7 @@ export const Header: React.FC = () => {
   const DARK_GROUND_ROUTES = ["/services", "/work", "/contact"];
   const isDarkInitialRoute = DARK_GROUND_ROUTES.includes(pathname);
 
-  // Effective dark ratio: 0 = top Hero light state, 1 = dark charcoal section state
+  // Effective dark ratio: 0 = top Hero light state, 1 = dark section state
   const darkRatio = isDarkInitialRoute ? 1 : Math.min(1, Math.max(0, scrollProgress));
   const isDarkMode = darkRatio > 0.45;
 
@@ -70,10 +70,12 @@ export const Header: React.FC = () => {
         style={{
           backgroundColor: isDarkInitialRoute
             ? "rgba(8, 9, 9, 0.72)"
-            : `rgba(8, 9, 9, ${(scrollProgress * 0.70).toFixed(2)})`,
-          backdropFilter: scrollProgress > 0.1 || isDarkInitialRoute ? "blur(12px)" : "none",
-          WebkitBackdropFilter: scrollProgress > 0.1 || isDarkInitialRoute ? "blur(12px)" : "none",
-          borderBottom: `1px solid rgba(255, 255, 255, ${(scrollProgress * 0.06).toFixed(2)})`,
+            : scrollProgress > 0.1
+            ? `rgba(250, 247, 242, ${(0.85 + scrollProgress * 0.1).toFixed(2)})`
+            : "transparent",
+          backdropFilter: scrollProgress > 0.05 || isDarkInitialRoute ? "blur(12px)" : "none",
+          WebkitBackdropFilter: scrollProgress > 0.05 || isDarkInitialRoute ? "blur(12px)" : "none",
+          borderBottom: `1px solid rgba(11, 31, 58, ${(scrollProgress * 0.08).toFixed(2)})`,
           paddingTop: isScrolled
             ? "max(10px, env(safe-area-inset-top, 10px))"
             : "max(14px, env(safe-area-inset-top, 14px))",

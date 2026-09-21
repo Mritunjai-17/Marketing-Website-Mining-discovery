@@ -5,8 +5,8 @@ import { CompanyJourney } from "@/components/sections/CompanyJourney/CompanyJour
 
 export default function Home() {
   return (
-    <div className="relative min-h-screen overflow-x-clip bg-[#F2F2F0]">
-      {/* ROTATING HEMISPHERE HERO & 3D STORYTELLING */}
+    <div className="relative min-h-screen overflow-x-clip bg-[#FAF7F2]">
+      {/* SCROLL-DRIVEN 3D GLOBE HERO & STORYTELLING */}
       <GlobeHero />
       {/* COMPANY EVOLUTION TIMELINE ROAD */}
       <CompanyJourney />

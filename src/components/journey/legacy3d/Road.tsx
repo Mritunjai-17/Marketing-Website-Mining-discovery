@@ -56,16 +56,31 @@ function shoulderHeight(_t: number, offset: number): number {
 export const Road: React.FC = () => {
   const progress = useJourneyProgress();
   const downGroundMatRef = useRef<THREE.MeshBasicMaterial>(null);
+  const roadGroupRef = useRef<THREE.Group>(null);
 
   useFrame(() => {
     const mat = downGroundMatRef.current;
-    if (!mat) return;
     const t = progress.current;
-    // In side view (t < 0.82), the down side of the road is solid black.
-    // When the camera angle changes (t >= 0.82 to 0.90), smoothly remove the blackness (fade to 0).
-    const blackness = 1 - smoothstep(0.82, 0.90, t);
-    mat.opacity = blackness;
-    mat.visible = blackness > 0.005;
+    if (mat) {
+      // In side view (t < 0.82), the down side of the road is solid black.
+      // When the camera angle changes (t >= 0.82 to 0.90), smoothly remove the blackness (fade to 0).
+      const blackness = 1 - smoothstep(0.82, 0.90, t);
+      mat.opacity = blackness;
+      mat.visible = blackness > 0.005;
+    }
+
+    // As cards rise into center stage and truck zooms off,
+    // gracefully lower and hide the road surface
+    if (roadGroupRef.current) {
+      if (t >= 0.942) {
+        const roadFade = 1 - smoothstep(0.942, 0.956, t);
+        roadGroupRef.current.position.y = -(1 - roadFade) * 20;
+        roadGroupRef.current.visible = roadFade > 0.01;
+      } else {
+        roadGroupRef.current.position.y = 0;
+        roadGroupRef.current.visible = true;
+      }
+    }
   });
 
   /*
@@ -219,7 +234,7 @@ export const Road: React.FC = () => {
   );
 
   return (
-    <group>
+    <group ref={roadGroupRef}>
       {/* Down-side ground ribbon: black in side view, fades out when camera angle changes */}
       <mesh geometry={downGround}>
         <meshBasicMaterial
@@ -233,12 +248,12 @@ export const Road: React.FC = () => {
       </mesh>
 
       <mesh geometry={curbs} receiveShadow castShadow>
-        <meshStandardMaterial color="#ffffff" roughness={0.9} metalness={0.05} />
+        <meshStandardMaterial color="#222938" roughness={0.9} metalness={0.05} />
       </mesh>
 
       <mesh geometry={shoulders} receiveShadow>
         <meshStandardMaterial
-          color="#ffffff"
+          color="#131924"
           roughness={0.95}
           metalness={0.02}
           roughnessMap={roughnessMap}
@@ -247,10 +262,10 @@ export const Road: React.FC = () => {
         />
       </mesh>
 
-      {/* Dark sleek obsidian-charcoal asphalt carriageway matching unitedcarriers.com */}
+      {/* Dark sleek obsidian-charcoal asphalt carriageway */}
       <mesh geometry={asphalt} receiveShadow>
         <meshStandardMaterial
-          color="#16191f"
+          color="#0d1117"
           roughness={0.88}
           metalness={0.04}
           roughnessMap={roughnessMap}
@@ -262,21 +277,21 @@ export const Road: React.FC = () => {
 
       <mesh geometry={edgeLines}>
         <meshStandardMaterial
-          color="#ffffff"
+          color="#f4f2ea"
           roughness={0.4}
           metalness={0.04}
-          emissive="#ffffff"
-          emissiveIntensity={0.25}
+          emissive="#d4af37"
+          emissiveIntensity={0.35}
         />
       </mesh>
 
       <mesh geometry={centreDashes}>
         <meshStandardMaterial
-          color="#ffffff"
+          color="#ffd700"
           roughness={0.3}
           metalness={0.04}
-          emissive="#ffffff"
-          emissiveIntensity={0.5}
+          emissive="#ff9d00"
+          emissiveIntensity={0.7}
         />
       </mesh>
     </group>

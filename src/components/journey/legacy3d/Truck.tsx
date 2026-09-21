@@ -99,7 +99,21 @@ function useJourneyRig(groupRef: React.RefObject<THREE.Group | null>) {
     // along +tangent (forward down the road).
     lookTarget.copy(position).sub(tangent);
     group.lookAt(lookTarget);
-    group.scale.setScalar(1.4);
+
+    // As soon as cards emerge from cargo rear (t >= 0.940),
+    // the truck accelerates smoothly down the highway into the distance
+    // and dissolves into the fog, yielding the stage entirely to Our Services.
+    if (t >= 0.940) {
+      const exitProgress = Math.min(1, Math.max(0, (t - 0.940) / 0.016));
+      const easeExit = exitProgress * exitProgress * (3 - 2 * exitProgress);
+      group.position.addScaledVector(tangent, easeExit * 160);
+      const currentScale = 1.4 * Math.max(0, 1 - easeExit);
+      group.scale.setScalar(currentScale);
+      group.visible = currentScale > 0.005;
+    } else {
+      group.scale.setScalar(1.4);
+      group.visible = true;
+    }
   });
 }
 

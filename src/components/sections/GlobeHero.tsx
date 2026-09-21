@@ -22,6 +22,8 @@ import {
   JOURNEY_RUNS_FROM,
 } from "@/components/journey/descentCamera";
 
+import { BoonHero } from "@/components/sections/BoonHero";
+
 const Journey3D = dynamic(
   () => import("@/components/journey/Journey3D"),
   { ssr: false },
@@ -321,7 +323,7 @@ const STARTING_SITE = MINING_SITES.find((s) => s.id === STARTING_SITE_ID)!;
 const MAX_ZOOM = 10.5;
 
 /** Total viewport heights for the entire continuous story */
-const TOTAL_SCROLL_VH = 2500;
+const TOTAL_SCROLL_VH = 1200;
 
 /** Easing curve for cinematic camera zoom in/out (power3.inOut) */
 function easeInOutCubic(x: number): number {
@@ -462,6 +464,8 @@ export const GlobeHero: React.FC = () => {
   const lastTransPRef = useRef(0);
   const [transitionState, setTransitionState] = useState<TransitionState>("GLOBE_IDLE");
   const transitionStateRef = useRef<TransitionState>("GLOBE_IDLE");
+  const [heroProgress, setHeroProgress] = useState(0);
+  const lastHeroPRef = useRef(0);
 
   /**
    * Card bounds in the globe canvas's coordinate space. Cached on resize rather than
@@ -705,6 +709,18 @@ export const GlobeHero: React.FC = () => {
     const t = clamp(progress.value, 0, 1);
     progressRef.current = t;
 
+    // Hero scrubbed animation span in the pinned scroll timeline
+    const HERO_SPAN = 0.22;
+    const heroP = clamp(t / HERO_SPAN, 0, 1);
+    if (
+      Math.abs(heroP - lastHeroPRef.current) > 0.001 ||
+      heroP === 0 ||
+      heroP === 1
+    ) {
+      lastHeroPRef.current = heroP;
+      setHeroProgress(heroP);
+    }
+
     // --- Master Progress & Phase Partitioning ---------------------------------------
     // Total pinned scroll is partitioned into:
     // 1. TRANSITION (0.00 -> 0.40):
@@ -929,33 +945,26 @@ export const GlobeHero: React.FC = () => {
     measureRange();
     applyStage();
 
+    let animId: number;
+    const loop = () => {
+      applyStage();
+      animId = requestAnimationFrame(loop);
+    };
+    animId = requestAnimationFrame(loop);
+
     const observer = new ResizeObserver(() => {
       measureRange();
       applyStage();
     });
     observer.observe(range);
 
-    /*
-     * Fallback only, and the guard is what makes that true.
-     *
-     * The globe's render loop samples progress every frame. This listener exists for the
-     * case where that loop is suspended — tab hidden, or the canvas scrolled out of view
-     * — so the hero is correct the moment it comes back. Without the guard it also fired
-     * on every scroll event WHILE the loop was running, so the spring was integrated
-     * twice per frame with two different dt values, one of them near zero. That is not a
-     * smoothing filter any more; it is a filter being stepped at an irregular rate, which
-     * is precisely the stutter it was meant to remove.
-     *
-     * SAMPLE_IDLE is comfortably longer than a frame at any refresh rate this runs at, so
-     * while the loop is alive this does nothing at all.
-     */
     const onScroll = () => {
-      if (performance.now() - lastSampleRef.current < SAMPLE_IDLE) return;
       applyStage();
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", measureRange);
     return () => {
+      cancelAnimationFrame(animId);
       observer.disconnect();
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", measureRange);
@@ -1011,417 +1020,31 @@ export const GlobeHero: React.FC = () => {
   // creates a containing block for it. The heading, subtitle and globe each keep their
   // own entrance, so the effect survives without the wrapper's.
   return (
-    <section className="relative isolate w-full bg-[#FAF7F2]">
-      {/* Single Unified Light Sky & Soft Clouds Background */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none sticky top-0 -mb-[100vh] h-screen w-full -z-10 overflow-hidden"
-      >
-        <div
-          className="absolute inset-0 bg-cover bg-bottom bg-no-repeat"
-          style={{
-            backgroundImage: "url('/images/hero-light-sky.jpg')",
-          }}
-        />
-        {/* Soft, natural light sun glow over the right horizon (toned down from yellow) */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute right-[-5%] sm:right-[5%] lg:right-[10%] bottom-[15%] sm:bottom-[22%] w-[450px] sm:w-[650px] h-[450px] sm:h-[650px] rounded-full"
-          style={{
-            background:
-              "radial-gradient(circle, rgba(255,250,230,0.30) 0%, rgba(255,245,215,0.14) 35%, rgba(255,245,225,0.04) 60%, transparent 75%)",
-            filter: "blur(30px)",
-          }}
-        />
-        {/* Subtle, soft ambient light wash */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(130% 80% at 50% 100%, rgba(255,250,240,0.18) 0%, rgba(250,247,242,0) 70%)",
-          }}
-        />
-
-        {/* Floating delicate gold sparkle stars */}
-        <svg className="absolute inset-0 w-0 h-0 pointer-events-none" aria-hidden="true">
-          <defs>
-            <radialGradient id="goldSparkleGrad" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#FFFFFF" stopOpacity="1" />
-              <stop offset="30%" stopColor="#FFF2B0" stopOpacity="0.95" />
-              <stop offset="65%" stopColor="#FFC837" stopOpacity="0.85" />
-              <stop offset="100%" stopColor="#B8860B" stopOpacity="0" />
-            </radialGradient>
-          </defs>
-        </svg>
-        {SKY_GOLD_SPARKLES.map((s, i) => (
-          <div
-            key={i}
-            aria-hidden="true"
-            className="pointer-events-none absolute animate-pulse"
-            style={{
-              top: s.top,
-              left: s.left,
-              right: s.right,
-              width: s.size,
-              height: s.size,
-              animationDelay: s.delay,
-              animationDuration: s.duration,
-              filter: "drop-shadow(0 0 5px rgba(255,200,50,0.85))",
-            }}
-          >
-            <svg viewBox="0 0 24 24" className="w-full h-full">
-              <path
-                d="M12 0 C12 7 17 12 24 12 C17 12 12 17 12 24 C12 17 7 12 0 12 C7 12 12 7 12 0 Z"
-                fill="url(#goldSparkleGrad)"
-              />
-            </svg>
-          </div>
-        ))}
-      </div>
-
-      {/* Copy — normal flow, scrolls away before anything pins. */}
-      <div
-        ref={copyRef}
-        /*
-          TOP PADDING IS THE ONLY THING HOLDING THE HEADLINE OFF THE NAVBAR.
-          The header is position:fixed, so it occupies no layout space — the hero starts at
-          y=0 underneath it and the bar overlays the first 68px (72px from sm up, where the
-          logo goes h-11 -> h-12). Every pixel of clearance has to come from here.
-
-          The floors are what changed most. They were 44/48/52px, all of them SHORTER than
-          the navbar, so on a short laptop the clamp bottomed out and the headline sat 20px
-          BEHIND the bar rather than merely close to it. Each floor now clears the navbar
-          plus a working margin, so the two can never overlap at any viewport.
-
-              1440x900   gap 16px -> 77px
-              1280x800   gap -20px -> 41px
-              1280x768   gap -20px -> 33px
-              1440x1080  gap 52px -> 105px
-
-          BELOW sm THE HEADLINE RUNS ON ITS OWN CLAMP. At the desktop scale's 40px floor
-          the three written lines do not fit a phone's measure — "story impossible to" is
-          about 12.4em of uppercase Playfair, which needs 272px at 320 wide and has 272px
-          to live in only up to ~21px. So each line wrapped in two and the headline became
-          five rows, which pushed the globe down to 30px of visible planet on a 320x568
-          screen. 6.5vw between 1.3rem and 2.5rem keeps all three lines unwrapped from 320
-          up, and hands the globe back 126px there and 117px at 375. The sm: clamp is the
-          old one unchanged, and 6.5vw reaches 2.5rem just as sm takes over, so the two
-          meet at 40px with no step.
-
-          THE BOTTOM PADDING IS NOT SLACK. The globe range that follows is pulled up over
-          this block by -mt-5, and lg:-mt-6, and the sticky card inside it is opaque
-          and paints later in the tree — so it covers whatever it reaches.
-          The clearance under the buttons is therefore pb MINUS that negative margin, and
-          at pb-5 against lg:-mt-6 it was -4px: the card sat over the bottom 4px of the
-          CTAs. pb-8 puts it back to +8px on lg and +12px elsewhere. Any future trim to pb
-          has to stay above 24px or the buttons start being clipped again.
-
-          THE OTHER CONSTRAINT IS THE GLOBE, and it is what sets these numbers rather
-          than taste. Its position is pt + the copy block's height, so re-adding the
-          eyebrow would have pushed the planet down by exactly what the eyebrow costs:
-          11px of line plus its 16px gap to the headline, 27px from sm up. That is paid
-          back precisely — 15px off the padding here, and 4px each off the headline's gap
-          to the description, the description's gap to the buttons, and the block's own
-          bottom padding. The sum is zero: the globe shows the same 388px at 1440x900 and
-          the same 328px at 1280x768 as it did before the line came back.
-
-          So these three values are not free. Changing one without moving the eyebrow's own
-          spacing takes the difference straight out of the planet.
-        */
-        className="flex flex-col items-center px-4 pb-6 sm:pb-8 pt-[70px] text-center sm:px-10 sm:pt-[clamp(89px,calc(34vh-163px),149px)] lg:pt-[clamp(97px,calc(36vh-183px),169px)]"
-      >
-        {/*
-          Eyebrow, headline, support, CTAs. The wrapper above is untouched - same padding,
-          same centred column, same position in the tree - so only the message, its type
-          scale and the button row are new. Entrances stay on the existing .hero-rise
-          class, which is plain CSS keyframes with a reduced-motion opt-out; nothing here
-          adds a scroll listener, and nothing here holds a transform that could become a
-          containing block for the sticky globe frame below.
-        */}
-        <p className="hero-rise [animation-delay:60ms] font-mono text-[9.5px] font-semibold uppercase leading-none tracking-[0.18em] text-[#B8860B] sm:text-[11px] sm:tracking-[0.22em]">
-          Mining Media <span aria-hidden="true">&times;</span> Marketing{" "}
-          <span aria-hidden="true">&times;</span> Investor Reach
-        </p>
-
-        {/*
-          Display caps at 700. The words are written sentence-case in the markup and
-          uppercased in CSS, so the reading order a screen reader gets stays natural and
-          the caps are a single class to drop if the editorial voice wins out later.
-        */}
-        {/*
-          Still one h1, with the same classes, clamp, measure and three lines — the only
-          change is that the breaks are explicit spans rather than natural wrapping, since
-          a line cannot be animated on its own while it is just a run of text inside a
-          paragraph box. Reading order is unchanged: a screen reader still gets one
-          continuous sentence.
-        */}
-        <h1 className="hero-rise [animation-delay:160ms] mt-2 max-w-[1040px] font-geist text-[clamp(1.75rem,7.5vw,2.75rem)] font-bold uppercase leading-[0.94] sm:text-[clamp(2.5rem,5vw,4.5rem)] tracking-[-0.02em] text-[#0B1F3A] sm:mt-2">
-          {HEADLINE_LINES.map((line, index) => {
-            // Where the underlined word starts, so the line can be printed as three runs.
-            const at = line.underlineWord
-              ? line.text.lastIndexOf(line.underlineWord)
-              : -1;
-
-            return (
-              /*
-                The mask. overflow-hidden is what turns a slow drift into a line leaving:
-                the span slides up behind this edge and is simply gone, while the lines
-                under it have not started.
-  
-                pb/-mb cancel each other, so the box is taller than the glyphs by a hair
-                without moving anything: the line box at leading-[0.96] is shorter than the
-                type it holds, and without that slack the mask would shave the tops of the
-                caps at rest.
-              */
-              <span
-                key={line.text}
-                className={
-                  line.underlineWord
-                    ? /*
-                      The underlined line needs the SAME trick with more room: the stroke
-                      hangs below the line box and this span's overflow-hidden would cut
-                      it off at 0.08em. 0.2em clears the 8.1px the stroke needs (1.5px gap
-                      + 6.6px of ink) at the clamp's 48px floor, where the em is smallest.
-                      pb and -mb still cancel, so the h1's height is byte-for-byte what it
-                      was and the paragraph below does not move; the stroke simply paints
-                      into the 24px gap that was already there, keeping ~16px of daylight.
-                    */
-                    "block overflow-hidden pb-[0.45em] -mb-[0.45em] sm:pb-[0.26em] sm:-mb-[0.26em]"
-                    : "block overflow-hidden pb-[0.08em] -mb-[0.08em]"
-                }
-              >
-                <span
-                  ref={(el) => {
-                    lineRefs.current[index] = el;
-                  }}
-                  className="block will-change-[transform,opacity,filter]"
-                >
-                  {line.underlineWord && at >= 0 ? (
-                    <>
-                      {line.text.slice(0, at)}
-                      {/*
-                      Wraps the word alone, so the stroke's 100% width is the word's width
-                      and not the line's. inline-block for the containing block only — no
-                      z-index, so no stacking context is created and the stroke paints in
-                      the headline's own order: over the starfield behind it, under the
-                      globe, pins and arcs that come later in the tree.
-                    */}
-                      <span className="relative inline-block">
-                        {line.underlineWord}
-                        <HeadlineUnderline />
-                      </span>
-                      {line.text.slice(at + line.underlineWord.length)}
-                    </>
-                  ) : (
-                    line.text
-                  )}
-                </span>
-              </span>
-            );
-          })}
-        </h1>
-
-        <p className="hero-rise [animation-delay:260ms] mt-3.5 max-w-[740px] font-geist text-[clamp(0.88rem,3.4vw,1.125rem)] font-normal leading-[1.52] tracking-[-0.005em] text-[#4A5568] sm:mt-4">
-          Mining Discovery combines industry media, digital marketing and investor-focused
-          communication to put mining companies in front of the audiences that matter.
-        </p>
-
-        {/*
-          CTA row. Full-width stacked on phones, side by side from 640px. Gold solid for
-          the commercial action, hairline outline for the browse - dark navy on white.
-        */}
-        <div className="hero-rise [animation-delay:360ms] mt-4 sm:mt-5 flex w-full flex-col items-stretch gap-2.5 sm:w-auto sm:flex-row sm:items-center sm:gap-4">
-          <Link
-            href="/contact"
-            className="group inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-[#A87E2C] px-6 py-3 font-sans text-[12.5px] sm:text-[13px] font-semibold uppercase tracking-[0.08em] text-white shadow-sm transition-colors duration-200 hover:bg-[#8F6B24] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A87E2C] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF7F2]"
-          >
-            Start a Campaign
-            <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
-          </Link>
-
-          <Link
-            href="/services"
-            className="group inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-[#0B1F3A]/20 bg-white/40 backdrop-blur-xs px-6 py-3 font-sans text-[12.5px] sm:text-[13px] font-semibold uppercase tracking-[0.08em] text-[#0B1F3A] transition-colors duration-200 hover:border-[#0B1F3A]/50 hover:bg-white/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0B1F3A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF7F2]"
-          >
-            Explore Our Services
-            <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
-          </Link>
-        </div>
-      </div>
-
-      {/* Globe range — its top edge is where the tour begins. */}
+    <section className="relative isolate w-full bg-[#030509]">
+      {/* Story Range — pins hero and drives entire journey from scroll 0 */}
       <div
         ref={rangeRef}
-        className="relative -mt-5 lg:-mt-6"
-        // TOTAL_SCROLL_VH of travel for the continuous story.
+        className="relative w-full"
         style={{ height: reduceMotion ? "100vh" : `${TOTAL_SCROLL_VH}vh` }}
       >
-        {/*
-          The pinned frame. It is also what the markers are clipped to, so cardRef lives
-          here rather than on the section: the visible frame is now one viewport, not the
-          whole band, and clipping against the band would never hide anything.
-          overflow-hidden crops the planet, and it is safe on this element — only an
-          overflow ancestor would break the stickiness, never the sticky element itself.
-        */}
         <div
           ref={cardRef}
-          className="sticky top-0 h-screen w-full overflow-hidden bg-transparent"
+          className="sticky top-0 h-screen w-full overflow-hidden bg-[#030509]"
         >
-          {/*
-            The viewport slot is now the single continuous canvas hosting both the
-            3D Globe experience and the 2D Sideways Truck Journey.
-          */}
           <div ref={slotRef} className="relative h-full w-full">
+            {/* Boon-Inspired Dark Hero Overlay */}
+            <BoonHero progress={heroProgress} />
 
-            {/* Layer 2 + 3 — 3D globe, clouds and atmosphere */}
+            {/* Hidden globe & markers to keep refs safely mounted */}
             <div
               ref={globeBoxRef}
-              className={`
-                absolute left-1/2 z-10 -translate-x-1/2 will-change-transform
-                transition-[opacity,scale] duration-300 ease-out
-                motion-reduce:transition-none
-                ${ready ? "opacity-100 scale-100" : "opacity-0 scale-[0.98] motion-reduce:scale-100"}
-              `}
-              style={{
-                width: metrics.boxSize || undefined,
-                height: metrics.boxSize || undefined,
-                top: metrics.boxSize ? metrics.boxTop : undefined,
-              }}
+              style={{ display: "none" }}
+              aria-hidden="true"
             >
-              {/* Atmosphere bloom */}
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-0"
-                style={{ background: ATMOSPHERE_HALO }}
-              />
-
-              {metrics.boxSize > 0 && (
-                <EarthGlobe
-                  style={{ position: "relative" }}
-                  className="h-full w-full"
-                  anchors={ANCHORS}
-                  arcs={HERO_ARCS}
-                  onProject={handleProject}
-                  onBeforeRender={applyStage}
-                  onReady={handleReady}
-                  focusRef={focusRef}
-                  emphasisId={emphasisId}
-                  speedScale={activeId ? 0.25 : 1}
-                />
-              )}
-
-              {/* Layer 4 — mining markers in globe canvas box space */}
-              <div
-                ref={markerLayerRef}
-                className={`
-                  pointer-events-none absolute inset-0 z-10
-                  transition-opacity duration-300 delay-100
-                  ${ready ? "opacity-100" : "opacity-0"}
-                `}
-              >
-                {MINING_SITES.map((site, index) => {
-                  const isCanada = site.id === STARTING_SITE_ID;
-                  const isCanadaStartingPoint = isCanada && isCanadaStarting;
-
-                  const isActive = activeId === site.id || isCanadaStartingPoint;
-                  const pulse = PIN_PULSE[index % PIN_PULSE.length];
-
-                  return (
-                    <div
-                      key={site.id}
-                      ref={(el) => {
-                        markerRefs.current.set(site.id, el);
-                      }}
-                      style={{
-                        transform:
-                          "translate3d(var(--mx, -9999px), var(--my, -9999px), 0) scale(var(--unzoom, 1))",
-                      }}
-                      className="absolute left-0 top-0"
-                    >
-                      {/* Starting point indicator for Canada */}
-                      {isCanadaStartingPoint && (
-                        <div className="pointer-events-none absolute -top-14 left-1/2 -translate-x-1/2 flex flex-col items-center whitespace-nowrap z-30 transition-all duration-300">
-                          <div className="flex items-center gap-1.5 rounded-md bg-[#0B1F3A]/95 border border-[#B8860B]/70 px-2.5 py-1 shadow-[0_0_16px_rgba(184,134,11,0.5)] backdrop-blur-xs">
-                            <span className="h-1.5 w-1.5 rounded-full bg-[#FFD700] animate-pulse" />
-                            <span className="font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-[#FFD700]">
-                              Starting Point
-                            </span>
-                          </div>
-                          <span className="mt-1 rounded bg-[#0B1F3A]/90 border border-white/10 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-white shadow-xs">
-                            {site.country} · Mining Region
-                          </span>
-                          <div className="h-2 w-[1.5px] bg-gradient-to-b from-[#B8860B] to-transparent" />
-                        </div>
-                      )}
-
-                      {/* Standard Location Label */}
-                      {!isCanadaStartingPoint && (
-                        <span
-                          className={`pointer-events-none absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider shadow-xs backdrop-blur-xs transition-all duration-300 ${
-                            isActive
-                              ? "bg-[#0B1F3A] text-[#FFD700] border border-[#B8860B]/60 shadow-[0_0_8px_rgba(184,134,11,0.3)] opacity-100 scale-105"
-                              : "bg-[#0B1F3A]/80 text-[#FAF7F2] border border-white/10 opacity-90"
-                          }`}
-                        >
-                          {site.country}
-                        </span>
-                      )}
-
-                      {/* Pin — 44px hit target centred on geographic coordinates */}
-                      <button
-                        type="button"
-                        aria-label={`${site.region}, ${site.country}. ${site.detail}.`}
-                        className="absolute left-0 top-0 grid h-11 w-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B8860B] focus-visible:ring-offset-2"
-                        onPointerEnter={() => setActiveId(site.id)}
-                        onPointerLeave={() => setActiveId((id) => (id === site.id ? null : id))}
-                        onFocus={() => setActiveId(site.id)}
-                        onBlur={() => setActiveId((id) => (id === site.id ? null : id))}
-                        onClick={() => setActiveId((id) => (id === site.id ? null : site.id))}
-                      >
-                        <span
-                          className="globe-pin-ring"
-                          style={pulse}
-                          aria-hidden="true"
-                        />
-                        <span
-                          className={`globe-pin-dot ${isActive ? "globe-pin-dot--active" : ""}`}
-                          style={pulse}
-                          aria-hidden="true"
-                        />
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
+              <div ref={markerLayerRef} />
             </div>
 
-            {/*
-              Layer 5 — The one environment, with the one truck in it.
-
-              This is the real Journey, and it is the *only* thing the descent
-              reveals. It used to sit above a separate `CameraDescentStage`
-              that drew its own terrain, highway and hand-drawn SVG truck, and
-              the two crossfaded into each other between 0.92 and 0.97 — which
-              is where the second truck came from. There was no illusion to
-              fix: both were on screen together. That stage is gone, and what
-              the camera now flies down to is this.
-
-              It is mounted under the cloud deck rather than over it, and made
-              opaque while the deck is still solid, so the land is already
-              there to be uncovered. Nothing about the Journey itself changes:
-              the camera rig is a transform on its container, so its own
-              layout, scroll and composition are untouched, and at the moment
-              the rotation completes the transform is exact identity.
-            */}
-            {/*
-              The ground the descent happens over, behind the Journey and in
-              front of nothing else. A plane raked to 78 degrees covers a band
-              across the frame rather than the frame, so without this the
-              Journey read as a lit rectangle floating in the globe section the
-              moment the clouds thinned. It draws no terrain, no road and no
-              vehicle — see DescentBackdrop.tsx.
-            */}
+            {/* Layer 5 — Dark Descent Backdrop & 3D Truck Journey */}
             <DescentBackdrop progress={transitionProgress} />
 
             <div
@@ -1437,10 +1060,6 @@ export const GlobeHero: React.FC = () => {
                 <Journey3D progress={journeyProgress} active={journeyActive} />
               </div>
             </div>
-
-            {/* Layer 6 — Atmospheric cloud deck, above the land it is hiding. */}
-            <AtmosphericCloudLayer progress={transitionProgress} />
-
           </div>
         </div>
       </div>

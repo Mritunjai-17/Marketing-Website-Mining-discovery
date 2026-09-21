@@ -17,18 +17,117 @@ import { getChronologicalMagazines, type MagazineEdition } from "@/data/magazine
 
 const MILESTONE_ICONS = [TrendingUp, Newspaper, BookOpen, Globe, Sparkles, Sparkles];
 
-export interface RevealCard {
+export interface MiningServiceCard {
   id: number;
+  number: string;
+  brand: string;
+  headline: string;
+  tag: string;
+  title: string;
+  highlight: string;
+  description: string;
+  capabilities: string[];
+  image: string;
+  badge: string;
+  isSummaryCard?: boolean;
 }
 
-export const REVEAL_CARDS: RevealCard[] = [
-  { id: 1 },
-  { id: 2 },
-  { id: 3 },
-  { id: 4 },
-  { id: 5 },
-  { id: 6 },
+export const SERVICE_CARDS: MiningServiceCard[] = [
+  {
+    id: 1,
+    number: "01",
+    brand: "Mining Discovery",
+    headline: "Disrupting tradition with global mining brand expression.",
+    tag: "MEDIA & PR",
+    title: "Global Media & Strategic PR",
+    highlight: "PR & Syndication",
+    description: "Multi-channel editorial syndication placing mining narratives into Tier-1 financial media and resource publications.",
+    capabilities: ["Global Press Distribution", "Executive Op-Eds", "Crisis Communications", "Media Syndication"],
+    image: "/cards/bg_card_1.jpg",
+    badge: "GLOBAL REACH",
+  },
+  {
+    id: 2,
+    number: "02",
+    brand: "Capital Syndicate",
+    headline: "Direct institutional capital connecting mining leaders.",
+    tag: "CAPITAL",
+    title: "Investor Roadshows & Capital Syndicate",
+    highlight: "Capital Reach",
+    description: "Targeted digital roadshows connecting resource executives directly with institutional funds, family offices, and mining investors.",
+    capabilities: ["Institutional Roadshows", "Capital Introduction", "Private Deal Rooms", "Investor Webinars"],
+    image: "/cards/bg_card_2.jpg",
+    badge: "INVESTOR ACCESS",
+  },
+  {
+    id: 3,
+    number: "03",
+    brand: "Mining Magazine",
+    headline: "14 editions. Global readership. Constant reinvention.",
+    tag: "PUBLICATIONS",
+    title: "Monthly Magazines & Editorial Features",
+    highlight: "Publications",
+    description: "Premier digital and print publications with in-depth commodity reports, executive cover stories, and project deep-dives.",
+    capabilities: ["14+ Published Editions", "Dedicated Cover Features", "150k+ Readership", "Global Distribution"],
+    image: "/services/03-assay.jpg",
+    badge: "INDUSTRY AUTHORITY",
+  },
+  {
+    id: 4,
+    number: "04",
+    brand: "Mining AI",
+    headline: "Enabling a predictive suite of critical mineral analytics.",
+    tag: "INTELLIGENCE",
+    title: "AI Mining Intelligence & Analytics",
+    highlight: "AI Intelligence",
+    description: "Predictive data modeling and investor sentiment tracking across critical minerals, battery metals, and precious assets.",
+    capabilities: ["Commodity Trend Forecasts", "Investor Sentiment Index", "Jurisdiction Risk Scans", "AI Market Insights"],
+    image: "/services/01-survey.jpg",
+    badge: "MARKET DATA",
+  },
+  {
+    id: 5,
+    number: "05",
+    brand: "Field Studio",
+    headline: "Cinema-grade 4K aerial and open-pit documentation.",
+    tag: "PRODUCTION",
+    title: "On-Site 4K Video & Drone Documentation",
+    highlight: "Field Production",
+    description: "Full-scale documentary field crews capturing exploration sites, open pits, and processing infrastructure in cinema-grade 4K.",
+    capabilities: ["Cinema Drone FPV", "Executive Interviews", "Technical Project Tours", "Investor Video Suites"],
+    image: "/services/02-drill.jpg",
+    badge: "FIELD PRODUCTION",
+  },
+  {
+    id: 6,
+    number: "06",
+    brand: "Global Summits",
+    headline: "Official keynote media partner at PDAC, Indaba, and Mines.",
+    tag: "CONFERENCES",
+    title: "Conference Partnerships & Live Coverage",
+    highlight: "Live Broadcast",
+    description: "Official media partnership at PDAC, Mines & Money, and Indaba with on-site interview lounges and real-time social broadcasting.",
+    capabilities: ["Keynote Interview Lounges", "Live Video Broadcasting", "VIP Investor Networking", "Event Special Editions"],
+    image: "/about/open-pit-golden-hour.png",
+    badge: "GLOBAL EVENTS",
+  },
+  {
+    id: 7,
+    number: "07",
+    brand: "Full Capability Suite",
+    headline: "Comprehensive 360° strategic growth for resource leaders.",
+    tag: "COMPLETE SUITE",
+    title: "Full Capability Suite & Advisory",
+    highlight: "All Services",
+    description: "Comprehensive 360° mining communication, investor relations, and capital strategy engineered for market leaders.",
+    capabilities: ["End-to-End Media Retainers", "Custom Capital Campaigns", "Dedicated IR Support", "Global Syndication Network"],
+    image: "/services/04-pit.jpg",
+    badge: "EXPLORE ALL",
+    isSummaryCard: true,
+  },
 ];
+
+export const REVEAL_CARDS = SERVICE_CARDS;
 
 
 export interface StoryPoint {
@@ -203,6 +302,7 @@ export const JourneyStory: React.FC = () => {
   const [readerState, setReaderState] = useState<"closed" | "opening" | "open" | "closing">("closed");
   const [spreadLabel, setSpreadLabel] = useState("INSIDE OPENING SPREAD • PAGES 2–3");
   const [showAllArchive, setShowAllArchive] = useState(false);
+  const [showAllServices, setShowAllServices] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const totalTravelRef = useRef(3200);
 
@@ -297,15 +397,16 @@ export const JourneyStory: React.FC = () => {
     handleOpenReader(mag);
   }, [handleOpenReader]);
 
-  // Lock scroll & handle Escape key when reader is active
+  // Lock scroll & handle Escape key when reader or services modal is active
   useEffect(() => {
-    if (readerState === "open" || readerState === "opening") {
+    if (readerState === "open" || readerState === "opening" || showAllServices) {
       const originalOverflow = document.body.style.overflow;
       document.body.style.overflow = "hidden";
 
       const handleKeyDown = (e: KeyboardEvent) => {
         if (e.key === "Escape") {
           handleCloseReader();
+          setShowAllServices(false);
         }
       };
       window.addEventListener("keydown", handleKeyDown);
@@ -315,7 +416,7 @@ export const JourneyStory: React.FC = () => {
         window.removeEventListener("keydown", handleKeyDown);
       };
     }
-  }, [readerState, handleCloseReader]);
+  }, [readerState, showAllServices, handleCloseReader]);
 
   useJourneyFrame((scene) => {
     const p = scene.progress;
@@ -397,7 +498,7 @@ export const JourneyStory: React.FC = () => {
         if (servicesTitleRef.current) {
           servicesTitleRef.current.style.opacity = "0";
         }
-        REVEAL_CARDS.forEach((_, idx) => {
+        SERVICE_CARDS.forEach((_, idx) => {
           const el = cardRefs.current[idx];
           if (el) {
             el.style.opacity = "0";
@@ -418,95 +519,95 @@ export const JourneyStory: React.FC = () => {
         const startX = winW * 0.04;
         const startY = -winH * 0.26;
 
-        // Arch Geometry matching Huge Inc reference
-        // Balanced "little gap" (~50px-65px) so cards never touch or crowd
+        // Arch Geometry matching Huge Inc reference screenshots
+        // Center card: x = 0, y = originY, rotZ = 0, scale = 1.0
+        // Right card: x = +deltaX, y = originY + baseDrop, rotZ = +rotZAngle, scale = 0.86
+        // Left card: x = -deltaX, y = originY + baseDrop, rotZ = -rotZAngle, scale = 0.86
         const deltaX = isMobile
           ? winW * 0.46
           : isTablet
-          ? Math.min(360, winW * 0.38)
-          : Math.min(460, winW * 0.325);
+          ? Math.min(380, winW * 0.36)
+          : Math.min(480, winW * 0.34);
 
-        // Apex Y position: center card sits high up
-        const originY = isMobile ? -winH * 0.05 : -winH * 0.07;
-        const baseDrop = isMobile ? 105 : isTablet ? 125 : 150;
-        const rotZAngle = isMobile ? 15 : isTablet ? 14 : 13;
+        // Apex Y position: center card sits comfortably high and dominant
+        const originY = isMobile ? -winH * 0.05 : -winH * 0.06;
+        const baseDrop = isMobile ? 90 : isTablet ? 115 : 135;
+        const rotZAngle = isMobile ? 14 : isTablet ? 13 : 13;
 
-        // 1. Emergence from truck: 0.938 -> 0.948
-        const EMERGE_START = 0.938;
-        const EMERGE_END = 0.948;
+        // 1. Emergence from truck: 0.936 -> 0.942
+        const EMERGE_START = 0.936;
+        const EMERGE_END = 0.942;
 
-        // 2. Continuous semicircle rotation across cards driven by scroll: 0.948 -> 0.968
-        const CARDS_ACTIVE_END = 0.968;
-        const totalCards = REVEAL_CARDS.length; // 6
+        // 2. Continuous semicircle rotation across cards driven by scroll: 0.942 -> 0.984
+        // (Significantly expanded span so card scrolling is calm, relaxed, and normal)
+        const CARDS_ACTIVE_END = 0.984;
+        const totalCards = SERVICE_CARDS.length; // 7
         let focal = 0;
 
         if (p >= EMERGE_END && p < CARDS_ACTIVE_END) {
           const galleryP = (p - EMERGE_END) / (CARDS_ACTIVE_END - EMERGE_END);
-          const rawTarget = galleryP * totalCards;
+          const rawTarget = galleryP * (totalCards - 1);
 
           const k = Math.floor(rawTarget);
           const sub = rawTarget - k;
 
-          // Cinematic dwell at apex & smooth rotation along arc
+          // Comfortable dwell at apex: 56% dwell time per card so user can comfortably read each service
           let stepT = 0;
-          if (sub <= 0.16) {
+          if (sub <= 0.28) {
             stepT = 0;
-          } else if (sub >= 0.84) {
+          } else if (sub >= 0.72) {
             stepT = 1;
           } else {
-            const tau = (sub - 0.16) / 0.68;
+            const tau = (sub - 0.28) / 0.44;
             stepT = tau * tau * (3 - 2 * tau);
           }
 
           focal = k + stepT;
         } else if (p >= CARDS_ACTIVE_END) {
-          focal = totalCards;
+          focal = totalCards - 1;
         }
 
-        // Dissolve cards into golden mineral dust: 0.966 -> 0.978
-        const cardExitP = smoothstep(0.966, 0.978, p);
+        // Dissolve cards into golden mineral dust: 0.982 -> 0.992
+        const cardExitP = smoothstep(0.982, 0.992, p);
 
         // Track card positions for particle emission
         const cardScreenCoords: { x: number; y: number; width: number; height: number; opacity: number }[] = [];
-        const cardW = isMobile ? 250 : isTablet ? 290 : Math.min(370, winW * 0.25);
-        const cardH = cardW * 1.38;
+        const cardW = isMobile ? 260 : isTablet ? 320 : Math.min(460, winW * 0.32);
+        const cardH = cardW * 1.08;
 
-        REVEAL_CARDS.forEach((_, idx) => {
+        SERVICE_CARDS.forEach((_, idx) => {
           const el = cardRefs.current[idx];
           if (!el) return;
 
-          // Wrapped circular distance so all transitions are continuous
-          let d = ((idx - focal) % totalCards + totalCards) % totalCards;
-          if (d > totalCards / 2) {
-            d -= totalCards;
-          }
+          // Pure linear distance: cards flow from RIGHT (+d) -> CENTER (d = 0) -> LEFT (-d)
+          const d = idx - focal;
 
           // Trajectory: Parabolic Arch from bottom-right -> up into center -> down into bottom-left
           // Center card (d = 0): Apex peak (arcX = 0, arcY = originY, rotZ = 0)
           // Left card (d < 0): Moves LEFT and plunges DOWN, tilted counter-clockwise (rotZ < 0)
           // Right card (d > 0): Plunges DOWN to the right, tilted clockwise (rotZ > 0), rising UP into center as scroll advances
-          const archDrop = Math.pow(Math.abs(d), 1.38) * baseDrop;
+          const archDrop = Math.pow(Math.abs(d), 1.35) * baseDrop;
           const arcX = d * deltaX;
           const arcY = originY + archDrop;
 
-          // 3D Rotations matching Huge Inc (media_1789728259487.png):
+          // 3D Rotations matching Huge Inc (screenshots):
           // Left card (d < 0): tilts counter-clockwise (arcRotZ < 0) & faces inward (arcRotY > 0)
           // Right card (d > 0): tilts clockwise (arcRotZ > 0) & faces inward (arcRotY < 0)
           const arcRotZ = Math.max(-32, Math.min(32, d * rotZAngle));
           const arcRotY = Math.max(-20, Math.min(20, -d * 14));
           const arcZ = -Math.abs(d) * (isMobile ? 35 : 55);
 
-          // Scale: Center card is 1.0, flanks scale down subtly to 0.89, far edges to ~0.76
-          const arcScale = Math.max(0.74, Math.min(1.0, 1.0 - Math.abs(d) * 0.11));
+          // Scale: Center card is 1.0, flanks scale down subtly to 0.86, far edges to ~0.74
+          const arcScale = Math.max(0.74, Math.min(1.0, 1.0 - Math.abs(d) * 0.14));
           const zIndex = Math.round(50 - Math.abs(d) * 15);
 
-          // Card Visibility: 3 main cards dominant, incoming card from bottom-right and outgoing card to bottom-left visible at edges
+          // Card Visibility: 3 main cards dominant, incoming from right, outgoing to left
           const absD = Math.abs(d);
           let arcOpacity = 0;
           if (absD <= 1.15) {
             arcOpacity = 1.0;
-          } else if (absD < 1.75) {
-            arcOpacity = 1.0 - (absD - 1.15) / 0.60;
+          } else if (absD < 1.85) {
+            arcOpacity = 1.0 - (absD - 1.15) / 0.70;
           } else {
             arcOpacity = 0;
           }
@@ -584,18 +685,18 @@ export const JourneyStory: React.FC = () => {
 
         // Interactive golden spotlight following cursor
         if (spotlightRef.current) {
-          if (p < 0.966) {
+          if (p < 0.984) {
             spotlightRef.current.style.opacity = "0";
           } else {
-            const spotAlpha = Math.min(1, (p - 0.966) / 0.012);
+            const spotAlpha = Math.min(1, (p - 0.984) / 0.010);
             spotlightRef.current.style.opacity = spotAlpha.toFixed(3);
             spotlightRef.current.style.background = `radial-gradient(circle 560px at ${(m.x * 100).toFixed(1)}% ${(m.y * 100).toFixed(1)}%, rgba(255, 215, 110, 0.26) 0%, rgba(212, 175, 55, 0.12) 36%, rgba(14, 32, 64, 0.04) 65%, transparent 82%)`;
           }
         }
 
-        // Controls visibility: cleanly hide 6 dots when cards dissolve into mountain stage
+        // Controls visibility: cleanly hide 7 dots when cards dissolve into mountain stage
         if (controlsRef.current) {
-          if (p < 0.948 || p >= 0.966) {
+          if (p < 0.942 || p >= 0.984) {
             controlsRef.current.style.opacity = "0";
             controlsRef.current.style.pointerEvents = "none";
           } else {
@@ -605,22 +706,22 @@ export const JourneyStory: React.FC = () => {
         }
 
         // Deepen background to dark cinematic backdrop during cards, transparent during mountain stage so rich alpine dawn breathes
-        if (p >= 0.966) {
+        if (p >= 0.984) {
           magazineWrapRef.current.style.backgroundColor = "transparent";
           magazineWrapRef.current.style.backdropFilter = "none";
         } else {
-          const bgAlpha = (Math.min(1, (p - 0.938) / 0.035) * 0.88).toFixed(3);
+          const bgAlpha = (Math.min(1, (p - 0.936) / 0.030) * 0.90).toFixed(3);
           magazineWrapRef.current.style.backgroundColor = `rgba(6, 10, 18, ${bgAlpha})`;
-          magazineWrapRef.current.style.backdropFilter = p > 0.945 ? "blur(12px)" : "none";
+          magazineWrapRef.current.style.backdropFilter = p > 0.940 ? "blur(14px)" : "none";
         }
 
-        // Background typography ("OUR SERVICES")
+        // Background typography ("OUR SERVICES" centered directly behind cards)
         if (servicesTitleRef.current) {
-          if (p < 0.948) {
+          if (p < 0.940) {
             servicesTitleRef.current.style.opacity = "0";
           } else {
-            const titleP = smoothstep(0.948, 0.965, p) * (1 - cardExitP);
-            servicesTitleRef.current.style.opacity = (titleP * 0.12).toFixed(3);
+            const titleP = smoothstep(0.940, 0.950, p) * (1 - cardExitP);
+            servicesTitleRef.current.style.opacity = titleP.toFixed(3);
             servicesTitleRef.current.style.transform = `translate3d(-50%, -50%, 0)`;
           }
         }
@@ -630,12 +731,12 @@ export const JourneyStory: React.FC = () => {
         // Progressively revealed across the screen
         // ====================================================================
         if (settleStageRef.current) {
-          if (p < 0.966) {
+          if (p < 0.984) {
             settleStageRef.current.style.opacity = "0";
             settleStageRef.current.style.pointerEvents = "none";
             settleStageRef.current.style.clipPath = "inset(0 100% 0 0)";
           } else {
-            const writeProgress = Math.max(0, Math.min(1, (p - 0.966) / (0.985 - 0.966)));
+            const writeProgress = Math.max(0, Math.min(1, (p - 0.984) / (0.998 - 0.984)));
             const easeWrite = 1 - Math.pow(1 - writeProgress, 2.2);
             const revealPct = (easeWrite * 100).toFixed(1);
 
@@ -953,9 +1054,9 @@ export const JourneyStory: React.FC = () => {
           OUR SERVICES
         </div>
 
-        {/* Pure Semicircular Arc Gallery (Exactly 3 Cards Seen Rotating) */}
+        {/* Pure Semicircular Arc Gallery for 7 Services */}
         <div ref={rowRef} className={styles.cardsAlignedRow}>
-          {REVEAL_CARDS.map((card, idx) => (
+          {SERVICE_CARDS.map((card, idx) => (
             <div
               key={card.id}
               ref={(el) => {
@@ -964,18 +1065,73 @@ export const JourneyStory: React.FC = () => {
               className={`${styles.alignedCardItem} ${
                 activeIndex === idx ? styles.alignedCardItemActive : ""
               }`}
-              onClick={() => setActiveIndex(idx)}
+              onClick={() => {
+                setActiveIndex(idx);
+                if (card.isSummaryCard) {
+                  setShowAllServices(true);
+                }
+              }}
               role="button"
               tabIndex={0}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
                   setActiveIndex(idx);
+                  if (card.isSummaryCard) {
+                    setShowAllServices(true);
+                  }
                 }
               }}
-              aria-label={`Service Card 0${card.id}`}
+              aria-label={`Service ${card.number}: ${card.title}`}
             >
-              {/* Clean blank card shell preserving exact frame, spine, sheen, and shield */}
+              <div className={styles.hugeCardInner}>
+                {/* Full-bleed photo background */}
+                <div
+                  className={styles.hugeCardBg}
+                  style={{ backgroundImage: `url(${card.image})` }}
+                  aria-hidden="true"
+                />
+                {/* Cinematic gradient overlay matching Huge Inc reference */}
+                <div className={styles.hugeCardGradient} aria-hidden="true" />
+
+                {/* Top: Clean brand and service index */}
+                <div className={styles.hugeCardHeader}>
+                  <div className={styles.hugeCardBrandRow}>
+                    <span className={styles.hugeCardBrand}>{card.brand}</span>
+                    <span className={styles.hugeCardNumber}>{card.number}</span>
+                  </div>
+                </div>
+
+                {/* Bottom: Large bold punchy headline */}
+                <div className={styles.hugeCardBottom}>
+                  <h3 className={styles.hugeCardHeadline}>{card.headline}</h3>
+                  {card.isSummaryCard ? (
+                    <div
+                      className={styles.hugeCardAction}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowAllServices(true);
+                      }}
+                    >
+                      <span>Explore all services</span>
+                      <span aria-hidden="true">&rarr;</span>
+                    </div>
+                  ) : (
+                    <div
+                      className={styles.hugeCardSubAction}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowAllServices(true);
+                      }}
+                    >
+                      <span>View capabilities</span>
+                      <span aria-hidden="true">&rarr;</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* 3D cover spine, sheen and shield effects */}
               <div aria-hidden="true" className={magStyles.coverSpine} />
               <div aria-hidden="true" className={magStyles.coverSheen} />
               <div aria-hidden="true" className={magStyles.coverShield} />
@@ -985,7 +1141,7 @@ export const JourneyStory: React.FC = () => {
 
         {/* Minimal dot navigation indicator */}
         <div ref={controlsRef} className={styles.alignedControls}>
-          {REVEAL_CARDS.map((card, idx) => (
+          {SERVICE_CARDS.map((card, idx) => (
             <button
               key={card.id}
               type="button"
@@ -993,10 +1149,99 @@ export const JourneyStory: React.FC = () => {
                 activeIndex === idx ? styles.alignedDotActive : ""
               }`}
               onClick={() => setActiveIndex(idx)}
-              aria-label={`Focus card ${idx + 1}`}
+              aria-label={`Focus service ${idx + 1}`}
             />
           ))}
         </div>
+
+        {/* Full Services Suite Modal / Drawer */}
+        {showAllServices && (
+          <div
+            className={styles.fullServicesModalOverlay}
+            onClick={() => setShowAllServices(false)}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Mining Discovery Full Services Suite"
+          >
+            <div
+              className={styles.fullServicesModalBox}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className={styles.fullServicesModalHeader}>
+                <div>
+                  <p className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-[#d4af37]">
+                    FULL CAPABILITY SUITE
+                  </p>
+                  <h2 className="font-serif text-2xl sm:text-3xl text-white mt-1">
+                    Our Comprehensive Mining Services
+                  </h2>
+                  <p className="text-sm text-gray-300 mt-1 max-w-xl leading-relaxed">
+                    Explore our end-to-end strategic media, capital syndicate, and global broadcasting solutions designed specifically for natural resource and mining companies.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className={styles.fullServicesModalClose}
+                  onClick={() => setShowAllServices(false)}
+                  aria-label="Close modal"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className={styles.fullServicesGrid}>
+                {SERVICE_CARDS.filter((s) => !s.isSummaryCard).map((service) => (
+                  <div key={service.id} className={styles.fullServiceItemCard}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-mono text-xs font-bold text-[#d4af37] px-2 py-0.5 rounded-full bg-[#d4af37]/10 border border-[#d4af37]/25">
+                        {service.number}
+                      </span>
+                      <span className="font-mono text-[10px] uppercase tracking-wider text-gray-400">
+                        {service.tag}
+                      </span>
+                    </div>
+                    <h3 className="font-serif text-lg font-semibold text-white mb-1.5">
+                      {service.title}
+                    </h3>
+                    <p className="text-xs text-gray-300 line-clamp-3 mb-3 leading-relaxed">
+                      {service.description}
+                    </p>
+                    <div className="mt-auto pt-2 border-t border-white/10 flex flex-col gap-1.5">
+                      {service.capabilities.map((cap, i) => (
+                        <div key={i} className="flex items-center gap-2 text-xs text-gray-200">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#d4af37]" />
+                          <span>{cap}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-4">
+                <div className="text-xs text-gray-400">
+                  Ready to accelerate your mining company&apos;s valuation and global reach?
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    className="px-5 py-2.5 rounded-lg border border-white/20 text-xs font-mono font-semibold uppercase tracking-wider text-white hover:bg-white/10 transition-colors cursor-pointer"
+                    onClick={() => setShowAllServices(false)}
+                  >
+                    Close
+                  </button>
+                  <Link
+                    href="/contact"
+                    className="px-6 py-2.5 rounded-lg bg-gradient-to-r from-[#d4af37] to-[#b8860b] text-[#0b1320] text-xs font-mono font-bold uppercase tracking-wider hover:opacity-95 transition-opacity"
+                    onClick={() => setShowAllServices(false)}
+                  >
+                    Schedule Consultation &rarr;
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
 
         {/* MOUNTAIN LANDSCAPE & EDITORIAL SETTLE STAGE */}

@@ -80,12 +80,12 @@ export const DescentBackdrop: React.FC<DescentBackdropProps> = ({ progress: p })
       className="pointer-events-none absolute inset-0 z-23 overflow-hidden"
       style={{ opacity: opacity.toFixed(3) }}
     >
-      {/* Seamless transition backdrop into the white studio journey */}
+      {/* Seamless transition backdrop into the dark obsidian journey */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(180deg, #FAF7F2 0%, #F3F4F6 40%, #ffffff 100%)",
+            "radial-gradient(ellipse 100% 70% at 50% 100%, rgba(18, 24, 38, 0.9) 0%, #030509 100%)",
         }}
       />
     </div>

@@ -39,49 +39,22 @@ import { clamp01, smoothstep } from "./journeySideView";
  * difference: this ramp finishes at 0.42, and the clouds do not begin parting
  * until 0.44.
  */
-const MATERIALISE = { from: 0.16, to: 0.25 };
+const MATERIALISE = { from: 0.02, to: 0.12 };
 
 /**
- * The camera's fall from altitude. Runs under the cloud and past it.
- *
- * STARTS LATE ON PURPOSE. When the fall began at 0.44, half of it was already
- * spent by the time the last deck blew past, so the truck came out of the
- * weather at a third of the frame wide and there was no reveal left to have —
- * the brief's land, road, markings and truck all arrived in the same instant
- * the cloud left. Beginning it at 0.54 keeps the camera parked at altitude
- * while the deck is dense and puts the whole of the closing distance after it,
- * which is what gives 0.65 land, 0.70 road and 0.76 truck room to happen one
- * after another instead of together.
+ * The camera's fall from altitude. Runs under the hero handover and past it.
  */
-const DESCEND = { from: 0.54, to: 0.84 };
+const DESCEND = { from: 0.12, to: 0.65 };
 
 /**
  * The hold, between the descent ending and the orbit beginning.
- *
- * Not an accident of the numbers — a beat the sequence needs. The camera
- * arrives, stops, and the truck is simply there on the road below, whole and
- * still, before anything else happens. Without it the descent runs straight
- * into the orbit and the moment of finding the truck never lands, because the
- * camera is already moving on. The truck starts rolling inside this window,
- * so the last of it is truck-moving-under-a-still-overhead-camera.
  */
-const HOLD = { from: 0.84, to: 0.89 };
+const HOLD = { from: 0.65, to: 0.78 };
 
 /**
  * The orbit to side view. Nothing rotates before this.
- *
- * Starts only once the truck has been fully revealed by the descent above,
- * and finishes a little short of 1 so the last of the transition is spent
- * locked in the Journey's own composition rather than still settling into it.
- *
- * WIDENED from 0.95–0.995. Forty-five thousandths of the transition is about
- * a fifth of a second at any reasonable scroll speed, and 78 degrees of
- * elevation inside that is not an orbit — it is a cut with an ease on it. The
- * brief asks for top, high three-quarter, low three-quarter and side as four
- * things the eye gets to see in turn, and at a tenth of the transition each
- * of them lasts long enough to be one.
  */
-const ROTATE = { from: 0.89, to: 0.99 };
+const ROTATE = { from: 0.78, to: 0.98 };
 
 /**
  * The overhead pitch, in degrees.

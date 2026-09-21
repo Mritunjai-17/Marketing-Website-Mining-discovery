@@ -12,8 +12,8 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
-  /* The deepest value in the scene. Everything else sits on top of it. */
-  background: #ffffff;
+  /* Deep obsidian dark background matching Boon Global and Huge Inc theme. */
+  background: #030509;
   /* Layers are promoted individually; this just establishes the context. */
   isolation: isolate;
 }
@@ -1328,27 +1328,26 @@
   margin: 0 auto;
   pointer-events: auto;
   box-sizing: border-box;
+  z-index: 20;
 }
 
 .alignedCardItem {
   position: absolute;
   top: 50%;
   left: 50%;
-  /* Well-balanced editorial cards with clean, distinct gap matching Huge Inc */
-  width: clamp(260px, 26vw, 380px);
-  height: clamp(360px, 36vw, 530px);
-  max-width: 390px;
-  max-height: 540px;
-  aspect-ratio: 3 / 4.1;
-  border-radius: clamp(18px, 1.8vw, 26px);
+  /* Dimensions matching Huge Inc reference screenshots: near-square, slightly tall, prominent */
+  width: clamp(310px, 32vw, 470px);
+  height: clamp(340px, 35vw, 510px);
+  max-width: 480px;
+  max-height: 530px;
+  aspect-ratio: 1 / 1.08;
+  border-radius: clamp(24px, 2.4vw, 32px);
   overflow: hidden;
-  background: linear-gradient(155deg, #131b2a 0%, #0c101a 50%, #070a10 100%);
-  border: 1px solid rgba(212, 175, 55, 0.28);
+  background: #06090e;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow:
-    0 24px 60px -12px rgba(0, 0, 0, 0.8),
-    0 8px 24px -6px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 0 0 1px rgba(255, 255, 255, 0.03);
+    0 24px 64px -12px rgba(0, 0, 0, 0.8),
+    0 8px 24px -6px rgba(0, 0, 0, 0.5);
   cursor: pointer;
   user-select: none;
   will-change: transform, opacity;
@@ -1359,21 +1358,167 @@
 }
 
 .alignedCardItem:hover {
-  border-color: rgba(212, 175, 55, 0.55);
+  border-color: rgba(255, 255, 255, 0.32);
   box-shadow:
-    0 30px 70px -10px rgba(0, 0, 0, 0.88),
-    0 12px 30px -6px rgba(0, 0, 0, 0.6),
-    0 0 24px rgba(212, 175, 55, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    0 30px 80px -10px rgba(0, 0, 0, 0.9),
+    0 12px 32px -6px rgba(0, 0, 0, 0.6);
 }
 
 .alignedCardItemActive {
-  border-color: rgba(212, 175, 55, 0.8);
+  border-color: rgba(255, 255, 255, 0.45);
   box-shadow:
-    0 36px 85px -10px rgba(0, 0, 0, 0.95),
-    0 16px 36px -6px rgba(0, 0, 0, 0.7),
-    0 0 32px rgba(212, 175, 55, 0.25),
-    inset 0 1px 0 rgba(255, 215, 0, 0.25);
+    0 36px 90px -10px rgba(0, 0, 0, 0.95),
+    0 16px 36px -6px rgba(0, 0, 0, 0.7);
+}
+
+/* Huge Inc Card Inner Structure */
+.hugeCardInner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: clamp(24px, 2.5vw, 36px);
+  box-sizing: border-box;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.hugeCardBg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transform: scale(1.02);
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 1;
+  filter: contrast(1.04) saturate(1.05) brightness(1.02);
+}
+
+.alignedCardItem:hover .hugeCardBg {
+  transform: scale(1.06);
+}
+
+.hugeCardGradient {
+  position: absolute;
+  inset: 0;
+  /* Ultra-clean vignette: keeps 80% of the real photo fully visible and bright */
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.38) 0%,
+    rgba(0, 0, 0, 0.05) 18%,
+    rgba(0, 0, 0, 0) 38%,
+    rgba(0, 0, 0, 0) 60%,
+    rgba(0, 0, 0, 0.42) 82%,
+    rgba(0, 0, 0, 0.78) 100%
+  );
+  z-index: 2;
+  pointer-events: none;
+}
+
+.hugeCardHeader {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hugeCardBrandRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.hugeCardBrand {
+  font-family: var(--font-sans-custom), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: clamp(16px, 1.4vw, 22px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
+}
+
+.hugeCardNumber {
+  font-family: var(--font-mono, monospace);
+  font-size: clamp(10px, 0.85vw, 12px);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.hugeCardBottom {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 1vw, 14px);
+}
+
+.hugeCardHeadline {
+  font-family: var(--font-sans-custom), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: clamp(20px, 2.1vw, 32px);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  color: #ffffff;
+  margin: 0;
+  text-shadow: 0 3px 20px rgba(0, 0, 0, 0.9);
+  max-width: 95%;
+}
+
+.hugeCardAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono, monospace);
+  font-size: clamp(10px, 0.85vw, 12px);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #ffd700;
+  background: rgba(212, 175, 55, 0.2);
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  padding: 6px 14px;
+  border-radius: 999px;
+  width: fit-content;
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.hugeCardAction:hover {
+  background: rgba(212, 175, 55, 0.4);
+  border-color: #ffd700;
+  transform: translateX(4px);
+}
+
+.hugeCardSubAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono, monospace);
+  font-size: clamp(9px, 0.8vw, 11px);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.6);
+  transition: all 0.25s ease;
+  width: fit-content;
+  cursor: pointer;
+}
+
+.alignedCardItem:hover .hugeCardSubAction {
+  color: #ffd700;
+  transform: translateX(4px);
 }
 
 .alignedControls {
@@ -1408,29 +1553,33 @@
 /* Background typography behind 3D gallery ("OUR SERVICES") */
 .servicesBackgroundText {
   position: absolute;
-  top: 18%;
+  top: 48%;
   left: 50%;
   transform: translate3d(-50%, -50%, 0);
   font-family: var(--font-sans-custom), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  font-size: clamp(3rem, 9vw, 8rem);
+  font-size: clamp(3.5rem, 11vw, 9.5rem);
   font-weight: 900;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(212, 175, 55, 0.13);
+  color: rgba(212, 175, 55, 0.12);
+  -webkit-text-stroke: 1.5px rgba(212, 175, 55, 0.45);
+  text-shadow: 0 0 60px rgba(212, 175, 55, 0.25);
   white-space: nowrap;
   pointer-events: none;
   user-select: none;
-  z-index: 2;
+  z-index: 1;
   line-height: 0.9;
+  text-align: center;
   will-change: transform, opacity;
   opacity: 0;
 }
 
 @media (max-width: 900px) {
   .servicesBackgroundText {
-    top: 16%;
-    font-size: clamp(2.2rem, 10vw, 5rem);
-    letter-spacing: 0.04em;
+    top: 48%;
+    font-size: clamp(2.4rem, 10vw, 5.5rem);
+    letter-spacing: 0.08em;
+    -webkit-text-stroke: 1px rgba(212, 175, 55, 0.4);
   }
 }
 
@@ -1440,9 +1589,10 @@
     min-height: clamp(380px, 58vh, 540px);
   }
   .alignedCardItem {
-    width: clamp(215px, 64vw, 290px);
-    height: clamp(295px, 88vw, 400px);
-    border-radius: 18px;
+    width: clamp(260px, 72vw, 340px);
+    height: clamp(285px, 78vw, 370px);
+    aspect-ratio: 1 / 1.08;
+    border-radius: 22px;
   }
   .alignedControls {
     bottom: max(1.25rem, env(safe-area-inset-bottom, 16px));
@@ -1693,6 +1843,301 @@
   .settleMountainStage {
     display: none !important;
   }
+}
+
+/* ==========================================================================
+   3D PERSPECTIVE SERVICES CARDS & SHOW FULL SERVICES MODAL
+   ========================================================================== */
+
+.serviceCardInner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: clamp(1.2rem, 2.4vw, 1.8rem);
+  box-sizing: border-box;
+  overflow: hidden;
+  border-radius: inherit;
+  z-index: 10;
+}
+
+.serviceCardBg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.26;
+  filter: saturate(1.2);
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+  z-index: 1;
+}
+
+.alignedCardItem:hover .serviceCardBg {
+  opacity: 0.42;
+  transform: scale(1.06);
+}
+
+.serviceCardOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 16, 26, 0.72) 0%,
+    rgba(8, 12, 20, 0.88) 45%,
+    rgba(5, 8, 14, 0.98) 100%
+  );
+  z-index: 2;
+}
+
+.serviceCardTopRow {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.serviceCardNumber {
+  font-family: var(--font-mono-custom), ui-monospace, monospace;
+  font-size: clamp(0.72rem, 1.2vw, 0.85rem);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: #d4af37;
+  padding: 0.2rem 0.55rem;
+  background: rgba(212, 175, 55, 0.12);
+  border: 1px solid rgba(212, 175, 55, 0.28);
+  border-radius: 999px;
+}
+
+.serviceCardBadge {
+  font-family: var(--font-mono-custom), ui-monospace, monospace;
+  font-size: clamp(0.58rem, 0.95vw, 0.68rem);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.8);
+  padding: 0.2rem 0.5rem;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+}
+
+.serviceCardBody {
+  position: relative;
+  z-index: 5;
+  margin-top: auto;
+  margin-bottom: 0.85rem;
+}
+
+.serviceCardTag {
+  font-family: var(--font-mono-custom), ui-monospace, monospace;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #fce08b;
+  margin-bottom: 0.3rem;
+}
+
+.serviceCardTitle {
+  font-family: var(--font-serif, "Playfair Display", Georgia, serif);
+  font-size: clamp(1.15rem, 2vw, 1.48rem);
+  line-height: 1.22;
+  color: #ffffff;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.55rem 0;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+.serviceCardDesc {
+  font-size: clamp(0.72rem, 1.05vw, 0.82rem);
+  line-height: 1.48;
+  color: rgba(230, 235, 245, 0.82);
+  margin: 0 0 0.75rem 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.serviceCardCapabilities {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.serviceCapabilityPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: clamp(0.66rem, 0.95vw, 0.74rem);
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+.serviceCapabilityDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #d4af37;
+  box-shadow: 0 0 6px rgba(212, 175, 55, 0.6);
+  flex-shrink: 0;
+}
+
+.serviceCardFooter {
+  position: relative;
+  z-index: 5;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.serviceCardExploreBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono-custom), ui-monospace, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #d4af37;
+  font-weight: 700;
+  transition: all 0.25s ease;
+}
+
+.alignedCardItem:hover .serviceCardExploreBtn {
+  color: #ffffff;
+  transform: translateX(4px);
+}
+
+.serviceCardCtaPrimary {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
+  color: #0b1320;
+  font-family: var(--font-mono-custom), ui-monospace, monospace;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(212, 175, 55, 0.35);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.serviceCardCtaPrimary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(212, 175, 55, 0.55);
+  background: linear-gradient(135deg, #ffd700 0%, #d4af37 100%);
+}
+
+/* Modal for Full Services */
+.fullServicesModalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(5, 8, 14, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1.5rem, 4vh, 3rem) 1.5rem;
+  box-sizing: border-box;
+  overflow-y: auto;
+  animation: modalFadeIn 0.3s ease-out forwards;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.fullServicesModalBox {
+  width: 100%;
+  max-width: 1140px;
+  max-height: 90vh;
+  background: linear-gradient(165deg, #0e1626 0%, #080d17 100%);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 20px;
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+  box-sizing: border-box;
+  box-shadow: 0 30px 100px -10px rgba(0, 0, 0, 0.9), 0 0 40px rgba(212, 175, 55, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  position: relative;
+}
+
+.fullServicesModalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.fullServicesModalClose {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.fullServicesModalClose:hover {
+  background: rgba(212, 175, 55, 0.25);
+  border-color: #d4af37;
+  color: #ffd700;
+  transform: rotate(90deg);
+}
+
+.fullServicesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+@media (max-width: 1024px) {
+  .fullServicesGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .fullServicesGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.fullServiceItemCard {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+}
+
+.fullServiceItemCard:hover {
+  background: rgba(212, 175, 55, 0.04);
+  border-color: rgba(212, 175, 55, 0.4);
+  transform: translateY(-2px);
 }
 
 

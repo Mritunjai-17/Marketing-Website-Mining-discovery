@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter, IBM_Plex_Mono, Playfair_Display } from "next/font/google";
+import { Geist, Geist_Mono, Inter, IBM_Plex_Mono, Playfair_Display, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import { Header, Footer, SmoothScroll } from "@/components/layout";
 import MiningAICHatWidget from "@/components/ui/MiningAICHatWidget";
@@ -14,6 +14,16 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-geist-mono",
+  display: "swap",
+});
+
+/**
+ * Cormorant Garamond: The high-end luxury editorial serif matching the reference (Forge luxury aesthetic)
+ */
+const cormorantGaramond = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-editorial-serif",
   display: "swap",
 });
 
@@ -53,7 +63,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${playfairDisplay.variable} ${inter.variable} ${ibmPlexMono.variable}`}
+      className={`${geistSans.variable} ${geistMono.variable} ${cormorantGaramond.variable} ${playfairDisplay.variable} ${inter.variable} ${ibmPlexMono.variable}`}
     >
       <body className="min-h-screen flex flex-col bg-[#FAFAF9] text-[#1A1D21] antialiased selection:bg-[#B8860B]/20 selection:text-[#0B1F3A]">
         <SmoothScroll>
