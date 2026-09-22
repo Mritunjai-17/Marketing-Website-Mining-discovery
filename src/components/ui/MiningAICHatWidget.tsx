@@ -475,7 +475,7 @@ export default function MiningAICHatWidget() {
           <div className="chat-header-new">
             <div className="chat-brand">
               <div className="chat-logo">
-                <img src="/logo.png" alt="Mining Discovery" />
+                <img src="/logo.webp" alt="Mining Discovery" />
               </div>
               <div className="chat-brand-text">
                 <strong>Mining Discovery</strong>

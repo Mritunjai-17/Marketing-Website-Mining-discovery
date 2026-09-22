@@ -175,10 +175,10 @@ export const miningAgentKnowledge = {
       ],
       website: "https://www.miningdiscovery.com",
       socials: {
-        facebook: "https://facebook.com",
-        x_twitter: "https://x.com",
-        instagram: "https://instagram.com",
-        linkedin: "https://linkedin.com",
+        facebook: "https://www.facebook.com/share/17woBUaJqG/?mibextid=wwXIfr",
+        x_twitter: "https://x.com/MiningDiscovery",
+        instagram: "https://www.instagram.com/miningdiscovery",
+        linkedin: "https://www.linkedin.com/company/miningdiscovery/",
       },
     },
 

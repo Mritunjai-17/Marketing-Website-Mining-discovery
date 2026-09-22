@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import styles from "./BoonHero.module.css";
 
 export interface BoonHeroProps {
@@ -15,6 +15,95 @@ export const BoonHero: React.FC<BoonHeroProps> = ({
 }) => {
   // Damped scrubbed progress strictly bounded in [0, 1]
   const p = Math.max(0, Math.min(1, progress));
+
+  // Refs for 3D cursor-reactive parallax motion (Reference Recording Behavior)
+  const stageRef = useRef<HTMLDivElement>(null);
+  const bgRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLDivElement>(null);
+  const glowRef = useRef<HTMLDivElement>(null);
+  const targetPos = useRef({ x: 0, y: 0 });
+  const currentPos = useRef({ x: 0, y: 0 });
+  const animRef = useRef<number | null>(null);
+
+  // ========================================================================
+  // INTERACTIVE 3D SCREEN PERSPECTIVE & PARALLAX ON CURSOR MOVE
+  // Matches Forge Atelier luxury motion from the screen recording
+  // ========================================================================
+  useEffect(() => {
+    // Disable on touch devices or prefers-reduced-motion
+    const isTouch = window.matchMedia("(pointer: coarse)").matches;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (isTouch || reducedMotion) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const { innerWidth, innerHeight } = window;
+      // Normalized coords from -1 to 1 centered around viewport
+      const nx = (e.clientX / innerWidth - 0.5) * 2;
+      const ny = (e.clientY / innerHeight - 0.5) * 2;
+      targetPos.current = { x: nx, y: ny };
+    };
+
+    const handleMouseLeave = () => {
+      targetPos.current = { x: 0, y: 0 };
+    };
+
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    document.addEventListener("mouseleave", handleMouseLeave);
+
+    const updateLoop = () => {
+      // Silky smooth spring interpolation (lerp)
+      const lerp = 0.055;
+      currentPos.current.x += (targetPos.current.x - currentPos.current.x) * lerp;
+      currentPos.current.y += (targetPos.current.y - currentPos.current.y) * lerp;
+
+      const x = currentPos.current.x;
+      const y = currentPos.current.y;
+
+      // When user scrolls down (p > 0), smoothly fade mouse influence so it doesn't conflict with scroll scrub
+      const damp = Math.max(0, 1 - p * 2.8);
+
+      if (stageRef.current) {
+        // 3D Perspective Tilt on the entire scene (Matches recording 00:00 - 00:04)
+        const tiltX = -y * 3.8 * damp;
+        const tiltY = x * 4.6 * damp;
+        const panX = x * 10 * damp;
+        const panY = y * 7 * damp;
+
+        stageRef.current.style.transform = `perspective(1200px) rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg) translate3d(${panX.toFixed(2)}px, ${panY.toFixed(2)}px, 0)`;
+      }
+
+      if (bgRef.current) {
+        // Background vehicle imagery shifts with physical depth
+        const bgX = x * 16 * damp;
+        const bgY = y * 12 * damp;
+        bgRef.current.style.transform = `translate3d(${bgX.toFixed(2)}px, ${bgY.toFixed(2)}px, 0) scale(${(1 + 0.02 * damp).toFixed(3)})`;
+      }
+
+      if (titleRef.current) {
+        // Massive typography floats in front with counter-parallax
+        const tX = -x * 12 * damp;
+        const tY = -y * 8 * damp;
+        titleRef.current.style.transform = `translate3d(${tX.toFixed(2)}px, ${tY.toFixed(2)}px, 25px)`;
+      }
+
+      if (glowRef.current) {
+        // Dynamic amber light shifts toward cursor
+        const gX = x * 35 * damp;
+        const gY = y * 25 * damp;
+        glowRef.current.style.transform = `translate3d(${gX.toFixed(2)}px, ${gY.toFixed(2)}px, 0)`;
+      }
+
+      animRef.current = requestAnimationFrame(updateLoop);
+    };
+
+    animRef.current = requestAnimationFrame(updateLoop);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseleave", handleMouseLeave);
+      if (animRef.current) cancelAnimationFrame(animRef.current);
+    };
+  }, [p]);
 
   // ========================================================================
   // 1. HERO TYPOGRAPHY MOTION (Reference Animation Behavior)
@@ -108,147 +197,159 @@ export const BoonHero: React.FC<BoonHeroProps> = ({
       }}
       aria-label="Mining Discovery - Global Mining Media & Capital Platform"
     >
-      {/* FRAGMENTED EDITORIAL QUADRANT PANELS (Reference Motion Philosophy) */}
-      <div className={styles.heroVisualWrap} aria-hidden="true">
-        {/* Panel 1: Top Left */}
+      {/* 3D PARALLAX STAGE (Follows cursor position with smooth perspective tilt) */}
+      <div ref={stageRef} className={styles.heroParallaxStage}>
+        {/* FRAGMENTED EDITORIAL QUADRANT PANELS (Reference Motion Philosophy) */}
         <div
-          className={styles.panelTopLeft}
-          style={{
-            transform: `translate3d(${p1X.toFixed(2)}vw, ${p1Y.toFixed(2)}vh, 0)`,
-          }}
+          ref={bgRef}
+          className={styles.heroVisualWrap}
+          aria-hidden="true"
+          style={{ transformOrigin: "center center", willChange: "transform" }}
         >
+          {/* Panel 1: Top Left */}
           <div
-            className={styles.panelInnerImage}
-            style={{ left: 0, top: 0 }}
+            className={styles.panelTopLeft}
+            style={{
+              transform: `translate3d(${p1X.toFixed(2)}vw, ${p1Y.toFixed(2)}vh, 0)`,
+            }}
+          >
+            <div
+              className={styles.panelInnerImage}
+              style={{ left: 0, top: 0 }}
+            />
+          </div>
+
+          {/* Panel 2: Top Right */}
+          <div
+            className={styles.panelTopRight}
+            style={{
+              transform: `translate3d(${p2X.toFixed(2)}vw, ${p2Y.toFixed(2)}vh, 0)`,
+            }}
+          >
+            <div
+              className={styles.panelInnerImage}
+              style={{ left: "-44vw", top: 0 }}
+            />
+          </div>
+
+          {/* Panel 3: Bottom Left */}
+          <div
+            className={styles.panelBottomLeft}
+            style={{
+              transform: `translate3d(${p3X.toFixed(2)}vw, ${p3Y.toFixed(2)}vh, 0)`,
+            }}
+          >
+            <div
+              className={styles.panelInnerImage}
+              style={{ left: 0, top: "-50vh" }}
+            />
+            {/* Lower Left Box Accent Frame */}
+            <div className={styles.lowerLeftBoxAccent} style={{ width: "100%" }} />
+          </div>
+
+          {/* Panel 4: Bottom Right */}
+          <div
+            className={styles.panelBottomRight}
+            style={{
+              transform: `translate3d(${p4X.toFixed(2)}vw, ${p4Y.toFixed(2)}vh, 0)`,
+            }}
+          >
+            <div
+              className={styles.panelInnerImage}
+              style={{ left: "-44vw", top: "-50vh" }}
+            />
+            {/* Amber Ember Glow */}
+            <div ref={glowRef} className={styles.ambientEmberGlow} />
+          </div>
+
+          {/* Soft Vignette Overlay */}
+          <div
+            className={styles.heroVignetteOverlay}
+            style={{ opacity: seamOp.toFixed(3) }}
+          />
+
+          {/* Technical Grid Seams (Separate / Fade on scroll) */}
+          <div
+            className={styles.gridSeamHorizontal}
+            style={{
+              opacity: seamOp.toFixed(3),
+              transform: `scaleX(${(1 + p * 0.15).toFixed(3)})`,
+            }}
+          />
+          <div
+            className={styles.gridSeamVertical}
+            style={{
+              opacity: seamOp.toFixed(3),
+              transform: `translate3d(${(p1X * 0.8).toFixed(2)}vw, 0, 0)`,
+            }}
           />
         </div>
 
-        {/* Panel 2: Top Right */}
-        <div
-          className={styles.panelTopRight}
-          style={{
-            transform: `translate3d(${p2X.toFixed(2)}vw, ${p2Y.toFixed(2)}vh, 0)`,
-          }}
-        >
+        {/* Main Content Overlay: Typography & Bottom Bar */}
+        <div className={styles.heroContentOverlay}>
+          {/* Massive Asymmetric Display Typography (Physical Horizontal Translations + 3D Depth) */}
           <div
-            className={styles.panelInnerImage}
-            style={{ left: "-44vw", top: 0 }}
-          />
-        </div>
-
-        {/* Panel 3: Bottom Left */}
-        <div
-          className={styles.panelBottomLeft}
-          style={{
-            transform: `translate3d(${p3X.toFixed(2)}vw, ${p3Y.toFixed(2)}vh, 0)`,
-          }}
-        >
-          <div
-            className={styles.panelInnerImage}
-            style={{ left: 0, top: "-50vh" }}
-          />
-          {/* Lower Left Box Accent Frame */}
-          <div className={styles.lowerLeftBoxAccent} style={{ width: "100%" }} />
-        </div>
-
-        {/* Panel 4: Bottom Right */}
-        <div
-          className={styles.panelBottomRight}
-          style={{
-            transform: `translate3d(${p4X.toFixed(2)}vw, ${p4Y.toFixed(2)}vh, 0)`,
-          }}
-        >
-          <div
-            className={styles.panelInnerImage}
-            style={{ left: "-44vw", top: "-50vh" }}
-          />
-          {/* Amber Ember Glow */}
-          <div className={styles.ambientEmberGlow} />
-        </div>
-
-        {/* Soft Vignette Overlay */}
-        <div
-          className={styles.heroVignetteOverlay}
-          style={{ opacity: seamOp.toFixed(3) }}
-        />
-
-        {/* Technical Grid Seams (Separate / Fade on scroll) */}
-        <div
-          className={styles.gridSeamHorizontal}
-          style={{
-            opacity: seamOp.toFixed(3),
-            transform: `scaleX(${(1 + p * 0.15).toFixed(3)})`,
-          }}
-        />
-        <div
-          className={styles.gridSeamVertical}
-          style={{
-            opacity: seamOp.toFixed(3),
-            transform: `translate3d(${(p1X * 0.8).toFixed(2)}vw, 0, 0)`,
-          }}
-        />
-      </div>
-
-      {/* Main Content Overlay: Typography & Bottom Bar */}
-      <div className={styles.heroContentOverlay}>
-        {/* Massive Asymmetric Display Typography (Physical Horizontal Translations) */}
-        <div className={styles.titleArea}>
-          <h1
-            className={styles.headlineLine1}
-            style={{
-              transform: `translate3d(${text1X.toFixed(2)}vw, calc(-50% + ${text1Y.toFixed(2)}vh), 0)`,
-              opacity: text1Opacity.toFixed(3),
-            }}
+            ref={titleRef}
+            className={styles.titleArea}
+            style={{ transformStyle: "preserve-3d", willChange: "transform" }}
           >
-            MINING
-          </h1>
-          <h2
-            className={styles.headlineLine2}
-            style={{
-              transform: `translate3d(${text2X.toFixed(2)}vw, calc(-50% + ${text2Y.toFixed(2)}vh), 0)`,
-              opacity: text2Opacity.toFixed(3),
-            }}
-          >
-            DISCOVERY
-          </h2>
-        </div>
+            <h1
+              className={styles.headlineLine1}
+              style={{
+                transform: `translate3d(${text1X.toFixed(2)}vw, calc(-50% + ${text1Y.toFixed(2)}vh), 0)`,
+                opacity: text1Opacity.toFixed(3),
+              }}
+            >
+              MINING
+            </h1>
+            <h2
+              className={styles.headlineLine2}
+              style={{
+                transform: `translate3d(${text2X.toFixed(2)}vw, calc(-50% + ${text2Y.toFixed(2)}vh), 0)`,
+                opacity: text2Opacity.toFixed(3),
+              }}
+            >
+              DISCOVERY
+            </h2>
+          </div>
 
-        {/* Bottom Bar: Mission statement on left, animated scroll cue on right */}
-        <div className={styles.bottomBar}>
-          <p
-            className={styles.missionStatement}
-            style={{
-              transform: `translate3d(${bLeftX.toFixed(2)}vw, ${bLeftY.toFixed(2)}vh, 0)`,
-              opacity: bLeftOp.toFixed(3),
-            }}
-          >
-            We engineer strategic media, institutional capital, and global intelligence to drive{" "}
-            <span className={styles.accentHighlight}>unprecedented market valuation</span> for natural resource leaders.
-          </p>
+          {/* Bottom Bar: Mission statement on left, animated scroll cue on right */}
+          <div className={styles.bottomBar}>
+            <p
+              className={styles.missionStatement}
+              style={{
+                transform: `translate3d(${bLeftX.toFixed(2)}vw, ${bLeftY.toFixed(2)}vh, 0)`,
+                opacity: bLeftOp.toFixed(3),
+              }}
+            >
+              We engineer strategic media, institutional capital, and global intelligence to drive{" "}
+              <span className={styles.accentHighlight}>unprecedented market valuation</span> for natural resource leaders.
+            </p>
 
-          <div
-            className={styles.scrollCue}
-            onClick={handleScrollClick}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                handleScrollClick();
-              }
-            }}
-            style={{
-              transform: `translate3d(${bRightX.toFixed(2)}vw, ${bRightY.toFixed(2)}vh, 0)`,
-              opacity: bRightOp.toFixed(3),
-            }}
-            aria-label="Scroll down to begin 3D story journey"
-          >
-            <span className={styles.scrollText}>SCROLL FOR MORE</span>
-            <div className={styles.scrollDots} aria-hidden="true">
-              <span className={styles.scrollDot} />
-              <span className={styles.scrollDot} />
-              <span className={styles.scrollDot} />
-              <span className={styles.scrollDot} />
+            <div
+              className={styles.scrollCue}
+              onClick={handleScrollClick}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleScrollClick();
+                }
+              }}
+              style={{
+                transform: `translate3d(${bRightX.toFixed(2)}vw, ${bRightY.toFixed(2)}vh, 0)`,
+                opacity: bRightOp.toFixed(3),
+              }}
+              aria-label="Scroll down to begin 3D story journey"
+            >
+              <span className={styles.scrollText}>SCROLL FOR MORE</span>
+              <div className={styles.scrollDots} aria-hidden="true">
+                <span className={styles.scrollDot} />
+                <span className={styles.scrollDot} />
+                <span className={styles.scrollDot} />
+                <span className={styles.scrollDot} />
+              </div>
             </div>
           </div>
         </div>

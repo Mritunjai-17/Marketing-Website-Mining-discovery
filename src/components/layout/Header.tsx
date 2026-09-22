@@ -2,15 +2,12 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { Menu, X, ArrowRight, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { X } from "lucide-react";
 
 /*
- * Navigation Architecture for Mining Discovery:
- * WORK, SERVICES, STORY, INSIGHTS, NETWORK
- * Right Actions: ASK AI, CONTACT
+ * Primary Navigation Architecture for Mining Discovery
  */
 const navLinks = [
   { name: "About", href: "/about" },
@@ -23,51 +20,59 @@ export const Header: React.FC = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [hoveredLink, setHoveredLink] = useState<string | null>(null);
   const lastScrollYRef = useRef(0);
 
-  const router = useRouter();
   const pathname = usePathname();
 
   // Dark ground routes that open immediately in dark mode
   const DARK_GROUND_ROUTES = ["/services", "/work", "/contact"];
   const isDarkInitialRoute = DARK_GROUND_ROUTES.includes(pathname);
 
-  // Effective dark ratio: 0 = top Hero light state, 1 = dark section state
-  const darkRatio = isDarkInitialRoute ? 1 : Math.min(1, Math.max(0, scrollProgress));
-  const isDarkMode = darkRatio > 0.45;
-
-  const goToContact = () => {
-    setMobileMenuOpen(false);
-    router.push("/contact");
-  };
-
-  const openAskAI = () => {
-    setMobileMenuOpen(false);
-    const chatBtn = document.querySelector<HTMLButtonElement>(".chat-button-new");
-    if (chatBtn) {
-      chatBtn.click();
+  // Lock body scroll when overlay menu is open
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
     }
-  };
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [menuOpen]);
 
+  // Handle escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && menuOpen) {
+        setMenuOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [menuOpen]);
+
+  // Close menu on route change
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
+
+  // Scroll monitoring
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = Math.max(0, window.scrollY);
       setIsScrolled(currentScrollY > 30);
 
-      // Smooth transition progress over 140px of scrolling away from top of Hero
       const progress = Math.min(1, currentScrollY / 140);
       setScrollProgress(progress);
 
       const prevScrollY = lastScrollYRef.current;
       const diff = currentScrollY - prevScrollY;
 
-      // Always show near the top of the page
       if (currentScrollY <= 40) {
         setIsVisible(true);
       } else if (Math.abs(diff) > 3) {
-        // Scrolling downward -> hide navbar
-        // Scrolling upward -> show navbar
         if (diff > 0) {
           setIsVisible(false);
         } else {
@@ -94,178 +99,279 @@ export const Header: React.FC = () => {
     };
   }, []);
 
-  const shouldShow = isVisible || mobileMenuOpen;
+  const shouldShow = isVisible || menuOpen;
 
   return (
     <>
+      {/* Fixed Navigation Bar */}
       <header
-        className="fixed top-0 z-50 w-full font-sans transition-all duration-300 ease-out"
+        className="fixed top-0 left-0 z-[110] w-full font-sans transition-all duration-400 ease-out"
         style={{
           transform: shouldShow ? "translateY(0)" : "translateY(-100%)",
           opacity: shouldShow ? 1 : 0,
           pointerEvents: shouldShow ? "auto" : "none",
-          backgroundColor: isDarkInitialRoute
-            ? "rgba(8, 9, 9, 0.72)"
+          backgroundColor: menuOpen
+            ? "transparent"
+            : isDarkInitialRoute
+            ? "rgba(8, 9, 9, 0.75)"
             : scrollProgress > 0.1
-            ? `rgba(250, 247, 242, ${(0.85 + scrollProgress * 0.1).toFixed(2)})`
+            ? `rgba(10, 11, 14, ${(0.82 + scrollProgress * 0.12).toFixed(2)})`
             : "transparent",
-          backdropFilter: scrollProgress > 0.05 || isDarkInitialRoute ? "blur(12px)" : "none",
-          WebkitBackdropFilter: scrollProgress > 0.05 || isDarkInitialRoute ? "blur(12px)" : "none",
-          borderBottom: `1px solid rgba(11, 31, 58, ${(scrollProgress * 0.08).toFixed(2)})`,
+          backdropFilter:
+            !menuOpen && (scrollProgress > 0.05 || isDarkInitialRoute)
+              ? "blur(14px)"
+              : "none",
+          WebkitBackdropFilter:
+            !menuOpen && (scrollProgress > 0.05 || isDarkInitialRoute)
+              ? "blur(14px)"
+              : "none",
+          borderBottom: menuOpen
+            ? "none"
+            : `1px solid rgba(255, 255, 255, ${(scrollProgress * 0.07).toFixed(2)})`,
           paddingTop: isScrolled
-            ? "max(10px, env(safe-area-inset-top, 10px))"
-            : "max(14px, env(safe-area-inset-top, 14px))",
-          paddingBottom: isScrolled ? "10px" : "14px",
+            ? "max(12px, env(safe-area-inset-top, 12px))"
+            : "max(18px, env(safe-area-inset-top, 18px))",
+          paddingBottom: isScrolled ? "12px" : "18px",
         }}
       >
-        {/* Full-width container with responsive horizontal padding */}
-        <div className="w-full px-3.5 sm:px-8 lg:px-16 flex items-center justify-between">
-          {/* Brand Logo */}
-          <Link
-            href="/"
-            className="group flex items-center focus:outline-none"
-            aria-label="Mining Discovery Home"
-          >
-            <Image
-              src="/logo.png"
-              alt="Mining Discovery Logo"
-              width={220}
-              height={85}
-              priority
-              className="h-9 sm:h-11 w-auto object-contain transition-transform duration-300 group-hover:scale-102"
-            />
-          </Link>
-
-          {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-7 font-sans">
-            {navLinks.map((link) => {
-              const isActive = pathname === link.href;
-              return (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  className="relative py-1 text-xs font-semibold uppercase tracking-[0.09em] transition-colors duration-300"
-                  style={{
-                    color: isDarkMode
-                      ? isActive
-                        ? "#FAF7F2"
-                        : "rgba(250, 247, 242, 0.84)"
-                      : isActive
-                        ? "#0B1F3A"
-                        : "rgba(11, 31, 58, 0.90)",
-                  }}
-                >
-                  <span className="hover:text-[#B8860B] transition-colors duration-200">
-                    {link.name}
-                  </span>
-
-                  {/* Restrained Gold Active Indicator */}
-                  {isActive && (
-                    <span
-                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#B8860B] shadow-[0_0_6px_rgba(184,134,11,0.6)]"
-                      aria-hidden="true"
-                    />
-                  )}
-                </Link>
-              );
-            })}
-          </nav>
-
-          {/* Desktop Header Action CTA: Get Featured */}
-          <div className="hidden lg:flex items-center">
-            <Button
-              variant="gold"
-              size="sm"
-              onClick={goToContact}
-              className="font-sans font-semibold tracking-wider text-xs py-1.5 px-4 text-white bg-[#A87E2C] hover:bg-[#8F6B24] shadow-xs transition-all duration-300"
+        {/* 3-Column Luxury Forge Header Layout */}
+        <div className="w-full px-5 sm:px-10 lg:px-16 flex items-center justify-between">
+          {/* Left Column: Social Icons (LinkedIn, Instagram, Facebook matching recording) */}
+          <div className="w-1/3 flex items-center justify-start gap-3.5 sm:gap-4.5">
+            {/* LinkedIn */}
+            <a
+              href="https://www.linkedin.com/company/miningdiscovery/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white/80 hover:text-white transition-all duration-200 hover:scale-110 flex items-center justify-center"
+              aria-label="LinkedIn"
             >
-              Get Featured
-              <ArrowRight className="w-3.5 h-3.5 ml-1" />
-            </Button>
+              <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.64a1.67 1.67 0 1 0 1.67 1.67 1.67 1.67 0 0 0-1.67-1.67z" />
+              </svg>
+            </a>
+
+            {/* Instagram */}
+            <a
+              href="https://www.instagram.com/miningdiscovery"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white/80 hover:text-white transition-all duration-200 hover:scale-110 flex items-center justify-center"
+              aria-label="Instagram"
+            >
+              <svg
+                className="w-4 h-4 fill-none stroke-current stroke-2"
+                viewBox="0 0 24 24"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+              </svg>
+            </a>
+
+            {/* Facebook */}
+            <a
+              href="https://www.facebook.com/share/17woBUaJqG/?mibextid=wwXIfr"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white/80 hover:text-white transition-all duration-200 hover:scale-110 flex items-center justify-center"
+              aria-label="Facebook"
+            >
+              <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+              </svg>
+            </a>
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen(true)}
-            className="lg:hidden p-2 rounded-lg focus:outline-none transition-colors"
-            style={{
-              color: isDarkMode ? "#FAF7F2" : "#0B1F3A",
-              backgroundColor: isDarkMode ? "rgba(255,255,255,0.06)" : "rgba(11,31,58,0.06)",
-            }}
-            aria-label="Open navigation menu"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
+          {/* Center Column: Symmetrical Brand Logo */}
+          <div className="w-1/3 flex items-center justify-center">
+            <Link
+              href="/"
+              onClick={() => setMenuOpen(false)}
+              className="group flex flex-col items-center justify-center focus:outline-none"
+              aria-label="Mining Discovery Home"
+            >
+              <Image
+                src="/logo.webp"
+                alt="Mining Discovery Logo"
+                width={190}
+                height={60}
+                priority
+                className="h-8 sm:h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+              />
+            </Link>
+          </div>
+
+          {/* Right Column: NAVIGATE / CLOSE Trigger Button */}
+          <div className="w-1/3 flex items-center justify-end">
+            <button
+              type="button"
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="group flex items-center gap-2.5 px-3 py-1.5 rounded-full text-white/90 hover:text-white transition-all duration-300 focus:outline-none select-none cursor-pointer"
+              aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
+              aria-expanded={menuOpen}
+            >
+              <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] transition-colors duration-200 group-hover:text-amber-300/90">
+                {menuOpen ? "CLOSE" : "NAVIGATE"}
+              </span>
+
+              {/* Icon: Two horizontal bars for NAVIGATE, Cross for CLOSE */}
+              <div className="relative w-4 h-4 flex items-center justify-center">
+                {menuOpen ? (
+                  <X className="w-4 h-4 text-white transition-transform duration-300 rotate-0 group-hover:rotate-90" />
+                ) : (
+                  <div className="flex flex-col justify-center items-end gap-1 w-3.5">
+                    <span className="w-3.5 h-[1.5px] bg-white transition-all duration-300 group-hover:w-4" />
+                    <span className="w-2.5 h-[1.5px] bg-white transition-all duration-300 group-hover:w-4" />
+                  </div>
+                )}
+              </div>
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* Mobile Navigation Drawer - rendered outside <header> so backdrop-filter does not clip fixed positioning */}
-      {mobileMenuOpen && (
-        <div className="fixed inset-0 z-[100] lg:hidden">
-          <div
-            className="fixed inset-0 bg-black/70 backdrop-blur-xs transition-opacity duration-300"
-            onClick={() => setMobileMenuOpen(false)}
-          />
+      {/* Full-Screen Luxury Editorial Overlay Menu (Forge Style) */}
+      <div
+        className="fixed inset-0 z-[105] flex flex-col justify-between transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        style={{
+          opacity: menuOpen ? 1 : 0,
+          visibility: menuOpen ? "visible" : "hidden",
+          pointerEvents: menuOpen ? "auto" : "none",
+          background:
+            "radial-gradient(ellipse at 50% 45%, #240b0f 0%, #150608 50%, #070304 95%)",
+        }}
+        aria-hidden={!menuOpen}
+      >
+        {/* Subtle Ambient Radial Vignette Layer */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-40 mix-blend-screen"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.08) 0%, transparent 65%)",
+          }}
+        />
 
-          <div className="fixed inset-y-0 right-0 w-full max-w-xs bg-[#080909] text-[#FAF7F2] shadow-2xl p-6 pt-[max(1.5rem,env(safe-area-inset-top,1.5rem))] pb-[max(1.5rem,env(safe-area-inset-bottom,1.5rem))] flex flex-col justify-between transform transition-transform duration-300 ease-out border-l border-white/10 font-sans overflow-y-auto overscroll-contain">
-            <div>
-              <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
-                <Link
-                  href="/"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center"
-                >
-                  <Image
-                    src="/logo.png"
-                    alt="Mining Discovery"
-                    width={160}
-                    height={60}
-                    className="h-8 w-auto object-contain"
-                  />
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="p-1.5 rounded-md text-white/70 hover:text-white hover:bg-white/10 focus:outline-none"
-                  aria-label="Close navigation menu"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
+        {/* Top Spacer to account for pinned header */}
+        <div className="h-24 sm:h-28 w-full shrink-0" />
 
-              <nav className="flex flex-col gap-4">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.name}
-                    href={link.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="text-xs font-semibold uppercase tracking-wider text-white/90 hover:text-[#D4AF37] py-2 border-b border-white/10 transition-colors flex items-center justify-between"
+        {/* Center: Massive Editorial Serif Navigation Links */}
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 py-8">
+          <nav className="flex flex-col items-center justify-center gap-4 sm:gap-6 md:gap-8 text-center">
+            {navLinks.map((link) => {
+              const isHovered = hoveredLink === link.name;
+              const hasHover = hoveredLink !== null;
+              const isOtherHovered = hasHover && !isHovered;
+
+              return (
+                <div
+                  key={link.name}
+                  className="relative flex flex-col items-center group"
+                  onMouseEnter={() => setHoveredLink(link.name)}
+                  onMouseLeave={() => setHoveredLink(null)}
+                >
+                  {/* Fluid Sine Wave Ornament Above Text on Hover (Reference Recording Detail) */}
+                  <div
+                    className="overflow-hidden transition-all duration-300 ease-out"
+                    style={{
+                      height: isHovered ? "18px" : "0px",
+                      opacity: isHovered ? 1 : 0,
+                      transform: isHovered ? "translateY(0)" : "translateY(6px)",
+                    }}
+                    aria-hidden="true"
                   >
-                    <span>{link.name}</span>
-                    {pathname === link.href && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#B8860B]" />
-                    )}
-                  </Link>
-                ))}
-              </nav>
-            </div>
+                    <svg
+                      width="60"
+                      height="12"
+                      viewBox="0 0 60 12"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="text-[#FAF7F2]/80"
+                    >
+                      <path
+                        d="M2 6C6 2 10 2 14 6C18 10 22 10 26 6C30 2 34 2 38 6C42 10 46 10 50 6C54 2 58 2 62 6"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  </div>
 
-            <div className="pt-6 border-t border-white/10">
-              <Button
-                variant="gold"
-                size="md"
-                fullWidth
-                onClick={goToContact}
-                className="font-sans font-semibold tracking-wider text-white bg-[#A87E2C] hover:bg-[#8F6B24] shadow-md"
+                  {/* Editorial Serif Link Text */}
+                  <Link
+                    href={link.href}
+                    onClick={() => setMenuOpen(false)}
+                    className="relative block font-[family-name:var(--font-editorial-serif)] uppercase tracking-[0.06em] text-4xl sm:text-6xl md:text-7xl lg:text-8xl transition-all duration-400 ease-out select-none"
+                    style={{
+                      color: isHovered
+                        ? "#FFFFFF"
+                        : isOtherHovered
+                        ? "rgba(250, 247, 242, 0.28)"
+                        : "rgba(250, 247, 242, 0.92)",
+                      fontStyle: isHovered ? "italic" : "normal",
+                      transform: isHovered ? "scale(1.03)" : "scale(1)",
+                      textShadow: isHovered
+                        ? "0 0 35px rgba(255, 255, 255, 0.25)"
+                        : "none",
+                    }}
+                  >
+                    {link.name}
+                  </Link>
+                </div>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* Bottom Bar: Copyright, Legal Links, Attribution (Matches Recording 00:09-00:12) */}
+        <div className="relative z-10 w-full px-6 sm:px-12 lg:px-16 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom,1.5rem))] flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/10 text-white/50 text-[10px] sm:text-xs uppercase tracking-[0.2em] font-sans">
+          {/* Bottom Left */}
+          <div className="order-3 sm:order-1 text-center sm:text-left">
+            <span>COPYRIGHT © {new Date().getFullYear()}</span>
+          </div>
+
+          {/* Bottom Center: Legal & Powered By */}
+          <div className="order-1 sm:order-2 flex flex-col items-center gap-1.5 text-center">
+            <div className="flex items-center gap-5 text-white/70">
+              <Link
+                href="/privacy"
+                onClick={() => setMenuOpen(false)}
+                className="hover:text-white transition-colors"
               >
-                Get Featured
-                <ArrowRight className="w-4 h-4 ml-1" />
-              </Button>
+                COOKIES
+              </Link>
+              <span className="text-white/20">•</span>
+              <Link
+                href="/privacy"
+                onClick={() => setMenuOpen(false)}
+                className="hover:text-white transition-colors"
+              >
+                PRIVACY
+              </Link>
+              <span className="text-white/20">•</span>
+              <Link
+                href="/terms"
+                onClick={() => setMenuOpen(false)}
+                className="hover:text-white transition-colors"
+              >
+                TERMS
+              </Link>
             </div>
+            <span className="text-[9px] text-white/40 tracking-[0.26em]">
+              POWERED BY MINING DISCOVERY
+            </span>
+          </div>
+
+          {/* Bottom Right */}
+          <div className="order-2 sm:order-3 text-center sm:text-right">
+            <span>MADE BY 101 STUDIO</span>
           </div>
         </div>
-      )}
+      </div>
     </>
   );
 };
+
+export default Header;

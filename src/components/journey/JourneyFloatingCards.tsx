@@ -369,7 +369,7 @@ export const JourneyFloatingCards: React.FC<JourneyFloatingCardsProps> = ({ onOp
             <span className={styles.cardHeaderTag}>DIGITAL MEDIA</span>
           </div>
           <img
-            src="/cards/bg_card_1.jpg"
+            src="/cards/bg_card_1.webp"
             alt="Digital Media"
             className={styles.digitalMediaThumb}
           />
@@ -401,7 +401,7 @@ export const JourneyFloatingCards: React.FC<JourneyFloatingCardsProps> = ({ onOp
               </p>
             </div>
             <img
-              src="/services/04-pit.jpg"
+              src="/services/04-pit.webp"
               alt="Mining Newsletters"
               className={styles.newslettersThumb}
             />
@@ -429,7 +429,7 @@ export const JourneyFloatingCards: React.FC<JourneyFloatingCardsProps> = ({ onOp
           </div>
           <div className={styles.youtubeThumbWrap}>
             <img
-              src="/cards/bg_card_1.jpg"
+              src="/cards/bg_card_1.webp"
               alt="The Future of Mining"
               className={styles.youtubeThumbImg}
             />
@@ -463,18 +463,46 @@ export const JourneyFloatingCards: React.FC<JourneyFloatingCardsProps> = ({ onOp
             <span className={styles.cardHeaderTag}>SOCIAL MEDIA</span>
           </div>
           <div className={styles.socialRow}>
-            <div className={`${styles.socialIconBtn} ${styles.socialLinkedin}`} title="LinkedIn">
+            <a
+              href="https://www.linkedin.com/company/miningdiscovery/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`${styles.socialIconBtn} ${styles.socialLinkedin}`}
+              title="LinkedIn"
+              aria-label="LinkedIn"
+            >
               in
-            </div>
-            <div className={`${styles.socialIconBtn} ${styles.socialX}`} title="X">
+            </a>
+            <a
+              href="https://x.com/MiningDiscovery"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`${styles.socialIconBtn} ${styles.socialX}`}
+              title="X"
+              aria-label="X"
+            >
               𝕏
-            </div>
-            <div className={`${styles.socialIconBtn} ${styles.socialInsta}`} title="Instagram">
+            </a>
+            <a
+              href="https://www.instagram.com/miningdiscovery"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`${styles.socialIconBtn} ${styles.socialInsta}`}
+              title="Instagram"
+              aria-label="Instagram"
+            >
               📸
-            </div>
-            <div className={`${styles.socialIconBtn} ${styles.socialYoutube}`} title="YouTube">
+            </a>
+            <a
+              href="https://www.youtube.com/@miningdiscovery"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`${styles.socialIconBtn} ${styles.socialYoutube}`}
+              title="YouTube"
+              aria-label="YouTube"
+            >
               ▶
-            </div>
+            </a>
           </div>
           <div className="flex items-center justify-between">
             <p className={styles.cardBodyText}>Real stories. Global reach.</p>
@@ -501,7 +529,7 @@ export const JourneyFloatingCards: React.FC<JourneyFloatingCardsProps> = ({ onOp
           </div>
           <div className={styles.magazineCoverMini}>
             <img
-              src="/cards/bg_card_4.jpg"
+              src="/cards/bg_card_4.webp"
               alt="Mining Today Magazine"
               className={styles.magazineCoverImg}
             />
@@ -607,18 +635,39 @@ export const JourneyFloatingCards: React.FC<JourneyFloatingCardsProps> = ({ onOp
         >
           <div className={styles.reachRow}>
             <div className={styles.reachSocials}>
-              <div className={`${styles.socialIconBtn} ${styles.socialLinkedin}`} title="LinkedIn">
+              <a
+                href="https://www.linkedin.com/company/miningdiscovery/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${styles.socialIconBtn} ${styles.socialLinkedin}`}
+                title="LinkedIn"
+                aria-label="LinkedIn"
+              >
                 in
-              </div>
-              <div className={`${styles.socialIconBtn} ${styles.socialX}`} title="X">
+              </a>
+              <a
+                href="https://x.com/MiningDiscovery"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${styles.socialIconBtn} ${styles.socialX}`}
+                title="X"
+                aria-label="X"
+              >
                 𝕏
-              </div>
-              <div className={`${styles.socialIconBtn} ${styles.socialYoutube}`} title="YouTube">
+              </a>
+              <a
+                href="https://www.youtube.com/@miningdiscovery"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${styles.socialIconBtn} ${styles.socialYoutube}`}
+                title="YouTube"
+                aria-label="YouTube"
+              >
                 ▶
-              </div>
+              </a>
             </div>
             <img
-              src="/cards/bg_card_1.jpg"
+              src="/cards/bg_card_1.webp"
               alt="Global Mining Reach"
               className={styles.reachThumb}
             />
@@ -663,7 +712,7 @@ export const JourneyFloatingCards: React.FC<JourneyFloatingCardsProps> = ({ onOp
                 </svg>
               </div>
               <img
-                src="/cards/bg_card_3.jpg"
+                src="/cards/bg_card_3.webp"
                 alt="Mining Asset Preview"
                 className={styles.investorMineThumb}
               />
@@ -747,17 +796,62 @@ export const JourneyFloatingCards: React.FC<JourneyFloatingCardsProps> = ({ onOp
               </p>
               {/* Platform icons row */}
               <div className={styles.p4SocialIcons}>
-                <span className={`${styles.p4SocialIcon} ${styles.p4Ig}`} title="Instagram">ig</span>
-                <span className={`${styles.p4SocialIcon} ${styles.p4Li}`} title="LinkedIn">in</span>
-                <span className={`${styles.p4SocialIcon} ${styles.p4Yt}`} title="YouTube">▶</span>
-                <span className={`${styles.p4SocialIcon} ${styles.p4Tw}`} title="X/Twitter">𝕏</span>
-                <span className={`${styles.p4SocialIcon} ${styles.p4Fb}`} title="Facebook">f</span>
+                <a
+                  href="https://www.instagram.com/miningdiscovery"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`${styles.p4SocialIcon} ${styles.p4Ig}`}
+                  title="Instagram"
+                  aria-label="Instagram"
+                >
+                  ig
+                </a>
+                <a
+                  href="https://www.linkedin.com/company/miningdiscovery/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`${styles.p4SocialIcon} ${styles.p4Li}`}
+                  title="LinkedIn"
+                  aria-label="LinkedIn"
+                >
+                  in
+                </a>
+                <a
+                  href="https://www.youtube.com/@miningdiscovery"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`${styles.p4SocialIcon} ${styles.p4Yt}`}
+                  title="YouTube"
+                  aria-label="YouTube"
+                >
+                  ▶
+                </a>
+                <a
+                  href="https://x.com/MiningDiscovery"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`${styles.p4SocialIcon} ${styles.p4Tw}`}
+                  title="X/Twitter"
+                  aria-label="X"
+                >
+                  𝕏
+                </a>
+                <a
+                  href="https://www.facebook.com/share/17woBUaJqG/?mibextid=wwXIfr"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`${styles.p4SocialIcon} ${styles.p4Fb}`}
+                  title="Facebook"
+                  aria-label="Facebook"
+                >
+                  f
+                </a>
               </div>
             </div>
             {/* Inline phone thumbnail */}
             <div className={styles.p4PhoneMini}>
               <div className={styles.p4PhoneMiniScreen}>
-                <img src="/cards/bg_card_1.jpg" alt="Social feed" className={styles.p4PhoneMiniImg} />
+                <img src="/cards/bg_card_1.webp" alt="Social feed" className={styles.p4PhoneMiniImg} />
               </div>
             </div>
           </div>
@@ -838,12 +932,12 @@ export const JourneyFloatingCards: React.FC<JourneyFloatingCardsProps> = ({ onOp
           {/* Two video thumbnail previews */}
           <div className={styles.p4VideoThumbs}>
             <div className={styles.p4VideoThumb}>
-              <img src="/cards/bg_card_2.jpg" alt="Video 1" className={styles.p4VideoThumbImg} />
+              <img src="/cards/bg_card_2.webp" alt="Video 1" className={styles.p4VideoThumbImg} />
               <div className={styles.p4VideoPlayBtn}>▶</div>
               <span className={styles.p4VideoDuration}>2:08</span>
             </div>
             <div className={styles.p4VideoThumb}>
-              <img src="/cards/bg_card_3.jpg" alt="Video 2" className={styles.p4VideoThumbImg} />
+              <img src="/cards/bg_card_3.webp" alt="Video 2" className={styles.p4VideoThumbImg} />
               <div className={styles.p4VideoPlayBtn}>▶</div>
               <span className={styles.p4VideoDuration}>1:14</span>
             </div>
@@ -871,7 +965,7 @@ export const JourneyFloatingCards: React.FC<JourneyFloatingCardsProps> = ({ onOp
               <span className={styles.p4BrowserDot} />
             </div>
             <div className={styles.p4ContentDeviceScreen}>
-              <img src="/cards/bg_card_1.jpg" alt="Content preview" className={styles.p4ContentDeviceImg} />
+              <img src="/cards/bg_card_1.webp" alt="Content preview" className={styles.p4ContentDeviceImg} />
             </div>
             <div className={styles.p4ContentDeviceBase} />
             <div className={styles.p4ContentDeviceFoot} />

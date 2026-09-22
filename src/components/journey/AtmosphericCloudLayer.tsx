@@ -295,9 +295,9 @@ export const AtmosphericCloudLayer: React.FC<AtmosphericCloudLayerProps> = ({ pr
     gl.vertexAttribPointer(aPosition, 2, gl.FLOAT, false, 0, 0);
 
     // Load textures
-    texCloudRef.current = loadTexture(gl, "/clouds/cloud_blanket.jpg");
-    texCloudMobileRef.current = loadTexture(gl, "/clouds/cloud_blanket_mobile.jpg");
-    texWispRef.current = loadTexture(gl, "/clouds/cloud_puff_1.png");
+    texCloudRef.current = loadTexture(gl, "/clouds/cloud_blanket.webp");
+    texCloudMobileRef.current = loadTexture(gl, "/clouds/cloud_blanket_mobile.webp");
+    texWispRef.current = loadTexture(gl, "/clouds/cloud_puff_1.webp");
 
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);

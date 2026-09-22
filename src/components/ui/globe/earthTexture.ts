@@ -239,8 +239,8 @@ function paintIceCaps(ctx: CanvasRenderingContext2D, w: number, h: number) {
  * step below wants, since it is drawn under "lighter" where black adds nothing.
  */
 const NIGHT_LIGHTS_SOURCES = {
-  2048: "/textures/earth_lights_2048.jpg",
-  4096: "/textures/earth_lights_4096.jpg",
+  2048: "/textures/earth_lights_2048.webp",
+  4096: "/textures/earth_lights_4096.webp",
 } as const;
 
 /**
@@ -789,7 +789,7 @@ if (typeof window !== "undefined") {
   // Preload atlas and night lights image immediately on browser load
   import("world-atlas/countries-50m.json").catch(() => {});
   const preImg = new Image();
-  preImg.src = "/textures/earth_lights_2048.jpg";
+  preImg.src = "/textures/earth_lights_2048.webp";
 }
 
 /**

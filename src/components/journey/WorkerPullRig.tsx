@@ -111,7 +111,7 @@ export const WorkerPullRig = forwardRef<WorkerPullRigHandle>((_, ref) => {
 
         // Custom tailored executive dark navy / charcoal suit texture
         const texLoader = new THREE.TextureLoader();
-        const suitTexture = texLoader.load("/models/avatar_suit_navy.png", (tex) => {
+        const suitTexture = texLoader.load("/models/avatar_suit_navy.webp", (tex) => {
           tex.flipY = false;
           tex.colorSpace = THREE.SRGBColorSpace;
           renderer.render(scene, camera);

@@ -2,26 +2,12 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { HeadlineUnderline } from "@/components/sections/hero-layers/HeadlineUnderline";
-import { FOCUS_ANCHOR_ID, GLOBE_FIT } from "@/components/ui/globe/EarthGlobe";
-import type {
-  GlobeAnchor,
-  GlobeArc,
-  GlobeFocus,
-  ProjectedAnchor,
-} from "@/components/ui/globe/EarthGlobe";
 import { useCreateJourneyProgress } from "@/components/journey/journeyProgress";
-import { AtmosphericCloudLayer } from "@/components/journey/AtmosphericCloudLayer";
 import { DescentBackdrop } from "@/components/journey/DescentBackdrop";
 import {
   deriveDescentCamera,
   JOURNEY_RUNS_FROM,
 } from "@/components/journey/descentCamera";
-
 import { BoonHero } from "@/components/sections/BoonHero";
 
 const Journey3D = dynamic(
@@ -29,377 +15,27 @@ const Journey3D = dynamic(
   { ssr: false },
 );
 
-// WebGL has no server render, and the topojson chunk should not block first paint.
-const EarthGlobe = dynamic(
-  () => import("@/components/ui/globe/EarthGlobe").then((m) => m.EarthGlobe),
-  { ssr: false },
-);
-
-if (typeof window !== "undefined") {
-  // Preload EarthGlobe chunk, world atlas, and textures as soon as the client bundle loads
-  import("@/components/ui/globe/EarthGlobe");
-  import("world-atlas/countries-50m.json").catch(() => {});
-  const preLights = new Image();
-  preLights.src = "/textures/earth_lights_2048.jpg";
-}
-
-interface MiningSite extends GlobeAnchor {
-  /** Continent, used as the primary label. */
-  region: string;
-  /** Country or territory, used as the sub-label. */
-  country: string;
-  /** One short line shown only while the marker is hovered or focused. */
-  detail: string;
-}
-
-/**
- * One site per continent, positioned by real coordinates rather than by eye.
- *
- * Antarctica is a geographic representation only — the Antarctic Treaty's Madrid
- * Protocol bans commercial mining there, so its detail line says research, not
- * production. Swap it if the company has real data to put behind it.
- */
-const MINING_SITES: MiningSite[] = [
-  { id: "north-america", region: "North America", country: "Canada", detail: "Mining region", lat: 56, lng: -106 },
-  { id: "south-america", region: "South America", country: "Chile", detail: "Mining region", lat: -30, lng: -71 },
-  { id: "europe", region: "Europe", country: "Sweden", detail: "Mining region", lat: 60, lng: 18 },
-  { id: "africa", region: "Africa", country: "South Africa", detail: "Mining region", lat: -30, lng: 24 },
-  { id: "asia", region: "Asia", country: "Mongolia", detail: "Mining region", lat: 46, lng: 104 },
-  { id: "australia", region: "Australia", country: "Western Australia", detail: "Mining region", lat: -25, lng: 122 },
-  // The three below are markers only — they are not tour stops and carry no arcs.
-  //
-  // They exist because the original six sat at longitudes -106, -71, 18, 24, 104 and 122,
-  // which leaves two wide empty sweeps: the Atlantic between Chile and Sweden, and the
-  // whole Pacific from Western Australia back round to Canada. Only about a third of the
-  // set was ever on the near face at once. Filling those gaps is what keeps five or more
-  // markers presented at any rotation angle, and each is a real mining region rather than
-  // a dot placed to space the set out.
-  { id: "brazil", region: "South America", country: "Brazil", detail: "Mining region", lat: -20, lng: -44 },
-  { id: "central-asia", region: "Central Asia", country: "Kazakhstan", detail: "Mining region", lat: 48, lng: 68 },
-  { id: "southeast-asia", region: "Southeast Asia", country: "Indonesia", detail: "Mining region", lat: -4, lng: 137 },
-  // NOTE: at -82 this pin sits permanently below the container's bottom crop — the globe
-  // is deliberately cut off there, and no view pitch brings 82S onto the visible arc
-  // without pushing Sweden and Canada over the top rim. It is kept geographically honest;
-  // to actually surface it, either raise VISIBLE_FRACTION toward 0.9 (a ~20% smaller
-  // globe) or move the pin to the Antarctic Peninsula.
-  { id: "antarctica", region: "Antarctica", country: "Research site", detail: "Geographic representation", lat: -82, lng: 0 },
-];
-
-/**
- * The connection network: ten arcs over six of the regions.
- *
- * WHY ASIA IS IN THE SET NOW. The first six were chosen against the RESTING longitude of
- * 18E, where Mongolia sits out on the far limb and an arc to it spends most of its length
- * behind the planet, fading to nothing in the shader's occlusion test. That reasoning only
- * ever held for a stationary globe: this one drifts continuously and the tour aims at all
- * seven stops in turn, Asia among them, so an Asia arc is fully presented for a large part
- * of every cycle and merely grazing for the rest. Leaving the largest landmass unconnected
- * was the more visible problem.
- *
- * The four additions reach it from four different directions — down from Sweden, up from
- * South Africa, across to Western Australia — rather than all from one side, so the new
- * lines open out across the Indian Ocean and the western Pacific instead of stacking in
- * one quarter. na-au is the one that carries no Asia endpoint: it throws a single line
- * across the Pacific, which is the emptiest part of the disc at the resting angle.
- *
- * Antarctica stays out. At -82 it is below the card's crop at every pitch the framing
- * allows, so an arc to it would be cropped rather than drawn.
- *
- * Phases are spread unevenly across the cycle rather than at even tenths: an even split
- * has every arc firing on a common beat, which reads as a metronome. These share no
- * simple ratio, so the set never resolves into a pattern, and the four new values are
- * interleaved into the gaps the original six left rather than appended after them.
- *
- * onMobile thins the set to five on small viewports, over a globe that has far less room
- * to carry them.
- */
-const HERO_ARCS: GlobeArc[] = [
-  { id: "na-eu", fromId: "north-america", toId: "europe", phase: 0.0, onMobile: true },
-  { id: "eu-as", fromId: "europe", toId: "asia", phase: 0.09 },
-  { id: "na-sa", fromId: "north-america", toId: "south-america", phase: 0.17 },
-  { id: "na-br", fromId: "north-america", toId: "brazil", phase: 0.23 },
-  { id: "eu-af", fromId: "europe", toId: "africa", phase: 0.31, onMobile: true },
-  { id: "eu-ca", fromId: "europe", toId: "central-asia", phase: 0.35 },
-  { id: "af-as", fromId: "africa", toId: "asia", phase: 0.39 },
-  { id: "br-af", fromId: "brazil", toId: "africa", phase: 0.44 },
-  { id: "sa-af", fromId: "south-america", toId: "africa", phase: 0.48, onMobile: true },
-  { id: "ca-as", fromId: "central-asia", toId: "asia", phase: 0.53 },
-  { id: "as-se", fromId: "asia", toId: "southeast-asia", phase: 0.56 },
-  { id: "as-au", fromId: "asia", toId: "australia", phase: 0.62, onMobile: true },
-  { id: "eu-au", fromId: "europe", toId: "australia", phase: 0.68, onMobile: true },
-  { id: "se-au", fromId: "southeast-asia", toId: "australia", phase: 0.76, onMobile: true },
-  { id: "af-au", fromId: "africa", toId: "australia", phase: 0.83 },
-  { id: "na-au", fromId: "north-america", toId: "australia", phase: 0.91 },
-];
-
-const ANCHORS: GlobeAnchor[] = MINING_SITES.map(({ id, lat, lng }) => ({
-  id,
-  lat,
-  lng,
-}));
-
-/**
- * How far past the card's bottom corners the planet runs. At exactly 1 the arc is
- * tangent to them; a little over reads better than a tangent, which looks accidental.
- */
-const HORIZON_OVERRUN = 1.08;
-
-/**
- * Diameter of the sphere whose arc passes exactly through the bottom two corners of a
- * `width` x `height` slot — the horizon framing, solved rather than dialled in.
- *
- * Half-width of a circle of radius r at depth h below its crown is sqrt(r² - (r - h)²).
- * Setting that to width / 2 and solving for the diameter gives the expression below.
- *
- * Two properties fall out of it that hold at every breakpoint, whatever the copy above
- * wraps to, so neither needs a guard constant:
- *   - diameter > height, always — the planet is cropped by the card's floor, never
- *     small enough to sit whole inside the card with white underneath it.
- *   - diameter >= width, always, since it reduces to (width - 2·height)² >= 0 — the
- *     planet is never narrower than the card, so no white gutters beside the arc.
- */
-function horizonDiameter(width: number, height: number) {
-  return ((width * width) / (4 * height) + height) * HORIZON_OVERRUN;
-}
-
-/**
- * Outer bloom, painted in CSS behind the canvas. The shader's haze is an *inner* glow
- * that stops at the silhouette; this is the part that spills onto the white card, so
- * the limb reads as lit rather than as a cut edge.
- *
- * `closest-side` makes 100% the box's half-width, so GLOBE_FIT is directly the stop
- * where the silhouette sits — the halo tracks the sphere at any size.
- *
- * The band is deliberately tight and bright rather than wide and faint. The card crops
- * at the sphere's crown, so glow living far out at 96–100% of the half-width is cut off
- * across most of the arc and never paid for itself; concentrating the same alpha budget
- * into 89.6–95.5% puts the brightest ring immediately outside the limb, where it clears
- * the crop over far more of the visible curve. Peak sits just *past* the silhouette —
- * an atmosphere reads as a rim of light on the edge, not a wash centred on it.
- */
-const SILHOUETTE_STOP = GLOBE_FIT * 100;
-/** Where the bloom finally reaches zero, as a percent of the box's half-width. */
-const HALO_OUTER_STOP = SILHOUETTE_STOP + 5.5;
-const ATMOSPHERE_HALO = [
-  "radial-gradient(circle closest-side at 50% 50%,",
-  `rgba(255,225,160,0) ${SILHOUETTE_STOP - 6}%,`,
-  `rgba(255,210,130,0.12) ${SILHOUETTE_STOP - 2.5}%,`,
-  `rgba(255,195,95,0.42) ${SILHOUETTE_STOP - 0.3}%,`,
-  `rgba(255,210,120,0.52) ${SILHOUETTE_STOP + 0.7}%,`,
-  `rgba(255,225,150,0.28) ${SILHOUETTE_STOP + 1.8}%,`,
-  `rgba(255,235,180,0.10) ${SILHOUETTE_STOP + 3.5}%,`,
-  `rgba(255,245,210,0) ${HALO_OUTER_STOP}%)`,
-].join(" ");
-
-/**
- * How far the bloom reaches past the silhouette, as a fraction of the box's edge.
- *
- * The break in the ring at the crown was never a shape mismatch — the bloom and the
- * canvas share one box, so they cannot drift. It was the crop: boxTop used to seat the
- * crown exactly on the card's top edge, which leaves the ring above it nowhere to
- * render. Dropping the crown by precisely this fraction lands the bloom's outermost
- * pixel flush with that edge instead, so the arc closes with no space wasted.
- *
- * Derived from the gradient's own outer stop rather than dialled in, so retuning the
- * bloom moves the headroom with it and the two cannot fall out of sync.
- */
-const HALO_HEADROOM = (HALO_OUTER_STOP / 100 - GLOBE_FIT) / 2;
-
-/** Below this projected opacity a pin is edge-on, and takes no pointer events. */
-const MARKER_OPACITY_FLOOR = 0.5;
-
-/**
- * Per-marker pulse timing, consumed by .globe-pin-dot and .globe-pin-ring in globals.css.
- *
- * The old stagger was a single stride — index * 0.42s against one shared 3.2s period —
- * which offsets the markers but does not desynchronise them: every ring still opens on
- * the same 3.2s beat, so the set reads as one metronome heard from several places, and
- * any two markers 3.2s apart in delay pulse in exact lockstep.
- *
- * Giving each its OWN period as well is what breaks that. The periods below are spread
- * across the brief's 2-3s and share no simple ratio, so the set has no common multiple to
- * drift back into phase on — the same trick the WebGL arc nodes use, where the comment on
- * ARC_NODE_PERIOD_MIN explains the reasoning at more length.
- *
- * Indexed modulo length, so the table does not have to be kept the same size as the site
- * list — a marker past the end simply reuses an earlier pairing, and with the periods all
- * mutually irrational-ish even a reused pair does not visibly twin with its partner.
- */
-type PinPulseStyle = React.CSSProperties &
-  Record<"--pin-period" | "--pin-delay", string>;
-
-const PIN_PULSE: PinPulseStyle[] = [
-  { "--pin-period": "2.30s", "--pin-delay": "0s" },
-  { "--pin-period": "2.75s", "--pin-delay": "0.53s" },
-  { "--pin-period": "2.15s", "--pin-delay": "1.11s" },
-  { "--pin-period": "2.90s", "--pin-delay": "0.27s" },
-  { "--pin-period": "2.45s", "--pin-delay": "1.64s" },
-  { "--pin-period": "2.60s", "--pin-delay": "0.82s" },
-  { "--pin-period": "2.05s", "--pin-delay": "1.38s" },
-];
-
-/** Shimmering gold sparkles in the sky */
-const SKY_GOLD_SPARKLES = [
-  { top: "22%", left: "9%", size: 14, delay: "0s", duration: "3.2s" },
-  { top: "35%", left: "5%", size: 18, delay: "1.1s", duration: "2.8s" },
-  { top: "18%", right: "11%", size: 16, delay: "0.6s", duration: "3.5s" },
-  { top: "30%", right: "6%", size: 21, delay: "1.8s", duration: "3.0s" },
-  { top: "52%", left: "15%", size: 13, delay: "0.9s", duration: "2.5s" },
-  { top: "62%", right: "17%", size: 15, delay: "1.4s", duration: "3.1s" },
-  { top: "14%", left: "26%", size: 10, delay: "2.1s", duration: "2.7s" },
-  { top: "15%", right: "24%", size: 12, delay: "0.4s", duration: "3.3s" },
-];
-
-/**
- * Order the tour visits. One entry per continent, matched to MINING_SITES by id, and
- * the scroll range is split into this many equal stages.
- */
-const TOUR = [
-  "north-america",
-  "south-america",
-  "europe",
-  "africa",
-  "asia",
-  "australia",
-  "antarctica",
-] as const;
-
-/**
- * Headline exit. Three lines leaving one after another as the copy block scrolls away.
- *
- * `start` is where each line begins moving, as a fraction of the copy block's own scroll
- * span; `span` is how much of that span the line takes to finish. The three overlap
- * heavily on purpose — a gap between them would read as three separate events rather
- * than as one headline coming apart.
- *
- * `rise` differs slightly per line so the stack opens up as it goes instead of travelling
- * as a rigid unit. All three sit inside the 80–120px brief.
- */
-const HEADLINE_LINES: {
-  text: string;
-  start: number;
-  /**
-   * The word inside `text` that carries the gold brushstroke, or absent for no stroke.
-   *
-   * A word rather than a flag because the stroke has to span it and NOT the period after
-   * it. The render splits `text` at the word's last occurrence and prints the three runs
-   * adjacent with no whitespace between them, so the DOM still reads the line exactly as
-   * written. It used to assume a prefix, which only held while "ignore." was a line of
-   * its own; the word now sits at the end of a longer line.
-   */
-  underlineWord?: string;
-}[] = [
-    { text: "Make your mining story", start: 0.18 },
-    { text: "impossible to ignore.", start: 0.36, underlineWord: "ignore" },
-  ];
-
-/**
- * How far a line travels, as a percentage of its own height. Past 100 it is fully behind
- * the mask's top edge; 150 carries it clear with margin, and being a percentage it scales
- * itself across the headline's whole clamp range instead of being right at one width.
- */
-const HEADLINE_RISE_PERCENT = -150;
-/** Scroll fraction each line takes to complete. Overlaps its neighbours by design. */
-const HEADLINE_SPAN = 0.32;
-/** Peak blur in px. Past about 3 the type stops reading as type and starts reading as fog. */
-const HEADLINE_BLUR = 3;
-
 export type TransitionState =
-  | "GLOBE_IDLE"
-  | "GLOBE_LOCATION_SELECTED"
-  | "GLOBE_ZOOMING_IN"
-  | "CLOUDS_IN"
-  | "LAND_DESCENT"
-  | "TRUCK_OVERHEAD_MOVE"
+  | "HERO_ACTIVE"
   | "CAMERA_ANGLE_SHIFT"
   | "SIDE_VIEW_LOCKED"
   | "JOURNEY_ACTIVE";
 
-/** The starting location for the 2D journey: Canada mining region */
-const STARTING_SITE_ID = "north-america";
-const STARTING_SITE = MINING_SITES.find((s) => s.id === STARTING_SITE_ID)!;
+/** Total viewport heights for the entire continuous story (provides comfortable, normal scrolling pace) */
+const TOTAL_SCROLL_VH = 1650;
 
-/** Cinematic zoom into Canada mining terrain before touching down on the road */
-const MAX_ZOOM = 10.5;
-
-/** Total viewport heights for the entire continuous story */
-const TOTAL_SCROLL_VH = 1200;
-
-/** Easing curve for cinematic camera zoom in/out (power3.inOut) */
-function easeInOutCubic(x: number): number {
-  const t = Math.min(Math.max(x, 0), 1);
-  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-}
 /**
  * How the sampled progress follows the true scroll position.
- *
- * THIS WAS DELIBERATELY LAGGY AND IS NOT ANY MORE. The previous values, 60/20, gave a
- * time constant of 272ms and took 816ms to settle — the note here used to describe that
- * as weight that "reads as deliberate rather than as 1:1 scrubbing". It is the same thing
- * a reader feels as the globe being disconnected from the wheel: it accelerates into a
- * move and coasts out of it a third of a second behind the page.
- *
- * 84/18.3 sits between the two extremes this has been tuned to. zeta = 18.3 / (2 *
- * sqrt(84)) = 0.998 — critical to three decimals, so progress still cannot overshoot the
- * scroll position and the tour cannot run past a stop and come back.
- *
- * The time constant is 109ms. That is the ease: flick the wheel and the globe leans into
- * the move and settles out of it rather than snapping onto the new position, trailing a
- * fast scroll by about 29ms. Move slowly and 29ms is below the threshold of noticing, so
- * it tracks the wheel precisely. The three tunings this has had, for the record:
- *
- *   60/20    tau 272ms, trails 106ms   too slow - reads as disconnected from the page
- *   480/44   tau  50ms, trails   1ms   locked on, but no ease into a fast scroll at all
- *   84/18.3  tau 109ms, trails  29ms   eases under a flick, exact under a slow drag
- *
- * WHY ANY FILTER AT ALL. Lenis already smooths the scroll position with its own lerp, so
- * this is a second filter on an already-smooth signal — which is exactly why it must be
- * fast. It earns its place only by absorbing sub-pixel unevenness and the odd long frame;
- * anything slower is double-smoothing, and double-smoothing is the lag.
- *
- * Stability: explicit Euler with substepping needs h * damping < 2. At 60fps that is
- * 0.0167 * 18.3 = 0.31, and the worst substep the cap allows before RESUME_GAP takes over
- * is 0.0333 * 18.3 = 0.61. Both hold comfortably.
+ * Critically damped Euler spring for smooth, responsive scroll-scrubbing.
  */
 const PROGRESS_SPRING = { stiffness: 84, damping: 18.3 };
-/**
- * The zoom's own spring, and the only underdamped one.
- *
- * zeta = 14 / (2 * sqrt(90)) = 0.738, and peak overshoot of a step response is
- * exp(-pi * zeta / sqrt(1 - zeta^2)) = 0.03 — a 3% pass beyond the target scale before it
- * settles. During a hop the target is moving and the spring simply trails it; the
- * overshoot only appears where the target stops changing, which is the arrival at a stop.
- * That is the settle, and it costs nothing at rest because the spring latches exactly.
- *
- * Set damping to 2 * sqrt(stiffness) = 18.97 to remove the bounce and keep the easing.
- */
-const ZOOM_SPRING = { stiffness: 90, damping: 14 };
-/**
- * A frame gap longer than this means the loop was parked — tab hidden, or the globe
- * scrolled out of view and its render loop suspended. Damping across that gap would
- * play the whole skipped span back as a slide, so progress snaps instead.
- */
 const RESUME_GAP = 0.8;
-/**
- * Milliseconds without a frame before the scroll listener takes over sampling.
- *
- * 100ms is ~6 frames at 60Hz and ~12 at 120Hz, so a running loop never trips it and a
- * genuinely parked one is picked up within a tenth of a second.
- */
-const SAMPLE_IDLE = 100;
 
 interface SpringState {
   value: number;
   velocity: number;
 }
 
-/**
- * One semi-implicit Euler step of a damped harmonic oscillator toward `target`.
- *
- * Substepped at 60Hz because the integrator is only conditionally stable: a single 100ms
- * step at this stiffness overshoots hard enough to ring, and a dropped frame would show
- * as a visible kick rather than as a stutter.
- */
 function stepSpring(
   spring: SpringState,
   target: number,
@@ -413,32 +49,10 @@ function stepSpring(
     spring.velocity += accel * h;
     spring.value += spring.velocity * h;
   }
-  // Latch, so a settled globe stops rewriting its transform every frame.
   if (Math.abs(target - spring.value) < 1e-4 && Math.abs(spring.velocity) < 1e-3) {
     spring.value = target;
     spring.velocity = 0;
   }
-}
-
-function smoothstep(edge0: number, edge1: number, x: number) {
-  const t = Math.min(Math.max((x - edge0) / (edge1 - edge0), 0), 1);
-  return t * t * (3 - 2 * t);
-}
-
-/**
- * Quintic ease-in-out. Zero first AND second derivative at both ends, where cubic
- * smoothstep only zeroes the first — so transitions enter and exit with no acceleration step.
- */
-function smootherstep(x: number) {
-  const t = Math.min(Math.max(x, 0), 1);
-  return t * t * t * (t * (t * 6 - 15) + 10);
-}
-
-interface Metrics {
-  /** Edge of the square canvas box. The sphere silhouette fills GLOBE_FIT of it. */
-  boxSize: number;
-  /** Offset from the top of the globe slot, so the sphere's crown lands on the slot. */
-  boxTop: number;
 }
 
 function clamp(v: number, lo: number, hi: number) {
@@ -449,247 +63,32 @@ export const GlobeHero: React.FC = () => {
   const rangeRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const slotRef = useRef<HTMLDivElement>(null);
-  const globeBoxRef = useRef<HTMLDivElement>(null);
-  const markerLayerRef = useRef<HTMLDivElement>(null);
   const journeyBoxRef = useRef<HTMLDivElement>(null);
-  const markerRefs = useRef(new Map<string, HTMLDivElement | null>());
 
   const journeyProgress = useCreateJourneyProgress();
   const [journeyActive, setJourneyActive] = useState(false);
   const journeyActiveRef = useRef(false);
-  const [emphasisId, setEmphasisId] = useState<string | null>(null);
-  const emphasisRef = useRef<string | null>(null);
-  const [isCanadaStarting, setIsCanadaStarting] = useState(false);
   const [transitionProgress, setTransitionProgress] = useState(0);
   const lastTransPRef = useRef(0);
-  const [transitionState, setTransitionState] = useState<TransitionState>("GLOBE_IDLE");
-  const transitionStateRef = useRef<TransitionState>("GLOBE_IDLE");
+  const [transitionState, setTransitionState] = useState<TransitionState>("HERO_ACTIVE");
+  const transitionStateRef = useRef<TransitionState>("HERO_ACTIVE");
   const [heroProgress, setHeroProgress] = useState(0);
   const lastHeroPRef = useRef(0);
 
-  /**
-   * Card bounds in the globe canvas's coordinate space. Cached on resize rather than
-   * measured per frame, so the render loop never forces layout.
-   */
-  const layoutRef = useRef({
-    maxY: Infinity,
-    minX: -Infinity,
-    maxX: Infinity,
-    fadeX: 110,
-    fadeY: 130,
-  });
-
-  const [metrics, setMetrics] = useState<Metrics>(() => {
-    if (typeof window !== "undefined") {
-      const w = window.innerWidth || 1200;
-      const h = window.innerHeight || 800;
-      const sphereSize = horizonDiameter(w, h * 0.75);
-      const boxSize = sphereSize / GLOBE_FIT;
-      const boxTop = -(boxSize - sphereSize) / 2 + boxSize * HALO_HEADROOM;
-      return { boxSize, boxTop };
-    }
-    return { boxSize: 1400, boxTop: -200 };
-  });
-  const [ready, setReady] = useState(true);
-  const [activeId, setActiveId] = useState<string | null>(null);
-
-  // --- Headline exit ---------------------------------------------------------------
-  /**
-   * Three lines leaving one after another, each behind its own overflow-hidden mask.
-   *
-   * WHY THE MASKS ARE LOAD-BEARING, and why the first attempt at this read as one block:
-   * over the span this animation covers, the page itself is already carrying the whole
-   * headline upward by the copy block's full height — roughly 625px. A per-line offset of
-   * ~110px on top of that is a differential of under a fifth, which the eye reads as the
-   * heading simply scrolling. A mask changes the terms entirely: the line has a hard edge
-   * to disappear behind, so travelling 150% of its own height makes it *gone* while its
-   * neighbours are still sitting there. The stagger becomes an event rather than a
-   * gradient.
-   *
-   * GSAP with ScrollTrigger scrub, because SmoothScroll.tsx already registers the plugin
-   * and feeds Lenis into it (`lenis.on("scroll", ScrollTrigger.update)`), so this rides
-   * the project's existing scroll pipeline rather than opening a second one. It owns no
-   * pin and no snap: it reads scroll position and writes to three spans, nothing else, so
-   * the globe's own timeline below is untouched by it.
-   */
-  const copyRef = useRef<HTMLDivElement>(null);
-  const lineRefs = useRef<(HTMLSpanElement | null)[]>([]);
-
-  useEffect(() => {
-    const copy = copyRef.current;
-    const lines = lineRefs.current.filter((el): el is HTMLSpanElement => el !== null);
-    if (!copy || lines.length !== HEADLINE_LINES.length) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    gsap.registerPlugin(ScrollTrigger);
-
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: copy,
-          // start: the copy block's top edge meets the top of the viewport, which is a
-          // little way into the scroll — so the headline holds its designed position for
-          // the whole of scroll 0. end: that same block has completely left.
-          start: "top top",
-          end: "bottom top",
-          scrub: 0.35,
-        },
-        defaults: { ease: "none" },
-      });
-
-      HEADLINE_LINES.forEach((line, i) => {
-        tl.to(
-          lines[i],
-          {
-            // Percent of the line's OWN height, not pixels: 150% clears the mask at every
-            // size the clamp produces, from ~37px on a phone to ~66px at 1440.
-            yPercent: HEADLINE_RISE_PERCENT,
-            opacity: 0,
-            filter: `blur(${HEADLINE_BLUR}px)`,
-            duration: HEADLINE_SPAN,
-          },
-          // Absolute position on a duration-1 timeline == fraction of scroll progress.
-          line.start
-        );
-      });
-
-      // Pins the timeline's total length to exactly 1. Without it GSAP would scale the
-      // 0.82 of timeline the tweens actually occupy across the whole scroll range, which
-      // stretches every window and leaves the last line finishing only as the block
-      // disappears. With it, the positions above ARE the scroll fractions.
-      tl.set({}, {}, 1);
-    }, copy);
-
-    return () => ctx.revert();
-  }, []);
-
-  // --- Scroll-linked zoom ----------------------------------------------------------
-  /**
-   * Progress across the tall pinned range: 0 as its top reaches the top of the
-   * viewport, 1 as its bottom does — exactly the span over which the sticky child
-   * stays parked. Measured directly rather than through framer-motion's useScroll,
-   * whose ref-based target threw "Target ref is defined but not hydrated" here.
-   * Everything derived from it is written straight to the DOM, so scrolling never
-   * re-renders the tree.
-   */
   const progressRef = useRef(0);
-  /**
-   * Progress and zoom as sprung values rather than as raw scroll readings. Refs, and
-   * mutated in place: these change every frame and must never re-render the tree.
-   */
   const progressSpring = useRef<SpringState>({ value: 0, velocity: 0 });
-  const zoomSpring = useRef<SpringState>({ value: 1, velocity: 0 });
-
-  /** Aim target handed to the globe; mutated in place, never triggers a render. */
-  const focusRef = useRef<GlobeFocus | null>(null);
-  /** Where the aim actually landed this frame, reported by the projection. */
-  const aimPointRef = useRef<{ x: number; y: number } | null>(null);
-  /**
-   * Where the aimed coordinate lands, and where it should land, in the canvas box's
-   * pixel space. `centre` is the middle of the sphere's projected disc; `visible` is
-   * the middle of the slice the card actually shows.
-   */
-  const geometryRef = useRef({ centre: 0, visibleY: 0, tiltBias: 0 });
-  /**
-   * The range's document-space top and its travel, cached so progress can be sampled
-   * from window.scrollY every frame. Reading scrollY is free; a getBoundingClientRect
-   * in the render loop would force layout on every frame instead.
-   */
   const rangeMetricsRef = useRef({ top: 0, travel: 0 });
   const lastSampleRef = useRef(0);
   const reduceMotionRef = useRef(false);
-  /** Index of the stop being visited, for the label highlight. Read every frame. */
-  const stageIndexRef = useRef(0);
-  const engagedRef = useRef(false);
-  const [stageIndex, setStageIndex] = useState(0);
   const [reduceMotion, setReduceMotion] = useState(false);
 
-  // Reused across frames so collision resolution allocates nothing per tick.
-
-  useEffect(() => {
-    const card = cardRef.current;
-    const slot = slotRef.current;
-    if (!card || !slot) return;
-
-    const measure = () => {
-      const c = card.getBoundingClientRect();
-      const s = slot.getBoundingClientRect();
-      if (!c.height || !s.width || !s.height) return;
-
-      // The slot is a normal flow child sitting directly under the subtitle and
-      // stretching to the card's bottom edge, so its box already *is* the frame the
-      // planet has to fill. Nothing here decides where the globe starts — the flow
-      // does, which is why no gap can open up between the copy and the sphere.
-      const sphereSize = horizonDiameter(s.width, s.height);
-
-      const boxSize = sphereSize / GLOBE_FIT;
-      // GLOBE_FIT leaves haze room around the silhouette; lift the box by that margin so
-      // the sphere's crown, not the transparent canvas edge, sits on the slot's top.
-      // Everything below the card's floor is cropped by its overflow-hidden.
-      //
-      // Then give the bloom its headroom back: seating the crown *exactly* on the top
-      // edge clipped the ring above it, which is the break in the arc at top-centre.
-      // This drops the crown by the bloom's own reach, so its outermost pixel lands on
-      // the edge and the curve runs unbroken from limb to limb.
-      const boxTop = -(boxSize - sphereSize) / 2 + boxSize * HALO_HEADROOM;
-
-      // Aiming puts a coordinate at the centre of the projected disc, which in a horizon
-      // framing is far below the card's floor. tiltBias is the extra pitch that lifts it
-      // to the middle of the visible slice instead:
-      //   the disc's centre sits sphereSize/2 below its crown, the visible middle sits
-      //   slotHeight/2 below it, so the gap to close is (sphereSize - slotHeight)/2,
-      //   which as a fraction of the radius is 1 - slotHeight/sphereSize.
-      geometryRef.current = {
-        centre: boxSize / 2,
-        visibleY: -boxTop + s.height / 2,
-        tiltBias: Math.asin(clamp(1 - s.height / sphereSize, 0, 0.995)),
-      };
-      setMetrics((prev) => {
-        if (
-          Math.abs(prev.boxSize - boxSize) < 2 &&
-          Math.abs(prev.boxTop - boxTop) < 2
-        ) {
-          return prev;
-        }
-        return { boxSize, boxTop };
-      });
-      // Markers are reported in the canvas box's space, so the card bounds that clip
-      // them have to be restated in it.
-      const boxTopInCard = s.top - c.top + boxTop;
-      const boxLeft = s.left - c.left + (s.width - boxSize) / 2;
-
-      layoutRef.current = {
-        maxY: c.height - boxTopInCard,
-        minX: -boxLeft,
-        maxX: c.width - boxLeft,
-        // Scaled to the card: a fixed band would keep a marker faded for most of its
-        // pass across a narrow phone container.
-        fadeX: Math.min(80, c.width * 0.12),
-        fadeY: Math.min(60, c.height * 0.08),
-      };
-    };
-
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(card);
-    observer.observe(slot);
-    return () => observer.disconnect();
-  }, []);
-
   /**
-   * Writes the tour state for the current scroll progress: where the globe is aimed,
-   * how far it is zoomed, and how the markers should read.
-   *
-   * Only `transform` and `opacity` are touched here — nothing that can trigger layout.
-   * The globe is aimed by rotating the sphere itself rather than by panning the element,
-   * which is what lets a stop like Antarctica be reached at all: it never enters the
-   * visible crop under free rotation, so no CSS transform could have found it.
+   * Writes the sequence state for the current scroll progress.
+   * Only transform and opacity are touched — zero layout triggers.
    */
   const applyStage = useCallback(() => {
-    const box = globeBoxRef.current;
     const journeyBox = journeyBoxRef.current;
-    const layer = markerLayerRef.current;
-    if (!box || reduceMotionRef.current) return;
+    if (reduceMotionRef.current) return;
 
     // --- Sample and damp scroll progress ---------------------------------------------
     const { top, travel } = rangeMetricsRef.current;
@@ -709,8 +108,8 @@ export const GlobeHero: React.FC = () => {
     const t = clamp(progress.value, 0, 1);
     progressRef.current = t;
 
-    // Hero scrubbed animation span in the pinned scroll timeline
-    const HERO_SPAN = 0.22;
+    // 1. Hero scrubbed animation span in the pinned scroll timeline (exact 264vh distance)
+    const HERO_SPAN = 0.160;
     const heroP = clamp(t / HERO_SPAN, 0, 1);
     if (
       Math.abs(heroP - lastHeroPRef.current) > 0.001 ||
@@ -722,40 +121,26 @@ export const GlobeHero: React.FC = () => {
     }
 
     // --- Master Progress & Phase Partitioning ---------------------------------------
-    // Total pinned scroll is partitioned into:
-    // 1. TRANSITION (0.00 -> 0.40):
-    //    Globe -> Canada emphasis -> 3D camera zoom -> Clouds fill screen -> Clouds part -> Highway & land reveal -> Truck roof -> Truck drive in top-down view -> 3D Camera rotates to side profile -> Lock side view
-    // 2. JOURNEY (0.40 -> 1.00):
-    //    Side view locked, truck drives rightward through the story chapters
-    const TRANSITION_SPAN = 0.52;
+    // Exact same scroll pixel distance for Transition (624vh) and Preroll (87.4vh)
+    const TRANSITION_SPAN = 0.3782;
     const transP = t <= TRANSITION_SPAN ? clamp(t / TRANSITION_SPAN, 0, 1) : 1.0;
 
-    /*
-     * The truck is already rolling before the camera finishes settling.
-     *
-     * The brief wants it moving while the camera is still coming round, and
-     * the wrong way to get that is a second driver nudging the truck during
-     * the transition — two things writing the truck's position is how the
-     * handover develops a seam. Instead the journey's own progress simply
-     * starts a little earlier than the transition ends, so it is one ramp
-     * throughout: still monotone, still continuous, and at the moment the
-     * camera locks nothing changes hands because nothing else was ever
-     * driving it.
-     *
-     * Kept small. This much of the journey plays out under a camera that is
-     * still tilted, so anything longer would spend the opening chapter's copy
-     * while it is not yet readable.
-     *
-     * Sized against descentCamera.ts rather than picked: the brief has the
-     * truck rolling at 0.86 of the transition, the descent's HOLD runs
-     * 0.84–0.89, and 0.0728 of the total puts the first turn of the wheels at
-     * exactly 0.86 — inside the hold, so the camera is still overhead and
-     * still when the truck sets off, and moving under its own power before the
-     * orbit begins at 0.89.
-     */
-    const JOURNEY_PREROLL = 0.0728;
-    const journeyFrom = TRANSITION_SPAN - JOURNEY_PREROLL;
-    const journeyP = clamp((t - journeyFrom) / (1.0 - journeyFrom), 0, 1);
+    const JOURNEY_PREROLL = 0.0529;
+    const journeyFrom = TRANSITION_SPAN - JOURNEY_PREROLL; // 0.3253
+
+    // Milestones 0-5 maintain 100% exact same scroll distance (583.7vh)
+    // Milestone 5 ends at journeyP = 0.88 (t = 0.6791)
+    // From t = 0.6791 to 1.0000, 529.5vh is dedicated to:
+    // "One platform. Every major mining audience." + 3D worker pull + services hold
+    const MILESTONE_5_T = 0.6791;
+    let journeyP = 0;
+    if (t <= journeyFrom) {
+      journeyP = 0;
+    } else if (t <= MILESTONE_5_T) {
+      journeyP = clamp(((t - journeyFrom) / (MILESTONE_5_T - journeyFrom)) * 0.88, 0, 0.88);
+    } else {
+      journeyP = clamp(0.88 + ((t - MILESTONE_5_T) / (1.0 - MILESTONE_5_T)) * 0.12, 0.88, 1.0);
+    }
 
     journeyProgress.current = journeyP;
     journeyProgress.descent = transP;
@@ -772,15 +157,8 @@ export const GlobeHero: React.FC = () => {
     }
 
     // Explicit Transition State
-    let nextState: TransitionState = "GLOBE_IDLE";
-    // Boundaries follow descentCamera.ts and AtmosphericCloudLayer.tsx; if
-    // those phases move, these are the labels that go stale with them.
-    if (transP < 0.08) nextState = "GLOBE_IDLE";
-    else if (transP < 0.16) nextState = "GLOBE_LOCATION_SELECTED";
-    else if (transP < 0.26) nextState = "GLOBE_ZOOMING_IN";
-    else if (transP < 0.44) nextState = "CLOUDS_IN";
-    else if (transP < 0.66) nextState = "LAND_DESCENT";
-    else if (transP < 0.89) nextState = "TRUCK_OVERHEAD_MOVE";
+    let nextState: TransitionState = "HERO_ACTIVE";
+    if (transP < 0.89) nextState = "HERO_ACTIVE";
     else if (transP < 0.99) nextState = "CAMERA_ANGLE_SHIFT";
     else if (t <= TRANSITION_SPAN) nextState = "SIDE_VIEW_LOCKED";
     else nextState = "JOURNEY_ACTIVE";
@@ -790,132 +168,20 @@ export const GlobeHero: React.FC = () => {
       setTransitionState(nextState);
     }
 
-    /*
-     * The Journey's frame loop has to be running before the Journey can be
-     * seen, not when it takes over.
-     *
-     * Its road, lamps and truck are all drawn from that loop, so starting it
-     * at the handover would mean the clouds part over an empty stage and the
-     * scene pops in a few frames later. It starts while the cloud deck is
-     * still solid, which costs a few hidden frames and is the difference
-     * between revealing something that is already there and switching it on.
-     */
+    // Journey active state
     const shouldJourneyBeActive = transP >= JOURNEY_RUNS_FROM;
     if (shouldJourneyBeActive !== journeyActiveRef.current) {
       journeyActiveRef.current = shouldJourneyBeActive;
       setJourneyActive(shouldJourneyBeActive);
     }
 
-    // Toggle starting point emphasis tag on Canada
-    const canadaStartingActive = transP >= 0.04 && transP < 0.30;
-    setIsCanadaStarting(canadaStartingActive);
-
-    const nextEmphasis = canadaStartingActive ? STARTING_SITE_ID : null;
-    if (nextEmphasis !== emphasisRef.current) {
-      emphasisRef.current = nextEmphasis;
-      setEmphasisId(nextEmphasis);
-    }
-
-    // --- 1. Camera Aim & Focus (True 3D Perspective Zoom in EarthGlobe) -------------
-    const { centre, visibleY, tiltBias } = geometryRef.current;
-    if (transP < 0.04) {
-      focusRef.current = null;
-      engagedRef.current = false;
-    } else {
-      const engageWeight = smoothstep(0.04, 0.16, transP);
-      // As zoom deepens, camera.position.z in EarthGlobe travels from ~6.4 down to 1.30
-      const zoomP = smoothstep(0.10, 0.32, transP);
-      const cameraDist = 6.4 - (6.4 - 1.30) * easeInOutCubic(zoomP);
-
-      focusRef.current = {
-        lat: STARTING_SITE.lat,
-        lng: STARTING_SITE.lng,
-        tiltBias,
-        distance: cameraDist,
-        weight: engageWeight,
-      };
-      engagedRef.current = true;
-    }
-
-    // --- 2. Globe CSS Scale and Centering -------------------------------------------
-    let scale = 1.0;
-    if (transP >= 0.10 && transP < 0.34) {
-      const zp = (transP - 0.10) / (0.34 - 0.10);
-      scale = 1.0 + (MAX_ZOOM - 1.0) * easeInOutCubic(zp);
-    } else if (transP >= 0.34) {
-      scale = MAX_ZOOM;
-    } else {
-      scale = 1.0;
-    }
-
-    const aim = aimPointRef.current;
-    const px = aim ? aim.x : centre;
-    const py = aim ? aim.y : visibleY;
-    const engage = smoothstep(0.04, 0.16, transP);
-    const dx = (px - centre) * (1 - scale);
-    const dy = (py - centre) * (1 - scale) + (visibleY - py) * engage;
-
-    if (!engagedRef.current && transP >= 0.04) {
-      box.style.transitionProperty = "none";
-      engagedRef.current = true;
-    }
-
-    // Globe Opacity: fades out cleanly while fully enclosed in dense clouds
-    let globeOpacity = 1.0;
-    if (transP >= 0.34 && transP < 0.44) {
-      globeOpacity = 1.0 - smoothstep(0.34, 0.44, transP);
-    } else if (transP >= 0.44) {
-      globeOpacity = 0.0;
-    } else {
-      globeOpacity = 1.0;
-    }
-
-    box.style.transform = `translate3d(${dx.toFixed(2)}px, ${dy.toFixed(2)}px, 0) scale(${scale.toFixed(4)})`;
-    box.style.opacity = globeOpacity.toFixed(3);
-    box.style.visibility = globeOpacity <= 0.005 ? "hidden" : "visible";
-
-    // Marker Layer Opacity & Unzoom
-    if (layer) {
-      layer.style.setProperty("--unzoom", (1 / Math.max(scale, 1)).toFixed(4));
-      let markerLayerOpacity = 1.0;
-      if (transP >= 0.20 && transP < 0.32) {
-        markerLayerOpacity = 1.0 - smoothstep(0.20, 0.32, transP);
-      } else if (transP >= 0.32) {
-        markerLayerOpacity = 0.0;
-      } else {
-        markerLayerOpacity = 1.0;
-      }
-      layer.style.opacity = markerLayerOpacity.toFixed(3);
-      layer.style.visibility = markerLayerOpacity <= 0.005 ? "hidden" : "visible";
-    }
-
-    // --- 3. The descent camera, flown over the real Journey ---------------------------
-    /*
-     * One camera over one environment. Everything the descent shows — land,
-     * road, markings, truck — is the Journey itself, seen from wherever the
-     * camera currently is, so there is nothing to crossfade into and no second
-     * truck to crossfade from.
-     *
-     * The truck is revealed purely by the camera closing distance: pitch is
-     * held at the overhead angle through the entire reveal and only turns
-     * afterwards. See descentCamera.ts, where that ordering is enforced and
-     * checked.
-     */
+    // --- The descent camera, flown over the real Journey ---------------------------
     if (journeyBox) {
       const camera = deriveDescentCamera(transP);
-      /*
-       * The truck needs to know the camera angle, because which of its faces
-       * is toward camera depends on it. It travels in the same box as
-       * progress and is read on the Journey's own frame, so the truck and the
-       * stage transform are always describing the same camera on the same
-       * frame rather than one lagging the other.
-       */
       journeyProgress.pitch = camera.pitch;
       journeyProgress.descent = transP;
       journeyBox.style.opacity = camera.opacity.toFixed(3);
       journeyBox.style.visibility = camera.opacity <= 0.005 ? "hidden" : "visible";
-      // Only once the camera has settled into the Journey's own composition;
-      // a tilted, half-descended stage should not be catching clicks.
       journeyBox.style.pointerEvents = camera.locked ? "auto" : "none";
     }
   }, [journeyProgress]);
@@ -926,14 +192,9 @@ export const GlobeHero: React.FC = () => {
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     reduceMotionRef.current = reduced;
-    // The tour is the only reason the range is taller than one viewport. With it off
-    // there is nothing to scroll through, so collapse the range rather than leave
-    // several screens of dead scroll over a frozen globe.
     setReduceMotion(reduced);
     if (reduced) return;
 
-    // The one layout read, kept out of the render loop: where the range sits in the
-    // document and how far the sticky child stays pinned. Both only change on resize.
     const measureRange = () => {
       const rect = range.getBoundingClientRect();
       rangeMetricsRef.current = {
@@ -963,6 +224,7 @@ export const GlobeHero: React.FC = () => {
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", measureRange);
+
     return () => {
       cancelAnimationFrame(animId);
       observer.disconnect();
@@ -971,54 +233,6 @@ export const GlobeHero: React.FC = () => {
     };
   }, [applyStage]);
 
-  const handleProject = useCallback((projected: ProjectedAnchor[]) => {
-    const { maxY, minX, maxX, fadeX, fadeY } = layoutRef.current;
-
-    // The aim point drifts while the globe swings onto a new stop, so the zoom has to be
-    // re-pinned every frame, not only when the scroll position changes.
-    const aim = projected.find((a) => a.id === FOCUS_ANCHOR_ID);
-    if (aim) aimPointRef.current = { x: aim.x, y: aim.y };
-
-    for (const anchor of projected) {
-      const el = markerRefs.current.get(anchor.id);
-      if (!el) continue;
-
-      // Fade before the container edge clips the marker, not after.
-      const bottomFade = clamp((maxY - anchor.y) / fadeY, 0, 1);
-      const leftFade = clamp((anchor.x - minX) / fadeX, 0, 1);
-      const rightFade = clamp((maxX - anchor.x) / fadeX, 0, 1);
-      const opacity = anchor.opacity * bottomFade * leftFade * rightFade;
-
-      const style = el.style;
-      if (opacity <= 0.01) {
-        if (style.visibility !== "hidden") style.visibility = "hidden";
-        continue;
-      }
-      if (style.visibility === "hidden") style.visibility = "";
-
-      style.setProperty("--mx", `${anchor.x.toFixed(1)}px`);
-      style.setProperty("--my", `${anchor.y.toFixed(1)}px`);
-      style.opacity = opacity.toFixed(3);
-      style.pointerEvents = opacity >= MARKER_OPACITY_FLOOR ? "auto" : "none";
-    }
-  }, []);
-
-  const handleReady = useCallback(() => setReady(true), []);
-
-  // Two blocks, and the split is the whole point of the sequence.
-  //
-  // The copy is an ordinary flow child: it simply scrolls off the top, no pinning, no
-  // scroll-linked anything. Underneath it the globe range supplies STAGE_COUNT viewports
-  // of travel and pins its own child for all of it.
-  //
-  // Because the range starts where the copy ends, the range's top edge reaching the top
-  // of the viewport is the same instant the copy finishes leaving — and that instant is
-  // progress 0, so the tour starts itself with no coordination between the two.
-  //
-  // Nothing carries hero-rise any more: its fadeInUp holds transform: translateY(0)
-  // under fill-mode both, and a lingering transform on a sticky element's ancestor
-  // creates a containing block for it. The heading, subtitle and globe each keep their
-  // own entrance, so the effect survives without the wrapper's.
   return (
     <section className="relative isolate w-full bg-[#030509]">
       {/* Story Range — pins hero and drives entire journey from scroll 0 */}
@@ -1035,16 +249,7 @@ export const GlobeHero: React.FC = () => {
             {/* Boon-Inspired Dark Hero Overlay */}
             <BoonHero progress={heroProgress} />
 
-            {/* Hidden globe & markers to keep refs safely mounted */}
-            <div
-              ref={globeBoxRef}
-              style={{ display: "none" }}
-              aria-hidden="true"
-            >
-              <div ref={markerLayerRef} />
-            </div>
-
-            {/* Layer 5 — Dark Descent Backdrop & 3D Truck Journey */}
+            {/* Dark Descent Backdrop & 3D Truck Journey */}
             <DescentBackdrop progress={transitionProgress} />
 
             <div

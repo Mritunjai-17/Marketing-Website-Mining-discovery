@@ -143,7 +143,7 @@ export const TRUCK_ASSET: TruckAsset | null = {
    * truck-side.ungraded.png. Re-run it against that original, never against
    * the shipped file, or the grade compounds.
    */
-  body: "/journey/truck-side.png",
+  body: "/journey/truck-side.webp",
   aspect: 4.7244,
   contact: 1,
   // The source faces left; the scene needs it facing right.

@@ -81,7 +81,7 @@ const GROUPS: ServiceGroup[] = [
     description: "Build a recognizable identity for your mining company.",
     back: ["Digital Branding", "Logo & Visual Design"],
     image: {
-      src: "/services/04-pit.jpg",
+      src: "/services/04-pit.webp",
       alt: "Aerial view of a large open-pit mine, haul trucks working the benches and a processing plant on the rim.",
     },
     from: { x: -0.8, y: 0, rotate: -8 },
@@ -95,7 +95,7 @@ const GROUPS: ServiceGroup[] = [
     description: "Create digital experiences that communicate your story.",
     back: ["Website Development", "App Development"],
     image: {
-      src: "/services/03-assay.jpg",
+      src: "/services/03-assay.webp",
       alt: "A geologist logging drill core in a core shack, recording measurements on a handheld data unit.",
     },
     from: { x: 0.6, y: -0.5, rotate: 7 },
@@ -116,7 +116,7 @@ const GROUPS: ServiceGroup[] = [
     // INTERIM. The brief asks for media/interview/conference photography; the project owns
     // none. This is a mining landscape standing in until that photograph exists.
     image: {
-      src: "/about/open-pit-golden-hour.png",
+      src: "/about/open-pit-golden-hour.webp",
       alt: "An open-pit mine at sunset, haul trucks descending the access ramp.",
       interim: true,
     },
@@ -133,7 +133,7 @@ const GROUPS: ServiceGroup[] = [
     // INTERIM. Needs a conference / industry-audience photograph; this crew shot is the
     // closest the project owns and does not communicate reach.
     image: {
-      src: "/services/02-drill.jpg",
+      src: "/services/02-drill.webp",
       alt: "A drill crew working a rig at a mountain exploration site at golden hour.",
       interim: true,
     },
@@ -149,7 +149,7 @@ const GROUPS: ServiceGroup[] = [
     back: ["Webinars & Events"],
     // INTERIM. Needs an event / stage / panel photograph; none exists in the project.
     image: {
-      src: "/services/01-survey.jpg",
+      src: "/services/01-survey.webp",
       alt: "A drill rig and its operator at a remote exploration site in arid hill country.",
       interim: true,
     },

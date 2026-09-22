@@ -37,7 +37,7 @@
   display: inline-block;
   margin-bottom: 0.75rem;
   color: #B8924A;
-  font-family: var(--font-mono, monospace);
+  font-family: var(--font-sans-custom), var(--font-geist-sans), system-ui, -apple-system, sans-serif;
   font-size: 0.8125rem;
   font-weight: 600;
   letter-spacing: 0.25em;
@@ -46,10 +46,10 @@
 
 .introTitle {
   color: #111312;
-  font-family: var(--font-geist, var(--font-display, sans-serif));
+  font-family: var(--font-editorial-serif), var(--font-display-custom), "Cormorant Garamond", "Playfair Display", Georgia, serif;
   font-size: clamp(2rem, 4.4vw, 3.25rem);
   line-height: 1.1;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: -0.02em;
   text-transform: uppercase;
 }
@@ -68,10 +68,10 @@
 .outroHeadline {
   margin-bottom: 0.75rem;
   color: #B8924A;
-  font-family: var(--font-geist, var(--font-display, sans-serif));
+  font-family: var(--font-editorial-serif), var(--font-display-custom), "Cormorant Garamond", "Playfair Display", Georgia, serif;
   font-size: clamp(1rem, 1.6vw, 1.25rem);
   line-height: 1.35;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -80,7 +80,7 @@
   max-width: 650px;
   margin: 0 auto;
   color: #68645B;
-  font-family: var(--font-serif, Georgia, serif);
+  font-family: var(--font-sans-custom), var(--font-geist-sans), system-ui, -apple-system, sans-serif;
   font-size: 0.9375rem;
   font-style: italic;
   line-height: 1.5;
@@ -322,10 +322,10 @@
 }
 
 .year {
-  font-family: var(--font-geist, var(--font-display, sans-serif));
+  font-family: var(--font-editorial-serif), var(--font-display-custom), "Cormorant Garamond", "Playfair Display", Georgia, serif;
   font-size: clamp(3.4rem, min(9.5vw, 16vh), 10.5rem);
   line-height: 0.84;
-  font-weight: 900;
+  font-weight: 600;
   letter-spacing: -0.045em;
   color: #B8924A;
   user-select: none;
@@ -375,7 +375,7 @@
 .chapterLabel {
   margin-bottom: 0.85rem;
   color: #B8924A;
-  font-family: var(--font-mono, monospace);
+  font-family: var(--font-sans-custom), var(--font-geist-sans), system-ui, -apple-system, sans-serif;
   font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.26em;
@@ -385,10 +385,10 @@
 .storyTitle {
   margin-bottom: 0.95rem;
   color: #171613;
-  font-family: var(--font-geist, var(--font-display, sans-serif));
+  font-family: var(--font-editorial-serif), var(--font-display-custom), "Cormorant Garamond", "Playfair Display", Georgia, serif;
   font-size: clamp(1.05rem, 1.75vw, 1.6rem);
   line-height: 1.28;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: -0.01em;
   text-transform: uppercase;
 }
@@ -397,7 +397,7 @@
   max-width: 580px;
   margin: 0 auto;
   color: #4A4740;
-  font-family: var(--font-sans, sans-serif);
+  font-family: var(--font-sans-custom), var(--font-geist-sans), system-ui, -apple-system, sans-serif;
   font-size: clamp(0.95rem, 1.15vw, 1.0625rem);
   line-height: 1.65;
 }
@@ -406,7 +406,7 @@
   display: inline-block;
   margin-top: 1rem;
   color: #8C8474;
-  font-family: var(--font-mono, monospace);
+  font-family: var(--font-sans-custom), var(--font-geist-sans), system-ui, -apple-system, sans-serif;
   font-size: clamp(0.625rem, 0.8vw, 0.71875rem);
   font-weight: 600;
   letter-spacing: 0.18em;

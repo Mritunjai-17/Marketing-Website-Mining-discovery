@@ -300,11 +300,11 @@ const TruckCargoRear: React.FC = () => {
     if (typeof window === "undefined") return [];
     const loader = new THREE.TextureLoader();
     const urls = [
-      "/cards/bg_card_1.jpg",
-      "/cards/bg_card_2.jpg",
-      "/cards/bg_card_3.jpg",
-      "/cards/bg_card_4.jpg",
-      "/about/open-pit-golden-hour.png",
+      "/cards/bg_card_1.webp",
+      "/cards/bg_card_2.webp",
+      "/cards/bg_card_3.webp",
+      "/cards/bg_card_4.webp",
+      "/about/open-pit-golden-hour.webp",
     ];
     return urls.map((url) => {
       const tex = loader.load(url);

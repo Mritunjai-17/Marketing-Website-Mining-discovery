@@ -221,8 +221,8 @@ export const JourneyScene: React.FC<JourneySceneProps> = ({ progress, active }) 
      * shadows and a clean console.
      */
     shadows="percentage"
-    // Native crisp resolution up to 2x pixel density, eliminating blurriness
-    dpr={[1, 2]}
+    // Optimized DPR clamped to 1.5 to maintain crisp rendering while saving 40% GPU fill rate
+    dpr={[1, 1.5]}
     frameloop={active ? "always" : "demand"}
     gl={{
       alpha: true,
