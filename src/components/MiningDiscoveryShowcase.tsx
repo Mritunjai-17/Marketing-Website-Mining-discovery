@@ -552,6 +552,16 @@ export const MiningDiscoveryShowcase: React.FC = () => {
     max-width: 100%;
     padding: 0 1.25rem;
   }
+  .quoteMarkChar {
+    font-size: 1.75rem;
+    margin-bottom: 0.65rem;
+  }
+  .quoteBodyText {
+    text-indent: 1.25rem;
+    font-size: clamp(0.94rem, 3.8vw, 1.05rem);
+    line-height: 1.65;
+    margin-bottom: 1rem;
+  }
 }
 
 .quoteMarkChar {
@@ -700,8 +710,17 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 
 @media (max-width: 768px) {
   .zoomImageFrame {
-    width: 90vw;
-    height: 46vh;
+    width: 92vw;
+    height: 52vh;
+    border-radius: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .zoomImageFrame {
+    width: 94vw;
+    height: 56vh;
+    border-radius: 12px;
   }
 }
 
@@ -817,11 +836,44 @@ export const MiningDiscoveryShowcase: React.FC = () => {
     flex-direction: column;
     justify-content: center;
     align-items: flex-start;
-    gap: 2rem;
+    gap: 1.5rem;
   }
   .zoomInfoCol {
     width: 100%;
     max-width: 500px;
+  }
+}
+
+@media (max-width: 768px) {
+  .zoomContentWrap {
+    padding: clamp(1.2rem, 3vh, 1.8rem) clamp(1rem, 3.5vw, 1.6rem);
+    gap: 1rem;
+  }
+  .zoomTitle {
+    font-size: clamp(1.85rem, 6.8vw, 2.5rem);
+    line-height: 1.1;
+  }
+  .zoomInfoEyebrow {
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+  }
+  .zoomInfoText {
+    font-size: clamp(0.78rem, 2.2vw, 0.88rem);
+    line-height: 1.5;
+  }
+}
+
+@media (max-width: 480px) {
+  .zoomContentWrap {
+    padding: 1.2rem 1rem;
+    gap: 0.75rem;
+  }
+  .zoomTitle {
+    font-size: clamp(1.65rem, 7.5vw, 2.1rem);
+  }
+  .zoomInfoText {
+    font-size: 0.78rem;
+    line-height: 1.45;
   }
 }
 
@@ -1166,11 +1218,77 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 @media (max-width: 768px) {
   .horizontalCardItem {
     width: 86vw;
-    height: 68vh;
+    height: min(72vh, 560px);
+    border-radius: 22px;
+    padding: 12px;
   }
   .horizontalCardsTrack {
+    gap: clamp(1.2rem, 3.5vw, 2.5rem);
     padding-left: 7vw;
     padding-right: 7vw;
+  }
+  .horizontalCardUpper {
+    padding: 0.9rem 0.9rem 0;
+  }
+  .horizontalCardTopBar {
+    padding: 0 0.4rem;
+    margin-bottom: 0.2rem;
+  }
+  .horizontalCardTop {
+    padding: 0 0.4rem;
+  }
+  .horizontalCardCategory {
+    font-size: 0.68rem;
+    margin-bottom: 0.1rem;
+  }
+  .horizontalCardTitle {
+    font-size: clamp(1.2rem, 4.8vw, 1.55rem);
+    line-height: 1.2;
+  }
+  .horizontalCardDesc {
+    font-size: 0.82rem;
+    line-height: 1.42;
+    margin-top: 0.35rem;
+  }
+  .horizontalCardFooter {
+    padding: 0 0.8rem 0.8rem;
+  }
+  .horizontalCardLocationTag {
+    font-size: 0.68rem;
+  }
+  .horizontalCardsFooter {
+    bottom: max(1rem, env(safe-area-inset-bottom, 1rem));
+    padding: 0 clamp(1.2rem, 4vw, 2.5rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .horizontalCardItem {
+    width: 88vw;
+    height: min(74vh, 510px);
+    border-radius: 18px;
+    padding: 10px;
+  }
+  .horizontalCardsTrack {
+    padding-left: 6vw;
+    padding-right: 6vw;
+    gap: 1rem;
+  }
+  .horizontalCardUpper {
+    padding: 0.75rem 0.6rem 0;
+  }
+  .horizontalCardTitle {
+    font-size: 1.2rem;
+  }
+  .horizontalCardDesc {
+    font-size: 0.76rem;
+    line-height: 1.35;
+  }
+  .horizontalCardAction {
+    font-size: 0.82rem;
+  }
+  .horizontalCardLocationTag {
+    font-size: 0.62rem;
   }
 }
 
@@ -1427,25 +1545,69 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 
 @media (max-width: 768px) {
   .finaleEditorialContainer {
-    padding: 1.5rem 1rem;
+    padding: clamp(1.5rem, 3.5vh, 2.5rem) 1rem;
+    justify-content: center;
+  }
+  .finaleBrandKicker {
+    font-size: 0.65rem;
+    padding: 0.25rem 0.75rem;
+    letter-spacing: 0.2em;
+  }
+  .finaleQuoteMark {
+    font-size: 2.4rem;
+    margin-bottom: 0.25rem;
   }
   .finaleQuoteBody {
-    font-size: 1.15rem;
-    line-height: 1.4;
+    font-size: clamp(1.05rem, 4.2vw, 1.35rem);
+    line-height: 1.36;
+  }
+  .finaleClientsSection {
+    margin-top: clamp(1.2rem, 2.5vh, 2rem);
   }
   .flipRowWrapper {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 0.8rem;
+    gap: 0.65rem;
+    max-width: 380px;
+    margin: 0 auto;
   }
   .flipCard {
-    height: 48px;
+    height: 46px;
     padding: 0 4px;
   }
   .finaleLogoImg {
-    height: 34px;
-    max-height: 34px;
-    max-width: 115px;
+    height: 32px;
+    max-height: 32px;
+    max-width: 105px;
+  }
+}
+
+@media (max-width: 480px) {
+  .finaleEditorialContainer {
+    padding: 1.25rem 0.75rem;
+  }
+  .finaleQuoteMark {
+    font-size: 2rem;
+  }
+  .finaleQuoteBody {
+    font-size: 0.98rem;
+    line-height: 1.34;
+  }
+  .flipRowWrapper {
+    gap: 0.4rem;
+    max-width: 320px;
+  }
+  .flipCard {
+    height: 40px;
+    padding: 0 2px;
+  }
+  .finaleLogoImg {
+    height: 26px;
+    max-height: 26px;
+    max-width: 88px;
+  }
+  .flipPaginationDots {
+    margin-top: 0.4rem;
   }
 }
 

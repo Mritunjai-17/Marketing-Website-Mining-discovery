@@ -319,37 +319,50 @@
 
 @media (max-width: 768px) {
   .headlineLine1 {
-    top: 26%;
-    left: 1.5rem;
-    font-size: clamp(2.6rem, 12vw, 4.2rem);
+    top: 24%;
+    left: clamp(1rem, 4vw, 1.5rem);
+    font-size: clamp(2.4rem, 11vw, 4.2rem);
   }
 
   .headlineLine2 {
-    top: 46%;
-    right: 1.5rem;
-    font-size: clamp(2.6rem, 12vw, 4.2rem);
+    top: 44%;
+    right: clamp(1rem, 4vw, 1.5rem);
+    font-size: clamp(2.4rem, 11vw, 4.2rem);
   }
 
   .bottomBar {
-    bottom: 1.75rem;
-    left: 1.5rem;
-    right: 1.5rem;
+    bottom: max(1.5rem, env(safe-area-inset-bottom, 1.5rem));
+    left: clamp(1rem, 4vw, 1.5rem);
+    right: clamp(1rem, 4vw, 1.5rem);
     flex-direction: column;
     align-items: flex-start;
-    gap: 1.25rem;
+    gap: 1rem;
   }
 
   .missionStatement {
     max-width: 100%;
-    font-size: 0.88rem;
+    font-size: clamp(0.82rem, 3vw, 0.92rem);
+    line-height: 1.5;
   }
 
   .scrollCue {
-    align-self: flex-end;
+    align-self: flex-start;
   }
 
   .gridSeamVertical,
   .lowerLeftBoxAccent {
     display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .headlineLine1 {
+    top: 22%;
+    font-size: clamp(2rem, 10.5vw, 3.2rem);
+  }
+
+  .headlineLine2 {
+    top: 40%;
+    font-size: clamp(2rem, 10.5vw, 3.2rem);
   }
 }
