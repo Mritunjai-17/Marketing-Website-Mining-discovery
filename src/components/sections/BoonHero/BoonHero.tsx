@@ -1,12 +1,21 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
+import gsap from "gsap";
 import styles from "./BoonHero.module.css";
+import { MineralDustField } from "@/components/sections/hero-layers/MineralDustField";
 
 export interface BoonHeroProps {
   /** Scroll progress from 0 (top) to 1. Directly scrubs the reference animation timeline. */
   progress?: number;
   onExploreClick?: () => void;
+}
+
+const TOTAL_FRAMES = 300;
+
+function getFrameUrl(index: number): string {
+  const padded = String(index).padStart(4, "0");
+  return `/frames/hero-sequence/frame_${padded}.png`;
 }
 
 export const BoonHero: React.FC<BoonHeroProps> = ({
@@ -16,162 +25,269 @@ export const BoonHero: React.FC<BoonHeroProps> = ({
   // Damped scrubbed progress strictly bounded in [0, 1]
   const p = Math.max(0, Math.min(1, progress));
 
-  // Refs for 3D cursor-reactive parallax motion (Reference Recording Behavior)
-  const stageRef = useRef<HTMLDivElement>(null);
-  const bgRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLDivElement>(null);
-  const glowRef = useRef<HTMLDivElement>(null);
-  const targetPos = useRef({ x: 0, y: 0 });
-  const currentPos = useRef({ x: 0, y: 0 });
-  const animRef = useRef<number | null>(null);
+  // Refs for Canvas, GSAP Parallax & DOM Elements
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const stageRef = useRef<HTMLDivElement | null>(null);
+
+  // GSAP animated overlay refs
+  const surfaceLayerRef = useRef<HTMLDivElement | null>(null);
+  const telemetryCardRef = useRef<HTMLDivElement | null>(null);
+  const openPitLayerRef = useRef<HTMLDivElement | null>(null);
+  const undergroundLayerRef = useRef<HTMLDivElement | null>(null);
+
+  // Image cache: index -> HTMLImageElement
+  const imageCache = useRef<Map<number, HTMLImageElement>>(new Map());
+  const currentFrameRef = useRef<number>(1);
+  const lastDrawnFrameRef = useRef<number>(-1);
+  const isInitialFrameLoaded = useRef<boolean>(false);
+
+  // Target mouse position for GSAP 3D Parallax tilt
+  const mousePos = useRef({ x: 0, y: 0 });
+
+  // Depth calculation for live telemetry UI: +2400m at summit down to -850m deep in mine
+  const currentAltitude = Math.round(2400 - p * 3250);
 
   // ========================================================================
-  // INTERACTIVE 3D SCREEN PERSPECTIVE & PARALLAX ON CURSOR MOVE
-  // Matches Forge Atelier luxury motion from the screen recording
+  // 1. CANVAS RENDER FUNCTION WITH OBJECT-FIT: COVER MATH
+  // ========================================================================
+  const renderFrame = useCallback((frameIndex: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Find requested frame or closest available in cache
+    let img = imageCache.current.get(frameIndex);
+    if (!img || !img.complete || img.naturalWidth === 0) {
+      // Find closest cached frame
+      let bestDist = Infinity;
+      let fallbackIndex = 1;
+      imageCache.current.forEach((cachedImg, idx) => {
+        if (cachedImg.complete && cachedImg.naturalWidth > 0) {
+          const dist = Math.abs(idx - frameIndex);
+          if (dist < bestDist) {
+            bestDist = dist;
+            fallbackIndex = idx;
+          }
+        }
+      });
+      img = imageCache.current.get(fallbackIndex);
+    }
+
+    if (!img || !img.complete || img.naturalWidth === 0) return;
+
+    const cw = canvas.width;
+    const ch = canvas.height;
+    const iw = img.naturalWidth;
+    const ih = img.naturalHeight;
+
+    // Calculate aspect ratio cover
+    const scale = Math.max(cw / iw, ch / ih);
+    const nw = iw * scale;
+    const nh = ih * scale;
+    const nx = (cw - nw) / 2;
+    const ny = (ch - nh) / 2;
+
+    ctx.clearRect(0, 0, cw, ch);
+    ctx.drawImage(img, nx, ny, nw, nh);
+    lastDrawnFrameRef.current = frameIndex;
+  }, []);
+
+  // Resize Canvas to device resolution with High-DPI support
+  const resizeCanvas = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      renderFrame(currentFrameRef.current);
+    }
+  }, [renderFrame]);
+
+  // ========================================================================
+  // 2. PROGRESSIVE PRELOADER FOR 300 FRAMES
   // ========================================================================
   useEffect(() => {
-    // Disable on touch devices or prefers-reduced-motion
+    // Step A: Load Frame 1 immediately and draw
+    const frame1 = new Image();
+    frame1.src = getFrameUrl(1);
+    frame1.onload = () => {
+      imageCache.current.set(1, frame1);
+      isInitialFrameLoaded.current = true;
+      resizeCanvas();
+    };
+
+    // Step B: Preload key frames first (every 4th frame for instant scrub response)
+    const keyIndices: number[] = [];
+    for (let i = 1; i <= TOTAL_FRAMES; i += 4) {
+      keyIndices.push(i);
+    }
+
+    let keyPointer = 0;
+    const loadNextKeyFrame = () => {
+      if (keyPointer >= keyIndices.length) {
+        // Step C: After key frames, load all remaining frames
+        loadAllRemainingFrames();
+        return;
+      }
+      const idx = keyIndices[keyPointer++];
+      if (!imageCache.current.has(idx)) {
+        const img = new Image();
+        img.src = getFrameUrl(idx);
+        img.onload = () => {
+          imageCache.current.set(idx, img);
+          loadNextKeyFrame();
+        };
+        img.onerror = () => loadNextKeyFrame();
+      } else {
+        loadNextKeyFrame();
+      }
+    };
+    loadNextKeyFrame();
+
+    const loadAllRemainingFrames = () => {
+      let idx = 1;
+      const loadNext = () => {
+        if (idx > TOTAL_FRAMES) return;
+        if (!imageCache.current.has(idx)) {
+          const img = new Image();
+          img.src = getFrameUrl(idx);
+          img.onload = () => {
+            imageCache.current.set(idx, img);
+            idx++;
+            loadNext();
+          };
+          img.onerror = () => {
+            idx++;
+            loadNext();
+          };
+        } else {
+          idx++;
+          loadNext();
+        }
+      };
+      // 3 parallel preloader streams
+      loadNext();
+      loadNext();
+      loadNext();
+    };
+
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    return () => {
+      window.removeEventListener("resize", resizeCanvas);
+    };
+  }, [resizeCanvas]);
+
+  // ========================================================================
+  // 3. FRAME SCRUBBING ON SCROLL
+  // ========================================================================
+  useEffect(() => {
+    // Map progress 0..1 to frame index 1..300
+    const targetFrame = Math.min(TOTAL_FRAMES, Math.max(1, Math.floor(p * (TOTAL_FRAMES - 1)) + 1));
+    currentFrameRef.current = targetFrame;
+    renderFrame(targetFrame);
+  }, [p, renderFrame]);
+
+  // ========================================================================
+  // 4. GSAP PARALLAX TWEENING (Scroll & Mouse Movement)
+  // ========================================================================
+  useEffect(() => {
+    // Calculate normalized progress phases
+    // Act 1: Surface Mountains (p = 0 to 0.32)
+    const act1Fade = Math.max(0, 1 - p / 0.28);
+    const act1Y = -p * 60; // vh
+
+    // Act 2: Open Pit Haulage (p = 0.32 to 0.68)
+    const act2Enter = Math.max(0, Math.min(1, (p - 0.28) / 0.12));
+    const act2Exit = Math.max(0, 1 - Math.max(0, (p - 0.62) / 0.1));
+    const act2Opacity = act2Enter * act2Exit;
+    const act2Y = (1 - act2Enter) * 30 - Math.max(0, (p - 0.62) * 50);
+
+    // Act 3: Deep Underground Mine (p = 0.68 to 1.0)
+    const act3Enter = Math.max(0, Math.min(1, (p - 0.68) / 0.12));
+    const act3Exit = Math.max(0, 1 - Math.max(0, (p - 0.88) / 0.12));
+    const act3Opacity = act3Enter * act3Exit;
+    const act3Y = (1 - act3Enter) * 30;
+
+    // GSAP Animate Overlays
+    if (surfaceLayerRef.current) {
+      gsap.to(surfaceLayerRef.current, {
+        opacity: act1Fade,
+        y: `${act1Y}vh`,
+        duration: 0.25,
+        ease: "power2.out",
+        overwrite: "auto",
+      });
+    }
+
+    if (telemetryCardRef.current) {
+      gsap.to(telemetryCardRef.current, {
+        opacity: act1Fade,
+        y: `${act1Y * 0.7}vh`,
+        duration: 0.25,
+        ease: "power2.out",
+        overwrite: "auto",
+      });
+    }
+
+    if (openPitLayerRef.current) {
+      gsap.to(openPitLayerRef.current, {
+        opacity: act2Opacity,
+        y: `${act2Y}px`,
+        duration: 0.25,
+        ease: "power2.out",
+        overwrite: "auto",
+      });
+    }
+
+    if (undergroundLayerRef.current) {
+      gsap.to(undergroundLayerRef.current, {
+        opacity: act3Opacity,
+        y: `${act3Y}px`,
+        duration: 0.25,
+        ease: "power2.out",
+        overwrite: "auto",
+      });
+    }
+  }, [p]);
+
+  // GSAP 3D Perspective Tilt on Mouse Movement
+  useEffect(() => {
     const isTouch = window.matchMedia("(pointer: coarse)").matches;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (isTouch || reducedMotion) return;
 
     const handleMouseMove = (e: MouseEvent) => {
-      const { innerWidth, innerHeight } = window;
-      // Normalized coords from -1 to 1 centered around viewport
-      const nx = (e.clientX / innerWidth - 0.5) * 2;
-      const ny = (e.clientY / innerHeight - 0.5) * 2;
-      targetPos.current = { x: nx, y: ny };
-    };
+      const nx = (e.clientX / window.innerWidth - 0.5) * 2;
+      const ny = (e.clientY / window.innerHeight - 0.5) * 2;
+      mousePos.current = { x: nx, y: ny };
 
-    const handleMouseLeave = () => {
-      targetPos.current = { x: 0, y: 0 };
+      const damp = Math.max(0, 1 - p * 2.2);
+      if (stageRef.current) {
+        gsap.to(stageRef.current, {
+          rotationY: nx * 3.5 * damp,
+          rotationX: -ny * 2.8 * damp,
+          transformPerspective: 1200,
+          duration: 0.6,
+          ease: "power2.out",
+          overwrite: "auto",
+        });
+      }
     };
 
     window.addEventListener("mousemove", handleMouseMove, { passive: true });
-    document.addEventListener("mouseleave", handleMouseLeave);
-
-    const updateLoop = () => {
-      // Silky smooth spring interpolation (lerp)
-      const lerp = 0.055;
-      currentPos.current.x += (targetPos.current.x - currentPos.current.x) * lerp;
-      currentPos.current.y += (targetPos.current.y - currentPos.current.y) * lerp;
-
-      const x = currentPos.current.x;
-      const y = currentPos.current.y;
-
-      // When user scrolls down (p > 0), smoothly fade mouse influence so it doesn't conflict with scroll scrub
-      const damp = Math.max(0, 1 - p * 2.8);
-
-      if (stageRef.current) {
-        // 3D Perspective Tilt on the entire scene (Matches recording 00:00 - 00:04)
-        const tiltX = -y * 3.8 * damp;
-        const tiltY = x * 4.6 * damp;
-        const panX = x * 10 * damp;
-        const panY = y * 7 * damp;
-
-        stageRef.current.style.transform = `perspective(1200px) rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg) translate3d(${panX.toFixed(2)}px, ${panY.toFixed(2)}px, 0)`;
-      }
-
-      if (bgRef.current) {
-        // Background vehicle imagery shifts with physical depth
-        const bgX = x * 16 * damp;
-        const bgY = y * 12 * damp;
-        bgRef.current.style.transform = `translate3d(${bgX.toFixed(2)}px, ${bgY.toFixed(2)}px, 0) scale(${(1 + 0.02 * damp).toFixed(3)})`;
-      }
-
-      if (titleRef.current) {
-        // Massive typography floats in front with counter-parallax
-        const tX = -x * 12 * damp;
-        const tY = -y * 8 * damp;
-        titleRef.current.style.transform = `translate3d(${tX.toFixed(2)}px, ${tY.toFixed(2)}px, 25px)`;
-      }
-
-      if (glowRef.current) {
-        // Dynamic amber light shifts toward cursor
-        const gX = x * 35 * damp;
-        const gY = y * 25 * damp;
-        glowRef.current.style.transform = `translate3d(${gX.toFixed(2)}px, ${gY.toFixed(2)}px, 0)`;
-      }
-
-      animRef.current = requestAnimationFrame(updateLoop);
-    };
-
-    animRef.current = requestAnimationFrame(updateLoop);
-
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseleave", handleMouseLeave);
-      if (animRef.current) cancelAnimationFrame(animRef.current);
-    };
+    return () => window.removeEventListener("mousemove", handleMouseMove);
   }, [p]);
 
-  // ========================================================================
-  // 1. HERO TYPOGRAPHY MOTION (Reference Animation Behavior)
-  // Physical horizontal translation across viewport + viewport clipping
-  // ========================================================================
-
-  // Line 1: "MINING" translates horizontally to the LEFT across the viewport
-  // Stays fully opaque as it moves; clips on left edge, leaves viewport cleanly
-  const pText1 = Math.pow(p, 1.05);
-  const text1X = -pText1 * 95; // vw
-  const text1Y = -pText1 * 10; // vh
-  const text1Opacity = Math.max(0, 1 - Math.max(0, (p - 0.72) / 0.28));
-
-  // Line 2: "DISCOVERY" translates horizontally to the RIGHT across the viewport
-  // Starts with a slight stagger/progression offset as requested
-  const p2Raw = Math.max(0, (p - 0.035) / 0.965);
-  const pText2 = Math.pow(p2Raw, 1.15);
-  const text2X = pText2 * 105; // vw
-  const text2Y = pText2 * 6; // vh
-  const text2Opacity = Math.max(0, 1 - Math.max(0, (p - 0.75) / 0.25));
-
-  // ========================================================================
-  // 2. IMAGE / VISUAL PANEL ANIMATION (Fragmented Editorial Composition)
-  // The visual separates into independent quadrant panels that pull apart
-  // ========================================================================
-
-  // Panel 1 (Top Left) moves up and left
-  const pPanel1 = Math.pow(p, 1.08);
-  const p1X = -pPanel1 * 50; // vw
-  const p1Y = -pPanel1 * 14; // vh
-
-  // Panel 2 (Top Right) moves up and right
-  const pPanel2 = Math.pow(p, 1.14);
-  const p2X = pPanel2 * 35; // vw
-  const p2Y = -pPanel2 * 26; // vh
-
-  // Panel 3 (Bottom Left) moves down and left
-  const pPanel3 = Math.pow(p, 1.10);
-  const p3X = -pPanel3 * 45; // vw
-  const p3Y = pPanel3 * 22; // vh
-
-  // Panel 4 (Bottom Right) moves down and right
-  const pPanel4 = Math.pow(p, 1.16);
-  const p4X = pPanel4 * 40; // vw
-  const p4Y = pPanel4 * 22; // vh
-
-  // ========================================================================
-  // 3. BOTTOM DETAILS (Mission statement & scroll cue)
-  // Move outward and dissolve cleanly
-  // ========================================================================
-  const pBottomLeft = Math.pow(p, 1.08);
-  const bLeftX = -pBottomLeft * 45; // vw
-  const bLeftY = pBottomLeft * 14; // vh
-  const bLeftOp = Math.max(0, 1 - p / 0.65);
-
-  const pBottomRight = Math.pow(p, 1.12);
-  const bRightX = pBottomRight * 35; // vw
-  const bRightY = pBottomRight * 14; // vh
-  const bRightOp = Math.max(0, 1 - p / 0.55);
-
-  // ========================================================================
-  // 4. GRID SEAMS
-  // ========================================================================
-  const seamOp = Math.max(0, 1 - p / 0.45);
-
-  // Overall container stays 100% visible while panels separate,
-  // then dissolves seamlessly between p = 0.85 and 1.00 for the downstream scene
-  const heroOpacity = p >= 0.85 ? Math.max(0, 1 - (p - 0.85) / 0.15) : 1.0;
+  // Handover to downstream scene at p >= 0.88
+  const heroOpacity = p >= 0.88 ? Math.max(0, 1 - (p - 0.88) / 0.12) : 1.0;
   const isHidden = heroOpacity <= 0.005;
   const pointerEvents = heroOpacity > 0.05 && p < 0.5 ? "auto" : "none";
 
@@ -180,7 +296,7 @@ export const BoonHero: React.FC<BoonHeroProps> = ({
       onExploreClick();
     } else {
       window.scrollBy({
-        top: window.innerHeight * 0.9,
+        top: window.innerHeight * 0.95,
         behavior: "smooth",
       });
     }
@@ -188,6 +304,7 @@ export const BoonHero: React.FC<BoonHeroProps> = ({
 
   return (
     <section
+      ref={containerRef}
       className={styles.heroContainer}
       style={{
         opacity: heroOpacity.toFixed(3),
@@ -195,162 +312,138 @@ export const BoonHero: React.FC<BoonHeroProps> = ({
         visibility: isHidden ? "hidden" : "visible",
         display: isHidden ? "none" : undefined,
       }}
-      aria-label="Mining Discovery - Global Mining Media & Capital Platform"
+      aria-label="Mining Discovery - From Alpine Summit to Deep Underground Extraction"
     >
-      {/* 3D PARALLAX STAGE (Follows cursor position with smooth perspective tilt) */}
-      <div ref={stageRef} className={styles.heroParallaxStage}>
-        {/* FRAGMENTED EDITORIAL QUADRANT PANELS (Reference Motion Philosophy) */}
-        <div
-          ref={bgRef}
-          className={styles.heroVisualWrap}
-          aria-hidden="true"
-          style={{ transformOrigin: "center center", willChange: "transform" }}
-        >
-          {/* Panel 1: Top Left */}
-          <div
-            className={styles.panelTopLeft}
-            style={{
-              transform: `translate3d(${p1X.toFixed(2)}vw, ${p1Y.toFixed(2)}vh, 0)`,
-            }}
-          >
-            <div
-              className={styles.panelInnerImage}
-              style={{ left: 0, top: 0 }}
-            />
+      {/* 1. 300-FRAME HIGH-PERFORMANCE CANVAS */}
+      <div className={styles.canvasContainer}>
+        <canvas ref={canvasRef} className={styles.sequenceCanvas} />
+        <div className={styles.cinematicVignette} />
+      </div>
+
+      {/* 2. AMBIENT MINERAL DUST / EMBERS */}
+      <div className="absolute inset-0 pointer-events-none z-8" aria-hidden="true">
+        <MineralDustField disabled={p > 0.88} />
+      </div>
+
+      {/* 3. GSAP 3D PARALLAX OVERLAY STAGE */}
+      <div ref={stageRef} className={styles.overlayStage}>
+        {/* ================================================================= */}
+        {/* ACT 1: SURFACE MOUNTAIN OVERLAY (p = 0 to 0.32)                   */}
+        {/* ================================================================= */}
+        <div ref={surfaceLayerRef} className={styles.surfaceLayer}>
+          <div className={styles.glassBadge}>
+            <span className={styles.badgePulseDot} />
+            <span className={styles.badgeText}>Natural Resource Discovery</span>
           </div>
 
-          {/* Panel 2: Top Right */}
-          <div
-            className={styles.panelTopRight}
-            style={{
-              transform: `translate3d(${p2X.toFixed(2)}vw, ${p2Y.toFixed(2)}vh, 0)`,
-            }}
-          >
-            <div
-              className={styles.panelInnerImage}
-              style={{ left: "-44vw", top: 0 }}
-            />
-          </div>
+          <h1 className={styles.heroTitle}>
+            <span>MINING</span>
+            <span>DISCOVERY</span>
+          </h1>
 
-          {/* Panel 3: Bottom Left */}
-          <div
-            className={styles.panelBottomLeft}
-            style={{
-              transform: `translate3d(${p3X.toFixed(2)}vw, ${p3Y.toFixed(2)}vh, 0)`,
-            }}
-          >
-            <div
-              className={styles.panelInnerImage}
-              style={{ left: 0, top: "-50vh" }}
-            />
-            {/* Lower Left Box Accent Frame */}
-            <div className={styles.lowerLeftBoxAccent} style={{ width: "100%" }} />
-          </div>
-
-          {/* Panel 4: Bottom Right */}
-          <div
-            className={styles.panelBottomRight}
-            style={{
-              transform: `translate3d(${p4X.toFixed(2)}vw, ${p4Y.toFixed(2)}vh, 0)`,
-            }}
-          >
-            <div
-              className={styles.panelInnerImage}
-              style={{ left: "-44vw", top: "-50vh" }}
-            />
-            {/* Amber Ember Glow */}
-            <div ref={glowRef} className={styles.ambientEmberGlow} />
-          </div>
-
-          {/* Soft Vignette Overlay */}
-          <div
-            className={styles.heroVignetteOverlay}
-            style={{ opacity: seamOp.toFixed(3) }}
-          />
-
-          {/* Technical Grid Seams (Separate / Fade on scroll) */}
-          <div
-            className={styles.gridSeamHorizontal}
-            style={{
-              opacity: seamOp.toFixed(3),
-              transform: `scaleX(${(1 + p * 0.15).toFixed(3)})`,
-            }}
-          />
-          <div
-            className={styles.gridSeamVertical}
-            style={{
-              opacity: seamOp.toFixed(3),
-              transform: `translate3d(${(p1X * 0.8).toFixed(2)}vw, 0, 0)`,
-            }}
-          />
+          <p className={styles.heroSubline}>
+            From alpine geological exploration to high-valuation institutional capital.
+          </p>
         </div>
 
-        {/* Main Content Overlay: Typography & Bottom Bar */}
-        <div className={styles.heroContentOverlay}>
-          {/* Massive Asymmetric Display Typography (Physical Horizontal Translations + 3D Depth) */}
-          <div
-            ref={titleRef}
-            className={styles.titleArea}
-            style={{ transformStyle: "preserve-3d", willChange: "transform" }}
-          >
-            <h1
-              className={styles.headlineLine1}
-              style={{
-                transform: `translate3d(${text1X.toFixed(2)}vw, calc(-50% + ${text1Y.toFixed(2)}vh), 0)`,
-                opacity: text1Opacity.toFixed(3),
-              }}
-            >
-              MINING
-            </h1>
-            <h2
-              className={styles.headlineLine2}
-              style={{
-                transform: `translate3d(${text2X.toFixed(2)}vw, calc(-50% + ${text2Y.toFixed(2)}vh), 0)`,
-                opacity: text2Opacity.toFixed(3),
-              }}
-            >
-              DISCOVERY
-            </h2>
+        {/* Floating Telemetry Glass Card (Top Right) */}
+        <div ref={telemetryCardRef} className={`${styles.glassPanel} ${styles.glassTelemetryCard}`}>
+          <span className={styles.telemetryLabel}>GEOLOGICAL TELEMETRY</span>
+          <div className={styles.telemetryValue}>
+            <span>ALT {currentAltitude > 0 ? `+${currentAltitude}` : currentAltitude}M</span>
+          </div>
+          <p className={styles.telemetryDesc}>
+            High-grade core drill verification & aerial lidar terrain mapping.
+          </p>
+        </div>
+
+        {/* ================================================================= */}
+        {/* ACT 2: OPEN PIT HAULAGE OVERLAY (p = 0.32 to 0.68)                */}
+        {/* ================================================================= */}
+        <div ref={openPitLayerRef} className={`${styles.glassPanel} ${styles.openPitLayer}`}>
+          <div className={styles.glassBadge} style={{ marginBottom: "0.8rem" }}>
+            <span className={styles.badgePulseDot} style={{ background: "#ff8c00", boxShadow: "0 0 8px #ff8c00" }} />
+            <span className={styles.badgeText}>Phase 02: Open Pit Haulage</span>
           </div>
 
-          {/* Bottom Bar: Mission statement on left, animated scroll cue on right */}
-          <div className={styles.bottomBar}>
-            <p
-              className={styles.missionStatement}
-              style={{
-                transform: `translate3d(${bLeftX.toFixed(2)}vw, ${bLeftY.toFixed(2)}vh, 0)`,
-                opacity: bLeftOp.toFixed(3),
-              }}
-            >
-              We engineer strategic media, institutional capital, and global intelligence to drive{" "}
-              <span className={styles.accentHighlight}>unprecedented market valuation</span> for natural resource leaders.
-            </p>
+          <h2 className={styles.actHeadline}>
+            THE SCALE OF EXTRACTION
+          </h2>
 
+          <p className={styles.heroSubline} style={{ textAlign: "left", margin: 0 }}>
+            Spiral haul roads connecting high-tonnage extraction zones directly to the primary underground portal.
+          </p>
+        </div>
+
+        {/* ================================================================= */}
+        {/* ACT 3: DEEP UNDERGROUND EXTRACTION (p = 0.68 to 1.0)              */}
+        {/* ================================================================= */}
+        <div ref={undergroundLayerRef} className={`${styles.glassPanel} ${styles.undergroundLayer}`}>
+          <div className={styles.glassBadge} style={{ marginBottom: "0.8rem" }}>
+            <span className={styles.badgePulseDot} />
+            <span className={styles.badgeText}>Phase 03: Underground Stope</span>
+          </div>
+
+          <h2 className={styles.actHeadline}>
+            WHERE VALUE IS UNEARTHED
+          </h2>
+
+          <p className={styles.heroSubline} style={{ textAlign: "left", margin: 0 }}>
+            Continuous miners cutting high-grade ore at depth. Ground truth engineered into unprecedented market valuation.
+          </p>
+
+          <button
+            type="button"
+            className={styles.undergroundCtaButton}
+            onClick={handleScrollClick}
+            aria-label="Explore Showcase"
+          >
+            <span>ENTER CAPITAL SHOWCASE</span>
+            <span aria-hidden="true">→</span>
+          </button>
+        </div>
+      </div>
+
+      {/* ================================================================= */}
+      {/* 4. BOTTOM BAR: LIVE DEPTH INDICATOR & SCROLL CUE                  */}
+      {/* ================================================================= */}
+      <div className={styles.bottomBar}>
+        {/* Live Depth Indicator */}
+        <div className={styles.depthIndicator}>
+          <span className={styles.depthLabel}>
+            {currentAltitude >= 0 ? `ELEV +${currentAltitude}M` : `DEPTH ${Math.abs(currentAltitude)}M`}
+          </span>
+          <div className={styles.depthTrack}>
             <div
-              className={styles.scrollCue}
-              onClick={handleScrollClick}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  handleScrollClick();
-                }
-              }}
-              style={{
-                transform: `translate3d(${bRightX.toFixed(2)}vw, ${bRightY.toFixed(2)}vh, 0)`,
-                opacity: bRightOp.toFixed(3),
-              }}
-              aria-label="Scroll down to begin 3D story journey"
-            >
-              <span className={styles.scrollText}>SCROLL FOR MORE</span>
-              <div className={styles.scrollDots} aria-hidden="true">
-                <span className={styles.scrollDot} />
-                <span className={styles.scrollDot} />
-                <span className={styles.scrollDot} />
-                <span className={styles.scrollDot} />
-              </div>
-            </div>
+              className={styles.depthFill}
+              style={{ width: `${Math.round(p * 100)}%` }}
+            />
+          </div>
+          <span className={styles.depthLabel} style={{ opacity: 0.6 }}>
+            {p < 0.35 ? "SUMMIT" : p < 0.7 ? "OPEN PIT" : "DEEP SHAFT"}
+          </span>
+        </div>
+
+        {/* Scroll Cue */}
+        <div
+          className={styles.scrollCue}
+          onClick={handleScrollClick}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              handleScrollClick();
+            }
+          }}
+          aria-label="Scroll down to begin 3D story journey"
+        >
+          <span className={styles.scrollText}>SCROLL TO EXPLORE</span>
+          <div className={styles.scrollDots} aria-hidden="true">
+            <span className={styles.scrollDot} />
+            <span className={styles.scrollDot} />
+            <span className={styles.scrollDot} />
+            <span className={styles.scrollDot} />
           </div>
         </div>
       </div>
