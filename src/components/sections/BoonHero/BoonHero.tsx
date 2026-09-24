@@ -32,7 +32,6 @@ export const BoonHero: React.FC<BoonHeroProps> = ({
 
   // GSAP animated overlay refs
   const surfaceLayerRef = useRef<HTMLDivElement | null>(null);
-  const telemetryCardRef = useRef<HTMLDivElement | null>(null);
   const openPitLayerRef = useRef<HTMLDivElement | null>(null);
   const undergroundLayerRef = useRef<HTMLDivElement | null>(null);
 
@@ -43,9 +42,6 @@ export const BoonHero: React.FC<BoonHeroProps> = ({
 
   // Target mouse position for GSAP 3D Parallax tilt
   const mousePos = useRef({ x: 0, y: 0 });
-
-  // Depth calculation for live telemetry UI: +2400m at summit down to -850m deep in mine
-  const currentAltitude = Math.round(2400 - p * 3250);
 
   // ========================================================================
   // 1. HARDWARE CANVAS RENDER FUNCTION (Instant 0.1ms render time, NO LAG)
@@ -91,6 +87,8 @@ export const BoonHero: React.FC<BoonHeroProps> = ({
     lastDrawnFrameRef.current = frameIndex;
   }, []);
 
+  const lastDimensionsRef = useRef({ width: 0, height: 0 });
+
   // Resize Canvas to device resolution with High-DPI support
   const resizeCanvas = useCallback(() => {
     const canvas = canvasRef.current;
@@ -99,34 +97,59 @@ export const BoonHero: React.FC<BoonHeroProps> = ({
     const width = window.innerWidth;
     const height = window.innerHeight;
 
-    if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
+    const last = lastDimensionsRef.current;
+    const widthChanged = Math.abs(width - last.width) > 1;
+    // On mobile, URL bar expand/collapse changes height by ~50-80px.
+    // Avoid reallocating canvas buffer on scroll-induced address bar resizes.
+    const heightChanged = Math.abs(height - last.height) > 100 || last.height === 0;
+
+    if (widthChanged || heightChanged) {
+      lastDimensionsRef.current = { width, height };
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
       renderFrame(currentFrameRef.current);
     }
   }, [renderFrame]);
 
   // ========================================================================
-  // 2. HIGH-SPEED PRELOADER FOR 240 WEBP FRAMES
+  // 2. HIGH-SPEED PROGRESSIVE PRELOADER FOR 240 WEBP FRAMES
   // ========================================================================
   useEffect(() => {
+    let isCancelled = false;
+
+    const onImageLoaded = (idx: number, img: HTMLImageElement) => {
+      if (isCancelled) return;
+      imageCache.current.set(idx, img);
+      const cur = currentFrameRef.current;
+      const lastDrawn = lastDrawnFrameRef.current;
+      // If this newly loaded image is closer to current scrubbing position than what's currently drawn:
+      if (Math.abs(idx - cur) < Math.abs(lastDrawn - cur)) {
+        renderFrame(cur);
+      }
+    };
+
     // Step A: Load Frame 1 immediately and draw
     const frame1 = new Image();
     frame1.src = getFrameUrl(1);
     frame1.onload = () => {
+      if (isCancelled) return;
       imageCache.current.set(1, frame1);
       resizeCanvas();
       renderFrame(currentFrameRef.current);
     };
 
-    // Step B: Preload key frames first (every 3rd frame for instant scrub coverage)
+    // Step B: Preload key frames first (every 4th frame for instant scrub coverage)
     const keyIndices: number[] = [];
-    for (let i = 1; i <= TOTAL_FRAMES; i += 3) {
+    for (let i = 1; i <= TOTAL_FRAMES; i += 4) {
       keyIndices.push(i);
+    }
+    if (keyIndices[keyIndices.length - 1] !== TOTAL_FRAMES) {
+      keyIndices.push(TOTAL_FRAMES);
     }
 
     let keyPointer = 0;
     const loadNextKeyFrame = () => {
+      if (isCancelled) return;
       if (keyPointer >= keyIndices.length) {
         loadAllRemainingFrames();
         return;
@@ -136,10 +159,7 @@ export const BoonHero: React.FC<BoonHeroProps> = ({
         const img = new Image();
         img.src = getFrameUrl(idx);
         img.onload = () => {
-          imageCache.current.set(idx, img);
-          if (idx === currentFrameRef.current) {
-            renderFrame(idx);
-          }
+          onImageLoaded(idx, img);
           loadNextKeyFrame();
         };
         img.onerror = () => loadNextKeyFrame();
@@ -147,24 +167,23 @@ export const BoonHero: React.FC<BoonHeroProps> = ({
         loadNextKeyFrame();
       }
     };
-    // Launch 2 parallel keyframe loaders
+
+    // Launch 3 parallel keyframe loaders
+    loadNextKeyFrame();
     loadNextKeyFrame();
     loadNextKeyFrame();
 
-    // Step C: Load remaining interstitial frames with 4 parallel streams
+    // Step C: Load remaining interstitial frames with 6 parallel streams
     const loadAllRemainingFrames = () => {
       let idx = 1;
       const loadNext = () => {
-        if (idx > TOTAL_FRAMES) return;
+        if (isCancelled || idx > TOTAL_FRAMES) return;
         const currentIdx = idx++;
         if (!imageCache.current.has(currentIdx)) {
           const img = new Image();
           img.src = getFrameUrl(currentIdx);
           img.onload = () => {
-            imageCache.current.set(currentIdx, img);
-            if (currentIdx === currentFrameRef.current) {
-              renderFrame(currentIdx);
-            }
+            onImageLoaded(currentIdx, img);
             loadNext();
           };
           img.onerror = () => loadNext();
@@ -172,16 +191,16 @@ export const BoonHero: React.FC<BoonHeroProps> = ({
           loadNext();
         }
       };
-      loadNext();
-      loadNext();
-      loadNext();
-      loadNext();
+      for (let s = 0; s < 6; s++) {
+        loadNext();
+      }
     };
 
     window.addEventListener("resize", resizeCanvas);
     resizeCanvas();
 
     return () => {
+      isCancelled = true;
       window.removeEventListener("resize", resizeCanvas);
     };
   }, [resizeCanvas, renderFrame]);
@@ -197,42 +216,38 @@ export const BoonHero: React.FC<BoonHeroProps> = ({
   }, [p, renderFrame]);
 
   // ========================================================================
-  // 4. GSAP PARALLAX TWEENING (Scroll & Mouse Movement)
+  // 4. GSAP PARALLAX TWEENING & CAMERA RACK FOCUS (Scroll & Mouse Movement)
   // ========================================================================
   useEffect(() => {
     // Calculate normalized progress phases
     // Act 1: Surface Mountains (p = 0 to 0.32)
     const act1Fade = Math.max(0, 1 - p / 0.28);
     const act1Y = -p * 60; // vh
+    const act1Blur = Math.max(0, (1 - act1Fade) * 10);
 
     // Act 2: Open Pit Haulage (p = 0.32 to 0.68)
     const act2Enter = Math.max(0, Math.min(1, (p - 0.28) / 0.12));
     const act2Exit = Math.max(0, 1 - Math.max(0, (p - 0.62) / 0.1));
     const act2Opacity = act2Enter * act2Exit;
     const act2Y = (1 - act2Enter) * 30 - Math.max(0, (p - 0.62) * 50);
+    const act2Blur = Math.max(0, (1 - act2Opacity) * 8);
 
     // Act 3: Deep Underground Mine (p = 0.68 to 1.0)
     const act3Enter = Math.max(0, Math.min(1, (p - 0.68) / 0.12));
     const act3Exit = Math.max(0, 1 - Math.max(0, (p - 0.88) / 0.12));
     const act3Opacity = act3Enter * act3Exit;
     const act3Y = (1 - act3Enter) * 30;
+    const act3Blur = Math.max(0, (1 - act3Opacity) * 8);
 
-    // GSAP Animate Overlays
+    // High-performance GSAP layer animations: On mobile, skip expensive CSS blur to ensure 60fps compositor scrolling
+    const isMobile = typeof window !== "undefined" && (window.innerWidth < 900 || window.matchMedia("(pointer: coarse)").matches);
+
     if (surfaceLayerRef.current) {
       gsap.to(surfaceLayerRef.current, {
         opacity: act1Fade,
         y: `${act1Y}vh`,
-        duration: 0.25,
-        ease: "power2.out",
-        overwrite: "auto",
-      });
-    }
-
-    if (telemetryCardRef.current) {
-      gsap.to(telemetryCardRef.current, {
-        opacity: act1Fade,
-        y: `${act1Y * 0.7}vh`,
-        duration: 0.25,
+        ...(isMobile ? { filter: "none" } : { filter: `blur(${act1Blur.toFixed(1)}px)` }),
+        duration: isMobile ? 0.15 : 0.25,
         ease: "power2.out",
         overwrite: "auto",
       });
@@ -242,7 +257,8 @@ export const BoonHero: React.FC<BoonHeroProps> = ({
       gsap.to(openPitLayerRef.current, {
         opacity: act2Opacity,
         y: `${act2Y}px`,
-        duration: 0.25,
+        ...(isMobile ? { filter: "none" } : { filter: `blur(${act2Blur.toFixed(1)}px)` }),
+        duration: isMobile ? 0.15 : 0.25,
         ease: "power2.out",
         overwrite: "auto",
       });
@@ -252,7 +268,8 @@ export const BoonHero: React.FC<BoonHeroProps> = ({
       gsap.to(undergroundLayerRef.current, {
         opacity: act3Opacity,
         y: `${act3Y}px`,
-        duration: 0.25,
+        ...(isMobile ? { filter: "none" } : { filter: `blur(${act3Blur.toFixed(1)}px)` }),
+        duration: isMobile ? 0.15 : 0.25,
         ease: "power2.out",
         overwrite: "auto",
       });
@@ -311,7 +328,6 @@ export const BoonHero: React.FC<BoonHeroProps> = ({
         opacity: heroOpacity.toFixed(3),
         pointerEvents: pointerEvents as "auto" | "none",
         visibility: isHidden ? "hidden" : "visible",
-        display: isHidden ? "none" : undefined,
       }}
       aria-label="Mining Discovery - From Alpine Summit to Deep Underground Extraction"
     >
@@ -332,11 +348,6 @@ export const BoonHero: React.FC<BoonHeroProps> = ({
         {/* ACT 1: SURFACE MOUNTAIN OVERLAY (p = 0 to 0.32)                   */}
         {/* ================================================================= */}
         <div ref={surfaceLayerRef} className={styles.surfaceLayer}>
-          <div className={styles.glassBadge}>
-            <span className={styles.badgePulseDot} />
-            <span className={styles.badgeText}>Natural Resource Discovery</span>
-          </div>
-
           <h1 className={styles.heroTitle}>
             <span>MINING</span>
             <span>DISCOVERY</span>
@@ -347,31 +358,20 @@ export const BoonHero: React.FC<BoonHeroProps> = ({
           </p>
         </div>
 
-        {/* Floating Telemetry Glass Card (Top Right) */}
-        <div ref={telemetryCardRef} className={`${styles.glassPanel} ${styles.glassTelemetryCard}`}>
-          <span className={styles.telemetryLabel}>GEOLOGICAL TELEMETRY</span>
-          <div className={styles.telemetryValue}>
-            <span>ALT {currentAltitude > 0 ? `+${currentAltitude}` : currentAltitude}M</span>
-          </div>
-          <p className={styles.telemetryDesc}>
-            High-grade core drill verification & aerial lidar terrain mapping.
-          </p>
-        </div>
 
         {/* ================================================================= */}
         {/* ACT 2: OPEN PIT HAULAGE OVERLAY (p = 0.32 to 0.68)                */}
         {/* ================================================================= */}
-        <div ref={openPitLayerRef} className={`${styles.glassPanel} ${styles.openPitLayer}`}>
-          <div className={styles.glassBadge} style={{ marginBottom: "0.8rem" }}>
-            <span className={styles.badgePulseDot} style={{ background: "#ff8c00", boxShadow: "0 0 8px #ff8c00" }} />
-            <span className={styles.badgeText}>Phase 02: Open Pit Haulage</span>
-          </div>
-
+        <div
+          ref={openPitLayerRef}
+          className={styles.openPitLayer}
+          style={{ opacity: 0 }}
+        >
           <h2 className={styles.actHeadline}>
             THE SCALE OF EXTRACTION
           </h2>
 
-          <p className={styles.heroSubline} style={{ textAlign: "left", margin: 0 }}>
+          <p className={styles.actSubline}>
             Spiral haul roads connecting high-tonnage extraction zones directly to the primary underground portal.
           </p>
         </div>
@@ -379,17 +379,16 @@ export const BoonHero: React.FC<BoonHeroProps> = ({
         {/* ================================================================= */}
         {/* ACT 3: DEEP UNDERGROUND EXTRACTION (p = 0.68 to 1.0)              */}
         {/* ================================================================= */}
-        <div ref={undergroundLayerRef} className={`${styles.glassPanel} ${styles.undergroundLayer}`}>
-          <div className={styles.glassBadge} style={{ marginBottom: "0.8rem" }}>
-            <span className={styles.badgePulseDot} />
-            <span className={styles.badgeText}>Phase 03: Underground Stope</span>
-          </div>
-
+        <div
+          ref={undergroundLayerRef}
+          className={styles.undergroundLayer}
+          style={{ opacity: 0 }}
+        >
           <h2 className={styles.actHeadline}>
             WHERE VALUE IS UNEARTHED
           </h2>
 
-          <p className={styles.heroSubline} style={{ textAlign: "left", margin: 0 }}>
+          <p className={styles.actSubline}>
             Continuous miners cutting high-grade ore at depth. Ground truth engineered into unprecedented market valuation.
           </p>
 
@@ -405,49 +404,6 @@ export const BoonHero: React.FC<BoonHeroProps> = ({
         </div>
       </div>
 
-      {/* ================================================================= */}
-      {/* 4. BOTTOM BAR: LIVE DEPTH INDICATOR & SCROLL CUE                  */}
-      {/* ================================================================= */}
-      <div className={styles.bottomBar}>
-        {/* Live Depth Indicator */}
-        <div className={styles.depthIndicator}>
-          <span className={styles.depthLabel}>
-            {currentAltitude >= 0 ? `ELEV +${currentAltitude}M` : `DEPTH ${Math.abs(currentAltitude)}M`}
-          </span>
-          <div className={styles.depthTrack}>
-            <div
-              className={styles.depthFill}
-              style={{ width: `${Math.round(p * 100)}%` }}
-            />
-          </div>
-          <span className={styles.depthLabel} style={{ opacity: 0.6 }}>
-            {p < 0.35 ? "SUMMIT" : p < 0.7 ? "OPEN PIT" : "DEEP SHAFT"}
-          </span>
-        </div>
-
-        {/* Scroll Cue */}
-        <div
-          className={styles.scrollCue}
-          onClick={handleScrollClick}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              handleScrollClick();
-            }
-          }}
-          aria-label="Scroll down to begin 3D story journey"
-        >
-          <span className={styles.scrollText}>SCROLL TO EXPLORE</span>
-          <div className={styles.scrollDots} aria-hidden="true">
-            <span className={styles.scrollDot} />
-            <span className={styles.scrollDot} />
-            <span className={styles.scrollDot} />
-            <span className={styles.scrollDot} />
-          </div>
-        </div>
-      </div>
     </section>
   );
 };

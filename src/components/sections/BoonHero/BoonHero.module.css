@@ -31,6 +31,7 @@
   height: 100%;
   overflow: hidden;
   pointer-events: none;
+  background: #030509 url("/frames/hero-sequence/frame_0001.webp") center center / cover no-repeat;
 }
 
 .sequenceVideo {
@@ -147,17 +148,19 @@
 
 .surfaceLayer {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  inset: 0;
+  margin: auto;
   width: 90%;
   max-width: 1100px;
+  height: fit-content;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   text-align: center;
   pointer-events: none;
-  will-change: transform, opacity;
+  will-change: transform, opacity, filter;
+  z-index: 12;
 }
 
 .heroTitle {
@@ -169,7 +172,7 @@
   color: #FAF8F5;
   line-height: 1.02;
   margin: 0 0 1.2rem 0;
-  text-shadow: 0 6px 40px rgba(0, 0, 0, 0.95);
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.95);
 }
 
 .heroTitle span {
@@ -187,66 +190,49 @@
   margin: 0 auto;
 }
 
-/* Floating Glass Telemetry Stat (Top Right) */
-.glassTelemetryCard {
-  position: absolute;
-  top: clamp(4.5rem, 10vh, 7rem);
-  right: clamp(2rem, 5vw, 5rem);
-  max-width: 280px;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  z-index: 15;
-  will-change: transform, opacity;
-}
-
-.telemetryLabel {
-  font-family: var(--font-mono, monospace);
-  font-size: 0.68rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: rgba(212, 175, 55, 0.85);
-}
-
-.telemetryValue {
-  font-family: var(--font-sans-custom), sans-serif;
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: #FAF8F5;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.telemetryDesc {
-  font-size: 0.78rem;
-  color: rgba(244, 242, 234, 0.7);
-  line-height: 1.4;
-}
-
 /* ==========================================================================
    ACT 2: OPEN PIT TRANSITION OVERLAY (p: 0.35 -> 0.68)
    ========================================================================== */
 
 .openPitLayer {
   position: absolute;
-  top: 50%;
-  left: clamp(2rem, 6vw, 6rem);
-  transform: translateY(-50%);
-  max-width: 500px;
+  top: 0;
+  bottom: 0;
+  left: clamp(3rem, 9vw, 9rem);
+  margin: auto 0;
+  height: fit-content;
+  max-width: 580px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
   pointer-events: none;
-  will-change: transform, opacity;
+  will-change: transform, opacity, filter;
+  opacity: 0;
+  z-index: 12;
 }
 
 .actHeadline {
-  font-family: var(--font-editorial-serif), var(--font-display-custom), Georgia, serif;
-  font-size: clamp(2.4rem, 5vw, 4.2rem);
+  font-family: var(--font-editorial-serif), var(--font-display-custom), "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(2.8rem, 5.5vw, 5rem);
   font-weight: 350;
+  letter-spacing: -0.015em;
   text-transform: uppercase;
   color: #FAF8F5;
-  line-height: 1.1;
-  margin: 0 0 1rem 0;
-  text-shadow: 0 4px 25px rgba(0, 0, 0, 0.95);
+  line-height: 1.05;
+  margin: 0 0 1.2rem 0;
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.95);
+}
+
+.actSubline {
+  font-family: var(--font-sans-custom), var(--font-geist-sans), system-ui, sans-serif;
+  font-size: clamp(1rem, 1.25vw, 1.2rem);
+  font-weight: 400;
+  color: rgba(244, 242, 234, 0.9);
+  line-height: 1.6;
+  margin: 0;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.95);
+  max-width: 520px;
 }
 
 /* ==========================================================================
@@ -255,12 +241,20 @@
 
 .undergroundLayer {
   position: absolute;
-  top: 50%;
-  right: clamp(2rem, 6vw, 6rem);
-  transform: translateY(-50%);
-  max-width: 540px;
+  top: 0;
+  bottom: 0;
+  right: clamp(3rem, 9vw, 9rem);
+  margin: auto 0;
+  height: fit-content;
+  max-width: 580px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
   pointer-events: none;
-  will-change: transform, opacity;
+  will-change: transform, opacity, filter;
+  opacity: 0;
+  z-index: 12;
 }
 
 .undergroundCtaButton {
@@ -416,26 +410,85 @@
    ========================================================================== */
 
 @media (max-width: 900px) {
-  .heroTitle {
-    font-size: clamp(2.4rem, 11vw, 4.8rem);
+  .heroContainer {
+    padding: 0;
   }
+
+  .surfaceLayer {
+    width: 100%;
+    max-width: 100%;
+    padding: 0 1.25rem;
+    box-sizing: border-box;
+  }
+
+  .heroTitle {
+    font-size: clamp(2.1rem, 9.2vw, 3.8rem);
+    letter-spacing: -0.015em;
+    margin: 0 0 1rem 0;
+  }
+
+  .heroSubline {
+    font-size: clamp(0.88rem, 3.6vw, 1.05rem);
+    line-height: 1.55;
+    padding: 0 0.5rem;
+    max-width: 440px;
+  }
+
+  .openPitLayer,
+  .undergroundLayer {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: 460px;
+    height: fit-content;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 0 1.25rem;
+    box-sizing: border-box;
+  }
+
+  .actHeadline {
+    font-size: clamp(1.75rem, 7vw, 2.6rem);
+    line-height: 1.1;
+    margin: 0 0 0.85rem 0;
+    text-align: center;
+  }
+
+  .actSubline {
+    font-size: clamp(0.86rem, 3.5vw, 1.02rem);
+    line-height: 1.55;
+    text-align: center;
+    margin: 0 auto;
+    max-width: 400px;
+  }
+
+  .undergroundCtaButton {
+    margin: 1.4rem auto 0 auto;
+    padding: 0.75rem 1.8rem;
+    font-size: 0.76rem;
+    letter-spacing: 0.18em;
+  }
+
   .glassTelemetryCard {
     display: none;
   }
-  .openPitLayer,
-  .undergroundLayer {
-    right: auto;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 90%;
-    text-align: center;
-  }
+
   .bottomBar {
-    left: 1.5rem;
-    right: 1.5rem;
+    left: 1rem;
+    right: 1rem;
+    bottom: 1.5rem;
     justify-content: center;
   }
+
   .depthIndicator {
     display: none;
   }
 }
+
