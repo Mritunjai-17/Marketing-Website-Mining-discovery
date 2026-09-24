@@ -12,8 +12,8 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
-  /* The deepest value in the scene. Everything else sits on top of it. */
-  background: #ffffff;
+  /* The deepest value in the scene: dark obsidian matching hero descent */
+  background: #030509;
   /* Layers are promoted individually; this just establishes the context. */
   isolation: isolate;
 }

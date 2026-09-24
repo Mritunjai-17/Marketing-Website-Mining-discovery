@@ -1,6 +1,14 @@
 "use client";
 
-import React, { useEffect, useLayoutEffect, useRef, useState, useCallback } from "react";
+import React, {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  useCallback,
+  useImperativeHandle,
+  forwardRef,
+} from "react";
 import gsap from "gsap";
 import styles from "./BoonHero.module.css";
 import { MineralDustField } from "@/components/sections/hero-layers/MineralDustField";
@@ -13,6 +21,10 @@ export interface BoonHeroProps {
   onExploreClick?: () => void;
 }
 
+export interface BoonHeroHandle {
+  scrub: (progress: number) => void;
+}
+
 const TOTAL_FRAMES = 240; // 240 frames extracted from Continuous_descent_into_mine.mp4
 
 function getFrameUrl(index: number): string {
@@ -20,10 +32,10 @@ function getFrameUrl(index: number): string {
   return `/frames/hero-sequence/frame_${padded}.webp`;
 }
 
-export const BoonHero: React.FC<BoonHeroProps> = ({
-  progress = 0,
-  onExploreClick,
-}) => {
+export const BoonHero = forwardRef<BoonHeroHandle, BoonHeroProps>(function BoonHero(
+  { progress = 0, onExploreClick },
+  ref,
+) {
   // Damped scrubbed progress strictly bounded in [0, 1]
   const p = Math.max(0, Math.min(1, progress));
 
@@ -221,43 +233,32 @@ export const BoonHero: React.FC<BoonHeroProps> = ({
   }, [resizeCanvas, renderFrame]);
 
   // ========================================================================
-  // 3. ZERO-LATENCY SYNCHRONOUS FRAME SCRUBBING (Before Paint)
+  // 3. ZERO-LATENCY DIRECT HARDWARE SCRUBBING (0ms, 120 FPS)
   // ========================================================================
-  useIsomorphicLayoutEffect(() => {
-    // Map progress 0..1 to exact frame 1..240
+  const scrub = useCallback((progressValue: number) => {
+    const p = Math.max(0, Math.min(1, progressValue));
+
+    // 1. Draw frame to canvas immediately
     const targetFrame = Math.min(TOTAL_FRAMES, Math.max(1, Math.round(p * (TOTAL_FRAMES - 1)) + 1));
     currentFrameRef.current = targetFrame;
     renderFrame(targetFrame);
-  }, [p, renderFrame]);
 
-  // ========================================================================
-  // 4. PARALLAX & LAYER ANIMATIONS (Synchronous Hardware Transforms)
-  // ========================================================================
-  useIsomorphicLayoutEffect(() => {
-    // Calculate normalized progress phases
-    // Act 1: Surface Mountains (p = 0 to 0.32)
+    // 2. Direct hardware CSS transforms (0ms, 120fps)
     const act1Fade = Math.max(0, 1 - p / 0.28);
     const act1Y = -p * 60; // vh
-    const act1Blur = Math.max(0, (1 - act1Fade) * 10);
 
-    // Act 2: Open Pit Haulage (p = 0.32 to 0.68)
     const act2Enter = Math.max(0, Math.min(1, (p - 0.28) / 0.12));
     const act2Exit = Math.max(0, 1 - Math.max(0, (p - 0.62) / 0.1));
     const act2Opacity = act2Enter * act2Exit;
     const act2Y = (1 - act2Enter) * 30 - Math.max(0, (p - 0.62) * 50);
-    const act2Blur = Math.max(0, (1 - act2Opacity) * 8);
 
-    // Act 3: Deep Underground Mine (p = 0.68 to 1.0)
     const act3Enter = Math.max(0, Math.min(1, (p - 0.68) / 0.12));
     const act3Exit = Math.max(0, 1 - Math.max(0, (p - 0.88) / 0.12));
     const act3Opacity = act3Enter * act3Exit;
     const act3Y = (1 - act3Enter) * 30;
-    const act3Blur = Math.max(0, (1 - act3Opacity) * 8);
 
     const isMobile = typeof window !== "undefined" && (window.innerWidth < 900 || window.matchMedia("(pointer: coarse)").matches);
 
-    // On mobile: Direct inline style application with translate3d runs directly in the GPU compositor
-    // with 0 latency, 0 tween scheduling, and 0 ease fighting touch finger movement!
     if (isMobile) {
       if (surfaceLayerRef.current) {
         surfaceLayerRef.current.style.opacity = act1Fade.toFixed(3);
@@ -279,36 +280,47 @@ export const BoonHero: React.FC<BoonHeroProps> = ({
         gsap.to(surfaceLayerRef.current, {
           opacity: act1Fade,
           y: `${act1Y}vh`,
-          filter: `blur(${act1Blur.toFixed(1)}px)`,
-          duration: 0.2,
-          ease: "power2.out",
+          duration: 0.1,
+          ease: "none",
           overwrite: "auto",
         });
       }
-
       if (openPitLayerRef.current) {
         gsap.to(openPitLayerRef.current, {
           opacity: act2Opacity,
           y: `${act2Y}px`,
-          filter: `blur(${act2Blur.toFixed(1)}px)`,
-          duration: 0.2,
-          ease: "power2.out",
+          duration: 0.1,
+          ease: "none",
           overwrite: "auto",
         });
       }
-
       if (undergroundLayerRef.current) {
         gsap.to(undergroundLayerRef.current, {
           opacity: act3Opacity,
           y: `${act3Y}px`,
-          filter: `blur(${act3Blur.toFixed(1)}px)`,
-          duration: 0.2,
-          ease: "power2.out",
+          duration: 0.1,
+          ease: "none",
           overwrite: "auto",
         });
       }
     }
-  }, [p]);
+
+    // 3. Section Handover Opacity & Pointer Events
+    const heroOpacity = p >= 0.88 ? Math.max(0, 1 - (p - 0.88) / 0.12) : 1.0;
+    const isHidden = heroOpacity <= 0.005;
+    if (containerRef.current) {
+      containerRef.current.style.opacity = heroOpacity.toFixed(3);
+      containerRef.current.style.visibility = isHidden ? "hidden" : "visible";
+      containerRef.current.style.pointerEvents = heroOpacity > 0.05 && p < 0.5 ? "auto" : "none";
+    }
+  }, [renderFrame]);
+
+  useImperativeHandle(ref, () => ({ scrub }), [scrub]);
+
+  // Synchronous sync with prop if passed
+  useIsomorphicLayoutEffect(() => {
+    scrub(progress);
+  }, [progress, scrub]);
 
   // GSAP 3D Perspective Tilt on Mouse Movement
   useEffect(() => {
@@ -440,6 +452,6 @@ export const BoonHero: React.FC<BoonHeroProps> = ({
 
     </section>
   );
-};
+});
 
 export default BoonHero;

@@ -15,6 +15,7 @@
   z-index: 30;
   user-select: none;
   pointer-events: auto;
+  touch-action: pan-y;
   will-change: transform, opacity;
   box-sizing: border-box;
 }
@@ -31,6 +32,7 @@
   height: 100%;
   overflow: hidden;
   pointer-events: none;
+  touch-action: pan-y;
   background: #030509 url("/frames/hero-sequence/frame_0001.webp") center center / cover no-repeat;
 }
 
@@ -88,6 +90,7 @@
   height: 100%;
   z-index: 10;
   pointer-events: none;
+  touch-action: pan-y;
 }
 
 /* Glass Card Component */

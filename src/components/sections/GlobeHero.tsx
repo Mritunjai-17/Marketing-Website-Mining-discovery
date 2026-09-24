@@ -8,7 +8,7 @@ import {
   deriveDescentCamera,
   JOURNEY_RUNS_FROM,
 } from "@/components/journey/descentCamera";
-import { BoonHero } from "@/components/sections/BoonHero";
+import { BoonHero, type BoonHeroHandle } from "@/components/sections/BoonHero";
 
 const Journey3D = dynamic(
   () => import("@/components/journey/Journey3D"),
@@ -72,8 +72,7 @@ export const GlobeHero: React.FC = () => {
   const lastTransPRef = useRef(0);
   const [transitionState, setTransitionState] = useState<TransitionState>("HERO_ACTIVE");
   const transitionStateRef = useRef<TransitionState>("HERO_ACTIVE");
-  const [heroProgress, setHeroProgress] = useState(0);
-  const lastHeroPRef = useRef(0);
+  const boonHeroRef = useRef<BoonHeroHandle>(null);
 
   const progressRef = useRef(0);
   const progressSpring = useRef<SpringState>({ value: 0, velocity: 0 });
@@ -115,18 +114,15 @@ export const GlobeHero: React.FC = () => {
     const t = clamp(progress.value, 0, 1);
     progressRef.current = t;
 
-    // 1. Hero scrubbed animation span in the pinned scroll timeline (exact 264vh distance)
-    const HERO_SPAN = 0.160;
-    const heroP = clamp(t / HERO_SPAN, 0, 1);
-    // 240 frames total: only trigger React state updates when the frame index changes (~0.0041)
-    const MIN_FRAME_STEP = 1 / 240;
-    if (
-      Math.abs(heroP - lastHeroPRef.current) >= MIN_FRAME_STEP ||
-      heroP === 0 ||
-      heroP === 1
-    ) {
-      lastHeroPRef.current = heroP;
-      setHeroProgress(heroP);
+    // 1. Direct hardware-scrubbed Hero sequence:
+    // On mobile (< 900px), a travel of 1.35x viewport height (~1000px) allows 3-4 natural, snappy thumb swipes
+    // so the camera never feels stuck or sluggish on mobile viewports.
+    const heroTravelPx = (isTouch ? 1.35 : 2.64) * (typeof window !== "undefined" ? window.innerHeight : 800);
+    const heroP = travel > 0 ? clamp((window.scrollY - top) / heroTravelPx, 0, 1) : 0;
+
+    // Direct 120 FPS hardware scrub with ZERO React virtual DOM re-renders!
+    if (boonHeroRef.current) {
+      boonHeroRef.current.scrub(heroP);
     }
 
     // --- Master Progress & Phase Partitioning ---------------------------------------
@@ -256,7 +252,7 @@ export const GlobeHero: React.FC = () => {
         >
           <div ref={slotRef} className="relative h-full w-full">
             {/* Boon-Inspired Dark Hero Overlay */}
-            <BoonHero progress={heroProgress} />
+            <BoonHero ref={boonHeroRef} />
 
             {/* Dark Descent Backdrop & 3D Truck Journey */}
             <DescentBackdrop progress={transitionProgress} />
