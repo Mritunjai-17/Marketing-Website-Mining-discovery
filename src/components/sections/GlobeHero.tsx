@@ -28,7 +28,7 @@ const TOTAL_SCROLL_VH = 1650;
  * How the sampled progress follows the true scroll position.
  * Critically damped Euler spring for smooth, responsive scroll-scrubbing.
  */
-const PROGRESS_SPRING = { stiffness: 84, damping: 18.3 };
+const PROGRESS_SPRING = { stiffness: 120, damping: 22 };
 const RESUME_GAP = 0.8;
 
 interface SpringState {

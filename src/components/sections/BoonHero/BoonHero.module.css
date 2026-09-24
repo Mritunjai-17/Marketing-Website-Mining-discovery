@@ -20,9 +20,10 @@
 }
 
 /* ==========================================================================
-   1. FULL-BLEED HIGH-PERFORMANCE CANVAS
+   1. FULL-BLEED HIGH-PERFORMANCE VIDEO & CANVAS
    ========================================================================== */
 
+.videoContainer,
 .canvasContainer {
   position: absolute;
   inset: 0;
@@ -30,6 +31,18 @@
   height: 100%;
   overflow: hidden;
   pointer-events: none;
+}
+
+.sequenceVideo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+  background-color: #030509;
 }
 
 .sequenceCanvas {
