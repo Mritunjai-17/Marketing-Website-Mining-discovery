@@ -98,8 +98,15 @@ export const GlobeHero: React.FC = () => {
     const gap = (now - lastSampleRef.current) / 1000;
     lastSampleRef.current = now;
 
+    const isTouch = typeof window !== "undefined" && (window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 900);
     const progress = progressSpring.current;
-    if (gap > RESUME_GAP) {
+
+    if (isTouch) {
+      // Mobile touch devices natively apply inertia momentum scrolling.
+      // 1:1 direct tracking gives instant, buttery responsiveness without spring lag.
+      progress.value = target;
+      progress.velocity = 0;
+    } else if (gap > RESUME_GAP) {
       progress.value = target;
       progress.velocity = 0;
     } else if (gap > 0) {
@@ -111,8 +118,10 @@ export const GlobeHero: React.FC = () => {
     // 1. Hero scrubbed animation span in the pinned scroll timeline (exact 264vh distance)
     const HERO_SPAN = 0.160;
     const heroP = clamp(t / HERO_SPAN, 0, 1);
+    // 240 frames total: only trigger React state updates when the frame index changes (~0.0041)
+    const MIN_FRAME_STEP = 1 / 240;
     if (
-      Math.abs(heroP - lastHeroPRef.current) > 0.001 ||
+      Math.abs(heroP - lastHeroPRef.current) >= MIN_FRAME_STEP ||
       heroP === 0 ||
       heroP === 1
     ) {
@@ -219,9 +228,9 @@ export const GlobeHero: React.FC = () => {
     });
     observer.observe(range);
 
-    const onScroll = () => {
-      applyStage();
-    };
+    // The requestAnimationFrame loop samples window.scrollY continuously on every display frame
+    // onScroll does not need to duplicate applyStage(), avoiding dual-execution timing jitter
+    const onScroll = () => {};
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", measureRange);
 

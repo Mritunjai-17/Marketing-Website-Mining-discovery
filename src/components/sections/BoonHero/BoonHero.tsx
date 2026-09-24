@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState, useCallback } from "react";
 import gsap from "gsap";
 import styles from "./BoonHero.module.css";
 import { MineralDustField } from "@/components/sections/hero-layers/MineralDustField";
+
+const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 export interface BoonHeroProps {
   /** Scroll progress from 0 (top) to 1. Directly scrubs the reference animation timeline. */
@@ -43,30 +45,43 @@ export const BoonHero: React.FC<BoonHeroProps> = ({
   // Target mouse position for GSAP 3D Parallax tilt
   const mousePos = useRef({ x: 0, y: 0 });
 
+  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
+
   // ========================================================================
   // 1. HARDWARE CANVAS RENDER FUNCTION (Instant 0.1ms render time, NO LAG)
   // ========================================================================
   const renderFrame = useCallback((frameIndex: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    let ctx = ctxRef.current;
+    if (!ctx) {
+      ctx = canvas.getContext("2d", { alpha: false });
+      ctxRef.current = ctx;
+    }
     if (!ctx) return;
 
     // Find requested frame or closest available in memory cache
     let img = imageCache.current.get(frameIndex);
     if (!img || !img.complete || img.naturalWidth === 0) {
-      let bestDist = Infinity;
-      let fallbackIndex = 1;
-      imageCache.current.forEach((cachedImg, idx) => {
-        if (cachedImg.complete && cachedImg.naturalWidth > 0) {
-          const dist = Math.abs(idx - frameIndex);
-          if (dist < bestDist) {
-            bestDist = dist;
-            fallbackIndex = idx;
+      // Fast bidirectional outward search for nearest cached frame
+      for (let offset = 1; offset < TOTAL_FRAMES; offset++) {
+        const lower = frameIndex - offset;
+        if (lower >= 1) {
+          const cand = imageCache.current.get(lower);
+          if (cand && cand.complete && cand.naturalWidth > 0) {
+            img = cand;
+            break;
           }
         }
-      });
-      img = imageCache.current.get(fallbackIndex);
+        const higher = frameIndex + offset;
+        if (higher <= TOTAL_FRAMES) {
+          const cand = imageCache.current.get(higher);
+          if (cand && cand.complete && cand.naturalWidth > 0) {
+            img = cand;
+            break;
+          }
+        }
+      }
     }
 
     if (!img || !img.complete || img.naturalWidth === 0) return;
@@ -206,9 +221,9 @@ export const BoonHero: React.FC<BoonHeroProps> = ({
   }, [resizeCanvas, renderFrame]);
 
   // ========================================================================
-  // 3. ZERO-LATENCY FRAME SCRUBBING ON SCROLL
+  // 3. ZERO-LATENCY SYNCHRONOUS FRAME SCRUBBING (Before Paint)
   // ========================================================================
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     // Map progress 0..1 to exact frame 1..240
     const targetFrame = Math.min(TOTAL_FRAMES, Math.max(1, Math.round(p * (TOTAL_FRAMES - 1)) + 1));
     currentFrameRef.current = targetFrame;
@@ -216,9 +231,9 @@ export const BoonHero: React.FC<BoonHeroProps> = ({
   }, [p, renderFrame]);
 
   // ========================================================================
-  // 4. GSAP PARALLAX TWEENING & CAMERA RACK FOCUS (Scroll & Mouse Movement)
+  // 4. PARALLAX & LAYER ANIMATIONS (Synchronous Hardware Transforms)
   // ========================================================================
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     // Calculate normalized progress phases
     // Act 1: Surface Mountains (p = 0 to 0.32)
     const act1Fade = Math.max(0, 1 - p / 0.28);
@@ -239,40 +254,59 @@ export const BoonHero: React.FC<BoonHeroProps> = ({
     const act3Y = (1 - act3Enter) * 30;
     const act3Blur = Math.max(0, (1 - act3Opacity) * 8);
 
-    // High-performance GSAP layer animations: On mobile, skip expensive CSS blur to ensure 60fps compositor scrolling
     const isMobile = typeof window !== "undefined" && (window.innerWidth < 900 || window.matchMedia("(pointer: coarse)").matches);
 
-    if (surfaceLayerRef.current) {
-      gsap.to(surfaceLayerRef.current, {
-        opacity: act1Fade,
-        y: `${act1Y}vh`,
-        ...(isMobile ? { filter: "none" } : { filter: `blur(${act1Blur.toFixed(1)}px)` }),
-        duration: isMobile ? 0.15 : 0.25,
-        ease: "power2.out",
-        overwrite: "auto",
-      });
-    }
+    // On mobile: Direct inline style application with translate3d runs directly in the GPU compositor
+    // with 0 latency, 0 tween scheduling, and 0 ease fighting touch finger movement!
+    if (isMobile) {
+      if (surfaceLayerRef.current) {
+        surfaceLayerRef.current.style.opacity = act1Fade.toFixed(3);
+        surfaceLayerRef.current.style.transform = `translate3d(0, ${act1Y}vh, 0)`;
+        surfaceLayerRef.current.style.filter = "none";
+      }
+      if (openPitLayerRef.current) {
+        openPitLayerRef.current.style.opacity = act2Opacity.toFixed(3);
+        openPitLayerRef.current.style.transform = `translate3d(0, ${act2Y}px, 0)`;
+        openPitLayerRef.current.style.filter = "none";
+      }
+      if (undergroundLayerRef.current) {
+        undergroundLayerRef.current.style.opacity = act3Opacity.toFixed(3);
+        undergroundLayerRef.current.style.transform = `translate3d(0, ${act3Y}px, 0)`;
+        undergroundLayerRef.current.style.filter = "none";
+      }
+    } else {
+      if (surfaceLayerRef.current) {
+        gsap.to(surfaceLayerRef.current, {
+          opacity: act1Fade,
+          y: `${act1Y}vh`,
+          filter: `blur(${act1Blur.toFixed(1)}px)`,
+          duration: 0.2,
+          ease: "power2.out",
+          overwrite: "auto",
+        });
+      }
 
-    if (openPitLayerRef.current) {
-      gsap.to(openPitLayerRef.current, {
-        opacity: act2Opacity,
-        y: `${act2Y}px`,
-        ...(isMobile ? { filter: "none" } : { filter: `blur(${act2Blur.toFixed(1)}px)` }),
-        duration: isMobile ? 0.15 : 0.25,
-        ease: "power2.out",
-        overwrite: "auto",
-      });
-    }
+      if (openPitLayerRef.current) {
+        gsap.to(openPitLayerRef.current, {
+          opacity: act2Opacity,
+          y: `${act2Y}px`,
+          filter: `blur(${act2Blur.toFixed(1)}px)`,
+          duration: 0.2,
+          ease: "power2.out",
+          overwrite: "auto",
+        });
+      }
 
-    if (undergroundLayerRef.current) {
-      gsap.to(undergroundLayerRef.current, {
-        opacity: act3Opacity,
-        y: `${act3Y}px`,
-        ...(isMobile ? { filter: "none" } : { filter: `blur(${act3Blur.toFixed(1)}px)` }),
-        duration: isMobile ? 0.15 : 0.25,
-        ease: "power2.out",
-        overwrite: "auto",
-      });
+      if (undergroundLayerRef.current) {
+        gsap.to(undergroundLayerRef.current, {
+          opacity: act3Opacity,
+          y: `${act3Y}px`,
+          filter: `blur(${act3Blur.toFixed(1)}px)`,
+          duration: 0.2,
+          ease: "power2.out",
+          overwrite: "auto",
+        });
+      }
     }
   }, [p]);
 
