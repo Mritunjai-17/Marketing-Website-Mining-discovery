@@ -27,6 +27,7 @@ export interface Journey3DProps {
 export const Journey3D: React.FC<Journey3DProps> = ({ progress, active }) => {
   const watermarkRef = useRef<HTMLDivElement>(null);
   const sideForestRef = useRef<HTMLDivElement>(null);
+  const topDownForestRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<SceneState>({
     progress: 0,
     truckWorldX: 0,
@@ -89,6 +90,23 @@ export const Journey3D: React.FC<Journey3DProps> = ({ progress, active }) => {
         watermarkRef.current.style.opacity = opacity;
         watermarkRef.current.style.transform = `translate3d(calc(-50% + ${currentX.toFixed(1)}px), -84%, 0)`;
       }
+
+      // Top-down vertical drone highway & rainforest canopy backdrop (matching reference)
+      if (topDownForestRef.current) {
+        let topDownAlpha = 0;
+        if (t >= 0.82 && t <= 0.936) {
+          const fadeIn = Math.max(0, Math.min(1, (t - 0.82) / 0.06));
+          const easeIn = fadeIn * fadeIn * (3 - 2 * fadeIn);
+          const fadeOut = 1 - Math.max(0, Math.min(1, (t - 0.922) / 0.012));
+          const easeOut = fadeOut * fadeOut * (3 - 2 * fadeOut);
+          topDownAlpha = easeIn * easeOut;
+        }
+        topDownForestRef.current.style.opacity = topDownAlpha.toFixed(3);
+        if (t >= 0.82) {
+          const driftY = (t - 0.85) * 50;
+          topDownForestRef.current.style.transform = `translate3d(0, ${driftY.toFixed(1)}px, 0)`;
+        }
+      }
     };
 
     gsap.ticker.add(tick);
@@ -106,6 +124,7 @@ export const Journey3D: React.FC<Journey3DProps> = ({ progress, active }) => {
         <div ref={watermarkRef} className={styles.watermarkBg} aria-hidden="true">
           OUR EVOLUTION
         </div>
+        <div ref={topDownForestRef} className={styles.topDownForestBg} aria-hidden="true" />
         <JourneyScene progress={progress} active={active} />
         <JourneyStory />
       </div>

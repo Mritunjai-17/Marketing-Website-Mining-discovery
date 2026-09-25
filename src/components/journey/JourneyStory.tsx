@@ -467,6 +467,7 @@ export const JourneyStory: React.FC = () => {
   const leftSubtextRef = useRef<HTMLDivElement>(null);
   const rightColRef = useRef<HTMLDivElement>(null);
   const statsTrackRef = useRef<HTMLDivElement>(null);
+  const industriesTitleRef = useRef<HTMLDivElement>(null);
 
   // Settle stage, controls, and interactive elements
   const settleStageRef = useRef<HTMLDivElement>(null);
@@ -758,17 +759,23 @@ export const JourneyStory: React.FC = () => {
           leftColRef.current.style.transform = `translate3d(0, ${enterY.toFixed(1)}px, 0)`;
           const headP = Math.max(0, Math.min(1, highwayP / 0.40));
           const headEl = leftColRef.current.querySelector<HTMLElement>(`.${styles.secondPartBigHeadline}`);
-          updateWordScrub(headEl, headP, "#9ca3af", "#000000", "#000000", 0.35);
+          updateWordScrub(headEl, headP, "rgba(255, 255, 255, 0.45)", "#ffffff", "#ffffff", 0.35);
         }
 
         // 2. Subtext word scrub (0.12 to 0.85)
         if (leftSubtextRef.current) {
           const descP = Math.max(0, Math.min(1, (highwayP - 0.12) / 0.73));
           const descEl = leftSubtextRef.current.querySelector<HTMLElement>(`.${styles.secondPartDescription}`);
-          updateWordScrub(descEl, descP, "#6b7280", "#111827", "#111827", 0.38);
+          updateWordScrub(descEl, descP, "rgba(255, 255, 255, 0.40)", "#ffffff", "#ffffff", 0.38);
         }
 
-        // 3. Right Side Stats Track Auto-scroll & Word Scrub
+        // 3. Huge Bold "INDUSTRIES" Title (Bottom-Left)
+        if (industriesTitleRef.current) {
+          const enterY = (1 - fadeIn) * 26;
+          industriesTitleRef.current.style.transform = `translate3d(0, ${enterY.toFixed(1)}px, 0)`;
+        }
+
+        // 4. Right Side Stats Track Auto-scroll & Word Scrub
         if (statsTrackRef.current) {
           const statsProgress = Math.max(0, Math.min(1, (highwayP - 0.08) / 0.82));
           const maxScroll = Math.max(0, statsTrackRef.current.scrollHeight - statsTrackRef.current.clientHeight);
@@ -791,17 +798,17 @@ export const JourneyStory: React.FC = () => {
             const dEl = itemEl.querySelector<HTMLElement>(`.${styles.secondPartStatDesc}`);
 
             if (valEl) {
-              valEl.style.opacity = (0.25 + itemP * 0.75).toFixed(2);
-              valEl.style.color = itemP > 0.4 ? "#000000" : "rgba(0, 0, 0, 0.25)";
+              valEl.style.opacity = (0.35 + itemP * 0.65).toFixed(2);
+              valEl.style.color = itemP > 0.4 ? "#ffffff" : "rgba(255, 255, 255, 0.45)";
             }
-            updateWordScrub(lblEl, itemP, "rgba(0, 0, 0, 0.30)", "#000000", "#000000", 0.25);
-            updateWordScrub(dEl, Math.max(0, (itemP - 0.1) / 0.9), "rgba(75, 85, 99, 0.35)", "#374151", undefined, 0.25);
+            updateWordScrub(lblEl, itemP, "rgba(255, 255, 255, 0.45)", "#ffffff", "#ffffff", 0.25);
+            updateWordScrub(dEl, Math.max(0, (itemP - 0.1) / 0.9), "rgba(255, 255, 255, 0.45)", "rgba(255, 255, 255, 0.92)", undefined, 0.25);
           });
 
           const calloutEl = statsTrackRef.current.querySelector<HTMLElement>(`.${styles.statCalloutHeadline}`);
           if (calloutEl) {
             const calloutP = Math.max(0, Math.min(1, (highwayP - 0.80) / 0.18));
-            updateWordScrub(calloutEl, calloutP, "rgba(0, 0, 0, 0.25)", "#000000", "#000000", 0.22);
+            updateWordScrub(calloutEl, calloutP, "rgba(255, 255, 255, 0.45)", "#ffffff", "#ffffff", 0.22);
           }
         }
 
@@ -1020,8 +1027,18 @@ export const JourneyStory: React.FC = () => {
           </p>
         </div>
 
+        {/* Bottom Left: Huge Bold Title matching user's attached reference */}
+        <div ref={industriesTitleRef} className={styles.secondPartIndustriesTitle} aria-hidden="true">
+          INDUSTRIES
+        </div>
+
         {/* Right Side: Main Data with Signs (matching Pic 1 reference) */}
         <div ref={rightColRef} className={styles.secondPartRightSide}>
+          {/* Right Column: Lead Statement matching United Carriers reference */}
+          <div className={styles.secondPartRightLeadStatement}>
+            Mining Discovery operates where mining complexity is highest and audience reach is essential
+          </div>
+
           <div ref={statsTrackRef} className={styles.statsScrollTrack}>
             {/* Point 1: 150,000+ Active Monthly Audience */}
             <div className={styles.statEditorialItem}>
