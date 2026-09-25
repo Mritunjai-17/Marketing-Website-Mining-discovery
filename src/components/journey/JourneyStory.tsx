@@ -985,10 +985,6 @@ export const JourneyStory: React.FC = () => {
                 <p className={styles.milestoneDescription}>
                   {renderScrubText(point.description, `mdesc-${point.id}`)}
                 </p>
-                {/* Pill button matching reference picture 2 */}
-                <Link href="/services" className={styles.underRoadBtn}>
-                  OUR SERVICES
-                </Link>
               </div>
             );
           })}

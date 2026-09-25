@@ -47,50 +47,41 @@ export const MiningApproachSequence: React.FC<MiningApproachSequenceProps> = ({ 
   // Enters cleanly from p = 0 to 0.08
   const typoEnter = Math.min(1, p / 0.07);
 
-  // Between p = 0.16 and 0.28:
-  // Surrounding words drift apart and dissolve:
-  // - Line 1 drifts upwards
-  // - "We" drifts left
-  // - "Market Valuation." drifts right
-  const driftP = Math.max(0, Math.min(1, (p - 0.16) / (0.28 - 0.16)));
-  const driftOpacity = typoEnter * Math.max(0, 1 - Math.pow(driftP, 1.2));
-  const driftY = driftP * 35;
-  const driftX = driftP * 40;
-
-  // The isolated word "Build" in the center:
-  // Stays pinned in center through drift, and dissolves as the card expands to full screen
-  const buildDissolveP = Math.max(0, Math.min(1, (p - 0.30) / (0.44 - 0.30)));
-  const buildWordOpacity = typoEnter * Math.max(0, 1 - Math.pow(buildDissolveP, 1.4));
-  const buildWordScale = 1.0 + buildDissolveP * 0.18;
+  // Between p = 0.15 and 0.32:
+  // Surrounding words drift apart:
+  // - Eyebrow drifts upwards and dissolves
+  // - Line 1: "We Don't Just" drifts left, "Report Mining." drifts right
+  // - Line 1 gently shifts down ~26px to align its gap directly with the screen center (50%, 50%)
+  // - Line 2: "We Build Market Valuation." drifts downwards and dissolves
+  const driftP = Math.max(0, Math.min(1, (p - 0.15) / (0.32 - 0.15)));
+  const driftOpacity = typoEnter * Math.max(0, 1 - Math.pow(driftP, 1.3));
+  const driftY = driftP * 40;
+  const driftX = driftP * 75; // separates left and right words
+  const line1CenterY = driftP * 26; // smoothly centers Line 1 vertically
 
   // Overall typography stage opacity
-  const typoStageOpacity = Math.max(driftOpacity, buildWordOpacity);
-
-  // Golden aura behind the word "Build"
-  const auraP = Math.max(0, Math.min(1, (p - 0.18) / 0.12));
-  const auraFade = Math.max(0, 1 - Math.max(0, (p - 0.34) / 0.10));
-  const portalAuraOpacity = auraP * auraFade * 0.85;
-  const portalAuraScale = 0.85 + auraP * 0.55;
+  const typoStageOpacity = driftOpacity;
 
   // -------------------------------------------------------------------------
   // PHASE 2: THE EXPANDING PORTAL CARD ("OUR APPROACH" SHOWCASE)
   // -------------------------------------------------------------------------
-  // Appears at p = 0.20, expands from p = 0.26 to 0.50
-  const approachEnter = Math.max(0, Math.min(1, (p - 0.20) / 0.06));
+  // Emerges between "Just" and "Report" from an ultra-tiny shape ("ekdm chote se shape me")
+  // and smoothly expands on scroll until reaching full viewport.
+  const approachEnter = Math.max(0, Math.min(1, (p - 0.18) / 0.05));
   const approachExit = Math.max(0, 1 - Math.max(0, (p - 0.86) / 0.12));
   const approachOpacity = approachEnter * approachExit;
 
-  // Card expansion progress: 0 (compact card behind "Build") -> 1 (full viewport)
-  const expandProgress = Math.max(0, Math.min(1, (p - 0.26) / (0.50 - 0.26)));
-  const eased = 1 - Math.pow(1 - expandProgress, 2.6);
+  // Card expansion progress: 0 (micro seed between "Just" & "Report") -> 1 (full viewport)
+  const expandProgress = Math.max(0, Math.min(1, (p - 0.19) / (0.48 - 0.19)));
+  // Exponential growth curve: stays tiny at start, then accelerates outwards smoothly
+  const eased = Math.pow(expandProgress, 2.4);
 
-  // Card dimensions: Starts at 56vw x 44vh, expands to 100vw x 100vh
-  const cardWidthVw = 56 + eased * 44;
-  const cardHeightVh = 44 + eased * 56;
-  const cardBorderRadius = (1 - eased) * 18;
+  // Card dimensions: Starts at micro size (1.5vw x 1.0vh ~ 22px x 10px), expands to 100vw x 100vh
+  const cardWidthVw = 1.5 + eased * 98.5;
+  const cardHeightVh = 1.0 + eased * 99.0;
+  const cardBorderRadius = Math.max(0, (1 - Math.min(1, eased * 1.5)) * 24);
 
-  // Border & shadow:
-  const cardBorderOpacity = Math.max(0, 1 - eased * 1.35);
+  // Shadow: Clean deep dark drop shadow while floating, disappears when full bleed
   const cardShadowOpacity = Math.max(0, 1 - eased);
 
   // Background macro image counter-zoom & subtle scroll parallax
@@ -98,13 +89,15 @@ export const MiningApproachSequence: React.FC<MiningApproachSequenceProps> = ({ 
   const bgY = (p - 0.50) * -45;
 
   // Inside the card:
-  // 1. Compact preview partner logos at bottom of card while expanding
+  // 1. Compact preview partner logos at bottom of card during mid-expansion
   const previewLogosOpacity =
-    approachEnter * Math.max(0, 1 - Math.max(0, (expandProgress - 0.25) / 0.45));
+    expandProgress > 0.36 && expandProgress < 0.72
+      ? Math.min(1, (expandProgress - 0.36) / 0.12) * Math.max(0, 1 - (expandProgress - 0.58) / 0.14)
+      : 0;
 
   // 2. Full editorial content (title, quote, CTA) blooms in as card reaches full screen
-  const editorialOpacity = Math.max(0, Math.min(1, (expandProgress - 0.35) / 0.55));
-  const editorialY = (1 - editorialOpacity) * 25;
+  const editorialOpacity = Math.max(0, Math.min(1, (expandProgress - 0.65) / 0.35));
+  const editorialY = (1 - editorialOpacity) * 20;
 
   // Bottom progress rail (active while full screen from p = 0.50 to 0.86)
   const railProgressPct = Math.round(
@@ -122,9 +115,9 @@ export const MiningApproachSequence: React.FC<MiningApproachSequenceProps> = ({ 
       aria-hidden={!isVisible}
     >
       {/* =================================================================== */}
-      {/* 1. KINETIC TYPOGRAPHY STAGE (Words separate leaving "Build" pinned)   */}
+      {/* 1. KINETIC TYPOGRAPHY STAGE (Splits between "Just" & "Report")       */}
       {/* =================================================================== */}
-      {typoStageOpacity > 0.01 && (
+      {typoStageOpacity > 0.005 && (
         <div
           className={styles.typoStage}
           style={{
@@ -143,23 +136,13 @@ export const MiningApproachSequence: React.FC<MiningApproachSequenceProps> = ({ 
           </span>
 
           <div className={styles.typoHeadline}>
-            {/* Line 1: Drifts upwards and dissolves */}
+            {/* Line 1: Splits between "Just" and "Report" */}
             <div
               className={styles.typoLine1}
               style={{
-                opacity: driftOpacity.toFixed(3),
-                transform: `translate3d(0, -${driftY.toFixed(1)}px, 0)`,
+                transform: `translate3d(0, ${line1CenterY.toFixed(1)}px, 0)`,
               }}
             >
-              <span className={styles.typoWord}>We</span>
-              <span className={styles.typoWord}>Don&apos;t</span>
-              <span className={styles.typoWord}>Just</span>
-              <span className={styles.typoWord}>Report</span>
-              <span className={styles.typoWord}>Mining.</span>
-            </div>
-
-            {/* Line 2: "We" drifts left, "Market Valuation." drifts right, "Build" stays pinned in center! */}
-            <div className={styles.typoLine2}>
               <span
                 className={styles.driftLeft}
                 style={{
@@ -168,24 +151,8 @@ export const MiningApproachSequence: React.FC<MiningApproachSequenceProps> = ({ 
                 }}
               >
                 <span className={styles.typoWord}>We</span>
-              </span>
-
-              {/* PINNED ANCHOR WORD "BUILD" */}
-              <span
-                className={`${styles.typoWord} ${styles.goldWord} ${styles.pinnedBuildWord}`}
-                style={{
-                  opacity: buildWordOpacity.toFixed(3),
-                  transform: `scale(${buildWordScale.toFixed(3)})`,
-                }}
-              >
-                Build
-                <span
-                  className={styles.portalAura}
-                  style={{
-                    opacity: portalAuraOpacity.toFixed(3),
-                    transform: `translate(-50%, -50%) scale(${portalAuraScale.toFixed(3)})`,
-                  }}
-                />
+                <span className={styles.typoWord}>Don&apos;t</span>
+                <span className={styles.typoWord}>Just</span>
               </span>
 
               <span
@@ -195,18 +162,32 @@ export const MiningApproachSequence: React.FC<MiningApproachSequenceProps> = ({ 
                   transform: `translate3d(${driftX.toFixed(1)}px, 0, 0)`,
                 }}
               >
-                <span className={styles.typoWord}>Market</span>
-                <span className={`${styles.typoWord} ${styles.goldWord}`}>Valuation.</span>
+                <span className={styles.typoWord}>Report</span>
+                <span className={styles.typoWord}>Mining.</span>
               </span>
+            </div>
+
+            {/* Line 2: Drifts downwards and dissolves */}
+            <div
+              className={styles.typoLine2}
+              style={{
+                opacity: driftOpacity.toFixed(3),
+                transform: `translate3d(0, ${driftY.toFixed(1)}px, 0)`,
+              }}
+            >
+              <span className={styles.typoWord}>We</span>
+              <span className={`${styles.typoWord} ${styles.goldWord}`}>Build</span>
+              <span className={styles.typoWord}>Market</span>
+              <span className={`${styles.typoWord} ${styles.goldWord}`}>Valuation.</span>
             </div>
           </div>
         </div>
       )}
 
       {/* =================================================================== */}
-      {/* 2. "OUR APPROACH" SHOWCASE (Expanding portal card from the word "Build") */}
+      {/* 2. "OUR APPROACH" SHOWCASE (Emerges between "Just" & "Report")       */}
       {/* =================================================================== */}
-      {approachOpacity > 0.01 && (
+      {approachOpacity > 0.005 && (
         <div
           className={styles.approachStage}
           style={{
@@ -214,13 +195,10 @@ export const MiningApproachSequence: React.FC<MiningApproachSequenceProps> = ({ 
             width: `${cardWidthVw.toFixed(2)}vw`,
             height: `${cardHeightVh.toFixed(2)}vh`,
             borderRadius: `${cardBorderRadius.toFixed(1)}px`,
-            border:
-              cardBorderOpacity > 0.01
-                ? `1.5px solid rgba(229, 169, 60, ${cardBorderOpacity.toFixed(3)})`
-                : "none",
+            border: "none",
             boxShadow:
-              cardShadowOpacity > 0.01
-                ? `0 25px 80px rgba(0, 0, 0, ${(0.85 * cardShadowOpacity).toFixed(3)}), 0 0 50px rgba(229, 169, 60, ${(0.35 * cardShadowOpacity).toFixed(3)})`
+              cardShadowOpacity > 0.01 && expandProgress < 0.98
+                ? `0 25px 80px rgba(0, 0, 0, ${(0.95 * cardShadowOpacity).toFixed(3)})`
                 : "none",
           }}
         >
@@ -253,75 +231,76 @@ export const MiningApproachSequence: React.FC<MiningApproachSequenceProps> = ({ 
 
           {/* Full Editorial Content Grid (fades in as card expands to full screen) */}
           <div
-            className={styles.contentGrid}
+            className={styles.innerEditorialWrapper}
             style={{
               opacity: editorialOpacity.toFixed(3),
-              transform: `translate3d(0, ${editorialY.toFixed(1)}px, 0)`,
               pointerEvents: editorialOpacity > 0.6 ? "auto" : "none",
             }}
           >
-            {/* Left Column: Heading & Client Badges */}
-            <div className={styles.leftCol}>
-              <div className={styles.eyebrowTag}>
-                <span className={styles.eyebrowDot} />
-                <span>02 — STRATEGIC METHODOLOGY</span>
+            <div
+              className={styles.contentGrid}
+              style={{
+                transform: `translate3d(0, ${editorialY.toFixed(1)}px, 0)`,
+              }}
+            >
+              {/* Left Column: Heading & Client Badges */}
+              <div className={styles.leftCol}>
+                <div className={styles.eyebrowTag}>
+                  <span className={styles.eyebrowDot} />
+                  <span>02 — STRATEGIC METHODOLOGY</span>
+                </div>
+
+                <h2 className={styles.mainTitle}>
+                  OUR APPROACH<br />
+                  <span className={styles.goldTitleWord}>TO EVERY RESOURCE</span>
+                </h2>
+
+                {/* Roster of Partner / Client Brands */}
+                <div className={styles.logosRow}>
+                  {PARTNER_LOGOS.map((name) => (
+                    <span key={name} className={styles.logoBadge}>
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#E5A93C]/80" />
+                      {name}
+                    </span>
+                  ))}
+                </div>
               </div>
 
-              <h2 className={styles.mainTitle}>
-                OUR APPROACH<br />
-                <span className={styles.goldTitleWord}>TO EVERY RESOURCE</span>
-              </h2>
+              {/* Right Column: High-conviction copy & Call to Action */}
+              <div className={styles.rightCol}>
+                <blockquote className={styles.philosophyQuote}>
+                  &ldquo;Every campaign is intentional, every thesis engineered with institutional conviction.
+                  Connecting ground-truth geology directly to global sovereign and capital market authority.&rdquo;
+                </blockquote>
 
-              {/* Roster of Partner / Client Brands */}
-              <div className={styles.logosRow}>
-                {PARTNER_LOGOS.map((name) => (
-                  <span key={name} className={styles.logoBadge}>
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#E5A93C]/80" />
-                    {name}
-                  </span>
-                ))}
+                <Link
+                  href="/contact"
+                  className={styles.ctaBtn}
+                  aria-label="Start Your Project"
+                >
+                  <span>SCHEDULE STRATEGY BRIEFING</span>
+                  <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
+                </Link>
               </div>
             </div>
 
-            {/* Right Column: High-conviction copy & Call to Action */}
-            <div className={styles.rightCol}>
-              <blockquote className={styles.philosophyQuote}>
-                &ldquo;Every campaign is intentional, every thesis engineered with institutional conviction.
-                Connecting ground-truth geology directly to global sovereign and capital market authority.&rdquo;
-              </blockquote>
+            {/* Bottom Progress Rail */}
+            <div className={styles.bottomRail}>
+              <span className={styles.progressLabel}>
+                DEEP EXTRACTION → OUR APPROACH → HAULAGE
+              </span>
 
-              <Link
-                href="/contact"
-                className={styles.ctaBtn}
-                aria-label="Start Your Project"
-              >
-                <span>SCHEDULE STRATEGY BRIEFING</span>
-                <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
-              </Link>
+              <div className={styles.progressTrack} aria-hidden="true">
+                <div
+                  className={styles.progressBar}
+                  style={{ width: `${railProgressPct}%` }}
+                />
+              </div>
+
+              <span className={styles.chapterCount}>
+                02 / 03
+              </span>
             </div>
-          </div>
-
-          {/* Bottom Progress Rail matching reference recording */}
-          <div
-            className={styles.bottomRail}
-            style={{
-              opacity: editorialOpacity.toFixed(3),
-            }}
-          >
-            <span className={styles.progressLabel}>
-              DEEP EXTRACTION → OUR APPROACH → HAULAGE
-            </span>
-
-            <div className={styles.progressTrack} aria-hidden="true">
-              <div
-                className={styles.progressBar}
-                style={{ width: `${railProgressPct}%` }}
-              />
-            </div>
-
-            <span className={styles.chapterCount}>
-              02 / 03
-            </span>
           </div>
         </div>
       )}

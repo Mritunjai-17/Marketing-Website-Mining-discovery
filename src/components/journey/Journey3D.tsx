@@ -26,6 +26,7 @@ export interface Journey3DProps {
  */
 export const Journey3D: React.FC<Journey3DProps> = ({ progress, active }) => {
   const watermarkRef = useRef<HTMLDivElement>(null);
+  const sideForestRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<SceneState>({
     progress: 0,
     truckWorldX: 0,
@@ -53,6 +54,7 @@ export const Journey3D: React.FC<Journey3DProps> = ({ progress, active }) => {
 
   useEffect(() => {
     if (!active) return;
+
     const start = performance.now();
     const tick = () => {
       const scene = sceneRef.current;
@@ -62,13 +64,19 @@ export const Journey3D: React.FC<Journey3DProps> = ({ progress, active }) => {
       scene.descent = progress.descent ?? 1.0;
       for (const listener of listenersRef.current) listener(scene);
 
-      if (watermarkRef.current) {
-        const descentP = progress.descent ?? 1.0;
-        // Watermark fades in smoothly as the truck journey scene arrives (0.0 to 0.30)
-        const zoomT = Math.min(1, Math.max(0, descentP / 0.30));
-        const zoomReveal = zoomT * zoomT * (3 - 2 * zoomT);
+      const descentP = progress.descent ?? 1.0;
+      const zoomT = Math.min(1, Math.max(0, descentP / 0.30));
+      const zoomReveal = zoomT * zoomT * (3 - 2 * zoomT);
+      const t = progress.current;
 
-        const t = progress.current;
+      // Side view panoramic forest canopy backdrop (in white area above road)
+      if (sideForestRef.current) {
+        const forestFade = 1 - Math.max(0, Math.min(1, (t - 0.78) / 0.08));
+        const forestOpacity = (zoomReveal * forestFade * forestFade * (3 - 2 * forestFade)).toFixed(3);
+        sideForestRef.current.style.opacity = forestOpacity;
+      }
+
+      if (watermarkRef.current) {
         const roadP = Math.min(1.0, Math.max(0.0, t / 0.82));
         const winW = typeof window !== "undefined" ? window.innerWidth : 1400;
         const travelDistance = winW * 1.05;
@@ -94,6 +102,7 @@ export const Journey3D: React.FC<Journey3DProps> = ({ progress, active }) => {
   return (
     <JourneySceneContext.Provider value={api}>
       <div className={styles.stage}>
+        <div ref={sideForestRef} className={styles.sideForestBg} aria-hidden="true" />
         <div ref={watermarkRef} className={styles.watermarkBg} aria-hidden="true">
           OUR EVOLUTION
         </div>

@@ -917,6 +917,36 @@
   }
 }
 
+/* Panoramic roadside forest treeline backdrop in horizontal side view */
+.sideForestBg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 52%;
+  background: url('/journey/side_forest_treeline.jpg') center bottom / cover no-repeat;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  will-change: opacity;
+  mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.45) 0%,
+    rgba(0, 0, 0, 0.9) 30%,
+    rgba(0, 0, 0, 1) 75%,
+    rgba(0, 0, 0, 0.9) 90%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.45) 0%,
+    rgba(0, 0, 0, 0.9) 30%,
+    rgba(0, 0, 0, 1) 75%,
+    rgba(0, 0, 0, 0.9) 90%,
+    transparent 100%
+  );
+}
+
 /* ==========================================================================
    EDITORIAL WATERMARK BEHIND TRUCK ("OUR EVOLUTION")
    Matching hero editorial serif typography & unitedcarriers reference
@@ -932,11 +962,12 @@
   font-weight: 350;
   letter-spacing: -0.015em;
   text-transform: uppercase;
-  color: #e3e6eb;
+  color: #ffffff;
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.45);
   white-space: nowrap;
   pointer-events: none;
   user-select: none;
-  z-index: 1;
+  z-index: 2;
   line-height: 0.86;
   will-change: transform, opacity;
 }
