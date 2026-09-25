@@ -26,8 +26,8 @@ export const TRUCK_MODEL_URL: string | null = null;
 const WHEEL_RADIUS = 0.62;
 const WHEEL_WIDTH = 0.44;
 
-/** Axle stations along the truck: steer axle, tractor drive pair, trailer bogie pair at rear. */
-const AXLE_Z = [-4.9, -2.6, -1.7, 8.8, 10.1];
+/** Axle stations along the truck: 1 steer axle, 1 tractor drive axle, and 3 trailer bogie axles matching European commercial semi-trucks. */
+const AXLE_Z = [-4.9, -1.8, 7.3, 8.8, 10.3];
 const AXLE_X = 1.3;
 
 /**
@@ -398,7 +398,7 @@ const TruckCargoRear: React.FC = () => {
       <group ref={leftDoorRef} position={[-1.24, 2.46, 11.62]}>
         <mesh position={[0.61, 0, 0]} castShadow receiveShadow>
           <boxGeometry args={[1.22, 2.76, 0.08]} />
-          <meshStandardMaterial color="#d8dce3" roughness={0.52} metalness={0.14} />
+          <meshStandardMaterial color="#151922" roughness={0.42} metalness={0.15} />
         </mesh>
         <mesh position={[1.1, 0, 0.06]} castShadow>
           <cylinderGeometry args={[0.02, 0.02, 2.65, 8]} />
@@ -414,7 +414,7 @@ const TruckCargoRear: React.FC = () => {
       <group ref={rightDoorRef} position={[1.24, 2.46, 11.62]}>
         <mesh position={[-0.61, 0, 0]} castShadow receiveShadow>
           <boxGeometry args={[1.22, 2.76, 0.08]} />
-          <meshStandardMaterial color="#d8dce3" roughness={0.52} metalness={0.14} />
+          <meshStandardMaterial color="#151922" roughness={0.42} metalness={0.15} />
         </mesh>
         <mesh position={[-1.1, 0, 0.06]} castShadow>
           <cylinderGeometry args={[0.02, 0.02, 2.65, 8]} />
@@ -483,12 +483,12 @@ const TruckSideBranding: React.FC = () => {
     if ("letterSpacing" in ctx) {
       (ctx as any).letterSpacing = "8px";
     }
-    // Clean high-contrast typography for white and black theme
-    ctx.shadowColor = "rgba(0, 0, 0, 0.12)";
-    ctx.shadowBlur = 4;
-    ctx.shadowOffsetX = 1;
+    // Clean high-contrast typography for black container livery
+    ctx.shadowColor = "rgba(0, 0, 0, 0.45)";
+    ctx.shadowBlur = 6;
+    ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 2;
-    ctx.fillStyle = "#1e293b"; // Sleek dark slate
+    ctx.fillStyle = "#ffffff"; // Crisp white lettering on black container
     ctx.fillText("MINING DISCOVERY", canvas.width / 2, canvas.height / 2);
     ctx.restore();
 
@@ -575,152 +575,306 @@ const BuiltInTruck: React.FC<{
 
   return (
     <group>
-      {/* Chassis rail, tying tractor and trailer together. */}
-      <mesh position={[0, 0.74, 2.8]} castShadow>
-        <boxGeometry args={[2.05, 0.3, 17.2]} />
+      {/* ====================================================================
+          1. CHASSIS RAILS & RUNNING GEAR
+          ==================================================================== */}
+      {/* Tractor main steel ladder chassis */}
+      <mesh position={[0, 0.72, -3.3]} castShadow>
+        <boxGeometry args={[1.72, 0.28, 4.8]} />
         <meshStandardMaterial color="#0e141d" roughness={0.72} metalness={0.55} />
       </mesh>
 
-      {/* Tractor cab - sleek dark finish matching unitedcarriers.com */}
-      <RoundedBox
-        args={[2.58, 2.1, 3.0]}
-        radius={0.3}
-        smoothness={3}
-        position={[0, 1.88, -4.1]}
-        castShadow
-        receiveShadow
-      >
-        <BodyPaint color="#1c212a" roughness={0.28} />
-      </RoundedBox>
-
-      {/* Sleeper section behind the cab. */}
-      <RoundedBox
-        args={[2.54, 2.34, 1.15]}
-        radius={0.22}
-        smoothness={3}
-        position={[0, 2.0, -2.3]}
-        castShadow
-        receiveShadow
-      >
-        <BodyPaint color="#181d26" roughness={0.32} />
-      </RoundedBox>
-
-      {/*
-       * Roof fairing. Aerodynamic kit is the single clearest visual signal that
-       * a truck is a modern long-haul vehicle rather than a generic box, and it
-       * costs one wedge.
-       */}
-      <mesh position={[0, 3.32, -3.3]} rotation={[-0.19, 0, 0]} castShadow>
-        <boxGeometry args={[2.42, 0.62, 2.6]} />
-        <BodyPaint color="#222834" roughness={0.25} />
-      </mesh>
-
-      {/* Windscreen — dark glass, slightly proud of the cab face. */}
-      <mesh position={[0, 2.26, -5.58]} rotation={[0.1, 0, 0]} castShadow>
-        <boxGeometry args={[2.3, 1.16, 0.1]} />
-        <meshPhysicalMaterial
-          color="#0a121d"
-          roughness={0.08}
-          metalness={0.2}
-          clearcoat={1}
-          clearcoatRoughness={0.05}
-          envMapIntensity={2.2}
-        />
-      </mesh>
-
-      {/* Side windows. */}
-      {[-1.3, 1.3].map((x) => (
-        <mesh key={x} position={[x, 2.22, -4.4]} castShadow>
-          <boxGeometry args={[0.06, 0.86, 1.5]} />
-          <meshPhysicalMaterial
-            color="#0a121d"
-            roughness={0.08}
-            metalness={0.2}
-            clearcoat={1}
-            envMapIntensity={2.2}
-          />
+      {/* Fifth wheel coupling plate & kingpin lock */}
+      <group position={[0, 0.98, -1.8]}>
+        <mesh castShadow receiveShadow>
+          <cylinderGeometry args={[0.52, 0.54, 0.12, 18]} />
+          <meshStandardMaterial color="#1a202c" roughness={0.4} metalness={0.8} />
         </mesh>
-      ))}
+        {/* Grease top pad & V-notch */}
+        <mesh position={[0, 0.07, 0]}>
+          <cylinderGeometry args={[0.44, 0.44, 0.02, 18]} />
+          <meshStandardMaterial color="#0b0f17" roughness={0.2} metalness={0.1} />
+        </mesh>
+      </group>
 
-      {/* Mirror arms. */}
-      {[-1.42, 1.42].map((x) => (
-        <group key={x} position={[x, 2.5, -5.2]}>
-          <mesh castShadow>
-            <boxGeometry args={[0.28, 0.06, 0.06]} />
-            <meshStandardMaterial color="#1a222e" roughness={0.5} metalness={0.6} />
+      {/* Suzie coils: Coiled pneumatic/electrical umbilical cables between cab and trailer */}
+      <group position={[0, 1.8, -2.6]}>
+        {[-0.22, -0.07, 0.07, 0.22].map((cx, idx) => {
+          const coilColor = idx === 0 ? "#dc2626" : idx === 1 ? "#eab308" : idx === 2 ? "#2563eb" : "#111827";
+          return (
+            <mesh key={`suzie-${idx}`} position={[cx, 0, 0]} rotation={[0.4, 0, (idx - 1.5) * 0.15]}>
+              <cylinderGeometry args={[0.025, 0.025, 0.82, 8]} />
+              <meshStandardMaterial color={coilColor} roughness={0.5} />
+            </mesh>
+          );
+        })}
+      </group>
+
+      {/* Large cylindrical polished aluminum fuel tank (driver side) */}
+      <group position={[-1.24, 0.95, -3.35]} rotation={[0, 0, Math.PI / 2]}>
+        <mesh castShadow>
+          <cylinderGeometry args={[0.48, 0.48, 2.2, 24]} />
+          <meshStandardMaterial color="#d1d5db" roughness={0.24} metalness={0.92} />
+        </mesh>
+        {/* Fuel tank chrome mounting straps */}
+        {[-0.75, 0.75].map((sy, i) => (
+          <mesh key={`tank-strap-${i}`} position={[0, sy, 0]}>
+            <cylinderGeometry args={[0.495, 0.495, 0.06, 24]} />
+            <meshStandardMaterial color="#1f2937" roughness={0.3} metalness={0.7} />
           </mesh>
-          <mesh position={[Math.sign(x) * 0.2, -0.16, 0]} castShadow>
-            <boxGeometry args={[0.09, 0.56, 0.16]} />
-            <meshStandardMaterial color="#141b25" roughness={0.35} metalness={0.7} />
+        ))}
+      </group>
+
+      {/* Passenger side auxiliary equipment: Battery box & AdBlue tank with step plate */}
+      <group position={[1.24, 0.95, -3.35]}>
+        <mesh castShadow>
+          <boxGeometry args={[0.46, 0.62, 1.9]} />
+          <meshStandardMaterial color="#374151" roughness={0.4} metalness={0.7} />
+        </mesh>
+        {/* Ribbed aluminum step tread */}
+        <mesh position={[0.02, 0.33, 0]}>
+          <boxGeometry args={[0.44, 0.03, 1.86]} />
+          <meshStandardMaterial color="#9ca3af" roughness={0.3} metalness={0.85} />
+        </mesh>
+      </group>
+
+      {/* Tractor drive axle curved mudguards (quarter fenders) */}
+      {[-1.26, 1.26].map((mx) => (
+        <group key={`drive-fender-${mx}`} position={[mx, 1.05, -1.8]}>
+          <mesh castShadow>
+            <boxGeometry args={[0.48, 0.48, 1.35]} />
+            <meshStandardMaterial color="#0f172a" roughness={0.7} metalness={0.1} />
+          </mesh>
+          {/* Black rubber mudflap behind rear tractor wheel */}
+          <mesh position={[0, -0.42, 0.64]}>
+            <boxGeometry args={[0.44, 0.48, 0.03]} />
+            <meshStandardMaterial color="#020617" roughness={0.9} />
           </mesh>
         </group>
       ))}
 
-      {/* Bumper and grille. */}
+      {/* ====================================================================
+          2. EUROPEAN CABOVER (COE) AERODYNAMIC HIGH-ROOF TRACTOR CAB
+          ==================================================================== */}
+      {/* Main cab shell */}
       <RoundedBox
-        args={[2.52, 0.76, 0.26]}
-        radius={0.09}
-        smoothness={2}
-        position={[0, 1.0, -5.6]}
-        castShadow
-      >
-        <meshStandardMaterial color="#19212e" roughness={0.42} metalness={0.75} />
-      </RoundedBox>
-      <mesh position={[0, 1.66, -5.56]} castShadow>
-        <boxGeometry args={[2.1, 0.62, 0.1]} />
-        <meshStandardMaterial color="#10171f" roughness={0.5} metalness={0.7} />
-      </mesh>
-
-      {/* Headlamps. Emissive, but small — the truck is lit, not glowing. */}
-      {[-0.94, 0.94].map((x) => (
-        <mesh key={x} position={[x, 1.5, -5.62]}>
-          <boxGeometry args={[0.5, 0.26, 0.12]} />
-          <meshStandardMaterial
-            color="#fff7e6"
-            emissive="#ffeec8"
-            emissiveIntensity={2.6}
-            roughness={0.2}
-          />
-        </mesh>
-      ))}
-
-      {/* Exhaust stack. */}
-      <mesh position={[1.24, 2.1, -2.9]} castShadow>
-        <cylinderGeometry args={[0.09, 0.09, 2.6, 8]} />
-        <meshStandardMaterial color="#3a424f" roughness={0.3} metalness={0.9} />
-      </mesh>
-
-      {/* Fuel tank. */}
-      <mesh position={[-1.22, 1.0, -2.2]} rotation={[0, 0, Math.PI / 2]} castShadow>
-        <cylinderGeometry args={[0.42, 0.42, 1.7, 12]} />
-        <meshStandardMaterial color="#5d6774" roughness={0.26} metalness={0.92} />
-      </mesh>
-
-      {/* Trailer body - elongated 40ft/53ft container proportions matching unitedcarriers.com */}
-      <RoundedBox
-        args={[2.54, 2.96, 12.8]}
-        radius={0.10}
-        smoothness={2}
-        position={[0, 2.46, 5.2]}
+        args={[2.55, 2.38, 2.75]}
+        radius={0.22}
+        smoothness={3}
+        position={[0, 2.05, -4.3]}
         castShadow
         receiveShadow
       >
-        <BodyPaint color="#f7f8f9" roughness={0.44} />
+        <BodyPaint color="#1d5ec9" roughness={0.28} />
       </RoundedBox>
 
-      {/* Side branding: "MINING DISCOVERY" in yellow lettering */}
+      {/* Aerodynamic high-roof sleeper deflector cap (slopes up to trailer roofline) */}
+      <mesh position={[0, 3.55, -3.8]} rotation={[-0.14, 0, 0]} castShadow>
+        <boxGeometry args={[2.46, 0.65, 2.4]} />
+        <BodyPaint color="#1d5ec9" roughness={0.26} />
+      </mesh>
+
+      {/* Cab side aerodynamic collar extenders (wings) bridging gap to trailer */}
+      {[-1.28, 1.28].map((wx) => (
+        <mesh key={`cab-wing-${wx}`} position={[wx, 2.35, -2.15]} castShadow>
+          <boxGeometry args={[0.08, 2.25, 1.45]} />
+          <BodyPaint color="#1d5ec9" roughness={0.3} />
+        </mesh>
+      ))}
+
+      {/* Large wrap-around aerodynamic windshield */}
+      <mesh position={[0, 2.38, -5.72]} rotation={[0.12, 0, 0]} castShadow>
+        <boxGeometry args={[2.34, 1.22, 0.12]} />
+        <meshPhysicalMaterial
+          color="#080f18"
+          roughness={0.06}
+          metalness={0.25}
+          clearcoat={1}
+          clearcoatRoughness={0.04}
+          envMapIntensity={2.4}
+        />
+      </mesh>
+
+      {/* Exterior smoked-acrylic sunvisor across top of windshield */}
+      <group position={[0, 3.12, -5.74]} rotation={[0.18, 0, 0]}>
+        <mesh castShadow>
+          <boxGeometry args={[2.42, 0.22, 0.22]} />
+          <meshStandardMaterial color="#0f172a" roughness={0.2} metalness={0.6} />
+        </mesh>
+        {/* Twin amber roof clearance lights */}
+        {[-0.92, 0.92].map((lx) => (
+          <mesh key={`sunvisor-light-${lx}`} position={[lx, 0.02, 0.1]}>
+            <boxGeometry args={[0.18, 0.08, 0.05]} />
+            <meshStandardMaterial color="#f59e0b" emissive="#f59e0b" emissiveIntensity={2.2} />
+          </mesh>
+        ))}
+      </group>
+
+      {/* Side door windows with black pillars */}
+      {[-1.29, 1.29].map((sx) => (
+        <group key={`side-glass-${sx}`} position={[sx, 2.32, -4.5]}>
+          <mesh castShadow>
+            <boxGeometry args={[0.04, 0.88, 1.48]} />
+            <meshPhysicalMaterial
+              color="#080f18"
+              roughness={0.06}
+              metalness={0.25}
+              clearcoat={1}
+              envMapIntensity={2.4}
+            />
+          </mesh>
+          {/* Chrome door handle */}
+          <mesh position={[Math.sign(sx) * 0.03, -0.25, 0.2]}>
+            <boxGeometry args={[0.03, 0.06, 0.22]} />
+            <meshStandardMaterial color="#e2e8f0" roughness={0.2} metalness={0.9} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* Recessed driver entry steps in lower cab skirt */}
+      {[-1.27, 1.27].map((stepX) => (
+        <group key={`entry-step-${stepX}`} position={[stepX, 1.15, -4.7]}>
+          <mesh>
+            <boxGeometry args={[0.06, 0.42, 0.72]} />
+            <meshStandardMaterial color="#0b0f17" roughness={0.8} />
+          </mesh>
+          {[-0.08, 0.08].map((sy, i) => (
+            <mesh key={`step-tread-${i}`} position={[Math.sign(stepX) * 0.02, sy, 0]}>
+              <boxGeometry args={[0.08, 0.03, 0.58]} />
+              <meshStandardMaterial color="#cbd5e1" roughness={0.3} metalness={0.85} />
+            </mesh>
+          ))}
+        </group>
+      ))}
+
+      {/* Aerodynamic dual-lens rearview mirror assemblies */}
+      {[-1.44, 1.44].map((mx) => (
+        <group key={`mirror-arm-${mx}`} position={[mx, 2.45, -5.35]}>
+          {/* Main vertical mirror housing */}
+          <mesh castShadow>
+            <boxGeometry args={[0.12, 0.68, 0.24]} />
+            <meshStandardMaterial color="#111827" roughness={0.32} metalness={0.65} />
+          </mesh>
+          {/* Upper support bracket */}
+          <mesh position={[-Math.sign(mx) * 0.12, 0.22, 0.08]}>
+            <boxGeometry args={[0.22, 0.04, 0.04]} />
+            <meshStandardMaterial color="#374151" metalness={0.8} />
+          </mesh>
+          {/* Lower support bracket */}
+          <mesh position={[-Math.sign(mx) * 0.12, -0.22, 0.08]}>
+            <boxGeometry args={[0.22, 0.04, 0.04]} />
+            <meshStandardMaterial color="#374151" metalness={0.8} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* Front radiator grille & bumper assembly */}
+      <group position={[0, 1.25, -5.72]}>
+        {/* Multi-tier horizontal slatted grille */}
+        <RoundedBox args={[2.24, 0.88, 0.16]} radius={0.06} smoothness={2} castShadow>
+          <meshStandardMaterial color="#0f172a" roughness={0.48} metalness={0.65} />
+        </RoundedBox>
+        {/* Central horizontal chrome badge / logo bar */}
+        <mesh position={[0, 0.14, 0.09]}>
+          <boxGeometry args={[1.65, 0.06, 0.04]} />
+          <meshStandardMaterial color="#f8fafc" roughness={0.2} metalness={0.95} />
+        </mesh>
+        {/* Front bumper */}
+        <mesh position={[0, -0.42, 0.02]} castShadow>
+          <boxGeometry args={[2.52, 0.38, 0.22]} />
+          <meshStandardMaterial color="#1a51b0" roughness={0.35} metalness={0.4} />
+        </mesh>
+        {/* Corner aerodynamic air turning vanes (deflectors) */}
+        {[-1.22, 1.22].map((cx) => (
+          <mesh key={`air-vane-${cx}`} position={[cx, 0.05, -0.05]} rotation={[0, Math.sign(cx) * 0.45, 0]}>
+            <boxGeometry args={[0.06, 0.78, 0.24]} />
+            <meshStandardMaterial color="#1d5ec9" roughness={0.3} metalness={0.4} />
+          </mesh>
+        ))}
+      </group>
+
+      {/* Composite front headlights & integrated DRL strips */}
+      {[-0.98, 0.98].map((hx) => (
+        <group key={`headlamp-${hx}`} position={[hx, 1.24, -5.76]}>
+          <mesh castShadow>
+            <boxGeometry args={[0.42, 0.24, 0.1]} />
+            <meshStandardMaterial
+              color="#ffffff"
+              emissive="#fff8e7"
+              emissiveIntensity={2.8}
+              roughness={0.15}
+            />
+          </mesh>
+          {/* Lower auxiliary fog light */}
+          <mesh position={[0, -0.28, 0]}>
+            <boxGeometry args={[0.26, 0.12, 0.08]} />
+            <meshStandardMaterial color="#fef08a" emissive="#fef08a" emissiveIntensity={1.8} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* ====================================================================
+          3. REFRIGERATED 3-AXLE TRAILER WITH FRONT CHILLER UNIT
+          ==================================================================== */}
+      {/* Front refrigeration chiller unit (Thermo King / Carrier style) */}
+      <group position={[0, 2.78, -1.06]}>
+        {/* Chiller casing */}
+        <RoundedBox args={[2.18, 1.44, 0.38]} radius={0.08} smoothness={2} castShadow>
+          <meshStandardMaterial color="#e2e8f0" roughness={0.32} metalness={0.15} />
+        </RoundedBox>
+        {/* Front horizontal cooling louvers */}
+        <mesh position={[0, 0.08, -0.2]}>
+          <boxGeometry args={[1.86, 0.88, 0.04]} />
+          <meshStandardMaterial color="#0f172a" roughness={0.7} metalness={0.4} />
+        </mesh>
+        {/* Digital temperature / status LED display */}
+        <mesh position={[0.65, -0.45, -0.2]}>
+          <boxGeometry args={[0.32, 0.14, 0.03]} />
+          <meshStandardMaterial color="#22c55e" emissive="#22c55e" emissiveIntensity={2.5} />
+        </mesh>
+      </group>
+
+      {/* Main refrigerated box trailer body in sleek black finish */}
+      <RoundedBox
+        args={[2.54, 2.96, 13.0]}
+        radius={0.10}
+        smoothness={2}
+        position={[0, 2.46, 5.3]}
+        castShadow
+        receiveShadow
+      >
+        <BodyPaint color="#12151b" roughness={0.38} />
+      </RoundedBox>
+
+      {/* Polished aluminum corner extrusions / rub rails for trailer */}
+      {[-1.27, 1.27].map((ex) => (
+        <group key={`corner-rail-${ex}`}>
+          {/* Bottom rub rail */}
+          <mesh position={[ex, 1.0, 5.3]}>
+            <boxGeometry args={[0.04, 0.08, 12.96]} />
+            <meshStandardMaterial color="#cbd5e1" roughness={0.25} metalness={0.9} />
+          </mesh>
+          {/* Top roof rub rail */}
+          <mesh position={[ex, 3.92, 5.3]}>
+            <boxGeometry args={[0.04, 0.08, 12.96]} />
+            <meshStandardMaterial color="#cbd5e1" roughness={0.25} metalness={0.9} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* Side branding: "MINING DISCOVERY" in white lettering on black container */}
       <TruckSideBranding />
 
       {/* Animated rear cargo bay, swinging doors, and cascading falling cards */}
       <TruckCargoRear />
 
-      {/* Shipping container corrugated roof ribs for overhead top-down view (56 ribs across 12.4m length) */}
+      {/* Shipping container corrugated roof ribs for overhead top-down view in matching black finish */}
       {Array.from({ length: 54 }, (_, i) => {
         const rz = -1.0 + i * (12.3 / 53);
         return (
           <mesh key={`roof-rib-${i}`} position={[0, 3.96, rz]}>
             <boxGeometry args={[2.48, 0.04, 0.11]} />
-            <meshStandardMaterial color="#d4d9df" roughness={0.52} metalness={0.2} />
+            <meshStandardMaterial color="#1c2129" roughness={0.48} metalness={0.25} />
           </mesh>
         );
       })}
@@ -734,26 +888,132 @@ const BuiltInTruck: React.FC<{
       ].map(([cx, cz], i) => (
         <mesh key={`casting-${i}`} position={[cx, 3.97, cz]}>
           <boxGeometry args={[0.22, 0.06, 0.28]} />
-          <meshStandardMaterial color="#828d9b" roughness={0.35} metalness={0.75} />
+          <meshStandardMaterial color="#2d333f" roughness={0.35} metalness={0.75} />
         </mesh>
       ))}
 
-      {/* Wheels: tyre, rim over each axle station matching slim trailer clearance */}
+      {/* Trailer telescopic landing gear legs with square footpads */}
+      <group position={[0, 0.65, 0.5]}>
+        {[-0.92, 0.92].map((lx) => (
+          <group key={`landing-leg-${lx}`} position={[lx, 0, 0]}>
+            {/* Telescoping vertical post */}
+            <mesh castShadow>
+              <boxGeometry args={[0.14, 0.72, 0.14]} />
+              <meshStandardMaterial color="#1e293b" roughness={0.5} metalness={0.7} />
+            </mesh>
+            {/* Ground footpad */}
+            <mesh position={[0, -0.38, 0]}>
+              <boxGeometry args={[0.28, 0.05, 0.28]} />
+              <meshStandardMaterial color="#0f172a" roughness={0.7} metalness={0.8} />
+            </mesh>
+            {/* Diagonal support brace */}
+            <mesh position={[0, 0.12, 0.28]} rotation={[0.55, 0, 0]}>
+              <cylinderGeometry args={[0.03, 0.03, 0.62, 8]} />
+              <meshStandardMaterial color="#334155" metalness={0.8} />
+            </mesh>
+          </group>
+        ))}
+        {/* Connecting cross shaft */}
+        <mesh position={[0, 0.18, 0]} rotation={[0, 0, Math.PI / 2]}>
+          <cylinderGeometry args={[0.035, 0.035, 1.84, 8]} />
+          <meshStandardMaterial color="#334155" metalness={0.8} />
+        </mesh>
+      </group>
+
+      {/* Aerodynamic side belly skirt / enclosed pallet storage box in matching royal blue */}
+      <group position={[0, 0.98, 3.8]}>
+        <mesh castShadow receiveShadow>
+          <boxGeometry args={[2.46, 0.62, 5.2]} />
+          <meshStandardMaterial color="#1d5ec9" roughness={0.32} metalness={0.25} />
+        </mesh>
+        {/* Row of amber LED side marker reflectors along the trailer flank */}
+        {[-1.24, 1.24].map((mx) =>
+          [-2.2, -1.1, 0, 1.1, 2.2].map((mz, idx) => (
+            <mesh key={`belly-marker-${mx}-${idx}`} position={[mx, 0.24, mz]}>
+              <boxGeometry args={[0.02, 0.05, 0.12]} />
+              <meshStandardMaterial color="#f59e0b" emissive="#f59e0b" emissiveIntensity={1.5} />
+            </mesh>
+          ))
+        )}
+      </group>
+
+      {/* Triple curved thermoplastic mudguards over the 3 trailer axles */}
+      {[-AXLE_X, AXLE_X].map((fx) =>
+        [7.3, 8.8, 10.3].map((fz, idx) => (
+          <group key={`tri-mudguard-${fx}-${idx}`} position={[fx, 1.18, fz]}>
+            {/* Curved top fender arch */}
+            <mesh castShadow>
+              <boxGeometry args={[0.48, 0.22, 1.12]} />
+              <meshStandardMaterial color="#0f172a" roughness={0.8} />
+            </mesh>
+            {/* Orange side reflector above wheel */}
+            <mesh position={[Math.sign(fx) * 0.25, 0.02, 0]}>
+              <boxGeometry args={[0.02, 0.06, 0.14]} />
+              <meshStandardMaterial color="#f59e0b" emissive="#f59e0b" emissiveIntensity={1.8} />
+            </mesh>
+          </group>
+        ))
+      )}
+
+      {/* Rear steel underrun protection bumper bar (ICC bumper) */}
+      <group position={[0, 0.58, 11.85]}>
+        {/* Horizontal bumper beam */}
+        <mesh castShadow>
+          <boxGeometry args={[2.48, 0.14, 0.1]} />
+          <meshStandardMaterial color="#e2e8f0" roughness={0.3} metalness={0.85} />
+        </mesh>
+        {/* Vertical support drops */}
+        {[-0.85, 0.85].map((bx) => (
+          <mesh key={`bumper-post-${bx}`} position={[bx, 0.26, 0]}>
+            <boxGeometry args={[0.08, 0.42, 0.08]} />
+            <meshStandardMaterial color="#1e293b" metalness={0.8} />
+          </mesh>
+        ))}
+        {/* Yellow/Red reflective diagonal chevron safety hazard plates */}
+        {[-1.0, 1.0].map((cx) => (
+          <mesh key={`chevron-${cx}`} position={[cx, 0, 0.055]}>
+            <planeGeometry args={[0.42, 0.12]} />
+            <meshStandardMaterial color="#facc15" emissive="#ca8a04" emissiveIntensity={0.6} />
+          </mesh>
+        ))}
+        {/* Rear commercial multi-element LED taillight strips */}
+        {[-0.55, 0.55].map((tx) => (
+          <mesh key={`taillight-${tx}`} position={[tx, 0, 0.055]}>
+            <boxGeometry args={[0.42, 0.1, 0.02]} />
+            <meshStandardMaterial color="#dc2626" emissive="#dc2626" emissiveIntensity={2.2} />
+          </mesh>
+        ))}
+      </group>
+
+      {/* ====================================================================
+          4. 5-AXLE EUROPEAN ALLOY WHEELS & HUBS (1 STEER, 1 DRIVE, 3 TRAILER)
+          ==================================================================== */}
       {AXLE_Z.map((z) =>
         [-AXLE_X, AXLE_X].map((x) => (
           <group key={`${z}:${x}`} position={[x, WHEEL_RADIUS, z]}>
+            {/* Outer semi-truck rubber tyre */}
             <mesh ref={handleWheelRef} rotation={wheelRest} castShadow>
               <cylinderGeometry args={[WHEEL_RADIUS, WHEEL_RADIUS, WHEEL_WIDTH, 32]} />
-              <meshStandardMaterial color="#0b0e13" roughness={0.92} metalness={0.08} />
+              <meshStandardMaterial color="#0f141a" roughness={0.92} metalness={0.06} />
             </mesh>
+            {/* Polished silver alloy disc wheel */}
             <mesh
               ref={handleWheelRef}
               position={[Math.sign(x) * (WHEEL_WIDTH / 2 + 0.01), 0, 0]}
               rotation={wheelRest}
               castShadow
             >
-              <cylinderGeometry args={[WHEEL_RADIUS * 0.58, WHEEL_RADIUS * 0.58, 0.05, 16]} />
-              <meshStandardMaterial color="#6b7480" roughness={0.3} metalness={0.9} />
+              <cylinderGeometry args={[WHEEL_RADIUS * 0.68, WHEEL_RADIUS * 0.68, 0.06, 24]} />
+              <meshStandardMaterial color="#e2e8f0" roughness={0.22} metalness={0.92} />
+            </mesh>
+            {/* Dark hub center with chrome wheel nut ring */}
+            <mesh
+              ref={handleWheelRef}
+              position={[Math.sign(x) * (WHEEL_WIDTH / 2 + 0.035), 0, 0]}
+              rotation={wheelRest}
+            >
+              <cylinderGeometry args={[WHEEL_RADIUS * 0.32, WHEEL_RADIUS * 0.32, 0.04, 16]} />
+              <meshStandardMaterial color="#1e293b" roughness={0.35} metalness={0.8} />
             </mesh>
           </group>
         )),

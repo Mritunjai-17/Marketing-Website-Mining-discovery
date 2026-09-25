@@ -746,74 +746,18 @@ export const JourneyStory: React.FC = () => {
     // and cleanly fades out at p = 0.922 to 0.934 BEFORE the truck doors open
     if (secondPartRef.current) {
       let opacity = 0;
-      if (p >= 0.88 && p <= 0.934) {
-        const fadeIn = smoothstep(0.88, 0.908, p);
+      if (p >= 0.85 && p <= 0.934) {
+        const fadeIn = smoothstep(0.85, 0.895, p);
         const fadeOut = 1 - smoothstep(0.922, 0.934, p);
         opacity = fadeIn * fadeOut;
 
-        const highwayP = Math.max(0, Math.min(1, (p - 0.884) / (0.928 - 0.884)));
-
-        // 1. Big Headline word scrub (0.00 to 0.40)
         if (leftColRef.current) {
-          const enterY = (1 - fadeIn) * 20;
+          const enterY = (1 - fadeIn) * 18;
           leftColRef.current.style.transform = `translate3d(0, ${enterY.toFixed(1)}px, 0)`;
-          const headP = Math.max(0, Math.min(1, highwayP / 0.40));
-          const headEl = leftColRef.current.querySelector<HTMLElement>(`.${styles.secondPartBigHeadline}`);
-          updateWordScrub(headEl, headP, "rgba(255, 255, 255, 0.45)", "#ffffff", "#ffffff", 0.35);
-        }
-
-        // 2. Subtext word scrub (0.12 to 0.85)
-        if (leftSubtextRef.current) {
-          const descP = Math.max(0, Math.min(1, (highwayP - 0.12) / 0.73));
-          const descEl = leftSubtextRef.current.querySelector<HTMLElement>(`.${styles.secondPartDescription}`);
-          updateWordScrub(descEl, descP, "rgba(255, 255, 255, 0.40)", "#ffffff", "#ffffff", 0.38);
-        }
-
-        // 3. Huge Bold "INDUSTRIES" Title (Bottom-Left)
-        if (industriesTitleRef.current) {
-          const enterY = (1 - fadeIn) * 26;
-          industriesTitleRef.current.style.transform = `translate3d(0, ${enterY.toFixed(1)}px, 0)`;
-        }
-
-        // 4. Right Side Stats Track Auto-scroll & Word Scrub
-        if (statsTrackRef.current) {
-          const statsProgress = Math.max(0, Math.min(1, (highwayP - 0.08) / 0.82));
-          const maxScroll = Math.max(0, statsTrackRef.current.scrollHeight - statsTrackRef.current.clientHeight);
-          statsTrackRef.current.scrollTop = statsProgress * maxScroll;
-
-          const statItems = statsTrackRef.current.querySelectorAll<HTMLElement>(`.${styles.statEditorialItem}`);
-          const ranges = [
-            [0.04, 0.22],
-            [0.20, 0.38],
-            [0.36, 0.54],
-            [0.52, 0.70],
-            [0.68, 0.86],
-          ];
-          statItems.forEach((itemEl, idx) => {
-            const rng = ranges[idx] || [0, 1];
-            const itemP = Math.max(0, Math.min(1, (highwayP - rng[0]) / (rng[1] - rng[0])));
-
-            const valEl = itemEl.querySelector<HTMLElement>(`.${styles.secondPartStatValue}`);
-            const lblEl = itemEl.querySelector<HTMLElement>(`.${styles.secondPartStatLabel}`);
-            const dEl = itemEl.querySelector<HTMLElement>(`.${styles.secondPartStatDesc}`);
-
-            if (valEl) {
-              valEl.style.opacity = (0.35 + itemP * 0.65).toFixed(2);
-              valEl.style.color = itemP > 0.4 ? "#ffffff" : "rgba(255, 255, 255, 0.45)";
-            }
-            updateWordScrub(lblEl, itemP, "rgba(255, 255, 255, 0.45)", "#ffffff", "#ffffff", 0.25);
-            updateWordScrub(dEl, Math.max(0, (itemP - 0.1) / 0.9), "rgba(255, 255, 255, 0.45)", "rgba(255, 255, 255, 0.92)", undefined, 0.25);
-          });
-
-          const calloutEl = statsTrackRef.current.querySelector<HTMLElement>(`.${styles.statCalloutHeadline}`);
-          if (calloutEl) {
-            const calloutP = Math.max(0, Math.min(1, (highwayP - 0.80) / 0.18));
-            updateWordScrub(calloutEl, calloutP, "rgba(255, 255, 255, 0.45)", "#ffffff", "#ffffff", 0.22);
-          }
         }
 
         if (rightColRef.current) {
-          const enterY = (1 - fadeIn) * 32;
+          const enterY = (1 - fadeIn) * 22;
           rightColRef.current.style.transform = `translate3d(0, ${enterY.toFixed(1)}px, 0)`;
         }
       } else {
@@ -1004,303 +948,127 @@ export const JourneyStory: React.FC = () => {
         className={styles.secondPartSidesWrap}
         aria-label="One platform. Every major mining audience."
       >
-        {/* Left Side: Big Heading (Matching user picture) */}
-        <div ref={leftColRef} className={styles.secondPartLeftSide}>
-          <h2 className={styles.secondPartBigHeadline}>
-            <span className={styles.secondPartMutedLine}>
-              {renderScrubText("ONE PLATFORM.", "bighead-muted")}
-            </span>
-            <span className={styles.secondPartBlackLine}>
-              {renderScrubText("EVERY MAJOR MINING AUDIENCE.", "bighead-black")}
-            </span>
+        {/* Top-Left: MD Gold Monogram & Intelligence Tagline */}
+        <div className={styles.topDownBrandHeader}>
+          <div className={styles.topDownLogoMark}>
+            <svg className={styles.topDownLogoSvg} viewBox="0 0 24 24" fill="#d4af37">
+              <path d="M12 2L2 22h20L12 2zm0 6l5.5 11h-11L12 8z" />
+            </svg>
+          </div>
+          <div className={styles.topDownBrandText}>
+            <div className={styles.topDownBrandTitle}>MINING DISCOVERY</div>
+            <div className={styles.topDownBrandTagline}>GLOBAL MINING INTELLIGENCE</div>
+          </div>
+        </div>
+
+        {/* Far-Left: Vertical Stepper Timeline (01 PLATFORM -> 04 IMPACT) */}
+        <div className={styles.topDownTimeline}>
+          <div className={`${styles.timelineStep} ${styles.timelineStepActive}`}>
+            <span className={styles.timelineDot} />
+            <span className={styles.timelineLabel}>01 PLATFORM</span>
+          </div>
+          <div className={styles.timelineStep}>
+            <span className={styles.timelineDot} />
+            <span className={styles.timelineLabel}>02 COVERAGE</span>
+          </div>
+          <div className={styles.timelineStep}>
+            <span className={styles.timelineDot} />
+            <span className={styles.timelineLabel}>03 INSIGHTS</span>
+          </div>
+          <div className={styles.timelineStep}>
+            <span className={styles.timelineDot} />
+            <span className={styles.timelineLabel}>04 IMPACT</span>
+          </div>
+        </div>
+
+        {/* Left Side: Main Heading, Gold Italic, Divider, Description & Scroll explore prompt */}
+        <div ref={leftColRef} className={styles.topDownLeftBlock}>
+          <div className={styles.topDownSmallCaps}>ONE PLATFORM.</div>
+          <h2 className={styles.topDownMainHeadline}>
+            EVERY MAJOR <br />
+            <span className={styles.topDownGoldItalic}>MINING</span> <br />
+            AUDIENCE.
           </h2>
-        </div>
-
-        {/* Left Side: Subtext Little Down (Bottom-Left) */}
-        <div ref={leftSubtextRef} className={styles.secondPartLeftBottom}>
-          <p className={styles.secondPartDescription}>
-            {renderScrubText(
-              "Mining Discovery bridges the gap between mining companies and the global investment community through targeted editorial coverage and market intelligence. Connecting global mining companies directly with institutional investors, analysts, and executive decision-makers.",
-              "bigdesc",
-              "investors"
-            )}
+          <div className={styles.topDownGoldDash} />
+          <p className={styles.topDownDescription}>
+            Mining Discovery bridges the gap between mining companies and the global investment community through targeted editorial coverage and strategic visibility.
           </p>
+
+          <div className={styles.topDownScrollExplore}>
+            <div className={styles.topDownScrollCircle} aria-hidden="true">&darr;</div>
+            <span>SCROLL TO EXPLORE</span>
+          </div>
         </div>
 
-        {/* Bottom Left: Huge Bold Title matching user's attached reference */}
-        <div ref={industriesTitleRef} className={styles.secondPartIndustriesTitle} aria-hidden="true">
-          INDUSTRIES
-        </div>
+        {/* Subtle Tech Telemetry Arc passing over the highway */}
+        <svg className={styles.topDownConnectingSvg} viewBox="0 0 1600 900" preserveAspectRatio="none" aria-hidden="true">
+          <path
+            d="M 220,180 C 580,120 1020,120 1380,180"
+            fill="none"
+            stroke="rgba(212, 175, 55, 0.4)"
+            strokeWidth="1"
+            strokeDasharray="4 6"
+          />
+          <circle cx="220" cy="180" r="3" fill="#d4af37" />
+          <circle cx="1380" cy="180" r="3" fill="#d4af37" />
+          <path
+            d="M 220,720 C 580,780 1020,780 1380,720"
+            fill="none"
+            stroke="rgba(212, 175, 55, 0.3)"
+            strokeWidth="1"
+            strokeDasharray="4 6"
+          />
+          <circle cx="220" cy="720" r="3" fill="#d4af37" />
+          <circle cx="1380" cy="720" r="3" fill="#d4af37" />
+        </svg>
 
-        {/* Right Side: Main Data with Signs (matching Pic 1 reference) */}
-        <div ref={rightColRef} className={styles.secondPartRightSide}>
-          {/* Right Column: Lead Statement matching United Carriers reference */}
-          <div className={styles.secondPartRightLeadStatement}>
-            Mining Discovery operates where mining complexity is highest and audience reach is essential
+        {/* Right Side: Main Data matching Image 1 */}
+        <div ref={rightColRef} className={styles.topDownRightBlock}>
+          <div className={styles.topDownGoldDash} />
+          <h3 className={styles.topDownRightHeadline}>
+            Mining Discovery operates where mining complexity is highest and audience reach is essential.
+          </h3>
+          <p className={styles.topDownRightSubtext}>
+            From junior exploration companies to Tier-1 global mining producers across 30+ jurisdictions.
+          </p>
+
+          {/* Radar HUD Reticle */}
+          <div className={styles.topDownRadarHud} aria-hidden="true">
+            <div className={styles.radarOuterRing} />
+            <div className={styles.radarInnerRing} />
+            <div className={styles.radarCrosshairX} />
+            <div className={styles.radarCrosshairY} />
+            <div className={styles.radarCenterPip} />
           </div>
 
-          <div ref={statsTrackRef} className={styles.statsScrollTrack}>
-            {/* Point 1: 150,000+ Active Monthly Audience */}
-            <div className={styles.statEditorialItem}>
-              {/* Sign 1: Audience & Executive Investor Profile */}
-              <div className={styles.statSignWrap} aria-hidden="true">
-                <svg className={styles.statItemSign} viewBox="0 0 48 48" fill="none">
-                  {/* Subtle matrix lattice background */}
-                  <g opacity="0.18" fill="#0b1f3a">
-                    <circle cx="4" cy="4" r="0.85" /><circle cx="8" cy="4" r="0.85" /><circle cx="12" cy="4" r="0.85" /><circle cx="16" cy="4" r="0.85" /><circle cx="20" cy="4" r="0.85" /><circle cx="24" cy="4" r="0.85" /><circle cx="28" cy="4" r="0.85" /><circle cx="32" cy="4" r="0.85" /><circle cx="36" cy="4" r="0.85" /><circle cx="40" cy="4" r="0.85" /><circle cx="44" cy="4" r="0.85" />
-                    <circle cx="4" cy="8" r="0.85" /><circle cx="8" cy="8" r="0.85" /><circle cx="12" cy="8" r="0.85" /><circle cx="16" cy="8" r="0.85" /><circle cx="20" cy="8" r="0.85" /><circle cx="24" cy="8" r="0.85" /><circle cx="28" cy="8" r="0.85" /><circle cx="32" cy="8" r="0.85" /><circle cx="36" cy="8" r="0.85" /><circle cx="40" cy="8" r="0.85" /><circle cx="44" cy="8" r="0.85" />
-                    <circle cx="4" cy="12" r="0.85" /><circle cx="8" cy="12" r="0.85" /><circle cx="12" cy="12" r="0.85" /><circle cx="16" cy="12" r="0.85" /><circle cx="20" cy="12" r="0.85" /><circle cx="24" cy="12" r="0.85" /><circle cx="28" cy="12" r="0.85" /><circle cx="32" cy="12" r="0.85" /><circle cx="36" cy="12" r="0.85" /><circle cx="40" cy="12" r="0.85" /><circle cx="44" cy="12" r="0.85" />
-                    <circle cx="4" cy="16" r="0.85" /><circle cx="8" cy="16" r="0.85" /><circle cx="12" cy="16" r="0.85" /><circle cx="16" cy="16" r="0.85" /><circle cx="20" cy="16" r="0.85" /><circle cx="24" cy="16" r="0.85" /><circle cx="28" cy="16" r="0.85" /><circle cx="32" cy="16" r="0.85" /><circle cx="36" cy="16" r="0.85" /><circle cx="40" cy="16" r="0.85" /><circle cx="44" cy="16" r="0.85" />
-                    <circle cx="4" cy="20" r="0.85" /><circle cx="8" cy="20" r="0.85" /><circle cx="12" cy="20" r="0.85" /><circle cx="16" cy="20" r="0.85" /><circle cx="20" cy="20" r="0.85" /><circle cx="24" cy="20" r="0.85" /><circle cx="28" cy="20" r="0.85" /><circle cx="32" cy="20" r="0.85" /><circle cx="36" cy="20" r="0.85" /><circle cx="40" cy="20" r="0.85" /><circle cx="44" cy="20" r="0.85" />
-                    <circle cx="4" cy="24" r="0.85" /><circle cx="8" cy="24" r="0.85" /><circle cx="12" cy="24" r="0.85" /><circle cx="16" cy="24" r="0.85" /><circle cx="20" cy="24" r="0.85" /><circle cx="24" cy="24" r="0.85" /><circle cx="28" cy="24" r="0.85" /><circle cx="32" cy="24" r="0.85" /><circle cx="36" cy="24" r="0.85" /><circle cx="40" cy="24" r="0.85" /><circle cx="44" cy="24" r="0.85" />
-                    <circle cx="4" cy="28" r="0.85" /><circle cx="8" cy="28" r="0.85" /><circle cx="12" cy="28" r="0.85" /><circle cx="16" cy="28" r="0.85" /><circle cx="20" cy="28" r="0.85" /><circle cx="24" cy="28" r="0.85" /><circle cx="28" cy="28" r="0.85" /><circle cx="32" cy="28" r="0.85" /><circle cx="36" cy="28" r="0.85" /><circle cx="40" cy="28" r="0.85" /><circle cx="44" cy="28" r="0.85" />
-                    <circle cx="4" cy="32" r="0.85" /><circle cx="8" cy="32" r="0.85" /><circle cx="12" cy="32" r="0.85" /><circle cx="16" cy="32" r="0.85" /><circle cx="20" cy="32" r="0.85" /><circle cx="24" cy="32" r="0.85" /><circle cx="28" cy="32" r="0.85" /><circle cx="32" cy="32" r="0.85" /><circle cx="36" cy="32" r="0.85" /><circle cx="40" cy="32" r="0.85" /><circle cx="44" cy="32" r="0.85" />
-                    <circle cx="4" cy="36" r="0.85" /><circle cx="8" cy="36" r="0.85" /><circle cx="12" cy="36" r="0.85" /><circle cx="16" cy="36" r="0.85" /><circle cx="20" cy="36" r="0.85" /><circle cx="24" cy="36" r="0.85" /><circle cx="28" cy="36" r="0.85" /><circle cx="32" cy="36" r="0.85" /><circle cx="36" cy="36" r="0.85" /><circle cx="40" cy="36" r="0.85" /><circle cx="44" cy="36" r="0.85" />
-                    <circle cx="4" cy="40" r="0.85" /><circle cx="8" cy="40" r="0.85" /><circle cx="12" cy="40" r="0.85" /><circle cx="16" cy="40" r="0.85" /><circle cx="20" cy="40" r="0.85" /><circle cx="24" cy="40" r="0.85" /><circle cx="28" cy="40" r="0.85" /><circle cx="32" cy="40" r="0.85" /><circle cx="36" cy="40" r="0.85" /><circle cx="40" cy="40" r="0.85" /><circle cx="44" cy="40" r="0.85" />
-                    <circle cx="4" cy="44" r="0.85" /><circle cx="8" cy="44" r="0.85" /><circle cx="12" cy="44" r="0.85" /><circle cx="16" cy="44" r="0.85" /><circle cx="20" cy="44" r="0.85" /><circle cx="24" cy="44" r="0.85" /><circle cx="28" cy="44" r="0.85" /><circle cx="32" cy="44" r="0.85" /><circle cx="36" cy="44" r="0.85" /><circle cx="40" cy="44" r="0.85" /><circle cx="44" cy="44" r="0.85" />
-                  </g>
-                  {/* Dark Audience / Executive Investor Profile dots */}
-                  <g fill="#0b1f3a">
-                    {/* Head */}
-                    <circle cx="24" cy="6" r="2.1" />
-                    <circle cx="20" cy="9" r="2.0" /><circle cx="24" cy="9" r="2.1" /><circle cx="28" cy="9" r="2.0" />
-                    <circle cx="18" cy="13" r="2.0" /><circle cx="22" cy="13" r="2.0" /><circle cx="26" cy="13" r="2.0" /><circle cx="30" cy="13" r="2.0" />
-                    <circle cx="20" cy="17" r="2.0" /><circle cx="24" cy="17" r="2.1" /><circle cx="28" cy="17" r="2.0" />
-                    <circle cx="24" cy="20" r="2.1" />
-                    {/* Shoulders & Mantle */}
-                    <circle cx="20" cy="24" r="2.0" /><circle cx="24" cy="24" r="2.1" /><circle cx="28" cy="24" r="2.0" />
-                    <circle cx="15" cy="27" r="2.0" /><circle cx="33" cy="27" r="2.0" />
-                    <circle cx="11" cy="31" r="2.0" /><circle cx="37" cy="31" r="2.0" />
-                    <circle cx="8" cy="36" r="2.0" /><circle cx="40" cy="36" r="2.0" />
-                    {/* Base */}
-                    <circle cx="8" cy="40" r="1.8" /><circle cx="12" cy="40" r="1.8" /><circle cx="16" cy="40" r="1.8" /><circle cx="20" cy="40" r="1.8" />
-                    <circle cx="24" cy="40" r="1.8" /><circle cx="28" cy="40" r="1.8" /><circle cx="32" cy="40" r="1.8" /><circle cx="36" cy="40" r="1.8" /><circle cx="40" cy="40" r="1.8" />
-                  </g>
-                </svg>
-              </div>
-              <div className={styles.secondPartStatValue}>150,000+</div>
-              <div className={styles.secondPartStatLabel}>
-                {renderScrubText("ACTIVE MONTHLY AUDIENCE", "statlbl-1")}
-              </div>
-              <p className={styles.secondPartStatDesc}>
-                {renderScrubText("Institutional investors, mining executives, and industry analysts reading market updates.", "statdesc-1")}
-              </p>
+          {/* 8+ YEARS GLOBAL COVERAGE */}
+          <div className={styles.topDownStatBlock}>
+            <svg className={styles.topDownStatLogo} viewBox="0 0 24 24" fill="#d4af37">
+              <polygon points="12,2 22,20 2,20" />
+            </svg>
+            <div className={styles.topDownStatNumbers}>
+              <div className={styles.topDownStat8}>8+</div>
+              <div className={styles.topDownStatYears}>YEARS</div>
             </div>
-
-            {/* Circular Indicator matching reference Image 1 */}
-            <div className={styles.topDownHotspot} aria-hidden="true">
-              <div className={styles.hotspotRing} />
-              <div className={styles.hotspotDot} />
-            </div>
-
-            {/* Point 2: 40,000+ Newsletter Subscribers */}
-            <div className={styles.statEditorialItem}>
-              {/* Sign 2: Newsletter Mail Envelope */}
-              <div className={styles.statSignWrap} aria-hidden="true">
-                <svg className={styles.statItemSign} viewBox="0 0 48 48" fill="none">
-                  {/* Subtle matrix lattice background */}
-                  <g opacity="0.18" fill="#0b1f3a">
-                    <circle cx="4" cy="4" r="0.85" /><circle cx="8" cy="4" r="0.85" /><circle cx="12" cy="4" r="0.85" /><circle cx="16" cy="4" r="0.85" /><circle cx="20" cy="4" r="0.85" /><circle cx="24" cy="4" r="0.85" /><circle cx="28" cy="4" r="0.85" /><circle cx="32" cy="4" r="0.85" /><circle cx="36" cy="4" r="0.85" /><circle cx="40" cy="4" r="0.85" /><circle cx="44" cy="4" r="0.85" />
-                    <circle cx="4" cy="8" r="0.85" /><circle cx="8" cy="8" r="0.85" /><circle cx="12" cy="8" r="0.85" /><circle cx="16" cy="8" r="0.85" /><circle cx="20" cy="8" r="0.85" /><circle cx="24" cy="8" r="0.85" /><circle cx="28" cy="8" r="0.85" /><circle cx="32" cy="8" r="0.85" /><circle cx="36" cy="8" r="0.85" /><circle cx="40" cy="8" r="0.85" /><circle cx="44" cy="8" r="0.85" />
-                    <circle cx="4" cy="12" r="0.85" /><circle cx="8" cy="12" r="0.85" /><circle cx="12" cy="12" r="0.85" /><circle cx="16" cy="12" r="0.85" /><circle cx="20" cy="12" r="0.85" /><circle cx="24" cy="12" r="0.85" /><circle cx="28" cy="12" r="0.85" /><circle cx="32" cy="12" r="0.85" /><circle cx="36" cy="12" r="0.85" /><circle cx="40" cy="12" r="0.85" /><circle cx="44" cy="12" r="0.85" />
-                    <circle cx="4" cy="16" r="0.85" /><circle cx="8" cy="16" r="0.85" /><circle cx="12" cy="16" r="0.85" /><circle cx="16" cy="16" r="0.85" /><circle cx="20" cy="16" r="0.85" /><circle cx="24" cy="16" r="0.85" /><circle cx="28" cy="16" r="0.85" /><circle cx="32" cy="16" r="0.85" /><circle cx="36" cy="16" r="0.85" /><circle cx="40" cy="16" r="0.85" /><circle cx="44" cy="16" r="0.85" />
-                    <circle cx="4" cy="20" r="0.85" /><circle cx="8" cy="20" r="0.85" /><circle cx="12" cy="20" r="0.85" /><circle cx="16" cy="20" r="0.85" /><circle cx="20" cy="20" r="0.85" /><circle cx="24" cy="20" r="0.85" /><circle cx="28" cy="20" r="0.85" /><circle cx="32" cy="20" r="0.85" /><circle cx="36" cy="20" r="0.85" /><circle cx="40" cy="20" r="0.85" /><circle cx="44" cy="20" r="0.85" />
-                    <circle cx="4" cy="24" r="0.85" /><circle cx="8" cy="24" r="0.85" /><circle cx="12" cy="24" r="0.85" /><circle cx="16" cy="24" r="0.85" /><circle cx="20" cy="24" r="0.85" /><circle cx="24" cy="24" r="0.85" /><circle cx="28" cy="24" r="0.85" /><circle cx="32" cy="24" r="0.85" /><circle cx="36" cy="24" r="0.85" /><circle cx="40" cy="24" r="0.85" /><circle cx="44" cy="24" r="0.85" />
-                    <circle cx="4" cy="28" r="0.85" /><circle cx="8" cy="28" r="0.85" /><circle cx="12" cy="28" r="0.85" /><circle cx="16" cy="28" r="0.85" /><circle cx="20" cy="28" r="0.85" /><circle cx="24" cy="28" r="0.85" /><circle cx="28" cy="28" r="0.85" /><circle cx="32" cy="28" r="0.85" /><circle cx="36" cy="28" r="0.85" /><circle cx="40" cy="28" r="0.85" /><circle cx="44" cy="28" r="0.85" />
-                    <circle cx="4" cy="32" r="0.85" /><circle cx="8" cy="32" r="0.85" /><circle cx="12" cy="32" r="0.85" /><circle cx="16" cy="32" r="0.85" /><circle cx="20" cy="32" r="0.85" /><circle cx="24" cy="32" r="0.85" /><circle cx="28" cy="32" r="0.85" /><circle cx="32" cy="32" r="0.85" /><circle cx="36" cy="32" r="0.85" /><circle cx="40" cy="32" r="0.85" /><circle cx="44" cy="32" r="0.85" />
-                    <circle cx="4" cy="36" r="0.85" /><circle cx="8" cy="36" r="0.85" /><circle cx="12" cy="36" r="0.85" /><circle cx="16" cy="36" r="0.85" /><circle cx="20" cy="36" r="0.85" /><circle cx="24" cy="36" r="0.85" /><circle cx="28" cy="36" r="0.85" /><circle cx="32" cy="36" r="0.85" /><circle cx="36" cy="36" r="0.85" /><circle cx="40" cy="36" r="0.85" /><circle cx="44" cy="36" r="0.85" />
-                    <circle cx="4" cy="40" r="0.85" /><circle cx="8" cy="40" r="0.85" /><circle cx="12" cy="40" r="0.85" /><circle cx="16" cy="40" r="0.85" /><circle cx="20" cy="40" r="0.85" /><circle cx="24" cy="40" r="0.85" /><circle cx="28" cy="40" r="0.85" /><circle cx="32" cy="40" r="0.85" /><circle cx="36" cy="40" r="0.85" /><circle cx="40" cy="40" r="0.85" /><circle cx="44" cy="40" r="0.85" />
-                    <circle cx="4" cy="44" r="0.85" /><circle cx="8" cy="44" r="0.85" /><circle cx="12" cy="44" r="0.85" /><circle cx="16" cy="44" r="0.85" /><circle cx="20" cy="44" r="0.85" /><circle cx="24" cy="44" r="0.85" /><circle cx="28" cy="44" r="0.85" /><circle cx="32" cy="44" r="0.85" /><circle cx="36" cy="44" r="0.85" /><circle cx="40" cy="44" r="0.85" /><circle cx="44" cy="44" r="0.85" />
-                  </g>
-                  {/* Dark Newsletter Mail Envelope dots */}
-                  <g fill="#0b1f3a">
-                    {/* Envelope Rectangle */}
-                    <circle cx="8" cy="12" r="2.0" /><circle cx="12" cy="12" r="2.0" /><circle cx="16" cy="12" r="2.0" /><circle cx="20" cy="12" r="2.0" /><circle cx="24" cy="12" r="2.0" /><circle cx="28" cy="12" r="2.0" /><circle cx="32" cy="12" r="2.0" /><circle cx="36" cy="12" r="2.0" /><circle cx="40" cy="12" r="2.0" />
-                    <circle cx="8" cy="16" r="2.0" /><circle cx="8" cy="20" r="2.0" /><circle cx="8" cy="24" r="2.0" /><circle cx="8" cy="28" r="2.0" /><circle cx="8" cy="32" r="2.0" />
-                    <circle cx="40" cy="16" r="2.0" /><circle cx="40" cy="20" r="2.0" /><circle cx="40" cy="24" r="2.0" /><circle cx="40" cy="28" r="2.0" /><circle cx="40" cy="32" r="2.0" />
-                    <circle cx="8" cy="36" r="2.0" /><circle cx="12" cy="36" r="2.0" /><circle cx="16" cy="36" r="2.0" /><circle cx="20" cy="36" r="2.0" /><circle cx="24" cy="36" r="2.0" /><circle cx="28" cy="36" r="2.0" /><circle cx="32" cy="36" r="2.0" /><circle cx="36" cy="36" r="2.0" /><circle cx="40" cy="36" r="2.0" />
-                    {/* Flap V fold */}
-                    <circle cx="12" cy="16" r="2.0" /><circle cx="36" cy="16" r="2.0" />
-                    <circle cx="16" cy="20" r="2.0" /><circle cx="32" cy="20" r="2.0" />
-                    <circle cx="20" cy="24" r="2.0" /><circle cx="28" cy="24" r="2.0" />
-                    <circle cx="24" cy="28" r="2.2" />
-                    {/* Inner bottom folds */}
-                    <circle cx="12" cy="32" r="1.8" /><circle cx="36" cy="32" r="1.8" />
-                    <circle cx="16" cy="28" r="1.8" /><circle cx="32" cy="28" r="1.8" />
-                  </g>
-                </svg>
-              </div>
-              <div className={styles.secondPartStatValue}>40,000+</div>
-              <div className={styles.secondPartStatLabel}>
-                {renderScrubText("NEWSLETTER SUBSCRIBERS", "statlbl-2")}
-              </div>
-              <p className={styles.secondPartStatDesc}>
-                {renderScrubText("Weekly executive briefing delivered directly to decision-maker inboxes worldwide.", "statdesc-2")}
-              </p>
-            </div>
-
-            {/* Point 3: 450+ Mining Companies Featured */}
-            <div className={styles.statEditorialItem}>
-              {/* Sign 3: Mining Industry Crossed Pickaxes */}
-              <div className={styles.statSignWrap} aria-hidden="true">
-                <svg className={styles.statItemSign} viewBox="0 0 48 48" fill="none">
-                  {/* Subtle matrix lattice background */}
-                  <g opacity="0.18" fill="#0b1f3a">
-                    <circle cx="4" cy="4" r="0.85" /><circle cx="8" cy="4" r="0.85" /><circle cx="12" cy="4" r="0.85" /><circle cx="16" cy="4" r="0.85" /><circle cx="20" cy="4" r="0.85" /><circle cx="24" cy="4" r="0.85" /><circle cx="28" cy="4" r="0.85" /><circle cx="32" cy="4" r="0.85" /><circle cx="36" cy="4" r="0.85" /><circle cx="40" cy="4" r="0.85" /><circle cx="44" cy="4" r="0.85" />
-                    <circle cx="4" cy="8" r="0.85" /><circle cx="8" cy="8" r="0.85" /><circle cx="12" cy="8" r="0.85" /><circle cx="16" cy="8" r="0.85" /><circle cx="20" cy="8" r="0.85" /><circle cx="24" cy="8" r="0.85" /><circle cx="28" cy="8" r="0.85" /><circle cx="32" cy="8" r="0.85" /><circle cx="36" cy="8" r="0.85" /><circle cx="40" cy="8" r="0.85" /><circle cx="44" cy="8" r="0.85" />
-                    <circle cx="4" cy="12" r="0.85" /><circle cx="8" cy="12" r="0.85" /><circle cx="12" cy="12" r="0.85" /><circle cx="16" cy="12" r="0.85" /><circle cx="20" cy="12" r="0.85" /><circle cx="24" cy="12" r="0.85" /><circle cx="28" cy="12" r="0.85" /><circle cx="32" cy="12" r="0.85" /><circle cx="36" cy="12" r="0.85" /><circle cx="40" cy="12" r="0.85" /><circle cx="44" cy="12" r="0.85" />
-                    <circle cx="4" cy="16" r="0.85" /><circle cx="8" cy="16" r="0.85" /><circle cx="12" cy="16" r="0.85" /><circle cx="16" cy="16" r="0.85" /><circle cx="20" cy="16" r="0.85" /><circle cx="24" cy="16" r="0.85" /><circle cx="28" cy="16" r="0.85" /><circle cx="32" cy="16" r="0.85" /><circle cx="36" cy="16" r="0.85" /><circle cx="40" cy="16" r="0.85" /><circle cx="44" cy="16" r="0.85" />
-                    <circle cx="4" cy="20" r="0.85" /><circle cx="8" cy="20" r="0.85" /><circle cx="12" cy="20" r="0.85" /><circle cx="16" cy="20" r="0.85" /><circle cx="20" cy="20" r="0.85" /><circle cx="24" cy="20" r="0.85" /><circle cx="28" cy="20" r="0.85" /><circle cx="32" cy="20" r="0.85" /><circle cx="36" cy="20" r="0.85" /><circle cx="40" cy="20" r="0.85" /><circle cx="44" cy="20" r="0.85" />
-                    <circle cx="4" cy="24" r="0.85" /><circle cx="8" cy="24" r="0.85" /><circle cx="12" cy="24" r="0.85" /><circle cx="16" cy="24" r="0.85" /><circle cx="20" cy="24" r="0.85" /><circle cx="24" cy="24" r="0.85" /><circle cx="28" cy="24" r="0.85" /><circle cx="32" cy="24" r="0.85" /><circle cx="36" cy="24" r="0.85" /><circle cx="40" cy="24" r="0.85" /><circle cx="44" cy="24" r="0.85" />
-                    <circle cx="4" cy="28" r="0.85" /><circle cx="8" cy="28" r="0.85" /><circle cx="12" cy="28" r="0.85" /><circle cx="16" cy="28" r="0.85" /><circle cx="20" cy="28" r="0.85" /><circle cx="24" cy="28" r="0.85" /><circle cx="28" cy="28" r="0.85" /><circle cx="32" cy="28" r="0.85" /><circle cx="36" cy="28" r="0.85" /><circle cx="40" cy="28" r="0.85" /><circle cx="44" cy="28" r="0.85" />
-                    <circle cx="4" cy="32" r="0.85" /><circle cx="8" cy="32" r="0.85" /><circle cx="12" cy="32" r="0.85" /><circle cx="16" cy="32" r="0.85" /><circle cx="20" cy="32" r="0.85" /><circle cx="24" cy="32" r="0.85" /><circle cx="28" cy="32" r="0.85" /><circle cx="32" cy="32" r="0.85" /><circle cx="36" cy="32" r="0.85" /><circle cx="40" cy="32" r="0.85" /><circle cx="44" cy="32" r="0.85" />
-                    <circle cx="4" cy="36" r="0.85" /><circle cx="8" cy="36" r="0.85" /><circle cx="12" cy="36" r="0.85" /><circle cx="16" cy="36" r="0.85" /><circle cx="20" cy="36" r="0.85" /><circle cx="24" cy="36" r="0.85" /><circle cx="28" cy="36" r="0.85" /><circle cx="32" cy="36" r="0.85" /><circle cx="36" cy="36" r="0.85" /><circle cx="40" cy="36" r="0.85" /><circle cx="44" cy="36" r="0.85" />
-                    <circle cx="4" cy="40" r="0.85" /><circle cx="8" cy="40" r="0.85" /><circle cx="12" cy="40" r="0.85" /><circle cx="16" cy="40" r="0.85" /><circle cx="20" cy="40" r="0.85" /><circle cx="24" cy="40" r="0.85" /><circle cx="28" cy="40" r="0.85" /><circle cx="32" cy="40" r="0.85" /><circle cx="36" cy="40" r="0.85" /><circle cx="40" cy="40" r="0.85" /><circle cx="44" cy="40" r="0.85" />
-                    <circle cx="4" cy="44" r="0.85" /><circle cx="8" cy="44" r="0.85" /><circle cx="12" cy="44" r="0.85" /><circle cx="16" cy="44" r="0.85" /><circle cx="20" cy="44" r="0.85" /><circle cx="24" cy="44" r="0.85" /><circle cx="28" cy="44" r="0.85" /><circle cx="32" cy="44" r="0.85" /><circle cx="36" cy="44" r="0.85" /><circle cx="40" cy="44" r="0.85" /><circle cx="44" cy="44" r="0.85" />
-                  </g>
-                  {/* Dark Mining Crossed Pickaxes (⚒) dots */}
-                  <g fill="#0b1f3a">
-                    {/* Center crossing point */}
-                    <circle cx="24" cy="22" r="2.1" /><circle cx="24" cy="26" r="2.1" />
-                    {/* Handle A (slanted / ) */}
-                    <circle cx="8" cy="42" r="1.9" /><circle cx="12" cy="38" r="1.9" /><circle cx="16" cy="34" r="1.9" /><circle cx="20" cy="30" r="1.9" /><circle cx="28" cy="18" r="1.9" /><circle cx="32" cy="14" r="1.9" /><circle cx="36" cy="10" r="2.0" />
-                    {/* Handle B (slanted \ ) */}
-                    <circle cx="40" cy="42" r="1.9" /><circle cx="36" cy="38" r="1.9" /><circle cx="32" cy="34" r="1.9" /><circle cx="28" cy="30" r="1.9" /><circle cx="20" cy="18" r="1.9" /><circle cx="16" cy="14" r="1.9" /><circle cx="12" cy="10" r="2.0" />
-                    {/* Pick Head A (top-right curved pick head) */}
-                    <circle cx="28" cy="6" r="2.0" /><circle cx="32" cy="5" r="2.0" /><circle cx="36" cy="6" r="2.1" /><circle cx="40" cy="8" r="2.0" /><circle cx="43" cy="12" r="2.0" /><circle cx="44" cy="17" r="1.9" /><circle cx="41" cy="14" r="1.9" />
-                    {/* Pick Head B (top-left curved pick head) */}
-                    <circle cx="20" cy="6" r="2.0" /><circle cx="16" cy="5" r="2.0" /><circle cx="12" cy="6" r="2.1" /><circle cx="8" cy="8" r="2.0" /><circle cx="5" cy="12" r="2.0" /><circle cx="4" cy="17" r="1.9" /><circle cx="7" cy="14" r="1.9" />
-                  </g>
-                </svg>
-              </div>
-              <div className={styles.secondPartStatValue}>450+</div>
-              <div className={styles.secondPartStatLabel}>
-                {renderScrubText("MINING COMPANIES FEATURED", "statlbl-3")}
-              </div>
-              <p className={styles.secondPartStatDesc}>
-                {renderScrubText("From junior exploration companies to Tier-1 global mining producers.", "statdesc-3")}
-              </p>
-            </div>
-
-            {/* Point 4: 8+ Years Industry Coverage */}
-            <div className={styles.statEditorialItem}>
-              {/* Sign 4: Industry Coverage Calendar & Timeline */}
-              <div className={styles.statSignWrap} aria-hidden="true">
-                <svg className={styles.statItemSign} viewBox="0 0 48 48" fill="none">
-                  {/* Matrix lattice background */}
-                  <g opacity="0.18" fill="#0b1f3a">
-                    <circle cx="4" cy="4" r="0.85" /><circle cx="8" cy="4" r="0.85" /><circle cx="12" cy="4" r="0.85" /><circle cx="16" cy="4" r="0.85" /><circle cx="20" cy="4" r="0.85" /><circle cx="24" cy="4" r="0.85" /><circle cx="28" cy="4" r="0.85" /><circle cx="32" cy="4" r="0.85" /><circle cx="36" cy="4" r="0.85" /><circle cx="40" cy="4" r="0.85" /><circle cx="44" cy="4" r="0.85" />
-                    <circle cx="4" cy="8" r="0.85" /><circle cx="8" cy="8" r="0.85" /><circle cx="12" cy="8" r="0.85" /><circle cx="16" cy="8" r="0.85" /><circle cx="20" cy="8" r="0.85" /><circle cx="24" cy="8" r="0.85" /><circle cx="28" cy="8" r="0.85" /><circle cx="32" cy="8" r="0.85" /><circle cx="36" cy="8" r="0.85" /><circle cx="40" cy="8" r="0.85" /><circle cx="44" cy="8" r="0.85" />
-                    <circle cx="4" cy="12" r="0.85" /><circle cx="8" cy="12" r="0.85" /><circle cx="12" cy="12" r="0.85" /><circle cx="16" cy="12" r="0.85" /><circle cx="20" cy="12" r="0.85" /><circle cx="24" cy="12" r="0.85" /><circle cx="28" cy="12" r="0.85" /><circle cx="32" cy="12" r="0.85" /><circle cx="36" cy="12" r="0.85" /><circle cx="40" cy="12" r="0.85" /><circle cx="44" cy="12" r="0.85" />
-                    <circle cx="4" cy="16" r="0.85" /><circle cx="8" cy="16" r="0.85" /><circle cx="12" cy="16" r="0.85" /><circle cx="16" cy="16" r="0.85" /><circle cx="20" cy="16" r="0.85" /><circle cx="24" cy="16" r="0.85" /><circle cx="28" cy="16" r="0.85" /><circle cx="32" cy="16" r="0.85" /><circle cx="36" cy="16" r="0.85" /><circle cx="40" cy="16" r="0.85" /><circle cx="44" cy="16" r="0.85" />
-                    <circle cx="4" cy="20" r="0.85" /><circle cx="8" cy="20" r="0.85" /><circle cx="12" cy="20" r="0.85" /><circle cx="16" cy="20" r="0.85" /><circle cx="20" cy="20" r="0.85" /><circle cx="24" cy="20" r="0.85" /><circle cx="28" cy="20" r="0.85" /><circle cx="32" cy="20" r="0.85" /><circle cx="36" cy="20" r="0.85" /><circle cx="40" cy="20" r="0.85" /><circle cx="44" cy="20" r="0.85" />
-                    <circle cx="4" cy="24" r="0.85" /><circle cx="8" cy="24" r="0.85" /><circle cx="12" cy="24" r="0.85" /><circle cx="16" cy="24" r="0.85" /><circle cx="20" cy="24" r="0.85" /><circle cx="24" cy="24" r="0.85" /><circle cx="28" cy="24" r="0.85" /><circle cx="32" cy="24" r="0.85" /><circle cx="36" cy="24" r="0.85" /><circle cx="40" cy="24" r="0.85" /><circle cx="44" cy="24" r="0.85" />
-                    <circle cx="4" cy="28" r="0.85" /><circle cx="8" cy="28" r="0.85" /><circle cx="12" cy="28" r="0.85" /><circle cx="16" cy="28" r="0.85" /><circle cx="20" cy="28" r="0.85" /><circle cx="24" cy="28" r="0.85" /><circle cx="28" cy="28" r="0.85" /><circle cx="32" cy="28" r="0.85" /><circle cx="36" cy="28" r="0.85" /><circle cx="40" cy="28" r="0.85" /><circle cx="44" cy="28" r="0.85" />
-                    <circle cx="4" cy="32" r="0.85" /><circle cx="8" cy="32" r="0.85" /><circle cx="12" cy="32" r="0.85" /><circle cx="16" cy="32" r="0.85" /><circle cx="20" cy="32" r="0.85" /><circle cx="24" cy="32" r="0.85" /><circle cx="28" cy="32" r="0.85" /><circle cx="32" cy="32" r="0.85" /><circle cx="36" cy="32" r="0.85" /><circle cx="40" cy="32" r="0.85" /><circle cx="44" cy="32" r="0.85" />
-                    <circle cx="4" cy="36" r="0.85" /><circle cx="8" cy="36" r="0.85" /><circle cx="12" cy="36" r="0.85" /><circle cx="16" cy="36" r="0.85" /><circle cx="20" cy="36" r="0.85" /><circle cx="24" cy="36" r="0.85" /><circle cx="28" cy="36" r="0.85" /><circle cx="32" cy="36" r="0.85" /><circle cx="36" cy="36" r="0.85" /><circle cx="40" cy="36" r="0.85" /><circle cx="44" cy="36" r="0.85" />
-                    <circle cx="4" cy="40" r="0.85" /><circle cx="8" cy="40" r="0.85" /><circle cx="12" cy="40" r="0.85" /><circle cx="16" cy="40" r="0.85" /><circle cx="20" cy="40" r="0.85" /><circle cx="24" cy="40" r="0.85" /><circle cx="28" cy="40" r="0.85" /><circle cx="32" cy="40" r="0.85" /><circle cx="36" cy="40" r="0.85" /><circle cx="40" cy="40" r="0.85" /><circle cx="44" cy="40" r="0.85" />
-                    <circle cx="4" cy="44" r="0.85" /><circle cx="8" cy="44" r="0.85" /><circle cx="12" cy="44" r="0.85" /><circle cx="16" cy="44" r="0.85" /><circle cx="20" cy="44" r="0.85" /><circle cx="24" cy="44" r="0.85" /><circle cx="28" cy="44" r="0.85" /><circle cx="32" cy="44" r="0.85" /><circle cx="36" cy="44" r="0.85" /><circle cx="40" cy="44" r="0.85" /><circle cx="44" cy="44" r="0.85" />
-                  </g>
-                  {/* Dark Calendar & Date Grid dots */}
-                  <g fill="#0b1f3a">
-                    {/* Top binders */}
-                    <circle cx="14" cy="6" r="2.0" /><circle cx="14" cy="10" r="2.0" />
-                    <circle cx="34" cy="6" r="2.0" /><circle cx="34" cy="10" r="2.0" />
-                    {/* Top header bar */}
-                    <circle cx="8" cy="12" r="2.0" /><circle cx="12" cy="12" r="2.0" /><circle cx="16" cy="12" r="2.0" /><circle cx="20" cy="12" r="2.0" /><circle cx="24" cy="12" r="2.0" /><circle cx="28" cy="12" r="2.0" /><circle cx="32" cy="12" r="2.0" /><circle cx="36" cy="12" r="2.0" /><circle cx="40" cy="12" r="2.0" />
-                    {/* Outer frame */}
-                    <circle cx="8" cy="16" r="2.0" /><circle cx="8" cy="20" r="2.0" /><circle cx="8" cy="24" r="2.0" /><circle cx="8" cy="28" r="2.0" /><circle cx="8" cy="32" r="2.0" /><circle cx="8" cy="36" r="2.0" />
-                    <circle cx="40" cy="16" r="2.0" /><circle cx="40" cy="20" r="2.0" /><circle cx="40" cy="24" r="2.0" /><circle cx="40" cy="28" r="2.0" /><circle cx="40" cy="32" r="2.0" /><circle cx="40" cy="36" r="2.0" />
-                    <circle cx="12" cy="36" r="2.0" /><circle cx="16" cy="36" r="2.0" /><circle cx="20" cy="36" r="2.0" /><circle cx="24" cy="36" r="2.0" /><circle cx="28" cy="36" r="2.0" /><circle cx="32" cy="36" r="2.0" /><circle cx="36" cy="36" r="2.0" />
-                    {/* Internal grid dates */}
-                    <circle cx="16" cy="20" r="1.8" /><circle cx="24" cy="20" r="1.8" /><circle cx="32" cy="20" r="1.8" />
-                    <circle cx="16" cy="26" r="1.8" /><circle cx="24" cy="26" r="1.8" /><circle cx="32" cy="26" r="1.8" />
-                    <circle cx="16" cy="31" r="1.8" /><circle cx="24" cy="31" r="1.8" />
-                  </g>
-                </svg>
-              </div>
-              <div className={styles.secondPartStatValue}>8+</div>
-              <div className={styles.secondPartStatLabel}>
-                {renderScrubText("YEARS INDUSTRY COVERAGE", "statlbl-4")}
-              </div>
-              <p className={styles.secondPartStatDesc}>
-                {renderScrubText("Established track record of independent editorial authority and market intelligence.", "statdesc-4")}
-              </p>
-            </div>
-
-            {/* Point 5: 30+ Mining Jurisdictions */}
-            <div className={styles.statEditorialItem}>
-              {/* Sign 5: Global Mining Jurisdictions Globe */}
-              <div className={styles.statSignWrap} aria-hidden="true">
-                <svg className={styles.statItemSign} viewBox="0 0 48 48" fill="none">
-                  {/* Matrix lattice background */}
-                  <g opacity="0.18" fill="#0b1f3a">
-                    <circle cx="4" cy="4" r="0.85" /><circle cx="8" cy="4" r="0.85" /><circle cx="12" cy="4" r="0.85" /><circle cx="16" cy="4" r="0.85" /><circle cx="20" cy="4" r="0.85" /><circle cx="24" cy="4" r="0.85" /><circle cx="28" cy="4" r="0.85" /><circle cx="32" cy="4" r="0.85" /><circle cx="36" cy="4" r="0.85" /><circle cx="40" cy="4" r="0.85" /><circle cx="44" cy="4" r="0.85" />
-                    <circle cx="4" cy="8" r="0.85" /><circle cx="8" cy="8" r="0.85" /><circle cx="12" cy="8" r="0.85" /><circle cx="16" cy="8" r="0.85" /><circle cx="20" cy="8" r="0.85" /><circle cx="24" cy="8" r="0.85" /><circle cx="28" cy="8" r="0.85" /><circle cx="32" cy="8" r="0.85" /><circle cx="36" cy="8" r="0.85" /><circle cx="40" cy="8" r="0.85" /><circle cx="44" cy="8" r="0.85" />
-                    <circle cx="4" cy="12" r="0.85" /><circle cx="8" cy="12" r="0.85" /><circle cx="12" cy="12" r="0.85" /><circle cx="16" cy="12" r="0.85" /><circle cx="20" cy="12" r="0.85" /><circle cx="24" cy="12" r="0.85" /><circle cx="28" cy="12" r="0.85" /><circle cx="32" cy="12" r="0.85" /><circle cx="36" cy="12" r="0.85" /><circle cx="40" cy="12" r="0.85" /><circle cx="44" cy="12" r="0.85" />
-                    <circle cx="4" cy="16" r="0.85" /><circle cx="8" cy="16" r="0.85" /><circle cx="12" cy="16" r="0.85" /><circle cx="16" cy="16" r="0.85" /><circle cx="20" cy="16" r="0.85" /><circle cx="24" cy="16" r="0.85" /><circle cx="28" cy="16" r="0.85" /><circle cx="32" cy="16" r="0.85" /><circle cx="36" cy="16" r="0.85" /><circle cx="40" cy="16" r="0.85" /><circle cx="44" cy="16" r="0.85" />
-                    <circle cx="4" cy="20" r="0.85" /><circle cx="8" cy="20" r="0.85" /><circle cx="12" cy="20" r="0.85" /><circle cx="16" cy="20" r="0.85" /><circle cx="20" cy="20" r="0.85" /><circle cx="24" cy="20" r="0.85" /><circle cx="28" cy="20" r="0.85" /><circle cx="32" cy="20" r="0.85" /><circle cx="36" cy="20" r="0.85" /><circle cx="40" cy="20" r="0.85" /><circle cx="44" cy="20" r="0.85" />
-                    <circle cx="4" cy="24" r="0.85" /><circle cx="8" cy="24" r="0.85" /><circle cx="12" cy="24" r="0.85" /><circle cx="16" cy="24" r="0.85" /><circle cx="20" cy="24" r="0.85" /><circle cx="24" cy="24" r="0.85" /><circle cx="28" cy="24" r="0.85" /><circle cx="32" cy="24" r="0.85" /><circle cx="36" cy="24" r="0.85" /><circle cx="40" cy="24" r="0.85" /><circle cx="44" cy="24" r="0.85" />
-                    <circle cx="4" cy="28" r="0.85" /><circle cx="8" cy="28" r="0.85" /><circle cx="12" cy="28" r="0.85" /><circle cx="16" cy="28" r="0.85" /><circle cx="20" cy="28" r="0.85" /><circle cx="24" cy="28" r="0.85" /><circle cx="28" cy="28" r="0.85" /><circle cx="32" cy="28" r="0.85" /><circle cx="36" cy="28" r="0.85" /><circle cx="40" cy="28" r="0.85" /><circle cx="44" cy="28" r="0.85" />
-                    <circle cx="4" cy="32" r="0.85" /><circle cx="8" cy="32" r="0.85" /><circle cx="12" cy="32" r="0.85" /><circle cx="16" cy="32" r="0.85" /><circle cx="20" cy="32" r="0.85" /><circle cx="24" cy="32" r="0.85" /><circle cx="28" cy="32" r="0.85" /><circle cx="32" cy="32" r="0.85" /><circle cx="36" cy="32" r="0.85" /><circle cx="40" cy="32" r="0.85" /><circle cx="44" cy="32" r="0.85" />
-                    <circle cx="4" cy="36" r="0.85" /><circle cx="8" cy="36" r="0.85" /><circle cx="12" cy="36" r="0.85" /><circle cx="16" cy="36" r="0.85" /><circle cx="20" cy="36" r="0.85" /><circle cx="24" cy="36" r="0.85" /><circle cx="28" cy="36" r="0.85" /><circle cx="32" cy="36" r="0.85" /><circle cx="36" cy="36" r="0.85" /><circle cx="40" cy="36" r="0.85" /><circle cx="44" cy="36" r="0.85" />
-                    <circle cx="4" cy="40" r="0.85" /><circle cx="8" cy="40" r="0.85" /><circle cx="12" cy="40" r="0.85" /><circle cx="16" cy="40" r="0.85" /><circle cx="20" cy="40" r="0.85" /><circle cx="24" cy="40" r="0.85" /><circle cx="28" cy="40" r="0.85" /><circle cx="32" cy="40" r="0.85" /><circle cx="36" cy="40" r="0.85" /><circle cx="40" cy="40" r="0.85" /><circle cx="44" cy="40" r="0.85" />
-                    <circle cx="4" cy="44" r="0.85" /><circle cx="8" cy="44" r="0.85" /><circle cx="12" cy="44" r="0.85" /><circle cx="16" cy="44" r="0.85" /><circle cx="20" cy="44" r="0.85" /><circle cx="24" cy="44" r="0.85" /><circle cx="28" cy="44" r="0.85" /><circle cx="32" cy="44" r="0.85" /><circle cx="36" cy="44" r="0.85" /><circle cx="40" cy="44" r="0.85" /><circle cx="44" cy="44" r="0.85" />
-                  </g>
-                  {/* Dark Globe Coordinates dots */}
-                  <g fill="#0b1f3a">
-                    {/* Outer circle */}
-                    <circle cx="20" cy="6" r="2.0" /><circle cx="24" cy="6" r="2.0" /><circle cx="28" cy="6" r="2.0" />
-                    <circle cx="12" cy="10" r="2.0" /><circle cx="36" cy="10" r="2.0" />
-                    <circle cx="8" cy="15" r="2.0" /><circle cx="40" cy="15" r="2.0" />
-                    <circle cx="6" cy="20" r="2.0" /><circle cx="42" cy="20" r="2.0" />
-                    <circle cx="6" cy="24" r="2.1" /><circle cx="42" cy="24" r="2.1" />
-                    <circle cx="6" cy="28" r="2.0" /><circle cx="42" cy="28" r="2.0" />
-                    <circle cx="8" cy="33" r="2.0" /><circle cx="40" cy="33" r="2.0" />
-                    <circle cx="12" cy="38" r="2.0" /><circle cx="36" cy="38" r="2.0" />
-                    <circle cx="20" cy="42" r="2.0" /><circle cx="24" cy="42" r="2.0" /><circle cx="28" cy="42" r="2.0" />
-                    {/* Equator */}
-                    <circle cx="10" cy="24" r="2.0" /><circle cx="16" cy="24" r="2.0" /><circle cx="20" cy="24" r="2.0" /><circle cx="24" cy="24" r="2.1" /><circle cx="28" cy="24" r="2.0" /><circle cx="32" cy="24" r="2.0" /><circle cx="38" cy="24" r="2.0" />
-                    {/* Prime meridian */}
-                    <circle cx="24" cy="12" r="2.0" /><circle cx="24" cy="18" r="2.0" /><circle cx="24" cy="30" r="2.0" /><circle cx="24" cy="36" r="2.0" />
-                    {/* Latitudes */}
-                    <circle cx="16" cy="15" r="1.8" /><circle cx="20" cy="15" r="1.8" /><circle cx="28" cy="15" r="1.8" /><circle cx="32" cy="15" r="1.8" />
-                    <circle cx="16" cy="33" r="1.8" /><circle cx="20" cy="33" r="1.8" /><circle cx="28" cy="33" r="1.8" /><circle cx="32" cy="33" r="1.8" />
-                  </g>
-                </svg>
-              </div>
-              <div className={styles.secondPartStatValue}>30+</div>
-              <div className={styles.secondPartStatLabel}>
-                {renderScrubText("MINING JURISDICTIONS", "statlbl-5")}
-              </div>
-              <p className={styles.secondPartStatDesc}>
-                {renderScrubText("Extensive reach across key financial capitals and global mining jurisdictions.", "statdesc-5")}
-              </p>
-            </div>
-
-            {/* Streamlined Editorial Callout Block (matching user picture) */}
-            <div className={styles.statCalloutBlock}>
-              <p className={styles.statCalloutHeadline}>
-                {renderScrubText(
-                  "With direct access to institutional investors and industry analysts, your company's news reaches the decision-makers who matter most in global mining.",
-                  "callout-head",
-                  "decision-makers"
-                )}
-              </p>
-              <div className={styles.statCalloutBulletRow}>
-                <div className={styles.statCalloutBulletBadge} aria-hidden="true">
-                  <span className={styles.statCalloutBulletDot} />
-                </div>
-                <p className={styles.statCalloutBulletText}>
-                  No fragmented messaging between channels. Just one dedicated team accountable for reaching decision-makers worldwide.
-                </p>
-              </div>
-              <Link href="/about" className={styles.statCalloutBtn}>
-                <span>LEARN MORE ABOUT US</span>
-                <span className={styles.statCalloutBtnArrow} aria-hidden="true">&rarr;</span>
-              </Link>
+            <div className={styles.topDownStatDivLine} aria-hidden="true" />
+            <div className={styles.topDownStatLabel}>
+              GLOBAL<br />COVERAGE
             </div>
           </div>
+
+          {/* Featured Glass HUD Card */}
+          <Link href="/about" className={styles.topDownFeaturedCard}>
+            <div className={styles.topDownCardThumb}>
+              <img
+                src="/images/services/service_marketing.webp"
+                alt="Connecting Global Mining"
+              />
+            </div>
+            <div className={styles.topDownCardContent}>
+              <span>CONNECTING GLOBAL MINING</span>
+              <span className={styles.topDownCardArrow} aria-hidden="true">&rarr;</span>
+            </div>
+          </Link>
         </div>
       </div>
 

@@ -84,10 +84,11 @@ export const Journey3D: React.FC<Journey3DProps> = ({ progress, active }) => {
         const startX = winW * 0.20;
         const currentX = startX - roadP * travelDistance;
 
-        const fade = 1 - Math.max(0, Math.min(1, (t - 0.82) / 0.08));
+        const fade = 1 - Math.max(0, Math.min(1, (t - 0.79) / 0.025));
         const opacity = (zoomReveal * fade * fade * (3 - 2 * fade)).toFixed(3);
 
         watermarkRef.current.style.opacity = opacity;
+        watermarkRef.current.style.display = t >= 0.815 ? "none" : "block";
         watermarkRef.current.style.transform = `translate3d(calc(-50% + ${currentX.toFixed(1)}px), -84%, 0)`;
       }
 

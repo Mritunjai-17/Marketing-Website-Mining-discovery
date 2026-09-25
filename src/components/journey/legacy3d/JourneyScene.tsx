@@ -7,6 +7,7 @@ import { Environment as DreiEnvironment } from "@react-three/drei";
 import { JourneyCamera } from "./JourneyCamera";
 import { Road } from "./Road";
 import { Truck } from "./Truck";
+import { TopDownForest } from "./TopDownForest";
 import { getJourneyPoint, getJourneySide, getJourneyTangent } from "./journeyPath";
 import { JourneyProgressProvider, type JourneyProgress } from "../journeyProgress";
 
@@ -158,14 +159,27 @@ const ProceduralEnvironmentLight: React.FC = () => (
   </DreiEnvironment>
 );
 
-/** Fog matching white canvas while allowing background elements behind canvas */
-const DynamicSceneBackground: React.FC<{ progress: JourneyProgress }> = () => {
+/** Fog matching white canvas in side view, and deep atmospheric forest in top-down view */
+const DynamicSceneBackground: React.FC<{ progress: JourneyProgress }> = ({ progress }) => {
   const { scene } = useThree();
-  const bgColor = useMemo(() => new THREE.Color(WHITE_BG), []);
+  const whiteFog = useMemo(() => new THREE.Color(WHITE_BG), []);
+  const forestFog = useMemo(() => new THREE.Color("#08140c"), []);
+  const currentColor = useMemo(() => new THREE.Color(WHITE_BG), []);
 
   useFrame(() => {
     if (scene.fog instanceof THREE.FogExp2) {
-      scene.fog.color.copy(bgColor);
+      const t = progress.current;
+      if (t >= 0.80 && t <= 0.965) {
+        const topDownAlpha =
+          THREE.MathUtils.smoothstep(t, 0.80, 0.84) *
+          (1 - THREE.MathUtils.smoothstep(t, 0.945, 0.965));
+        currentColor.copy(whiteFog).lerp(forestFog, topDownAlpha);
+        scene.fog.color.copy(currentColor);
+        scene.fog.density = THREE.MathUtils.lerp(FOG_DENSITY, 0.0006, topDownAlpha);
+      } else {
+        scene.fog.color.copy(whiteFog);
+        scene.fog.density = FOG_DENSITY;
+      }
     }
   });
 
@@ -190,6 +204,7 @@ const SceneContents: React.FC<{ progress: JourneyProgress }> = ({ progress }) =>
     <JourneyCamera />
     <Road />
     <Truck />
+    <TopDownForest />
   </JourneyProgressProvider>
 );
 

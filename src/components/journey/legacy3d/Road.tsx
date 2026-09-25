@@ -62,9 +62,9 @@ export const Road: React.FC = () => {
     const mat = downGroundMatRef.current;
     const t = progress.current;
     if (mat) {
-      // In side view (t < 0.82), the down side of the road is solid black.
-      // When the camera angle changes (t >= 0.82 to 0.90), smoothly remove the blackness (fade to 0).
-      const blackness = 1 - smoothstep(0.82, 0.90, t);
+      // In side view (t < 0.81), the down side of the road is solid black.
+      // When camera transitions to top-down view (t >= 0.80 to 0.84), smoothly fade out the blackness.
+      const blackness = 1 - smoothstep(0.80, 0.84, t);
       mat.opacity = blackness;
       mat.visible = blackness > 0.005;
     }
@@ -248,7 +248,13 @@ export const Road: React.FC = () => {
       </mesh>
 
       <mesh geometry={curbs} receiveShadow castShadow>
-        <meshStandardMaterial color="#1a202c" roughness={0.9} metalness={0.05} />
+        <meshStandardMaterial
+          color="#d97706"
+          roughness={0.35}
+          metalness={0.2}
+          emissive="#f59e0b"
+          emissiveIntensity={1.8}
+        />
       </mesh>
 
       <mesh geometry={shoulders} receiveShadow>
