@@ -235,11 +235,11 @@ export const Road: React.FC = () => {
 
   return (
     <group ref={roadGroupRef}>
-      {/* Down-side ground ribbon: black in side view, fades out when camera angle changes */}
+      {/* Down-side ground ribbon: solid black in side view, fades out when camera angle changes */}
       <mesh geometry={downGround}>
         <meshBasicMaterial
           ref={downGroundMatRef}
-          color="#0b0d13"
+          color="#000000"
           transparent
           opacity={1}
           side={THREE.DoubleSide}
@@ -248,12 +248,12 @@ export const Road: React.FC = () => {
       </mesh>
 
       <mesh geometry={curbs} receiveShadow castShadow>
-        <meshStandardMaterial color="#222938" roughness={0.9} metalness={0.05} />
+        <meshStandardMaterial color="#1a202c" roughness={0.9} metalness={0.05} />
       </mesh>
 
       <mesh geometry={shoulders} receiveShadow>
         <meshStandardMaterial
-          color="#131924"
+          color="#111827"
           roughness={0.95}
           metalness={0.02}
           roughnessMap={roughnessMap}
@@ -277,21 +277,21 @@ export const Road: React.FC = () => {
 
       <mesh geometry={edgeLines}>
         <meshStandardMaterial
-          color="#f4f2ea"
+          color="#ffffff"
           roughness={0.4}
           metalness={0.04}
-          emissive="#d4af37"
-          emissiveIntensity={0.35}
+          emissive="#ffffff"
+          emissiveIntensity={0.25}
         />
       </mesh>
 
       <mesh geometry={centreDashes}>
         <meshStandardMaterial
-          color="#ffd700"
+          color="#f8fafc"
           roughness={0.3}
           metalness={0.04}
-          emissive="#ff9d00"
-          emissiveIntensity={0.7}
+          emissive="#ffffff"
+          emissiveIntensity={0.35}
         />
       </mesh>
     </group>

@@ -82,19 +82,17 @@ export const Header: React.FC = () => {
     <>
       {/* Outer fixed positioning wrapper - full length across the screen */}
       <header
-        className={`fixed top-0 left-0 right-0 w-full z-[110] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-          isScrolled
-            ? "bg-[#06080d]/95 backdrop-blur-2xl border-b border-white/10 shadow-[0_12px_35px_-8px_rgba(0,0,0,0.85)]"
-            : isLightHero
+        className={`fixed top-0 left-0 right-0 w-full z-[110] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${isScrolled
+          ? "bg-[#06080d]/95 backdrop-blur-2xl border-b border-white/10 shadow-[0_12px_35px_-8px_rgba(0,0,0,0.85)]"
+          : isLightHero
             ? "bg-transparent border-b border-[#E5E4DE]/60"
             : "bg-transparent border-b border-transparent"
-        }`}
+          }`}
       >
         {/* Full-length container with refined responsive padding */}
         <div
-          className={`w-full flex items-center justify-between px-5 sm:px-8 md:px-10 lg:px-12 xl:px-16 transition-all duration-500 ${
-            isScrolled ? "py-2.5 sm:py-3" : "py-4 sm:py-5"
-          }`}
+          className={`w-full flex items-center justify-between px-5 sm:px-8 md:px-10 lg:px-12 xl:px-16 transition-all duration-500 ${isScrolled ? "py-2.5 sm:py-3" : "py-4 sm:py-5"
+            }`}
         >
           {/* Left: Brand Logo with increased size */}
           <Link
@@ -108,9 +106,8 @@ export const Header: React.FC = () => {
               width={260}
               height={75}
               priority
-              className={`w-auto object-contain transition-all duration-500 ${
-                isScrolled ? "h-9 sm:h-11 md:h-12" : "h-10 sm:h-12 md:h-14"
-              }`}
+              className={`w-auto object-contain transition-all duration-500 ${isScrolled ? "h-9 sm:h-11 md:h-12" : "h-10 sm:h-12 md:h-14"
+                }`}
             />
           </Link>
 
@@ -125,8 +122,8 @@ export const Header: React.FC = () => {
                   ? "text-[#FAF8F5]"
                   : "text-[#FAF8F5]/80 group-hover:text-[#E5A93C]"
                 : isActive
-                ? "text-[#0B1F3A]"
-                : "text-[#0B1F3A]/75 group-hover:text-[#B8860B]";
+                  ? "text-[#0B1F3A]"
+                  : "text-[#0B1F3A]/75 group-hover:text-[#B8860B]";
 
               const dotColorClass = isDarkNav
                 ? "bg-[#E5A93C] shadow-[0_0_8px_#E5A93C]"
@@ -146,11 +143,10 @@ export const Header: React.FC = () => {
 
                   {/* Golden indicator dot */}
                   <span
-                    className={`absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full ${dotColorClass} transition-all duration-300 ${
-                      isActive
-                        ? "opacity-100 scale-100"
-                        : "opacity-0 scale-50 group-hover:opacity-60 group-hover:scale-75"
-                    }`}
+                    className={`absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full ${dotColorClass} transition-all duration-300 ${isActive
+                      ? "opacity-100 scale-100"
+                      : "opacity-0 scale-50 group-hover:opacity-60 group-hover:scale-75"
+                      }`}
                   />
                 </Link>
               );
@@ -162,11 +158,10 @@ export const Header: React.FC = () => {
             {/* Circular Action Button */}
             <Link
               href="/contact"
-              className={`w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full border transition-all duration-300 backdrop-blur-sm cursor-pointer group flex items-center justify-center ${
-                isDarkNav
-                  ? "border-white/20 hover:border-[#E5A93C] text-white/85 hover:text-[#E5A93C] bg-white/5 hover:bg-white/10"
-                  : "border-[#0B1F3A]/20 hover:border-[#B8860B] text-[#0B1F3A]/85 hover:text-[#B8860B] bg-[#0B1F3A]/5 hover:bg-[#0B1F3A]/10"
-              }`}
+              className={`w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full border transition-all duration-300 backdrop-blur-sm cursor-pointer group flex items-center justify-center ${isDarkNav
+                ? "border-white/20 hover:border-[#E5A93C] text-white/85 hover:text-[#E5A93C] bg-white/5 hover:bg-white/10"
+                : "border-[#0B1F3A]/20 hover:border-[#B8860B] text-[#0B1F3A]/85 hover:text-[#B8860B] bg-[#0B1F3A]/5 hover:bg-[#0B1F3A]/10"
+                }`}
               aria-label="Schedule Consultation"
             >
               <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-300 group-hover:scale-110" />
@@ -185,11 +180,10 @@ export const Header: React.FC = () => {
             <button
               type="button"
               onClick={() => setMenuOpen(!menuOpen)}
-              className={`lg:hidden w-8 h-8 sm:w-9 sm:h-9 rounded-full border flex items-center justify-center transition-colors focus:outline-none cursor-pointer ${
-                isDarkNav
-                  ? "border-white/20 text-white/90 hover:text-white hover:border-white/40 bg-white/5"
-                  : "border-[#0B1F3A]/20 text-[#0B1F3A] hover:text-[#0B1F3A] hover:border-[#0B1F3A]/40 bg-[#0B1F3A]/5"
-              }`}
+              className={`lg:hidden w-8 h-8 sm:w-9 sm:h-9 rounded-full border flex items-center justify-center transition-colors focus:outline-none cursor-pointer ${isDarkNav
+                ? "border-white/20 text-white/90 hover:text-white hover:border-white/40 bg-white/5"
+                : "border-[#0B1F3A]/20 text-[#0B1F3A] hover:text-[#0B1F3A] hover:border-[#0B1F3A]/40 bg-[#0B1F3A]/5"
+                }`}
               aria-label={menuOpen ? "Close menu" : "Open menu"}
             >
               {menuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
@@ -200,9 +194,8 @@ export const Header: React.FC = () => {
 
       {/* Luxury Mobile Navigation Drawer */}
       <div
-        className={`fixed inset-0 z-[105] lg:hidden transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-          menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
+        className={`fixed inset-0 z-[105] lg:hidden transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          }`}
         aria-hidden={!menuOpen}
       >
         {/* Backdrop blur overlay */}
@@ -213,9 +206,8 @@ export const Header: React.FC = () => {
 
         {/* Drawer Content */}
         <div
-          className={`absolute top-0 right-0 w-[85%] max-w-sm h-full bg-[#06080d] border-l border-white/10 shadow-2xl p-6 sm:p-8 flex flex-col justify-between transition-transform duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-            menuOpen ? "translate-x-0" : "translate-x-full"
-          }`}
+          className={`absolute top-0 right-0 w-[85%] max-w-sm h-full bg-[#06080d] border-l border-white/10 shadow-2xl p-6 sm:p-8 flex flex-col justify-between transition-transform duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${menuOpen ? "translate-x-0" : "translate-x-full"
+            }`}
         >
           {/* Drawer Header */}
           <div className="flex items-center justify-between pb-6 border-b border-white/10">

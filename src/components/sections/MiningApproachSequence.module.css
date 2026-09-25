@@ -1,0 +1,429 @@
+/*
+ * MiningApproachSequence.module.css
+ * Cinematic transition between cave continuous miner and 3D truck haulage road.
+ * Inspired by luxury automotive craftsmanship & kinetic editorial typography.
+ */
+
+.container {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 22;
+  background-color: #030509;
+}
+
+/* -------------------------------------------------------------------------
+   PHASE 1: KINETIC TYPOGRAPHY ("letter appears" & camera zooms in)
+-------------------------------------------------------------------------- */
+.typoStage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 15;
+  text-align: center;
+  padding: 0 1.5rem;
+  will-change: transform, opacity, filter;
+  pointer-events: none;
+}
+
+.typoEyebrow {
+  display: inline-block;
+  font-family: var(--font-mono), var(--font-mono-custom), monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: #E5A93C;
+  margin-bottom: 1.5rem;
+  opacity: 0.9;
+  will-change: transform, opacity;
+}
+
+.typoHeadline {
+  font-family: var(--font-editorial-serif), var(--font-display-custom), "Cormorant Garamond", "Playfair Display", Georgia, serif;
+  font-size: clamp(1.8rem, 3.8vw, 4.4rem);
+  font-weight: 350;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
+  color: #FAF8F5;
+  width: 100%;
+  max-width: 95vw;
+  margin: 0 auto;
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.typoLine1 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  will-change: transform, opacity;
+}
+
+.typoLine2 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  position: relative;
+}
+
+.driftLeft {
+  display: inline-flex;
+  align-items: center;
+  will-change: transform, opacity;
+}
+
+.driftRight {
+  display: inline-flex;
+  align-items: center;
+  will-change: transform, opacity;
+}
+
+.pinnedBuildWord {
+  display: inline-block;
+  position: relative;
+  z-index: 2;
+  will-change: transform, opacity;
+  margin: 0 0.22em;
+}
+
+.typoWord {
+  display: inline-block;
+  margin: 0 0.22em;
+}
+
+.goldWord {
+  background: linear-gradient(135deg, #F3D27E 0%, #E5A93C 50%, #C4881A 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+.portalAnchorWord {
+  position: relative;
+  display: inline-block;
+}
+
+.portalAura {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 220px;
+  height: 90px;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+      rgba(229, 169, 60, 0.5) 0%,
+      rgba(229, 169, 60, 0.15) 50%,
+      transparent 80%);
+  filter: blur(16px);
+  pointer-events: none;
+  z-index: -1;
+  transform-origin: center center;
+  transition: opacity 0.2s ease-out;
+}
+
+/* -------------------------------------------------------------------------
+   PHASE 2: "OUR APPROACH" SHOWCASE (Expanding portal card from the word "Build")
+-------------------------------------------------------------------------- */
+.approachStage {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 5.5rem 2rem 2.5rem 2rem;
+  z-index: 10;
+  will-change: width, height, border-radius, box-shadow;
+  box-sizing: border-box;
+  overflow: hidden;
+  background-color: #030509;
+}
+
+/* Preview logos visible at bottom of the compact card before full expansion */
+.cardPreviewLogos {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  white-space: nowrap;
+  z-index: 4;
+  pointer-events: none;
+  will-change: opacity;
+}
+
+.cardPreviewLogo {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-sans-custom, sans-serif);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(250, 248, 245, 0.85);
+}
+
+@media (min-width: 768px) {
+  .approachStage {
+    padding: 6.5rem 4rem 3.5rem 4rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .approachStage {
+    padding: 7rem 6rem 4rem 6rem;
+  }
+}
+
+/* Macro Gold Mineral Texture Background */
+.macroBg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  z-index: 1;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+.macroOverlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center,
+      rgba(3, 5, 9, 0.45) 0%,
+      rgba(3, 5, 9, 0.85) 65%,
+      rgba(3, 5, 9, 0.98) 100%);
+  z-index: 2;
+}
+
+.vignetteGlow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 60% 40%,
+      rgba(229, 169, 60, 0.12) 0%,
+      transparent 60%);
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* Content Layout Grid */
+.contentGrid {
+  position: relative;
+  z-index: 5;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;
+  align-items: center;
+  flex: 1;
+}
+
+@media (min-width: 1024px) {
+  .contentGrid {
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 4rem;
+  }
+}
+
+/* Left Column: Big Editorial Heading */
+.leftCol {
+  display: flex;
+  flex-direction: column;
+}
+
+.eyebrowTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-mono), var(--font-mono-custom), monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: #E5A93C;
+  margin-bottom: 1.25rem;
+}
+
+.eyebrowDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #E5A93C;
+  box-shadow: 0 0 10px #E5A93C;
+}
+
+.mainTitle {
+  font-family: var(--font-editorial-serif), var(--font-display-custom), "Cormorant Garamond", "Playfair Display", Georgia, serif;
+  font-size: clamp(2.6rem, 5.2vw, 4.8rem);
+  font-weight: 350;
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
+  color: #FAF8F5;
+  margin-bottom: 1.75rem;
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.95);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.goldTitleWord {
+  background: linear-gradient(135deg, #F3D27E 0%, #E5A93C 50%, #C4881A 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline;
+  font-weight: 350;
+}
+
+/* Logos Ribbon */
+.logosRow {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.logoBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #FAF8F5;
+  font-family: var(--font-mono), var(--font-mono-custom), monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+}
+
+.logoBadge:hover {
+  background: rgba(229, 169, 60, 0.15);
+  border-color: #E5A93C;
+  color: #E5A93C;
+}
+
+/* Right Column: Philosophy & CTA */
+.rightCol {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.philosophyQuote {
+  font-family: var(--font-sans-custom), var(--font-geist-sans), system-ui, sans-serif;
+  font-size: clamp(1rem, 1.25vw, 1.2rem);
+  line-height: 1.6;
+  font-weight: 400;
+  color: rgba(244, 242, 234, 0.9);
+  margin-bottom: 2rem;
+  border-left: 2px solid #E5A93C;
+  padding-left: 1.25rem;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.95);
+}
+
+.ctaBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  align-self: flex-start;
+  padding: 0.85rem 1.8rem;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #E5A93C 0%, #E8B045 50%, #D49525 100%);
+  color: #0A0D12;
+  font-family: var(--font-mono), var(--font-mono-custom), monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  box-shadow: 0 4px 20px rgba(229, 169, 60, 0.35);
+  transition: all 0.3s ease;
+  pointer-events: auto;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.ctaBtn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+  box-shadow: 0 8px 30px rgba(229, 169, 60, 0.55);
+}
+
+/* Bottom Progress Track matching reference video */
+.bottomRail {
+  position: relative;
+  z-index: 5;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.progressLabel {
+  font-family: var(--font-mono-custom, monospace);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.progressTrack {
+  flex: 1;
+  max-width: 320px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+  margin: 0 1.5rem;
+  overflow: hidden;
+  position: relative;
+}
+
+.progressBar {
+  height: 100%;
+  background: linear-gradient(90deg, #E5A93C, #F7D488);
+  border-radius: 9999px;
+  transition: width 0.15s ease-out;
+}
+
+.chapterCount {
+  font-family: var(--font-mono-custom, monospace);
+  font-size: 0.7rem;
+  color: #E5A93C;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+}

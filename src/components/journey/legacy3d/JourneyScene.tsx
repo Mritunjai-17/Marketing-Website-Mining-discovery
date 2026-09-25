@@ -11,9 +11,9 @@ import { getJourneyPoint, getJourneySide, getJourneyTangent } from "./journeyPat
 import { JourneyProgressProvider, type JourneyProgress } from "../journeyProgress";
 
 /**
- * Deep obsidian dark background matching Boon Global and Huge Inc theme.
+ * Pure white background matching the editorial website canvas and unitedcarriers reference.
  */
-const WHITE_BG = "#030509";
+const WHITE_BG = "#ffffff";
 
 /**
  * Exponential-squared fog, tuned against the corridor's dimensions.

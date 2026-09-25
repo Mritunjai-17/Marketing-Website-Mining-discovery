@@ -678,11 +678,11 @@ export const JourneyStory: React.FC = () => {
     const p = scene.progress;
 
     // 1. Under-road horizontal milestone cards:
-    // When camera is far, NO text is shown! After camera zooms down (descent >= 0.82), text smoothly reveals!
-    // And fades out as road turns downward (p >= 0.82 to 0.86)
+    // Smoothly reveals as the truck journey scene arrives (descentP 0.0 -> 0.30)
+    // and fades out as road turns downward (p >= 0.82 to 0.86)
     if (underRoadRef.current) {
       const descentP = scene.descent ?? 1.0;
-      const zoomReveal = smoothstep(0.82, 0.89, descentP);
+      const zoomReveal = smoothstep(0.0, 0.30, descentP);
       const underRoadFade = (1 - smoothstep(0.82, 0.86, p)) * zoomReveal;
       underRoadRef.current.style.opacity = underRoadFade.toFixed(3);
       underRoadRef.current.style.pointerEvents = underRoadFade > 0.1 ? "auto" : "none";
@@ -723,11 +723,11 @@ export const JourneyStory: React.FC = () => {
         const headP = idx === 0 ? 1.0 : cardP;
         const descP = idx === 0 ? 1.0 : Math.max(0, (cardP - 0.10) / 0.90);
 
-        updateWordScrub(headlineEl, headP, "rgba(255, 255, 255, 0.35)", "#FFFFFF", "#D4AF37", 0.35);
-        updateWordScrub(descEl, descP, "#94A3B8", "#E2E8F0", undefined, 0.38);
+        updateWordScrub(headlineEl, headP, "rgba(255, 255, 255, 0.35)", "#FFFFFF", "#FFFFFF", 0.35);
+        updateWordScrub(descEl, descP, "rgba(255, 255, 255, 0.45)", "#F1F5F9", undefined, 0.38);
 
-        // Organic golden line draw-in & metallic luster animation:
-        // Card 0 golden line starts fully drawn and luminous.
+        // Organic silver line draw-in animation:
+        // Card 0 line starts fully drawn.
         // Cards 1 to 5: smoothly expand from left to right as each card enters from the right side.
         if (barEl) {
           const lineProgress = idx === 0 ? 1.0 : smoothstep(0.02, 0.30, cardP);
@@ -735,7 +735,7 @@ export const JourneyStory: React.FC = () => {
           barEl.style.opacity = (0.35 + lineProgress * 0.65).toFixed(2);
 
           const activeGlow = Math.sin(lineProgress * Math.PI * 0.5);
-          barEl.style.filter = `drop-shadow(0 0 ${(activeGlow * 7).toFixed(1)}px rgba(212, 175, 55, ${(0.3 + activeGlow * 0.5).toFixed(2)}))`;
+          barEl.style.filter = `drop-shadow(0 0 ${(activeGlow * 6).toFixed(1)}px rgba(255, 255, 255, ${(0.3 + activeGlow * 0.5).toFixed(2)}))`;
         }
       });
     }
@@ -758,14 +758,14 @@ export const JourneyStory: React.FC = () => {
           leftColRef.current.style.transform = `translate3d(0, ${enterY.toFixed(1)}px, 0)`;
           const headP = Math.max(0, Math.min(1, highwayP / 0.40));
           const headEl = leftColRef.current.querySelector<HTMLElement>(`.${styles.secondPartBigHeadline}`);
-          updateWordScrub(headEl, headP, "#475569", "#0B1F3A", "#B8860B", 0.35);
+          updateWordScrub(headEl, headP, "#9ca3af", "#000000", "#000000", 0.35);
         }
 
         // 2. Subtext word scrub (0.12 to 0.85)
         if (leftSubtextRef.current) {
           const descP = Math.max(0, Math.min(1, (highwayP - 0.12) / 0.73));
           const descEl = leftSubtextRef.current.querySelector<HTMLElement>(`.${styles.secondPartDescription}`);
-          updateWordScrub(descEl, descP, "#475569", "#1E293B", "#B8860B", 0.38);
+          updateWordScrub(descEl, descP, "#6b7280", "#111827", "#111827", 0.38);
         }
 
         // 3. Right Side Stats Track Auto-scroll & Word Scrub
@@ -792,16 +792,16 @@ export const JourneyStory: React.FC = () => {
 
             if (valEl) {
               valEl.style.opacity = (0.25 + itemP * 0.75).toFixed(2);
-              valEl.style.color = itemP > 0.4 ? "#0B1F3A" : "rgba(11, 31, 58, 0.25)";
+              valEl.style.color = itemP > 0.4 ? "#000000" : "rgba(0, 0, 0, 0.25)";
             }
-            updateWordScrub(lblEl, itemP, "rgba(184, 134, 11, 0.25)", "#B8860B", "#D4AF37", 0.25);
-            updateWordScrub(dEl, Math.max(0, (itemP - 0.1) / 0.9), "rgba(87, 89, 94, 0.25)", "#334155", undefined, 0.25);
+            updateWordScrub(lblEl, itemP, "rgba(0, 0, 0, 0.30)", "#000000", "#000000", 0.25);
+            updateWordScrub(dEl, Math.max(0, (itemP - 0.1) / 0.9), "rgba(75, 85, 99, 0.35)", "#374151", undefined, 0.25);
           });
 
           const calloutEl = statsTrackRef.current.querySelector<HTMLElement>(`.${styles.statCalloutHeadline}`);
           if (calloutEl) {
             const calloutP = Math.max(0, Math.min(1, (highwayP - 0.80) / 0.18));
-            updateWordScrub(calloutEl, calloutP, "rgba(11, 31, 58, 0.22)", "#0B1F3A", "#B8860B", 0.22);
+            updateWordScrub(calloutEl, calloutP, "rgba(0, 0, 0, 0.25)", "#000000", "#000000", 0.22);
           }
         }
 
@@ -951,6 +951,17 @@ export const JourneyStory: React.FC = () => {
 
   return (
     <div className={styles.overlay}>
+      {/* 00 KM/H Speedometer HUD (visible in top-left matching reference pictures) */}
+      <div className={styles.speedometerBadge} aria-hidden="true">
+        00 KM/H
+      </div>
+
+      {/* Circular Hotspot indicator for side view (matching Pic 2) */}
+      <div className={styles.sideHotspot} aria-hidden="true">
+        <div className={styles.hotspotRing} />
+        <div className={styles.hotspotDot} />
+      </div>
+
       {/* BLACK PART: ROADSIDE MILESTONE TRACK
           Text cards enter from the right side of the screen and travel across
           to the left side as the truck moves forward along the road */}
@@ -974,6 +985,10 @@ export const JourneyStory: React.FC = () => {
                 <p className={styles.milestoneDescription}>
                   {renderScrubText(point.description, `mdesc-${point.id}`)}
                 </p>
+                {/* Pill button matching reference picture 2 */}
+                <Link href="/services" className={styles.underRoadBtn}>
+                  OUR SERVICES
+                </Link>
               </div>
             );
           })}
@@ -989,7 +1004,12 @@ export const JourneyStory: React.FC = () => {
         {/* Left Side: Big Heading (Matching user picture) */}
         <div ref={leftColRef} className={styles.secondPartLeftSide}>
           <h2 className={styles.secondPartBigHeadline}>
-            {renderScrubText("One platform. Every major mining audience.", "bighead", "major")}
+            <span className={styles.secondPartMutedLine}>
+              {renderScrubText("ONE PLATFORM.", "bighead-muted")}
+            </span>
+            <span className={styles.secondPartBlackLine}>
+              {renderScrubText("EVERY MAJOR MINING AUDIENCE.", "bighead-black")}
+            </span>
           </h2>
         </div>
 
@@ -1052,6 +1072,12 @@ export const JourneyStory: React.FC = () => {
               <p className={styles.secondPartStatDesc}>
                 {renderScrubText("Institutional investors, mining executives, and industry analysts reading market updates.", "statdesc-1")}
               </p>
+            </div>
+
+            {/* Circular Indicator matching reference Image 1 */}
+            <div className={styles.topDownHotspot} aria-hidden="true">
+              <div className={styles.hotspotRing} />
+              <div className={styles.hotspotDot} />
             </div>
 
             {/* Point 2: 40,000+ Newsletter Subscribers */}

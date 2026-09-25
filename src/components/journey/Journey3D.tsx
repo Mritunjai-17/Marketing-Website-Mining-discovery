@@ -64,8 +64,8 @@ export const Journey3D: React.FC<Journey3DProps> = ({ progress, active }) => {
 
       if (watermarkRef.current) {
         const descentP = progress.descent ?? 1.0;
-        // When camera is far, no text will be shown. After zoom (descent >= 0.82), text will reveal!
-        const zoomT = Math.max(0, Math.min(1, (descentP - 0.82) / (0.89 - 0.82)));
+        // Watermark fades in smoothly as the truck journey scene arrives (0.0 to 0.30)
+        const zoomT = Math.min(1, Math.max(0, descentP / 0.30));
         const zoomReveal = zoomT * zoomT * (3 - 2 * zoomT);
 
         const t = progress.current;

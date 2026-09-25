@@ -435,10 +435,10 @@ const TruckCargoRear: React.FC = () => {
           }}
           visible={false}
         >
-          {/* Gold foiled card rim - scaled for high visibility from overhead camera */}
+          {/* Silver metallic card rim - scaled for high visibility from overhead camera */}
           <mesh castShadow receiveShadow>
             <boxGeometry args={[1.8, 0.03, 2.5]} />
-            <meshStandardMaterial color="#d4af37" metalness={0.85} roughness={0.25} />
+            <meshStandardMaterial color="#cbd5e1" metalness={0.85} roughness={0.25} />
           </mesh>
           {/* Front face with marketing/milestone artwork */}
           {cardTextures[card.texIndex] && (
@@ -483,12 +483,12 @@ const TruckSideBranding: React.FC = () => {
     if ("letterSpacing" in ctx) {
       (ctx as any).letterSpacing = "8px";
     }
-    // High-visibility crisp shadow for contrast on white paint
-    ctx.shadowColor = "rgba(0, 0, 0, 0.32)";
-    ctx.shadowBlur = 10;
-    ctx.shadowOffsetX = 3;
-    ctx.shadowOffsetY = 4;
-    ctx.fillStyle = "#f5be18"; // Vibrant yellow
+    // Clean high-contrast typography for white and black theme
+    ctx.shadowColor = "rgba(0, 0, 0, 0.12)";
+    ctx.shadowBlur = 4;
+    ctx.shadowOffsetX = 1;
+    ctx.shadowOffsetY = 2;
+    ctx.fillStyle = "#1e293b"; // Sleek dark slate
     ctx.fillText("MINING DISCOVERY", canvas.width / 2, canvas.height / 2);
     ctx.restore();
 

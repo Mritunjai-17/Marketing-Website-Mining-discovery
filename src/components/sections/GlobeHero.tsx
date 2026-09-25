@@ -9,6 +9,7 @@ import {
   JOURNEY_RUNS_FROM,
 } from "@/components/journey/descentCamera";
 import { BoonHero, type BoonHeroHandle } from "@/components/sections/BoonHero";
+import { MiningApproachSequence } from "@/components/sections/MiningApproachSequence";
 
 const Journey3D = dynamic(
   () => import("@/components/journey/Journey3D"),
@@ -17,12 +18,13 @@ const Journey3D = dynamic(
 
 export type TransitionState =
   | "HERO_ACTIVE"
+  | "APPROACH_ACTIVE"
   | "CAMERA_ANGLE_SHIFT"
   | "SIDE_VIEW_LOCKED"
   | "JOURNEY_ACTIVE";
 
-/** Total viewport heights for the entire continuous story (provides comfortable, normal scrolling pace) */
-const TOTAL_SCROLL_VH = 1650;
+/** Total viewport heights for the continuous story (comfortably accommodates Hero -> Approach -> Truck Journey) */
+const TOTAL_SCROLL_VH = 1950;
 
 /**
  * How the sampled progress follows the true scroll position.
@@ -70,6 +72,8 @@ export const GlobeHero: React.FC = () => {
   const journeyActiveRef = useRef(false);
   const [transitionProgress, setTransitionProgress] = useState(0);
   const lastTransPRef = useRef(0);
+  const [approachProgress, setApproachProgress] = useState(0);
+  const lastAppPRef = useRef(0);
   const [transitionState, setTransitionState] = useState<TransitionState>("HERO_ACTIVE");
   const transitionStateRef = useRef<TransitionState>("HERO_ACTIVE");
   const boonHeroRef = useRef<BoonHeroHandle>(null);
@@ -102,7 +106,6 @@ export const GlobeHero: React.FC = () => {
 
     if (isTouch) {
       // Mobile touch devices natively apply inertia momentum scrolling.
-      // 1:1 direct tracking gives instant, buttery responsiveness without spring lag.
       progress.value = target;
       progress.velocity = 0;
     } else if (gap > RESUME_GAP) {
@@ -114,35 +117,39 @@ export const GlobeHero: React.FC = () => {
     const t = clamp(progress.value, 0, 1);
     progressRef.current = t;
 
-    // 1. Direct hardware-scrubbed Hero sequence:
-    // On mobile (< 900px), a travel of 1.35x viewport height (~1000px) allows 3-4 natural, snappy thumb swipes
-    // so the camera never feels stuck or sluggish on mobile viewports.
-    const heroTravelPx = (isTouch ? 1.35 : 2.64) * (typeof window !== "undefined" ? window.innerHeight : 800);
-    const heroP = travel > 0 ? clamp((window.scrollY - top) / heroTravelPx, 0, 1) : 0;
-
-    // Direct 120 FPS hardware scrub with ZERO React virtual DOM re-renders!
+    // 1. Hardware-scrubbed Hero sequence:
+    // Act 1 (Alpine summit) -> Act 2 (Open Pit) -> Act 3 (Cave Continuous Miner)
+    // Scrubbed from t = 0.00 to t = 0.18
+    const heroP = clamp(t / 0.17, 0, 1);
     if (boonHeroRef.current) {
       boonHeroRef.current.scrub(heroP);
     }
 
-    // --- Master Progress & Phase Partitioning ---------------------------------------
-    // Exact same scroll pixel distance for Transition (624vh) and Preroll (87.4vh)
-    const TRANSITION_SPAN = 0.3782;
-    const transP = t <= TRANSITION_SPAN ? clamp(t / TRANSITION_SPAN, 0, 1) : 1.0;
+    // 2. Mining Approach Sequence (Kinetic Typography + "Our Approach" Showcase):
+    // Directly after the cave continuous miner machine cuts ore (t = 0.16 to 0.40)
+    const APPROACH_START = 0.16;
+    const APPROACH_END = 0.40;
+    const appP = clamp((t - APPROACH_START) / (APPROACH_END - APPROACH_START), 0, 1);
 
-    const JOURNEY_PREROLL = 0.0529;
-    const journeyFrom = TRANSITION_SPAN - JOURNEY_PREROLL; // 0.3253
+    if (Math.abs(appP - lastAppPRef.current) > 0.002 || appP === 0 || appP === 1) {
+      lastAppPRef.current = appP;
+      setApproachProgress(appP);
+    }
 
-    // Milestones 0-5 maintain 100% exact same scroll distance (583.7vh)
-    // Milestone 5 ends at journeyP = 0.88 (t = 0.6791)
-    // From t = 0.6791 to 1.0000, 529.5vh is dedicated to:
-    // "One platform. Every major mining audience." + 3D worker pull + services hold
-    const MILESTONE_5_T = 0.6791;
+    // 3. 3D Truck Highway Journey:
+    // Takes over seamlessly after "Our Approach" finishes
+    const TRANS_START = 0.35;
+    const TRANS_END = 0.40;
+    const transP = clamp((t - TRANS_START) / (TRANS_END - TRANS_START), 0, 1);
+
+    const JOURNEY_START = 0.365;
+    const MILESTONE_5_T = 0.72;
+
     let journeyP = 0;
-    if (t <= journeyFrom) {
+    if (t <= JOURNEY_START) {
       journeyP = 0;
     } else if (t <= MILESTONE_5_T) {
-      journeyP = clamp(((t - journeyFrom) / (MILESTONE_5_T - journeyFrom)) * 0.88, 0, 0.88);
+      journeyP = clamp(((t - JOURNEY_START) / (MILESTONE_5_T - JOURNEY_START)) * 0.88, 0, 0.88);
     } else {
       journeyP = clamp(0.88 + ((t - MILESTONE_5_T) / (1.0 - MILESTONE_5_T)) * 0.12, 0.88, 1.0);
     }
@@ -163,9 +170,10 @@ export const GlobeHero: React.FC = () => {
 
     // Explicit Transition State
     let nextState: TransitionState = "HERO_ACTIVE";
-    if (transP < 0.89) nextState = "HERO_ACTIVE";
+    if (t < APPROACH_START) nextState = "HERO_ACTIVE";
+    else if (t < JOURNEY_START) nextState = "APPROACH_ACTIVE";
     else if (transP < 0.99) nextState = "CAMERA_ANGLE_SHIFT";
-    else if (t <= TRANSITION_SPAN) nextState = "SIDE_VIEW_LOCKED";
+    else if (t <= TRANS_END) nextState = "SIDE_VIEW_LOCKED";
     else nextState = "JOURNEY_ACTIVE";
 
     if (nextState !== transitionStateRef.current) {
@@ -253,6 +261,9 @@ export const GlobeHero: React.FC = () => {
           <div ref={slotRef} className="relative h-full w-full">
             {/* Boon-Inspired Dark Hero Overlay */}
             <BoonHero ref={boonHeroRef} />
+
+            {/* Mining Approach Sequence (Kinetic Typography + "Our Approach" Showcase) */}
+            <MiningApproachSequence progress={approachProgress} />
 
             {/* Dark Descent Backdrop & 3D Truck Journey */}
             <DescentBackdrop progress={transitionProgress} />

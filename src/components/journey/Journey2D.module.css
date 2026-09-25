@@ -12,8 +12,8 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
-  /* The deepest value in the scene: dark obsidian matching hero descent */
-  background: #030509;
+  /* Pure white canvas matching reference design */
+  background: #ffffff;
   /* Layers are promoted individually; this just establishes the context. */
   isolation: isolate;
 }
@@ -637,29 +637,29 @@
 .milestoneIcon {
   width: 1.45rem;
   height: 1.45rem;
-  color: #d4af37;
+  color: #ffffff;
   flex-shrink: 0;
 }
 
 .milestoneTag {
-  font-family: var(--font-sans-custom), var(--font-geist-sans), system-ui, -apple-system, sans-serif;
-  font-size: clamp(0.66rem, 0.78vw, 0.74rem);
-  letter-spacing: 0.24em;
+  font-family: var(--font-mono-custom), var(--font-geist-mono), monospace;
+  font-size: clamp(0.66rem, 0.76vw, 0.72rem);
+  letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: #d4af37;
+  color: rgba(255, 255, 255, 0.8);
   font-weight: 700;
 }
 
 .milestoneHeadline {
   font-family: var(--font-editorial-serif), var(--font-display-custom), "Cormorant Garamond", "Playfair Display", Georgia, serif;
-  font-size: clamp(1.2rem, 1.55vw, 1.65rem);
-  font-weight: 600;
+  font-size: clamp(1.4rem, 2.1vw, 2.4rem);
+  font-weight: 350;
   letter-spacing: -0.015em;
-  line-height: 1.18;
+  line-height: 1.1;
   color: #ffffff;
   text-transform: uppercase;
   margin: 0;
-  max-width: 400px;
+  max-width: 440px;
 }
 
 .milestoneBar {
@@ -667,23 +667,21 @@
   height: 2px;
   background: linear-gradient(
     90deg,
-    #9a7218 0%,
-    #d4af37 25%,
-    #fff4ba 50%,
-    #d4af37 75%,
-    #9a7218 100%
+    rgba(255, 255, 255, 0.2) 0%,
+    #ffffff 50%,
+    rgba(255, 255, 255, 0.2) 100%
   );
   background-size: 200% 100%;
-  animation: goldBarShimmer 3.6s ease-in-out infinite;
+  animation: whiteBarShimmer 3.6s ease-in-out infinite;
   transform-origin: left center;
   margin: 0.2rem 0 0.3rem;
   position: relative;
   border-radius: 2px;
-  box-shadow: 0 0 6px rgba(212, 175, 55, 0.3);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.3);
   will-change: transform, opacity, filter;
 }
 
-/* Organic leading luminous spark tip on the golden line */
+/* Organic leading luminous spark tip on the white line */
 .milestoneBar::after {
   content: "";
   position: absolute;
@@ -692,14 +690,14 @@
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #fffbe6;
-  box-shadow: 0 0 6px 1.5px rgba(255, 251, 230, 0.95), 0 0 10px 2.5px rgba(212, 175, 55, 0.65);
+  background: #ffffff;
+  box-shadow: 0 0 6px 1.5px rgba(255, 255, 255, 0.95);
   transform: translate(50%, -50%);
   pointer-events: none;
   opacity: 0.9;
 }
 
-@keyframes goldBarShimmer {
+@keyframes whiteBarShimmer {
   0% {
     background-position: 100% 50%;
   }
@@ -712,12 +710,41 @@
 }
 
 .milestoneDescription {
-  font-family: var(--font-sans-custom), system-ui, -apple-system, sans-serif;
-  font-size: clamp(0.86rem, 0.96vw, 0.98rem);
+  font-family: var(--font-sans-custom), var(--font-geist-sans), system-ui, sans-serif;
+  font-size: clamp(0.88rem, 0.98vw, 1.04rem);
+  font-weight: 400;
   line-height: 1.62;
-  color: #94a3b8;
+  color: rgba(244, 242, 234, 0.85);
   margin: 0;
-  max-width: 390px;
+  max-width: 410px;
+}
+
+/* "OUR SERVICES" pill button matching reference image & hero CTA */
+.underRoadBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 1.65rem;
+  border-radius: 9999px;
+  background: #000000;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+  font-family: var(--font-mono-custom), var(--font-geist-mono), monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-top: 0.85rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  width: fit-content;
+  text-decoration: none;
+}
+
+.underRoadBtn:hover {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
 }
 
 /* ==========================================================================
@@ -824,46 +851,54 @@
   position: absolute;
   top: clamp(1.8rem, 4.5vh, 3.8rem);
   left: clamp(2rem, 5vw, 4.5rem);
-  font-family: var(--font-mono-custom), ui-monospace, monospace;
+  font-family: var(--font-mono-custom), var(--font-geist-mono), monospace;
   font-size: clamp(0.72rem, 0.86vw, 0.82rem);
   letter-spacing: 0.22em;
   font-weight: 700;
-  color: #1e293b;
+  color: #64748b;
   text-transform: uppercase;
-  opacity: 0;
+  opacity: 1;
   pointer-events: none;
   z-index: 30;
-  transition: opacity 0.3s ease;
 }
 
-.topDownHotspot {
+.sideHotspot {
   position: absolute;
-  top: 55%;
-  left: 56%;
-  transform: translate(-50%, -50%);
+  top: 22%;
+  left: 61%;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  opacity: 0;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.topDownHotspot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  position: relative;
+  margin: 1.5rem 0 1.2rem;
   pointer-events: none;
   z-index: 30;
-  transition: opacity 0.3s ease;
 }
 
 .hotspotRing {
   position: absolute;
   inset: 0;
-  border: 1.8px solid rgba(255, 255, 255, 0.85);
+  border: 1.5px solid #000000;
   border-radius: 50%;
   animation: pulseHotspot 2.2s ease-in-out infinite;
 }
 
 .hotspotDot {
-  width: 6px;
-  height: 6px;
-  background: #ffffff;
+  width: 5px;
+  height: 5px;
+  background: #000000;
   border-radius: 50%;
 }
 
@@ -884,7 +919,7 @@
 
 /* ==========================================================================
    EDITORIAL WATERMARK BEHIND TRUCK ("OUR EVOLUTION")
-   Matching unitedcarriers.com reference ("OUR SERVICES" watermark behind truck)
+   Matching hero editorial serif typography & unitedcarriers reference
    ========================================================================== */
 
 .watermarkBg {
@@ -892,10 +927,10 @@
   top: 44.0%;
   left: 50%;
   transform: translate3d(calc(-50% + 20vw), -84%, 0);
-  font-family: var(--font-sans-custom), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-editorial-serif), var(--font-display-custom), "Cormorant Garamond", "Playfair Display", Georgia, serif;
   font-size: clamp(6.5rem, 16vw, 15rem);
-  font-weight: 900;
-  letter-spacing: -0.02em;
+  font-weight: 350;
+  letter-spacing: -0.015em;
   text-transform: uppercase;
   color: #e3e6eb;
   white-space: nowrap;
@@ -953,13 +988,22 @@
 
 .secondPartBigHeadline {
   font-family: var(--font-editorial-serif), var(--font-display-custom), "Cormorant Garamond", "Playfair Display", Georgia, serif;
-  font-size: clamp(2.3rem, 3.8vw, 4.2rem);
-  font-weight: 500;
-  line-height: 1.15;
-  letter-spacing: -0.02em;
-  color: #0b1f3a;
+  font-size: clamp(2.4rem, 4.4vw, 4.6rem);
+  font-weight: 350;
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
   margin: 0;
-  text-shadow: 0 1px 2px rgba(11, 31, 58, 0.05);
+}
+
+.secondPartMutedLine {
+  display: block;
+  color: #8a909a;
+}
+
+.secondPartBlackLine {
+  display: block;
+  color: #000000;
 }
 
 /* Left Subtext "little down" (bottom-left) */
@@ -976,10 +1020,10 @@
 }
 
 .secondPartDescription {
-  font-family: var(--font-sans-custom), system-ui, -apple-system, sans-serif;
-  font-size: clamp(0.85rem, 0.92vw, 1.02rem);
-  line-height: 1.6;
-  color: #3a3d42;
+  font-family: var(--font-sans-custom), var(--font-geist-sans), system-ui, sans-serif;
+  font-size: clamp(0.9rem, 1.0vw, 1.08rem);
+  line-height: 1.62;
+  color: #111827;
   font-weight: 400;
   margin: 0;
 }
@@ -1020,7 +1064,7 @@
   text-align: left;
   padding-bottom: clamp(4.5rem, 9vh, 7rem);
   margin-bottom: clamp(4rem, 8vh, 6.5rem);
-  border-bottom: 1px solid rgba(15, 31, 58, 0.12);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .statEditorialItem:last-child {
@@ -1044,30 +1088,40 @@
   display: block;
 }
 
+.statItemSign g {
+  fill: #000000;
+}
+
+.statItemSign g[opacity] {
+  fill: #000000;
+  opacity: 0.12;
+}
+
 .secondPartStatValue {
   font-family: var(--font-editorial-serif), var(--font-display-custom), "Cormorant Garamond", "Playfair Display", Georgia, serif;
   font-size: clamp(2.8rem, 4.2vw, 4.5rem);
-  font-weight: 500;
+  font-weight: 350;
   line-height: 1;
   letter-spacing: -0.02em;
-  color: #0b1f3a;
+  color: #000000;
 }
 
 .secondPartStatLabel {
-  font-family: var(--font-sans-custom), var(--font-geist-sans), system-ui, -apple-system, sans-serif;
-  font-size: clamp(0.68rem, 0.76vw, 0.8rem);
+  font-family: var(--font-mono-custom), var(--font-geist-mono), monospace;
+  font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #b8860b;
+  color: #000000;
   margin-top: 0.45rem;
 }
 
 .secondPartStatDesc {
-  font-family: var(--font-sans-custom), system-ui, -apple-system, sans-serif;
-  font-size: clamp(0.82rem, 0.9vw, 0.95rem);
-  line-height: 1.5;
-  color: #57595e;
+  font-family: var(--font-sans-custom), var(--font-geist-sans), system-ui, sans-serif;
+  font-size: clamp(0.85rem, 0.94vw, 0.98rem);
+  line-height: 1.55;
+  color: #4b5563;
+  font-weight: 400;
   margin: 0.35rem 0 0 0;
 }
 
@@ -1084,10 +1138,10 @@
 
 .statCalloutHeadline {
   font-family: var(--font-editorial-serif), var(--font-display-custom), "Cormorant Garamond", "Playfair Display", Georgia, serif;
-  font-size: clamp(1.05rem, 1.25vw, 1.35rem);
-  font-weight: 600;
-  line-height: 1.45;
-  color: #0b1f3a;
+  font-size: clamp(1.15rem, 1.35vw, 1.45rem);
+  font-weight: 400;
+  line-height: 1.4;
+  color: #000000;
   margin: 0;
   letter-spacing: -0.01em;
 }
@@ -1103,7 +1157,7 @@
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  border: 1.5px solid rgba(15, 31, 58, 0.25);
+  border: 1.5px solid rgba(0, 0, 0, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1116,14 +1170,15 @@
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background-color: #0b1f3a;
+  background-color: #000000;
 }
 
 .statCalloutBulletText {
-  font-family: var(--font-sans-custom), system-ui, -apple-system, sans-serif;
+  font-family: var(--font-sans-custom), var(--font-geist-sans), system-ui, sans-serif;
   font-size: clamp(0.85rem, 0.95vw, 1.02rem);
   line-height: 1.6;
-  color: #334155;
+  color: #374151;
+  font-weight: 400;
   margin: 0;
 }
 
@@ -1131,16 +1186,16 @@
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
-  border: 1px solid rgba(15, 31, 58, 0.28);
+  border: 1px solid #000000;
   border-radius: 9999px;
   padding: 0.7rem 1.45rem;
-  font-family: var(--font-sans-custom), system-ui, -apple-system, sans-serif;
-  font-size: clamp(0.68rem, 0.75vw, 0.8rem);
-  font-weight: 600;
-  letter-spacing: 0.14em;
+  font-family: var(--font-mono-custom), var(--font-geist-mono), monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #0b1f3a;
-  background: transparent;
+  color: #ffffff;
+  background: #000000;
   text-decoration: none;
   cursor: pointer;
   transition: all 0.25s ease;
@@ -1148,11 +1203,11 @@
 }
 
 .statCalloutBtn:hover {
-  background: #0b1f3a;
-  color: #ffffff;
-  border-color: #0b1f3a;
+  background: #ffffff;
+  color: #000000;
+  border-color: #000000;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(11, 31, 58, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .statCalloutBtnArrow {

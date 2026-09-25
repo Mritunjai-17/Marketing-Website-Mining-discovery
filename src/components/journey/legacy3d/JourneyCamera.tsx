@@ -142,90 +142,57 @@ export const JourneyCamera: React.FC = () => {
 
     scratch.sideUp.set(0, 1, 0);
 
-    // 0. Sky-to-Land Descent (sequential: clouds get on sides first, then camera dives down from top)
-    // descentP runs 0..1 during GlobeHero -> Journey transition.
-    const descentP = progress.descent ?? 1.0;
+    // Side profile view is active from t = 0.
+    // After Milestone 05 (t >= 0.82), the camera smoothly turns 90 degrees downward by t = 0.90
+    // so the road aligns vertically from top to bottom, and the truck runs vertically down the screen!
+    const turnS = smoothstep(0.82, 0.90, t);
+    const easeTurn = turnS * turnS * (3 - 2 * turnS);
 
-    if (descentP < 0.88) {
-      // Step 1 (descentP <= 0.46): Camera holds at high sky altitude directly above, looking down from the top while clouds get on sides.
-      // Step 2 (descentP = 0.46 -> 0.78): Once clouds are on the sides, camera swoops down from the top toward the land.
-      // Step 3 (descentP = 0.68 -> 0.88): Camera sweeps into the exact side-profile view.
-      const fallT = smoothstep(0.46, 0.78, descentP);
-      const turnT = smoothstep(0.68, 0.88, descentP);
-      const easeFall = fallT * fallT * (3 - 2 * fallT);
-      const easeTurn = turnT * turnT * (3 - 2 * turnT);
+    // 2. Downward Vertical Overhead View (t >= 0.90)
+    // Camera is positioned directly above the highway.
+    // Height of 82 ensures the full truck (cab + trailer + wheels) is completely visible with ample breathing room.
+    const OVERHEAD_HEIGHT = 82 * (isPortrait ? 1.48 : 1.0);
 
-      // High sky altitude: looking straight down from the top onto the land & road
-      const SKY_ALTITUDE = 260 * (isPortrait ? 1.55 : 1.0);
-      const SKY_SIDE = 52 * (isPortrait ? 0.35 : 1.0) * sideDistanceScale;
-      const SKY_LEAD = -10;
+    // On mobile portrait, shift camera laterally to +state.side so road & truck slide to the right side of the screen,
+    // leaving the left side completely open for editorial headline and text.
+    const mobileLateralShift = (isPortrait ? 9.2 : 0) * easeTurn;
 
-      const curHeight = SKY_ALTITUDE * (1 - easeFall) + (CHASE_HEIGHT * (isPortrait ? 1.0 : sideDistanceScale)) * easeFall;
-      const curSide = SKY_SIDE * (1 - easeFall) + (CHASE_SIDE * sideDistanceScale) * easeFall;
-      const curTangent = SKY_LEAD * (1 - easeFall);
+    // The truck body's geometric midpoint is 4.2 units behind the truck group origin along tangent.
+    // Offsetting the target to the midpoint ensures the full tractor + trailer is perfectly centered.
+    const TRUCK_MIDPOINT_OFFSET = -4.2;
 
-      scratch.skyTarget.copy(state.truckPosition).addScaledVector(UP, -0.6);
+    // As user scrolls from t = 0.90 to 0.99, the truck visibly advances downward across the screen
+    const runProgress = smoothstep(0.90, 0.99, t);
+    const camLead = (1 - runProgress * 2) * 3.5;
+    const totalOffset = TRUCK_MIDPOINT_OFFSET + camLead;
 
-      state.desiredPosition
-        .copy(state.truckPosition)
-        .addScaledVector(state.side, curSide)
-        .addScaledVector(UP, curHeight)
-        .addScaledVector(state.tangent, curTangent);
+    scratch.overheadPos
+      .copy(state.truckPosition)
+      .addScaledVector(UP, OVERHEAD_HEIGHT)
+      .addScaledVector(state.tangent, TRUCK_MIDPOINT_OFFSET + camLead * 0.35)
+      .addScaledVector(state.side, mobileLateralShift);
 
-      state.desiredTarget.lerpVectors(scratch.skyTarget, scratch.sideTarget, easeTurn);
-      scratch.currentUp.set(0, 1, 0);
-    } else {
-      // After Milestone 05 (t >= 0.82), the camera smoothly turns 90 degrees downward by t = 0.90
-      // so the road aligns vertically from top to bottom, and the truck runs vertically down the screen!
-      const turnS = smoothstep(0.82, 0.90, t);
-      const easeTurn = turnS * turnS * (3 - 2 * turnS);
+    scratch.overheadTarget
+      .copy(state.truckPosition)
+      .addScaledVector(state.tangent, totalOffset)
+      .addScaledVector(state.side, mobileLateralShift);
 
-      // 2. Downward Vertical Overhead View (t >= 0.90)
-      // Camera is positioned directly above the highway.
-      // Height of 82 ensures the full truck (cab + trailer + wheels) is completely visible with ample breathing room.
-      const OVERHEAD_HEIGHT = 82 * (isPortrait ? 1.48 : 1.0);
+    scratch.overheadUp.copy(state.tangent).negate(); // (0, 0, 1)
 
-      // On mobile portrait, shift camera laterally to +state.side so road & truck slide to the right side of the screen,
-      // leaving the left side completely open for editorial headline and text.
-      const mobileLateralShift = (isPortrait ? 9.2 : 0) * easeTurn;
+    // 3. Smooth 90° circular arc sweep from side profile view to downward vertical road
+    const angle = easeTurn * (Math.PI / 2);
+    const arcSide = Math.cos(angle) * (CHASE_SIDE * sideDistanceScale) + mobileLateralShift;
+    const arcHeight = Math.sin(angle) * OVERHEAD_HEIGHT + (1 - easeTurn) * (CHASE_HEIGHT * (isPortrait ? 1.0 : sideDistanceScale));
 
-      // The truck body's geometric midpoint is 4.2 units behind the truck group origin along tangent.
-      // Offsetting the target to the midpoint ensures the full tractor + trailer is perfectly centered.
-      const TRUCK_MIDPOINT_OFFSET = -4.2;
+    state.desiredPosition
+      .copy(state.truckPosition)
+      .addScaledVector(state.side, arcSide)
+      .addScaledVector(UP, arcHeight)
+      .addScaledVector(state.tangent, easeTurn * (TRUCK_MIDPOINT_OFFSET + camLead * 0.35));
 
-      // As user scrolls from t = 0.90 to 0.99, the truck visibly advances downward across the screen
-      const runProgress = smoothstep(0.90, 0.99, t);
-      const camLead = (1 - runProgress * 2) * 3.5;
-      const totalOffset = TRUCK_MIDPOINT_OFFSET + camLead;
+    state.desiredTarget.lerpVectors(scratch.sideTarget, scratch.overheadTarget, easeTurn);
 
-      scratch.overheadPos
-        .copy(state.truckPosition)
-        .addScaledVector(UP, OVERHEAD_HEIGHT)
-        .addScaledVector(state.tangent, TRUCK_MIDPOINT_OFFSET + camLead * 0.35)
-        .addScaledVector(state.side, mobileLateralShift);
-
-      scratch.overheadTarget
-        .copy(state.truckPosition)
-        .addScaledVector(state.tangent, totalOffset)
-        .addScaledVector(state.side, mobileLateralShift);
-
-      scratch.overheadUp.copy(state.tangent).negate(); // (0, 0, 1)
-
-      // 3. Smooth 90° circular arc sweep from side profile view to downward vertical road
-      const angle = easeTurn * (Math.PI / 2);
-      const arcSide = Math.cos(angle) * (CHASE_SIDE * sideDistanceScale) + mobileLateralShift;
-      const arcHeight = Math.sin(angle) * OVERHEAD_HEIGHT + (1 - easeTurn) * (CHASE_HEIGHT * (isPortrait ? 1.0 : sideDistanceScale));
-
-      state.desiredPosition
-        .copy(state.truckPosition)
-        .addScaledVector(state.side, arcSide)
-        .addScaledVector(UP, arcHeight)
-        .addScaledVector(state.tangent, easeTurn * (TRUCK_MIDPOINT_OFFSET + camLead * 0.35));
-
-      state.desiredTarget.lerpVectors(scratch.sideTarget, scratch.overheadTarget, easeTurn);
-
-      scratch.currentUp.lerpVectors(scratch.sideUp, scratch.overheadUp, easeTurn).normalize();
-    }
+    scratch.currentUp.lerpVectors(scratch.sideUp, scratch.overheadUp, easeTurn).normalize();
 
     state.smoothedPosition.copy(state.desiredPosition);
     state.smoothedTarget.copy(state.desiredTarget);

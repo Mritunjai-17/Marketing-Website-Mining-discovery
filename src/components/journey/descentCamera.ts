@@ -140,35 +140,16 @@ export interface DescentCamera {
  */
 export function deriveDescentCamera(progress: number): DescentCamera {
   const p = clamp01(progress);
-
-  const opacity = smoothstep(MATERIALISE.from, MATERIALISE.to, p);
-
-  if (p >= ROTATE.to) {
-    return { opacity, pitch: 0, yaw: 0, dolly: 0, scale: 1, lift: 0, locked: true };
-  }
-
-  // The descent: distance closes and the world grows. This is the only thing
-  // that reveals the truck, which is why it runs its whole course before the
-  // rotation is allowed to begin.
-  const fall = smoothstep(DESCEND.from, DESCEND.to, p);
-
-  // The orbit: zero until the truck is up, then all the way to side view.
-  const turn = smoothstep(ROTATE.from, ROTATE.to, p);
+  const opacity = smoothstep(0.0, 0.30, p);
 
   return {
     opacity,
-    pitch: OVERHEAD_PITCH * (1 - turn),
-    // Yaw is carried by the orbit alone. It leans into the turn and comes out
-    // of it square, so the move reads as going around the truck rather than
-    // as the truck itself swinging.
-    yaw: ORBIT_YAW * Math.sin(turn * Math.PI),
-    // The last of the dolly is spent during the rotation, so the camera is
-    // still closing as it comes down — a crane move, not a tilt from a fixed
-    // point followed by a separate push in.
-    dolly: START_DOLLY * (1 - fall) * (1 - turn),
-    scale: START_SCALE + (1 - START_SCALE) * Math.max(fall, turn),
-    lift: START_LIFT * (1 - fall) * (1 - turn),
-    locked: false,
+    pitch: 0,
+    yaw: 0,
+    dolly: 0,
+    scale: 1,
+    lift: 0,
+    locked: true,
   };
 }
 
