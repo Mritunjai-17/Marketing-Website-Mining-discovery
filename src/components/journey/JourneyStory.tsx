@@ -84,7 +84,7 @@ export const SERVICE_CARDS: ServiceCardItem[] = [
     metaSeason: "CONFERENCE MEDIA",
     summary: "BUILD AUTHORITY ACROSS THE MINING MEDIA LANDSCAPE.",
     description:
-      "Strengthen credibility and visibility through mining media coverage, press communication and conference presence.",
+      "Strengthen credibility and visibility through\nmining media coverage, press communication\nand conference presence.",
     image: "/images/services/service_02_media_light.webp",
     badge: "02 / CREDIBILITY & INDUSTRY PRESENCE",
     features: [
@@ -1410,7 +1410,7 @@ export const JourneyStory: React.FC = () => {
 
                           <p
                             className={`${styles.cardFlickExcerpt} ${
-                              ["mining-intelligence", "monthly-magazines", "weekly-newspaper", "articles"].includes(card.id)
+                              ["media-authority", "mining-intelligence", "monthly-magazines", "weekly-newspaper", "articles"].includes(card.id)
                                 ? styles.cardFlickExcerptThreeLines
                                 : ""
                             }`}
