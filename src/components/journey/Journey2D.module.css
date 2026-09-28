@@ -2572,45 +2572,106 @@
 
   .cardFlickContent,
   .fullScreenCardContent {
-    padding: clamp(1rem, 3vh, 1.5rem) clamp(1rem, 4vw, 1.5rem);
-    gap: 0.8rem;
+    padding: clamp(4.2rem, 10vh, 5.8rem) clamp(1.2rem, 5vw, 1.8rem) clamp(3.8rem, 9vh, 5rem);
+    gap: clamp(0.75rem, 2vh, 1.4rem);
+    max-width: 100%;
     justify-content: center;
+  }
+
+  .cardFlickHeader {
+    gap: 0.4rem;
+    margin-bottom: 0.15rem;
+  }
+
+  .cardFlickFooter {
+    gap: 0.55rem;
+    margin-top: 0.15rem;
+    max-width: 100%;
+  }
+
+  .cardFlickGradient {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(6, 10, 18, 0.72) 0%,
+        rgba(6, 10, 18, 0.46) 35%,
+        rgba(6, 10, 18, 0.52) 65%,
+        rgba(6, 10, 18, 0.82) 100%
+      ),
+      linear-gradient(
+        90deg,
+        rgba(6, 10, 18, 0.45) 0%,
+        transparent 65%
+      );
   }
 
   .fullScreenNavControls {
     right: auto;
     left: 50%;
     transform: translateX(-50%);
-    bottom: 0.85rem;
+    bottom: max(0.85rem, env(safe-area-inset-bottom, 0.85rem));
+    padding: 0.35rem 0.75rem;
+    gap: 0.6rem;
+    max-width: 92vw;
+  }
+
+  .fullScreenDot {
+    width: 5px;
+    height: 5px;
+  }
+
+  .fullScreenDotActive {
+    width: 16px;
   }
 
   .cardFlickTitle {
-    font-size: clamp(1.15rem, 4.8vw, 1.55rem);
-    line-height: 1.15;
-    white-space: nowrap;
+    font-size: clamp(1.6rem, 6.4vw, 2.3rem);
+    line-height: 1.1;
+    white-space: normal;
+    word-break: normal;
+    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95), 0 0 24px rgba(0, 0, 0, 0.75);
   }
 
   .cardFlickExcerpt {
-    font-size: 0.8rem;
-    line-height: 1.4;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    font-size: clamp(0.84rem, 3.2vw, 0.95rem);
+    line-height: 1.5;
+    max-width: 100%;
+    display: block;
+    -webkit-line-clamp: unset;
+    overflow: visible;
+    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.95);
+  }
+
+  .cardFlickExcerptThreeLines {
+    max-width: 100%;
+    white-space: pre-line;
   }
 
   .cardFlickMeta {
-    font-size: 0.7rem;
-    gap: 0.5rem;
+    font-size: clamp(0.68rem, 2.6vw, 0.76rem);
+    letter-spacing: 0.12em;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.6rem;
   }
 
   .cardFlickLearnMore {
-    font-size: 0.74rem;
+    font-size: 0.76rem;
+    padding-bottom: 2px;
   }
 
   .cardFlickBadge {
     padding: 0.25rem 0.65rem;
     font-size: 0.68rem;
+  }
+
+  .cardFlickButtonRow {
+    gap: 0.5rem;
+  }
+
+  .cardFlickMagazineBtn,
+  .cardFlickArchiveBtn {
+    padding: 0.45rem 0.85rem;
+    font-size: 0.72rem;
   }
 }
 
