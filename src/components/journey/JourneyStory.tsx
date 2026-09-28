@@ -1,0 +1,1754 @@
+"use client";
+
+import React, { useRef, useState, useEffect, useCallback, useMemo } from "react";
+import Link from "next/link";
+import { createPortal } from "react-dom";
+import { X, Newspaper, BookOpen, TrendingUp, Globe, Sparkles, ChevronLeft, ChevronRight, ArrowRight, Maximize2 } from "lucide-react";
+import styles from "./Journey2D.module.css";
+import magStyles from "@/components/sections/MagazineShowcase/MagazineShowcase.module.css";
+import { smoothstep } from "./journeySideView";
+import { useJourneyFrame } from "./journeyScroll";
+import {
+  ShowcaseCardCover,
+  EditionCoverCard,
+} from "@/components/sections/MagazineShowcase/MagazineShowcase";
+import { MagazineSpread } from "@/components/sections/MagazineShowcase/MagazineSpread";
+import {
+  getChronologicalMagazines,
+  getLatestMagazine,
+  type MagazineEdition,
+} from "@/data/magazines";
+import {
+  INITIAL_NEWSLETTERS,
+  INITIAL_ARTICLES,
+  getProxiedPdfUrl,
+  type PublicationItem,
+} from "@/data/publications";
+
+const MILESTONE_ICONS = [TrendingUp, Newspaper, BookOpen, Globe, Sparkles, Sparkles];
+
+export interface ServiceCardItem {
+  id: string;
+  num: string;
+  category: string;
+  title: string;
+  italicTitle: string;
+  metaPrice: string;
+  metaSeason: string;
+  summary: string;
+  description: string;
+  image: string;
+  badge: string;
+  features: {
+    title: string;
+    text: string;
+  }[];
+  ctaText: string;
+  ctaHref: string;
+}
+
+export const SERVICE_CARDS: ServiceCardItem[] = [
+  {
+    id: "investor-growth",
+    num: "01",
+    category: "CAPITAL & INVESTOR REACH",
+    title: "Investor Growth",
+    italicTitle: "Investor Growth",
+    metaPrice: "CAPITAL STRATEGY",
+    metaSeason: "GLOBAL OUTREACH",
+    summary: "TURN MINING OPPORTUNITIES INTO INVESTOR ATTENTION.",
+    description:
+      "Connect mining projects with relevant investors,\nstakeholders and decision-makers through focused\ninvestor campaigns and global industry outreach.",
+    image: "/images/services/service_01_investor_light.webp",
+    badge: "01 / CAPITAL & INVESTOR REACH",
+    features: [
+      {
+        title: "INVESTOR CAMPAIGNS",
+        text: "Targeted campaigns designed to communicate the opportunity and story behind mining projects to relevant audiences.",
+      },
+      {
+        title: "GLOBAL OUTREACH",
+        text: "Extend project visibility across international mining audiences and create connections with global stakeholders.",
+      },
+    ],
+    ctaText: "DISCUSS INVESTOR OUTREACH",
+    ctaHref: "/contact",
+  },
+  {
+    id: "media-authority",
+    num: "02",
+    category: "CREDIBILITY & INDUSTRY PRESENCE",
+    title: "Media Authority",
+    italicTitle: "Media Authority",
+    metaPrice: "TIER-1 SYNDICATION",
+    metaSeason: "CONFERENCE MEDIA",
+    summary: "BUILD AUTHORITY ACROSS THE MINING MEDIA LANDSCAPE.",
+    description:
+      "Strengthen credibility and visibility through\nmining media coverage, press communication\nand conference presence.",
+    image: "/images/services/service_02_media_light.webp",
+    badge: "02 / CREDIBILITY & INDUSTRY PRESENCE",
+    features: [
+      {
+        title: "NEWS & SYNDICATION",
+        text: "Direct editorial syndication into Bloomberg, Reuters, Mining Journal and Tier-1 terminals.",
+      },
+      {
+        title: "PRESS & CONFERENCE",
+        text: "Communicate key milestones and amplify the impact of mining stories through media coverage and industry events.",
+      },
+    ],
+    ctaText: "ELEVATE YOUR MEDIA PROFILE",
+    ctaHref: "/contact",
+  },
+  {
+    id: "brand-digital",
+    num: "03",
+    category: "IDENTITY & CREATIVE PRESENCE",
+    title: "Brand & Digital",
+    italicTitle: "Brand & Digital",
+    metaPrice: "DIGITAL IDENTITY",
+    metaSeason: "3D VISUALIZATION",
+    summary: "BUILD A DISTINCTIVE DIGITAL IDENTITY FOR MINING.",
+    description:
+      "Build a distinctive visual and digital identity\nthat makes mining companies easier to\nrecognise, understand and remember.",
+    image: "/images/services/service_03_brand_light.webp",
+    badge: "03 / IDENTITY & CREATIVE PRESENCE",
+    features: [
+      {
+        title: "DIGITAL BRANDING",
+        text: "Modern visual identity, corporate presentations, and investor-facing digital assets.",
+      },
+      {
+        title: "MULTIMEDIA PRODUCTION",
+        text: "High-impact cinematography, drone mapping, and interactive mining asset models.",
+      },
+    ],
+    ctaText: "EXPLORE BRAND SOLUTIONS",
+    ctaHref: "/contact",
+  },
+  {
+    id: "audience-reach",
+    num: "04",
+    category: "REACH & AMPLIFICATION",
+    title: "Audience Reach",
+    italicTitle: "Audience Reach",
+    metaPrice: "40,000+ NETWORK",
+    metaSeason: "PAID AMPLIFICATION",
+    summary: "EXPAND YOUR REACH. OWN YOUR AUDIENCE.",
+    description:
+      "Turn content into measurable audience growth\nthrough targeted social campaigns, network\ndistribution and paid promotion.",
+    image: "/images/services/service_04_reach_light.webp",
+    badge: "04 / REACH & AMPLIFICATION",
+    features: [
+      {
+        title: "SOCIAL GROWTH & ADS",
+        text: "Targeted campaigns engaging family offices, brokers and institutional mining investors.",
+      },
+      {
+        title: "NETWORK DISTRIBUTION",
+        text: "Direct weekly newsletter reaching 40,000+ active mining decision-makers and brokers.",
+      },
+    ],
+    ctaText: "SCALE YOUR REACH",
+    ctaHref: "/contact",
+  },
+  {
+    id: "mining-intelligence",
+    num: "05",
+    category: "MARKET DATA & INSIGHTS",
+    title: "Mining Intelligence",
+    italicTitle: "Mining Intelligence",
+    metaPrice: "30+ JURISDICTIONS",
+    metaSeason: "AI SENTIMENT",
+    summary: "AI-DRIVEN INSIGHTS AND GLOBAL JURISDICTION DATA.",
+    description:
+      "Access proprietary market sentiment, real-time\ncommodity data and regulatory intelligence\nacross 30+ mining jurisdictions.",
+    image: "/images/services/service_05_intelligence_light.webp",
+    badge: "05 / MARKET DATA & INSIGHTS",
+    features: [
+      {
+        title: "EXECUTIVE BRIEFINGS",
+        text: "Real-time market intel, commodity tracking, and strategic transaction analysis.",
+      },
+      {
+        title: "STRATEGIC ANALYTICS",
+        text: "AI sentiment models tracking global mining momentum and investor perception.",
+      },
+    ],
+    ctaText: "ACCESS INTELLIGENCE",
+    ctaHref: "/contact",
+  },
+  {
+    id: "monthly-magazines",
+    num: "06",
+    category: "PRINT & DIGITAL PUBLISHING",
+    title: "Monthly Magazines",
+    italicTitle: "Monthly Magazines",
+    metaPrice: "GLOBAL CIRCULATION",
+    metaSeason: "MONTHLY EDITIONS",
+    summary: "IN-DEPTH MINING INTELLIGENCE, INDUSTRY VOICES, AND EXECUTIVE PROFILES.",
+    description:
+      "Curated monthly publications highlighting major\ndiscoveries, technological innovations, and strategic\ninsights from mining leaders worldwide.",
+    image: "/images/services/service_06_magazines_light.webp",
+    badge: "06 / PRINT & DIGITAL PUBLISHING",
+    features: [
+      {
+        title: "EXECUTIVE PROFILES",
+        text: "In-depth features and exclusive interviews with CEOs, exploration chiefs, and tier-1 investors.",
+      },
+      {
+        title: "GLOBAL DISTRIBUTION",
+        text: "Direct circulation to international mining conferences, financial hubs, and institutional desks.",
+      },
+    ],
+    ctaText: "EXPLORE EDITIONS",
+    ctaHref: "/magazines",
+  },
+  {
+    id: "weekly-newspaper",
+    num: "07",
+    category: "TIMELY INDUSTRY PRESS",
+    title: "Weekly Newspaper",
+    italicTitle: "Weekly Newspaper",
+    metaPrice: "EXECUTIVE BRIEFINGS",
+    metaSeason: "WEEKLY DISPATCH",
+    summary: "REAL-TIME COMMODITY NEWS, MARKET MOMENTUM, AND STRATEGIC HEADLINES.",
+    description:
+      "Weekly mining newspaper delivered to industry\nexecutives and investors, covering critical market shifts,\npolicy updates, and breaking project news.",
+    image: "/images/services/service_07_newspaper_light.webp",
+    badge: "07 / TIMELY INDUSTRY PRESS",
+    features: [
+      {
+        title: "MARKET DISPATCH",
+        text: "Weekly analytical synthesis of global commodity trends, M&A activity, and regulatory shifts.",
+      },
+      {
+        title: "BREAKING DEVELOPMENTS",
+        text: "Rapid-response coverage of drill results, feasibility milestones, and capital raises.",
+      },
+    ],
+    ctaText: "SUBSCRIBE TO DISPATCH",
+    ctaHref: "/contact",
+  },
+  {
+    id: "articles",
+    num: "08",
+    category: "EDITORIAL & RESEARCH",
+    title: "Articles",
+    italicTitle: "Articles",
+    metaPrice: "THOUGHT LEADERSHIP",
+    metaSeason: "DAILY INSIGHTS",
+    summary: "DEEP-DIVE EDITORIALS, TECHNICAL ANALYSES, AND EXPERT COMMENTARY.",
+    description:
+      "Authoritative research articles and market analyses\nbridging technical mining data with\ninstitutional investment strategy.",
+    image: "/images/services/service_08_articles_light.webp",
+    badge: "08 / EDITORIAL & RESEARCH",
+    features: [
+      {
+        title: "DEEP-DIVE RESEARCH",
+        text: "Data-grounded articles analyzing jurisdiction risk, processing innovation, and decarbonization.",
+      },
+      {
+        title: "OPINION & ANALYSIS",
+        text: "Expert perspectives from geologists, commodity economists, and senior mining analysts.",
+      },
+    ],
+    ctaText: "BROWSE ALL ARTICLES",
+    ctaHref: "/contact",
+  },
+];
+
+
+
+
+export interface StoryPoint {
+  id: string;
+  index: number;
+  year: string;
+  tag: string;
+  shortTitle: string;
+  eyebrow: string;
+  headline: string;
+  emphasis: string;
+  description: string;
+  meta: string;
+  image: string;
+  badge: string;
+  from: number;
+  to: number;
+}
+
+export const STORY_POINTS: StoryPoint[] = [
+  {
+    id: "evolution",
+    index: 0,
+    year: "OUR EVOLUTION",
+    tag: "OUR EVOLUTION",
+    shortTitle: "From Mining News to Global Influence",
+    eyebrow: "OUR EVOLUTION",
+    headline: "FROM MINING NEWS TO GLOBAL INFLUENCE",
+    emphasis: "EVOLUTION",
+    description: "The strategic journey of Mining Discovery from a dedicated digital news outlet into an international full-service media authority.",
+    meta: "GLOBAL MEDIA · STRATEGIC REACH · INDUSTRY AUTHORITY",
+    image: "/cards/bg_card_1.webp",
+    badge: "ORIGIN",
+    from: 0.0,
+    to: 0.14,
+  },
+  {
+    id: "2022",
+    index: 1,
+    year: "2022",
+    tag: "2022 · FOUNDATION",
+    shortTitle: "Foundation of Mining Media",
+    eyebrow: "01 — FOUNDATION · 2022",
+    headline: "FOUNDATION OF MINING MEDIA",
+    emphasis: "FOUNDATION",
+    description: "Mining Discovery launched as a digital mining news platform in Chandigarh, establishing our foothold in trusted resource reporting.",
+    meta: "DIGITAL NEWS · INDUSTRY INSIGHTS · CHANDIGARH",
+    image: "/cards/bg_card_1.webp",
+    badge: "2022",
+    from: 0.14,
+    to: 0.28,
+  },
+  {
+    id: "2023",
+    index: 2,
+    year: "2023",
+    tag: "2023 · EXPANSION",
+    shortTitle: "Multi-Channel Media Platform",
+    eyebrow: "02 — MEDIA EXPANSION · 2023",
+    headline: "MULTI-CHANNEL MEDIA PLATFORM",
+    emphasis: "PLATFORM",
+    description: "Expanded into newsletters, monthly magazines, and an interactive digital platform for global mining stakeholders.",
+    meta: "MONTHLY MAGAZINES · NEWSLETTERS · DIGITAL SUITE",
+    image: "/cards/bg_card_2.webp",
+    badge: "2023",
+    from: 0.28,
+    to: 0.44,
+  },
+  {
+    id: "2024",
+    index: 3,
+    year: "2024",
+    tag: "2024 · ENGAGEMENT",
+    shortTitle: "Branding & Investor Engagement",
+    eyebrow: "03 — INDUSTRY ENGAGEMENT · 2024",
+    headline: "BRANDING & INVESTOR ENGAGEMENT",
+    emphasis: "ENGAGEMENT",
+    description: "Began offering targeted investor campaigns, digital branding, and international conference media coverage.",
+    meta: "INVESTOR CAMPAIGNS · CONFERENCES · BRAND STRATEGY",
+    image: "/cards/bg_card_3.webp",
+    badge: "2024",
+    from: 0.44,
+    to: 0.60,
+  },
+  {
+    id: "2025",
+    index: 4,
+    year: "2025",
+    tag: "2025 · FULL-SERVICE",
+    shortTitle: "Full-Service Digital Media Agency",
+    eyebrow: "04 — FULL-SERVICE EVOLUTION · 2025",
+    headline: "FULL-SERVICE DIGITAL AGENCY",
+    emphasis: "FULL-SERVICE",
+    description: "Operating as a full-service digital media, global syndication, and investor-engagement agency.",
+    meta: "FULL-SERVICE AGENCY · GLOBAL REACH · 360° DIGITAL",
+    image: "/cards/bg_card_4.webp",
+    badge: "2025",
+    from: 0.60,
+    to: 0.74,
+  },
+  {
+    id: "future",
+    index: 5,
+    year: "FUTURE",
+    tag: "FUTURE · HORIZON",
+    shortTitle: "The Journey Continues",
+    eyebrow: "05 — WHAT COMES NEXT · FUTURE",
+    headline: "THE JOURNEY CONTINUES",
+    emphasis: "JOURNEY",
+    description: "Expanding global investor networks, AI-driven mining intelligence, and strategic media operations worldwide.",
+    meta: "GLOBAL INVESTOR NETWORKS · AI INTELLIGENCE · STRATEGIC MEDIA",
+    image: "/about/open-pit-golden-hour.webp",
+    badge: "FUTURE",
+    from: 0.74,
+    to: 0.88,
+  },
+];
+
+/** Splits a line so one word can carry the accent style. */
+function renderLine(line: string, emphasis: string | null): React.ReactNode {
+  if (!emphasis || !line.includes(emphasis)) return line;
+  const at = line.indexOf(emphasis);
+  return (
+    <>
+      {line.slice(0, at)}
+      <em>{emphasis}</em>
+      {line.slice(at + emphasis.length)}
+    </>
+  );
+}
+
+/**
+ * Renders text broken into individual scrub words with data attributes
+ * for 60-120fps direct DOM text illumination in lockstep with the truck (Reference Recording).
+ */
+function renderScrubText(
+  text: string,
+  keyPrefix: string,
+  emphasisWord?: string | null
+): React.ReactNode {
+  const words = text.split(" ");
+  return words.map((word, i) => {
+    const cleanWord = word.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const isEmphasis =
+      emphasisWord &&
+      cleanWord === emphasisWord.toLowerCase().replace(/[^a-z0-9]/g, "");
+    return (
+      <span
+        key={`${keyPrefix}-${i}`}
+        className={styles.scrubWord}
+        data-scrub-word
+        data-emphasis={isEmphasis ? "true" : undefined}
+      >
+        {word}
+        {i < words.length - 1 ? " " : ""}
+      </span>
+    );
+  });
+}
+
+/**
+ * Updates individual word illumination from muted to active theme colors
+ * based on the truck's exact scroll position.
+ */
+function updateWordScrub(
+  container: HTMLElement | null,
+  progress: number,
+  baseColor: string,
+  activeColor: string,
+  emphasisColor?: string,
+  baseOpacity: number = 0.22
+) {
+  if (!container) return;
+  const words = container.querySelectorAll<HTMLElement>("[data-scrub-word]");
+  const total = words.length;
+  if (total === 0) return;
+
+  const currentIdx = progress * total;
+
+  for (let i = 0; i < total; i++) {
+    const el = words[i];
+    const isEmphasis = el.getAttribute("data-emphasis") === "true";
+    const targetActiveColor = isEmphasis && emphasisColor ? emphasisColor : activeColor;
+
+    const wordP = Math.max(0, Math.min(1, (currentIdx - i) * 1.6));
+
+    if (wordP >= 1.0) {
+      el.style.color = targetActiveColor;
+      el.style.opacity = "1";
+    } else if (wordP <= 0.0) {
+      el.style.color = baseColor;
+      el.style.opacity = baseOpacity.toString();
+    } else {
+      el.style.color = targetActiveColor;
+      el.style.opacity = (baseOpacity + wordP * (1 - baseOpacity)).toFixed(2);
+    }
+  }
+}
+
+export const JourneyStory: React.FC = () => {
+  const underRoadRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const secondPartRef = useRef<HTMLDivElement>(null);
+  const leftColRef = useRef<HTMLDivElement>(null);
+  const leftSubtextRef = useRef<HTMLDivElement>(null);
+  const rightColRef = useRef<HTMLDivElement>(null);
+  const statsTrackRef = useRef<HTMLDivElement>(null);
+
+  // Settle stage, controls, and interactive elements
+  const settleStageRef = useRef<HTMLDivElement>(null);
+  const cardsTrackRef = useRef<HTMLDivElement>(null);
+  const spotlightRef = useRef<HTMLDivElement>(null);
+
+  // Active full-screen card index (0 to SERVICE_CARDS.length - 1)
+  const [activeCardIndex, setActiveCardIndex] = useState(0);
+  const activeCardIndexRef = useRef(0);
+
+  // Interactive mouse tracker for spotlight and mountain parallax
+  const mousePosRef = useRef({
+    x: 0.5,
+    y: 0.5,
+    targetX: 0.5,
+    targetY: 0.5,
+    px: 600,
+    py: 400,
+    targetPx: 600,
+    targetPy: 400,
+    active: false,
+  });
+
+  // All 14 magazines and the 5 latest editions
+  const allMagazines = useMemo(() => getChronologicalMagazines(false), []);
+  const showcaseMagazines = useMemo(() => allMagazines.slice(0, 5), [allMagazines]);
+
+  const [activeIndex, setActiveIndex] = useState(1);
+  const [selectedMagazine, setSelectedMagazine] = useState<MagazineEdition | null>(null);
+  const [readerState, setReaderState] = useState<"closed" | "opening" | "open" | "closing">("closed");
+  const [spreadLabel, setSpreadLabel] = useState("INSIDE OPENING SPREAD • PAGES 2–3");
+  const [activeCatalogModal, setActiveCatalogModal] = useState<"magazines" | "newsletters" | "articles" | null>(null);
+  const [newsletters, setNewsletters] = useState<PublicationItem[]>(INITIAL_NEWSLETTERS);
+  const [articles, setArticles] = useState<PublicationItem[]>(INITIAL_ARTICLES);
+  const [activeReaderDoc, setActiveReaderDoc] = useState<{
+    title: string;
+    subtitle: string;
+    pdfUrl: string;
+  } | null>(null);
+
+  const [isMounted, setIsMounted] = useState(false);
+  const shelfTrackRef = useRef<HTMLDivElement>(null);
+  const newsletterShelfTrackRef = useRef<HTMLDivElement>(null);
+  const articleShelfTrackRef = useRef<HTMLDivElement>(null);
+  const totalTravelRef = useRef(3200);
+
+  const activeMagazine = selectedMagazine || showcaseMagazines[activeIndex] || showcaseMagazines[0];
+
+  const scrollToCard = useCallback((targetIdx: number) => {
+    if (typeof window === "undefined") return;
+    const section = document.querySelector("[data-journey-prototype]");
+    if (!section) return;
+    const totalCards = SERVICE_CARDS.length;
+    const clamped = Math.max(0, Math.min(totalCards - 1, targetIdx));
+    const startP = 0.928;
+    const endP = 0.998;
+    const cardFraction = clamped / (totalCards - 1);
+    const targetProgress = startP + cardFraction * (endP - startP);
+    const rect = section.getBoundingClientRect();
+    const startScrollY = window.scrollY + rect.top;
+    const scrollDistance = section.clientHeight - window.innerHeight;
+    const targetScrollY = startScrollY + targetProgress * scrollDistance;
+    window.scrollTo({ top: targetScrollY, behavior: "smooth" });
+  }, []);
+
+  useEffect(() => {
+    setIsMounted(true);
+    const measure = () => {
+      const trackEl = trackRef.current;
+      if (!trackEl) return;
+      const firstCard = trackEl.firstElementChild as HTMLElement | null;
+      const lastCard = trackEl.lastElementChild as HTMLElement | null;
+      if (firstCard && lastCard) {
+        totalTravelRef.current = Math.max(600, lastCard.offsetLeft - firstCard.offsetLeft);
+      }
+    };
+    measure();
+    window.addEventListener("resize", measure, { passive: true });
+    const timer = setTimeout(measure, 400);
+    const handlePointerMove = (e: PointerEvent) => {
+      const m = mousePosRef.current;
+      const w = window.innerWidth || 1200;
+      const h = window.innerHeight || 800;
+      m.targetX = Math.max(0, Math.min(1, e.clientX / w));
+      m.targetY = Math.max(0, Math.min(1, e.clientY / h));
+      m.targetPx = e.clientX;
+      m.targetPy = e.clientY;
+      m.active = true;
+    };
+    const handlePointerLeave = () => {
+      const m = mousePosRef.current;
+      m.targetX = 0.5;
+      m.targetY = 0.5;
+    };
+    window.addEventListener("pointermove", handlePointerMove, { passive: true });
+    window.addEventListener("pointerleave", handlePointerLeave, { passive: true });
+
+    return () => {
+      window.removeEventListener("resize", measure);
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerleave", handlePointerLeave);
+      clearTimeout(timer);
+    };
+  }, []);
+
+  const handleOpenReader = useCallback((mag: MagazineEdition) => {
+    setSelectedMagazine(mag);
+    setActiveReaderDoc({
+      title: mag.title,
+      subtitle: `${mag.month?.toUpperCase()} ${mag.year} • ISSUE ${mag.issueNumber ?? "13"}`,
+      pdfUrl: mag.pdf,
+    });
+    setReaderState("opening");
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setReaderState("open");
+      });
+    });
+  }, []);
+
+  const handleOpenDocReader = useCallback(
+    (doc: { title: string; subtitle: string; pdfUrl: string }) => {
+      setSelectedMagazine(null);
+      setActiveReaderDoc(doc);
+      setReaderState("opening");
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setReaderState("open");
+        });
+      });
+    },
+    []
+  );
+
+  const handleCloseReader = useCallback(() => {
+    if (readerState === "open" || readerState === "opening") {
+      setReaderState("closing");
+      setTimeout(() => {
+        setReaderState("closed");
+        setSelectedMagazine(null);
+        setActiveReaderDoc(null);
+      }, 350);
+    }
+  }, [readerState]);
+
+  const handleCardClick = useCallback((idx: number, mag: MagazineEdition) => {
+    setActiveIndex(idx);
+    handleOpenReader(mag);
+  }, [handleOpenReader]);
+
+  // Background refresh publications from internal Next.js proxy routes
+  useEffect(() => {
+    fetch("/api/newsletters")
+      .then((r) => r.json())
+      .then((res) => {
+        if (res?.data && Array.isArray(res.data) && res.data.length > 0) {
+          setNewsletters(res.data);
+        }
+      })
+      .catch(() => {});
+
+    fetch("/api/articles")
+      .then((r) => r.json())
+      .then((res) => {
+        if (res?.data && Array.isArray(res.data) && res.data.length > 0) {
+          setArticles(res.data);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // Lock scroll & handle Escape key when catalog modal or reader is active
+  useEffect(() => {
+    if (activeCatalogModal !== null || readerState === "open" || readerState === "opening") {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "Escape") {
+          if (readerState === "open" || readerState === "opening") {
+            handleCloseReader();
+          } else if (activeCatalogModal !== null) {
+            setActiveCatalogModal(null);
+          }
+        }
+      };
+      window.addEventListener("keydown", handleKeyDown);
+
+      return () => {
+        document.body.style.overflow = originalOverflow;
+        window.removeEventListener("keydown", handleKeyDown);
+      };
+    }
+  }, [activeCatalogModal, readerState, handleCloseReader]);
+
+  useJourneyFrame((scene) => {
+    const p = scene.progress;
+
+    // 1. Under-road horizontal milestone cards:
+    // When camera is far, NO text is shown! After camera zooms down (descent >= 0.82), text smoothly reveals!
+    // And fades out as road turns downward (p >= 0.82 to 0.86)
+    if (underRoadRef.current) {
+      const descentP = scene.descent ?? 1.0;
+      const zoomReveal = smoothstep(0.82, 0.89, descentP);
+      const underRoadFade = (1 - smoothstep(0.82, 0.86, p)) * zoomReveal;
+      underRoadRef.current.style.opacity = underRoadFade.toFixed(3);
+      underRoadRef.current.style.pointerEvents = underRoadFade > 0.1 ? "auto" : "none";
+      underRoadRef.current.style.transform = `translate3d(0, ${((1 - underRoadFade) * 16).toFixed(1)}px, 0)`;
+    }
+
+    // 2. Roadside Milestone Track (horizontal travel)
+    if (trackRef.current) {
+      const roadProgress = Math.min(1.0, Math.max(0.0, p / 0.82));
+      const currentX = -roadProgress * totalTravelRef.current;
+      trackRef.current.style.transform = `translate3d(${currentX.toFixed(2)}px, 0, 0)`;
+
+      // Progressive text scrub on road milestone cards (connected to horizontal truck travel)
+      const roadCards = trackRef.current.querySelectorAll<HTMLElement>(`.${styles.roadCard}`);
+      STORY_POINTS.forEach((pt, idx) => {
+        const cardEl = roadCards[idx];
+        if (!cardEl) return;
+        const cardP = Math.max(0, Math.min(1, (p - (pt.from - 0.03)) / (pt.to - pt.from + 0.04)));
+        const headlineEl = cardEl.querySelector<HTMLElement>(`.${styles.milestoneHeadline}`);
+        const descEl = cardEl.querySelector<HTMLElement>(`.${styles.milestoneDescription}`);
+        const barEl = cardEl.querySelector<HTMLElement>(`.${styles.milestoneBar}`);
+
+        if (idx === 0) {
+          const exitP = smoothstep(0.08, 0.135, p);
+          const pinHold = (1 - exitP) * Math.min(Math.abs(currentX), 450);
+          cardEl.style.transform = `translate3d(${pinHold.toFixed(1)}px, 0, 0)`;
+          cardEl.style.opacity = (1 - exitP * 0.95).toFixed(3);
+        } else {
+          cardEl.style.transform = "translate3d(0, 0, 0)";
+          cardEl.style.opacity = "1";
+        }
+
+        const headP = idx === 0 ? 1.0 : cardP;
+        const descP = idx === 0 ? 1.0 : Math.max(0, (cardP - 0.10) / 0.90);
+
+        updateWordScrub(headlineEl, headP, "rgba(255, 255, 255, 0.35)", "#FFFFFF", "#D4AF37", 0.35);
+        updateWordScrub(descEl, descP, "#94A3B8", "#E2E8F0", undefined, 0.38);
+
+        if (barEl) {
+          const lineProgress = idx === 0 ? 1.0 : smoothstep(0.02, 0.30, cardP);
+          barEl.style.transform = `scaleX(${lineProgress.toFixed(3)})`;
+          barEl.style.opacity = (0.35 + lineProgress * 0.65).toFixed(2);
+
+          const activeGlow = Math.sin(lineProgress * Math.PI * 0.5);
+          barEl.style.filter = `drop-shadow(0 0 ${(activeGlow * 7).toFixed(1)}px rgba(212, 175, 55, ${(0.3 + activeGlow * 0.5).toFixed(2)}))`;
+        }
+      });
+    }
+
+    // 3. Second Part roadside text (vertical highway run):
+    // Smooth entrance as road turns downward, stays visible through highway run,
+    // and cleanly fades out at p = 0.902 to 0.915 before services section enters
+    if (secondPartRef.current) {
+      let opacity = 0;
+      if (p >= 0.86 && p <= 0.915) {
+        const fadeIn = smoothstep(0.86, 0.885, p);
+        const fadeOut = 1 - smoothstep(0.902, 0.915, p);
+        opacity = fadeIn * fadeOut;
+
+        const highwayP = Math.max(0, Math.min(1, (p - 0.865) / (0.910 - 0.865)));
+
+        // 1. Big Headline word scrub (0.00 to 0.40)
+        if (leftColRef.current) {
+          const enterY = (1 - fadeIn) * 20;
+          leftColRef.current.style.transform = `translate3d(0, ${enterY.toFixed(1)}px, 0)`;
+          const headP = Math.max(0, Math.min(1, highwayP / 0.40));
+          const headEl = leftColRef.current.querySelector<HTMLElement>(`.${styles.secondPartBigHeadline}`);
+          updateWordScrub(headEl, headP, "#475569", "#0B1F3A", "#B8860B", 0.35);
+        }
+
+        // 2. Subtext word scrub (0.12 to 0.85)
+        if (leftSubtextRef.current) {
+          const descP = Math.max(0, Math.min(1, (highwayP - 0.12) / 0.73));
+          const descEl = leftSubtextRef.current.querySelector<HTMLElement>(`.${styles.secondPartDescription}`);
+          updateWordScrub(descEl, descP, "#475569", "#1E293B", "#B8860B", 0.38);
+        }
+
+        // 3. Right Side Stats Track Auto-scroll & Word Scrub
+        if (statsTrackRef.current) {
+          const statsProgress = Math.max(0, Math.min(1, (highwayP - 0.08) / 0.82));
+          const maxScroll = Math.max(0, statsTrackRef.current.scrollHeight - statsTrackRef.current.clientHeight);
+          statsTrackRef.current.scrollTop = statsProgress * maxScroll;
+
+          const statItems = statsTrackRef.current.querySelectorAll<HTMLElement>(`.${styles.statEditorialItem}`);
+          const ranges = [
+            [0.04, 0.22],
+            [0.20, 0.38],
+            [0.36, 0.54],
+            [0.52, 0.70],
+            [0.68, 0.86],
+          ];
+          statItems.forEach((itemEl, idx) => {
+            const rng = ranges[idx] || [0, 1];
+            const itemP = Math.max(0, Math.min(1, (highwayP - rng[0]) / (rng[1] - rng[0])));
+
+            const valEl = itemEl.querySelector<HTMLElement>(`.${styles.secondPartStatValue}`);
+            const lblEl = itemEl.querySelector<HTMLElement>(`.${styles.secondPartStatLabel}`);
+            const dEl = itemEl.querySelector<HTMLElement>(`.${styles.secondPartStatDesc}`);
+
+            if (valEl) {
+              valEl.style.opacity = (0.25 + itemP * 0.75).toFixed(2);
+              valEl.style.color = itemP > 0.4 ? "#0B1F3A" : "rgba(11, 31, 58, 0.25)";
+            }
+            updateWordScrub(lblEl, itemP, "rgba(184, 134, 11, 0.25)", "#B8860B", "#D4AF37", 0.25);
+            updateWordScrub(dEl, Math.max(0, (itemP - 0.1) / 0.9), "rgba(87, 89, 94, 0.25)", "#334155", undefined, 0.25);
+          });
+
+          const calloutEl = statsTrackRef.current.querySelector<HTMLElement>(`.${styles.statCalloutHeadline}`);
+          if (calloutEl) {
+            const calloutP = Math.max(0, Math.min(1, (highwayP - 0.80) / 0.18));
+            updateWordScrub(calloutEl, calloutP, "rgba(11, 31, 58, 0.22)", "#0B1F3A", "#B8860B", 0.22);
+          }
+        }
+
+        if (rightColRef.current) {
+          const enterY = (1 - fadeIn) * 32;
+          rightColRef.current.style.transform = `translate3d(0, ${enterY.toFixed(1)}px, 0)`;
+        }
+      } else {
+        opacity = 0;
+      }
+
+      secondPartRef.current.style.opacity = opacity.toFixed(3);
+      secondPartRef.current.style.pointerEvents = opacity > 0.5 ? "auto" : "none";
+    }
+
+    // Smooth mouse lerp for interactive dynamic spotlight and parallax
+    const m = mousePosRef.current;
+    m.x += (m.targetX - m.x) * 0.08;
+    m.y += (m.targetY - m.y) * 0.08;
+    m.px += (m.targetPx - m.px) * 0.08;
+    m.py += (m.targetPy - m.py) * 0.08;
+
+    if (spotlightRef.current) {
+      if (p < 0.915) {
+        spotlightRef.current.style.opacity = "0";
+      } else {
+        const spotAlpha = Math.min(1, (p - 0.915) / 0.015);
+        spotlightRef.current.style.opacity = spotAlpha.toFixed(3);
+        spotlightRef.current.style.background = `radial-gradient(circle 540px at ${(m.x * 100).toFixed(1)}% ${(m.y * 100).toFixed(1)}%, rgba(212, 175, 55, 0.16) 0%, rgba(212, 175, 55, 0.05) 45%, transparent 75%)`;
+      }
+    }
+
+    // ====================================================================
+    // FULL-SCREEN SERVICES SECTION & SCROLL-DRIVEN HORIZONTAL CARDS
+    // The section slides normally from right to left, and each card covers
+    // the full screen, advancing from right to left one at a time on scroll.
+    // ====================================================================
+    if (settleStageRef.current) {
+      const winW = typeof window !== "undefined" ? window.innerWidth : 1440;
+      const totalCards = SERVICE_CARDS.length;
+
+      if (p < 0.915) {
+        settleStageRef.current.style.opacity = "0";
+        settleStageRef.current.style.pointerEvents = "none";
+        settleStageRef.current.style.transform = `translate3d(${winW}px, 0, 0)`;
+        settleStageRef.current.style.clipPath = "none";
+        if (cardsTrackRef.current) {
+          const cardEls = cardsTrackRef.current.children;
+          for (let i = 0; i < cardEls.length; i++) {
+            const el = cardEls[i] as HTMLElement | undefined;
+            if (!el) continue;
+            if (i === 0) {
+              el.style.transform = "translate3d(0, 0, 0)";
+              el.style.visibility = "visible";
+            } else {
+              el.style.transform = `translate3d(${winW}px, 0, 0)`;
+              el.style.visibility = "hidden";
+            }
+          }
+        }
+      } else if (p >= 0.915 && p < 0.928) {
+        // Stage slides in normally from right to left
+        const enterP = Math.max(0, Math.min(1, (p - 0.915) / (0.928 - 0.915)));
+        const ease = 1 - Math.pow(1 - enterP, 3);
+        const stageX = (1 - ease) * winW;
+
+        settleStageRef.current.style.opacity = "1";
+        settleStageRef.current.style.pointerEvents = "auto";
+        settleStageRef.current.style.transform = `translate3d(${stageX.toFixed(1)}px, 0, 0)`;
+        settleStageRef.current.style.clipPath = "none";
+
+        if (cardsTrackRef.current) {
+          const cardEls = cardsTrackRef.current.children;
+          for (let i = 0; i < cardEls.length; i++) {
+            const el = cardEls[i] as HTMLElement | undefined;
+            if (!el) continue;
+            if (i === 0) {
+              el.style.transform = "translate3d(0, 0, 0)";
+              el.style.visibility = "visible";
+            } else {
+              el.style.transform = `translate3d(${winW}px, 0, 0)`;
+              el.style.visibility = "hidden";
+            }
+          }
+        }
+        if (activeCardIndexRef.current !== 0) {
+          activeCardIndexRef.current = 0;
+          setActiveCardIndex(0);
+        }
+      } else {
+        // Stage is fully pinned covering the screen; first card is locked and subsequent cards overlay from right to left on scroll
+        settleStageRef.current.style.opacity = "1";
+        settleStageRef.current.style.pointerEvents = "auto";
+        settleStageRef.current.style.transform = "translate3d(0, 0, 0)";
+        settleStageRef.current.style.clipPath = "none";
+
+        const cardsP = Math.max(0, Math.min(1, (p - 0.928) / (0.998 - 0.928)));
+        const cardFloat = cardsP * (totalCards - 1);
+        const currentIdx = Math.min(totalCards - 1, Math.round(cardFloat));
+
+        if (currentIdx !== activeCardIndexRef.current) {
+          activeCardIndexRef.current = currentIdx;
+          setActiveCardIndex(currentIdx);
+        }
+
+        if (cardsTrackRef.current) {
+          const cardEls = cardsTrackRef.current.children;
+          for (let i = 0; i < totalCards; i++) {
+            const el = cardEls[i] as HTMLElement | undefined;
+            if (!el) continue;
+            if (i === 0) {
+              // First card / image remains locked in place on screen
+              el.style.transform = "translate3d(0, 0, 0)";
+              el.style.visibility = "visible";
+            } else {
+              // Subsequent cards overlay on top from right to left as user scrolls
+              if (cardFloat <= i - 1) {
+                el.style.transform = `translate3d(${winW}px, 0, 0)`;
+                el.style.visibility = "hidden";
+              } else if (cardFloat >= i) {
+                el.style.transform = "translate3d(0, 0, 0)";
+                el.style.visibility = "visible";
+              } else {
+                const overlayP = cardFloat - (i - 1);
+                const cardX = (1 - overlayP) * winW;
+                el.style.transform = `translate3d(${cardX.toFixed(1)}px, 0, 0)`;
+                el.style.visibility = "visible";
+              }
+            }
+          }
+        }
+      }
+    }
+  });
+
+  return (
+    <div className={styles.overlay}>
+      {/* BLACK PART: ROADSIDE MILESTONE TRACK
+          Text cards enter from the right side of the screen and travel across
+          to the left side as the truck moves forward along the road */}
+      <div ref={underRoadRef} className={styles.underRoadSection} aria-live="polite">
+        <div ref={trackRef} className={styles.roadTextTrack}>
+          {STORY_POINTS.map((point, index) => {
+            const Icon = MILESTONE_ICONS[index] || Globe;
+            return (
+              <div
+                key={point.id}
+                className={styles.roadCard}
+              >
+                <div className={styles.milestoneIconRow}>
+                  <Icon className={styles.milestoneIcon} strokeWidth={1.5} />
+                  <span className={styles.milestoneTag}>{point.eyebrow}</span>
+                </div>
+                <h3 className={styles.milestoneHeadline}>
+                  {renderScrubText(point.headline, `mhead-${point.id}`, point.emphasis)}
+                </h3>
+                <div className={styles.milestoneBar} />
+                <p className={styles.milestoneDescription}>
+                  {renderScrubText(point.description, `mdesc-${point.id}`)}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* SECOND PART (VERTICAL ROAD HERO): MINING DISCOVERY EDITORIAL & STATS */}
+      <div
+        ref={secondPartRef}
+        className={styles.secondPartSidesWrap}
+        aria-label="One platform. Every major mining audience."
+      >
+        {/* Left Side: Big Heading (Matching user picture) */}
+        <div ref={leftColRef} className={styles.secondPartLeftSide}>
+          <h2 className={styles.secondPartBigHeadline}>
+            {renderScrubText("One platform. Every major mining audience.", "bighead", "major")}
+          </h2>
+        </div>
+
+        {/* Left Side: Subtext Little Down (Bottom-Left) */}
+        <div ref={leftSubtextRef} className={styles.secondPartLeftBottom}>
+          <p className={styles.secondPartDescription}>
+            {renderScrubText(
+              "Mining Discovery bridges the gap between mining companies and the global investment community through targeted editorial coverage and market intelligence. Connecting global mining companies directly with institutional investors, analysts, and executive decision-makers.",
+              "bigdesc",
+              "investors"
+            )}
+          </p>
+        </div>
+
+        {/* Right Side: Main Data with Signs (matching Pic 1 reference) */}
+        <div ref={rightColRef} className={styles.secondPartRightSide}>
+          <div ref={statsTrackRef} className={styles.statsScrollTrack}>
+            {/* Point 1: 150,000+ Active Monthly Audience */}
+            <div className={styles.statEditorialItem}>
+              {/* Sign 1: Audience & Executive Investor Profile */}
+              <div className={styles.statSignWrap} aria-hidden="true">
+                <svg className={styles.statItemSign} viewBox="0 0 48 48" fill="none">
+                  {/* Subtle matrix lattice background */}
+                  <g opacity="0.18" fill="#0b1f3a">
+                    <circle cx="4" cy="4" r="0.85" /><circle cx="8" cy="4" r="0.85" /><circle cx="12" cy="4" r="0.85" /><circle cx="16" cy="4" r="0.85" /><circle cx="20" cy="4" r="0.85" /><circle cx="24" cy="4" r="0.85" /><circle cx="28" cy="4" r="0.85" /><circle cx="32" cy="4" r="0.85" /><circle cx="36" cy="4" r="0.85" /><circle cx="40" cy="4" r="0.85" /><circle cx="44" cy="4" r="0.85" />
+                    <circle cx="4" cy="8" r="0.85" /><circle cx="8" cy="8" r="0.85" /><circle cx="12" cy="8" r="0.85" /><circle cx="16" cy="8" r="0.85" /><circle cx="20" cy="8" r="0.85" /><circle cx="24" cy="8" r="0.85" /><circle cx="28" cy="8" r="0.85" /><circle cx="32" cy="8" r="0.85" /><circle cx="36" cy="8" r="0.85" /><circle cx="40" cy="8" r="0.85" /><circle cx="44" cy="8" r="0.85" />
+                    <circle cx="4" cy="12" r="0.85" /><circle cx="8" cy="12" r="0.85" /><circle cx="12" cy="12" r="0.85" /><circle cx="16" cy="12" r="0.85" /><circle cx="20" cy="12" r="0.85" /><circle cx="24" cy="12" r="0.85" /><circle cx="28" cy="12" r="0.85" /><circle cx="32" cy="12" r="0.85" /><circle cx="36" cy="12" r="0.85" /><circle cx="40" cy="12" r="0.85" /><circle cx="44" cy="12" r="0.85" />
+                    <circle cx="4" cy="16" r="0.85" /><circle cx="8" cy="16" r="0.85" /><circle cx="12" cy="16" r="0.85" /><circle cx="16" cy="16" r="0.85" /><circle cx="20" cy="16" r="0.85" /><circle cx="24" cy="16" r="0.85" /><circle cx="28" cy="16" r="0.85" /><circle cx="32" cy="16" r="0.85" /><circle cx="36" cy="16" r="0.85" /><circle cx="40" cy="16" r="0.85" /><circle cx="44" cy="16" r="0.85" />
+                    <circle cx="4" cy="20" r="0.85" /><circle cx="8" cy="20" r="0.85" /><circle cx="12" cy="20" r="0.85" /><circle cx="16" cy="20" r="0.85" /><circle cx="20" cy="20" r="0.85" /><circle cx="24" cy="20" r="0.85" /><circle cx="28" cy="20" r="0.85" /><circle cx="32" cy="20" r="0.85" /><circle cx="36" cy="20" r="0.85" /><circle cx="40" cy="20" r="0.85" /><circle cx="44" cy="20" r="0.85" />
+                    <circle cx="4" cy="24" r="0.85" /><circle cx="8" cy="24" r="0.85" /><circle cx="12" cy="24" r="0.85" /><circle cx="16" cy="24" r="0.85" /><circle cx="20" cy="24" r="0.85" /><circle cx="24" cy="24" r="0.85" /><circle cx="28" cy="24" r="0.85" /><circle cx="32" cy="24" r="0.85" /><circle cx="36" cy="24" r="0.85" /><circle cx="40" cy="24" r="0.85" /><circle cx="44" cy="24" r="0.85" />
+                    <circle cx="4" cy="28" r="0.85" /><circle cx="8" cy="28" r="0.85" /><circle cx="12" cy="28" r="0.85" /><circle cx="16" cy="28" r="0.85" /><circle cx="20" cy="28" r="0.85" /><circle cx="24" cy="28" r="0.85" /><circle cx="28" cy="28" r="0.85" /><circle cx="32" cy="28" r="0.85" /><circle cx="36" cy="28" r="0.85" /><circle cx="40" cy="28" r="0.85" /><circle cx="44" cy="28" r="0.85" />
+                    <circle cx="4" cy="32" r="0.85" /><circle cx="8" cy="32" r="0.85" /><circle cx="12" cy="32" r="0.85" /><circle cx="16" cy="32" r="0.85" /><circle cx="20" cy="32" r="0.85" /><circle cx="24" cy="32" r="0.85" /><circle cx="28" cy="32" r="0.85" /><circle cx="32" cy="32" r="0.85" /><circle cx="36" cy="32" r="0.85" /><circle cx="40" cy="32" r="0.85" /><circle cx="44" cy="32" r="0.85" />
+                    <circle cx="4" cy="36" r="0.85" /><circle cx="8" cy="36" r="0.85" /><circle cx="12" cy="36" r="0.85" /><circle cx="16" cy="36" r="0.85" /><circle cx="20" cy="36" r="0.85" /><circle cx="24" cy="36" r="0.85" /><circle cx="28" cy="36" r="0.85" /><circle cx="32" cy="36" r="0.85" /><circle cx="36" cy="36" r="0.85" /><circle cx="40" cy="36" r="0.85" /><circle cx="44" cy="36" r="0.85" />
+                    <circle cx="4" cy="40" r="0.85" /><circle cx="8" cy="40" r="0.85" /><circle cx="12" cy="40" r="0.85" /><circle cx="16" cy="40" r="0.85" /><circle cx="20" cy="40" r="0.85" /><circle cx="24" cy="40" r="0.85" /><circle cx="28" cy="40" r="0.85" /><circle cx="32" cy="40" r="0.85" /><circle cx="36" cy="40" r="0.85" /><circle cx="40" cy="40" r="0.85" /><circle cx="44" cy="40" r="0.85" />
+                    <circle cx="4" cy="44" r="0.85" /><circle cx="8" cy="44" r="0.85" /><circle cx="12" cy="44" r="0.85" /><circle cx="16" cy="44" r="0.85" /><circle cx="20" cy="44" r="0.85" /><circle cx="24" cy="44" r="0.85" /><circle cx="28" cy="44" r="0.85" /><circle cx="32" cy="44" r="0.85" /><circle cx="36" cy="44" r="0.85" /><circle cx="40" cy="44" r="0.85" /><circle cx="44" cy="44" r="0.85" />
+                  </g>
+                  {/* Dark Audience / Executive Investor Profile dots */}
+                  <g fill="#0b1f3a">
+                    {/* Head */}
+                    <circle cx="24" cy="6" r="2.1" />
+                    <circle cx="20" cy="9" r="2.0" /><circle cx="24" cy="9" r="2.1" /><circle cx="28" cy="9" r="2.0" />
+                    <circle cx="18" cy="13" r="2.0" /><circle cx="22" cy="13" r="2.0" /><circle cx="26" cy="13" r="2.0" /><circle cx="30" cy="13" r="2.0" />
+                    <circle cx="20" cy="17" r="2.0" /><circle cx="24" cy="17" r="2.1" /><circle cx="28" cy="17" r="2.0" />
+                    <circle cx="24" cy="20" r="2.1" />
+                    {/* Shoulders & Mantle */}
+                    <circle cx="20" cy="24" r="2.0" /><circle cx="24" cy="24" r="2.1" /><circle cx="28" cy="24" r="2.0" />
+                    <circle cx="15" cy="27" r="2.0" /><circle cx="33" cy="27" r="2.0" />
+                    <circle cx="11" cy="31" r="2.0" /><circle cx="37" cy="31" r="2.0" />
+                    <circle cx="8" cy="36" r="2.0" /><circle cx="40" cy="36" r="2.0" />
+                    {/* Base */}
+                    <circle cx="8" cy="40" r="1.8" /><circle cx="12" cy="40" r="1.8" /><circle cx="16" cy="40" r="1.8" /><circle cx="20" cy="40" r="1.8" />
+                    <circle cx="24" cy="40" r="1.8" /><circle cx="28" cy="40" r="1.8" /><circle cx="32" cy="40" r="1.8" /><circle cx="36" cy="40" r="1.8" /><circle cx="40" cy="40" r="1.8" />
+                  </g>
+                </svg>
+              </div>
+              <div className={styles.secondPartStatValue}>150,000+</div>
+              <div className={styles.secondPartStatLabel}>
+                {renderScrubText("ACTIVE MONTHLY AUDIENCE", "statlbl-1")}
+              </div>
+              <p className={styles.secondPartStatDesc}>
+                {renderScrubText("Institutional investors, mining executives, and industry analysts reading market updates.", "statdesc-1")}
+              </p>
+            </div>
+
+            {/* Point 2: 40,000+ Newsletter Subscribers */}
+            <div className={styles.statEditorialItem}>
+              {/* Sign 2: Newsletter Mail Envelope */}
+              <div className={styles.statSignWrap} aria-hidden="true">
+                <svg className={styles.statItemSign} viewBox="0 0 48 48" fill="none">
+                  {/* Subtle matrix lattice background */}
+                  <g opacity="0.18" fill="#0b1f3a">
+                    <circle cx="4" cy="4" r="0.85" /><circle cx="8" cy="4" r="0.85" /><circle cx="12" cy="4" r="0.85" /><circle cx="16" cy="4" r="0.85" /><circle cx="20" cy="4" r="0.85" /><circle cx="24" cy="4" r="0.85" /><circle cx="28" cy="4" r="0.85" /><circle cx="32" cy="4" r="0.85" /><circle cx="36" cy="4" r="0.85" /><circle cx="40" cy="4" r="0.85" /><circle cx="44" cy="4" r="0.85" />
+                    <circle cx="4" cy="8" r="0.85" /><circle cx="8" cy="8" r="0.85" /><circle cx="12" cy="8" r="0.85" /><circle cx="16" cy="8" r="0.85" /><circle cx="20" cy="8" r="0.85" /><circle cx="24" cy="8" r="0.85" /><circle cx="28" cy="8" r="0.85" /><circle cx="32" cy="8" r="0.85" /><circle cx="36" cy="8" r="0.85" /><circle cx="40" cy="8" r="0.85" /><circle cx="44" cy="8" r="0.85" />
+                    <circle cx="4" cy="12" r="0.85" /><circle cx="8" cy="12" r="0.85" /><circle cx="12" cy="12" r="0.85" /><circle cx="16" cy="12" r="0.85" /><circle cx="20" cy="12" r="0.85" /><circle cx="24" cy="12" r="0.85" /><circle cx="28" cy="12" r="0.85" /><circle cx="32" cy="12" r="0.85" /><circle cx="36" cy="12" r="0.85" /><circle cx="40" cy="12" r="0.85" /><circle cx="44" cy="12" r="0.85" />
+                    <circle cx="4" cy="16" r="0.85" /><circle cx="8" cy="16" r="0.85" /><circle cx="12" cy="16" r="0.85" /><circle cx="16" cy="16" r="0.85" /><circle cx="20" cy="16" r="0.85" /><circle cx="24" cy="16" r="0.85" /><circle cx="28" cy="16" r="0.85" /><circle cx="32" cy="16" r="0.85" /><circle cx="36" cy="16" r="0.85" /><circle cx="40" cy="16" r="0.85" /><circle cx="44" cy="16" r="0.85" />
+                    <circle cx="4" cy="20" r="0.85" /><circle cx="8" cy="20" r="0.85" /><circle cx="12" cy="20" r="0.85" /><circle cx="16" cy="20" r="0.85" /><circle cx="20" cy="20" r="0.85" /><circle cx="24" cy="20" r="0.85" /><circle cx="28" cy="20" r="0.85" /><circle cx="32" cy="20" r="0.85" /><circle cx="36" cy="20" r="0.85" /><circle cx="40" cy="20" r="0.85" /><circle cx="44" cy="20" r="0.85" />
+                    <circle cx="4" cy="24" r="0.85" /><circle cx="8" cy="24" r="0.85" /><circle cx="12" cy="24" r="0.85" /><circle cx="16" cy="24" r="0.85" /><circle cx="20" cy="24" r="0.85" /><circle cx="24" cy="24" r="0.85" /><circle cx="28" cy="24" r="0.85" /><circle cx="32" cy="24" r="0.85" /><circle cx="36" cy="24" r="0.85" /><circle cx="40" cy="24" r="0.85" /><circle cx="44" cy="24" r="0.85" />
+                    <circle cx="4" cy="28" r="0.85" /><circle cx="8" cy="28" r="0.85" /><circle cx="12" cy="28" r="0.85" /><circle cx="16" cy="28" r="0.85" /><circle cx="20" cy="28" r="0.85" /><circle cx="24" cy="28" r="0.85" /><circle cx="28" cy="28" r="0.85" /><circle cx="32" cy="28" r="0.85" /><circle cx="36" cy="28" r="0.85" /><circle cx="40" cy="28" r="0.85" /><circle cx="44" cy="28" r="0.85" />
+                    <circle cx="4" cy="32" r="0.85" /><circle cx="8" cy="32" r="0.85" /><circle cx="12" cy="32" r="0.85" /><circle cx="16" cy="32" r="0.85" /><circle cx="20" cy="32" r="0.85" /><circle cx="24" cy="32" r="0.85" /><circle cx="28" cy="32" r="0.85" /><circle cx="32" cy="32" r="0.85" /><circle cx="36" cy="32" r="0.85" /><circle cx="40" cy="32" r="0.85" /><circle cx="44" cy="32" r="0.85" />
+                    <circle cx="4" cy="36" r="0.85" /><circle cx="8" cy="36" r="0.85" /><circle cx="12" cy="36" r="0.85" /><circle cx="16" cy="36" r="0.85" /><circle cx="20" cy="36" r="0.85" /><circle cx="24" cy="36" r="0.85" /><circle cx="28" cy="36" r="0.85" /><circle cx="32" cy="36" r="0.85" /><circle cx="36" cy="36" r="0.85" /><circle cx="40" cy="36" r="0.85" /><circle cx="44" cy="36" r="0.85" />
+                    <circle cx="4" cy="40" r="0.85" /><circle cx="8" cy="40" r="0.85" /><circle cx="12" cy="40" r="0.85" /><circle cx="16" cy="40" r="0.85" /><circle cx="20" cy="40" r="0.85" /><circle cx="24" cy="40" r="0.85" /><circle cx="28" cy="40" r="0.85" /><circle cx="32" cy="40" r="0.85" /><circle cx="36" cy="40" r="0.85" /><circle cx="40" cy="40" r="0.85" /><circle cx="44" cy="40" r="0.85" />
+                    <circle cx="4" cy="44" r="0.85" /><circle cx="8" cy="44" r="0.85" /><circle cx="12" cy="44" r="0.85" /><circle cx="16" cy="44" r="0.85" /><circle cx="20" cy="44" r="0.85" /><circle cx="24" cy="44" r="0.85" /><circle cx="28" cy="44" r="0.85" /><circle cx="32" cy="44" r="0.85" /><circle cx="36" cy="44" r="0.85" /><circle cx="40" cy="44" r="0.85" /><circle cx="44" cy="44" r="0.85" />
+                  </g>
+                  {/* Dark Newsletter Mail Envelope dots */}
+                  <g fill="#0b1f3a">
+                    {/* Envelope Rectangle */}
+                    <circle cx="8" cy="12" r="2.0" /><circle cx="12" cy="12" r="2.0" /><circle cx="16" cy="12" r="2.0" /><circle cx="20" cy="12" r="2.0" /><circle cx="24" cy="12" r="2.0" /><circle cx="28" cy="12" r="2.0" /><circle cx="32" cy="12" r="2.0" /><circle cx="36" cy="12" r="2.0" /><circle cx="40" cy="12" r="2.0" />
+                    <circle cx="8" cy="16" r="2.0" /><circle cx="8" cy="20" r="2.0" /><circle cx="8" cy="24" r="2.0" /><circle cx="8" cy="28" r="2.0" /><circle cx="8" cy="32" r="2.0" />
+                    <circle cx="40" cy="16" r="2.0" /><circle cx="40" cy="20" r="2.0" /><circle cx="40" cy="24" r="2.0" /><circle cx="40" cy="28" r="2.0" /><circle cx="40" cy="32" r="2.0" />
+                    <circle cx="8" cy="36" r="2.0" /><circle cx="12" cy="36" r="2.0" /><circle cx="16" cy="36" r="2.0" /><circle cx="20" cy="36" r="2.0" /><circle cx="24" cy="36" r="2.0" /><circle cx="28" cy="36" r="2.0" /><circle cx="32" cy="36" r="2.0" /><circle cx="36" cy="36" r="2.0" /><circle cx="40" cy="36" r="2.0" />
+                    {/* Flap V fold */}
+                    <circle cx="12" cy="16" r="2.0" /><circle cx="36" cy="16" r="2.0" />
+                    <circle cx="16" cy="20" r="2.0" /><circle cx="32" cy="20" r="2.0" />
+                    <circle cx="20" cy="24" r="2.0" /><circle cx="28" cy="24" r="2.0" />
+                    <circle cx="24" cy="28" r="2.2" />
+                    {/* Inner bottom folds */}
+                    <circle cx="12" cy="32" r="1.8" /><circle cx="36" cy="32" r="1.8" />
+                    <circle cx="16" cy="28" r="1.8" /><circle cx="32" cy="28" r="1.8" />
+                  </g>
+                </svg>
+              </div>
+              <div className={styles.secondPartStatValue}>40,000+</div>
+              <div className={styles.secondPartStatLabel}>
+                {renderScrubText("NEWSLETTER SUBSCRIBERS", "statlbl-2")}
+              </div>
+              <p className={styles.secondPartStatDesc}>
+                {renderScrubText("Weekly executive briefing delivered directly to decision-maker inboxes worldwide.", "statdesc-2")}
+              </p>
+            </div>
+
+            {/* Point 3: 450+ Mining Companies Featured */}
+            <div className={styles.statEditorialItem}>
+              {/* Sign 3: Mining Industry Crossed Pickaxes */}
+              <div className={styles.statSignWrap} aria-hidden="true">
+                <svg className={styles.statItemSign} viewBox="0 0 48 48" fill="none">
+                  {/* Subtle matrix lattice background */}
+                  <g opacity="0.18" fill="#0b1f3a">
+                    <circle cx="4" cy="4" r="0.85" /><circle cx="8" cy="4" r="0.85" /><circle cx="12" cy="4" r="0.85" /><circle cx="16" cy="4" r="0.85" /><circle cx="20" cy="4" r="0.85" /><circle cx="24" cy="4" r="0.85" /><circle cx="28" cy="4" r="0.85" /><circle cx="32" cy="4" r="0.85" /><circle cx="36" cy="4" r="0.85" /><circle cx="40" cy="4" r="0.85" /><circle cx="44" cy="4" r="0.85" />
+                    <circle cx="4" cy="8" r="0.85" /><circle cx="8" cy="8" r="0.85" /><circle cx="12" cy="8" r="0.85" /><circle cx="16" cy="8" r="0.85" /><circle cx="20" cy="8" r="0.85" /><circle cx="24" cy="8" r="0.85" /><circle cx="28" cy="8" r="0.85" /><circle cx="32" cy="8" r="0.85" /><circle cx="36" cy="8" r="0.85" /><circle cx="40" cy="8" r="0.85" /><circle cx="44" cy="8" r="0.85" />
+                    <circle cx="4" cy="12" r="0.85" /><circle cx="8" cy="12" r="0.85" /><circle cx="12" cy="12" r="0.85" /><circle cx="16" cy="12" r="0.85" /><circle cx="20" cy="12" r="0.85" /><circle cx="24" cy="12" r="0.85" /><circle cx="28" cy="12" r="0.85" /><circle cx="32" cy="12" r="0.85" /><circle cx="36" cy="12" r="0.85" /><circle cx="40" cy="12" r="0.85" /><circle cx="44" cy="12" r="0.85" />
+                    <circle cx="4" cy="16" r="0.85" /><circle cx="8" cy="16" r="0.85" /><circle cx="12" cy="16" r="0.85" /><circle cx="16" cy="16" r="0.85" /><circle cx="20" cy="16" r="0.85" /><circle cx="24" cy="16" r="0.85" /><circle cx="28" cy="16" r="0.85" /><circle cx="32" cy="16" r="0.85" /><circle cx="36" cy="16" r="0.85" /><circle cx="40" cy="16" r="0.85" /><circle cx="44" cy="16" r="0.85" />
+                    <circle cx="4" cy="20" r="0.85" /><circle cx="8" cy="20" r="0.85" /><circle cx="12" cy="20" r="0.85" /><circle cx="16" cy="20" r="0.85" /><circle cx="20" cy="20" r="0.85" /><circle cx="24" cy="20" r="0.85" /><circle cx="28" cy="20" r="0.85" /><circle cx="32" cy="20" r="0.85" /><circle cx="36" cy="20" r="0.85" /><circle cx="40" cy="20" r="0.85" /><circle cx="44" cy="20" r="0.85" />
+                    <circle cx="4" cy="24" r="0.85" /><circle cx="8" cy="24" r="0.85" /><circle cx="12" cy="24" r="0.85" /><circle cx="16" cy="24" r="0.85" /><circle cx="20" cy="24" r="0.85" /><circle cx="24" cy="24" r="0.85" /><circle cx="28" cy="24" r="0.85" /><circle cx="32" cy="24" r="0.85" /><circle cx="36" cy="24" r="0.85" /><circle cx="40" cy="24" r="0.85" /><circle cx="44" cy="24" r="0.85" />
+                    <circle cx="4" cy="28" r="0.85" /><circle cx="8" cy="28" r="0.85" /><circle cx="12" cy="28" r="0.85" /><circle cx="16" cy="28" r="0.85" /><circle cx="20" cy="28" r="0.85" /><circle cx="24" cy="28" r="0.85" /><circle cx="28" cy="28" r="0.85" /><circle cx="32" cy="28" r="0.85" /><circle cx="36" cy="28" r="0.85" /><circle cx="40" cy="28" r="0.85" /><circle cx="44" cy="28" r="0.85" />
+                    <circle cx="4" cy="32" r="0.85" /><circle cx="8" cy="32" r="0.85" /><circle cx="12" cy="32" r="0.85" /><circle cx="16" cy="32" r="0.85" /><circle cx="20" cy="32" r="0.85" /><circle cx="24" cy="32" r="0.85" /><circle cx="28" cy="32" r="0.85" /><circle cx="32" cy="32" r="0.85" /><circle cx="36" cy="32" r="0.85" /><circle cx="40" cy="32" r="0.85" /><circle cx="44" cy="32" r="0.85" />
+                    <circle cx="4" cy="36" r="0.85" /><circle cx="8" cy="36" r="0.85" /><circle cx="12" cy="36" r="0.85" /><circle cx="16" cy="36" r="0.85" /><circle cx="20" cy="36" r="0.85" /><circle cx="24" cy="36" r="0.85" /><circle cx="28" cy="36" r="0.85" /><circle cx="32" cy="36" r="0.85" /><circle cx="36" cy="36" r="0.85" /><circle cx="40" cy="36" r="0.85" /><circle cx="44" cy="36" r="0.85" />
+                    <circle cx="4" cy="40" r="0.85" /><circle cx="8" cy="40" r="0.85" /><circle cx="12" cy="40" r="0.85" /><circle cx="16" cy="40" r="0.85" /><circle cx="20" cy="40" r="0.85" /><circle cx="24" cy="40" r="0.85" /><circle cx="28" cy="40" r="0.85" /><circle cx="32" cy="40" r="0.85" /><circle cx="36" cy="40" r="0.85" /><circle cx="40" cy="40" r="0.85" /><circle cx="44" cy="40" r="0.85" />
+                    <circle cx="4" cy="44" r="0.85" /><circle cx="8" cy="44" r="0.85" /><circle cx="12" cy="44" r="0.85" /><circle cx="16" cy="44" r="0.85" /><circle cx="20" cy="44" r="0.85" /><circle cx="24" cy="44" r="0.85" /><circle cx="28" cy="44" r="0.85" /><circle cx="32" cy="44" r="0.85" /><circle cx="36" cy="44" r="0.85" /><circle cx="40" cy="44" r="0.85" /><circle cx="44" cy="44" r="0.85" />
+                  </g>
+                  {/* Dark Mining Crossed Pickaxes (⚒) dots */}
+                  <g fill="#0b1f3a">
+                    {/* Center crossing point */}
+                    <circle cx="24" cy="22" r="2.1" /><circle cx="24" cy="26" r="2.1" />
+                    {/* Handle A (slanted / ) */}
+                    <circle cx="8" cy="42" r="1.9" /><circle cx="12" cy="38" r="1.9" /><circle cx="16" cy="34" r="1.9" /><circle cx="20" cy="30" r="1.9" /><circle cx="28" cy="18" r="1.9" /><circle cx="32" cy="14" r="1.9" /><circle cx="36" cy="10" r="2.0" />
+                    {/* Handle B (slanted \ ) */}
+                    <circle cx="40" cy="42" r="1.9" /><circle cx="36" cy="38" r="1.9" /><circle cx="32" cy="34" r="1.9" /><circle cx="28" cy="30" r="1.9" /><circle cx="20" cy="18" r="1.9" /><circle cx="16" cy="14" r="1.9" /><circle cx="12" cy="10" r="2.0" />
+                    {/* Pick Head A (top-right curved pick head) */}
+                    <circle cx="28" cy="6" r="2.0" /><circle cx="32" cy="5" r="2.0" /><circle cx="36" cy="6" r="2.1" /><circle cx="40" cy="8" r="2.0" /><circle cx="43" cy="12" r="2.0" /><circle cx="44" cy="17" r="1.9" /><circle cx="41" cy="14" r="1.9" />
+                    {/* Pick Head B (top-left curved pick head) */}
+                    <circle cx="20" cy="6" r="2.0" /><circle cx="16" cy="5" r="2.0" /><circle cx="12" cy="6" r="2.1" /><circle cx="8" cy="8" r="2.0" /><circle cx="5" cy="12" r="2.0" /><circle cx="4" cy="17" r="1.9" /><circle cx="7" cy="14" r="1.9" />
+                  </g>
+                </svg>
+              </div>
+              <div className={styles.secondPartStatValue}>450+</div>
+              <div className={styles.secondPartStatLabel}>
+                {renderScrubText("MINING COMPANIES FEATURED", "statlbl-3")}
+              </div>
+              <p className={styles.secondPartStatDesc}>
+                {renderScrubText("From junior exploration companies to Tier-1 global mining producers.", "statdesc-3")}
+              </p>
+            </div>
+
+            {/* Point 4: 8+ Years Industry Coverage */}
+            <div className={styles.statEditorialItem}>
+              {/* Sign 4: Industry Coverage Calendar & Timeline */}
+              <div className={styles.statSignWrap} aria-hidden="true">
+                <svg className={styles.statItemSign} viewBox="0 0 48 48" fill="none">
+                  {/* Matrix lattice background */}
+                  <g opacity="0.18" fill="#0b1f3a">
+                    <circle cx="4" cy="4" r="0.85" /><circle cx="8" cy="4" r="0.85" /><circle cx="12" cy="4" r="0.85" /><circle cx="16" cy="4" r="0.85" /><circle cx="20" cy="4" r="0.85" /><circle cx="24" cy="4" r="0.85" /><circle cx="28" cy="4" r="0.85" /><circle cx="32" cy="4" r="0.85" /><circle cx="36" cy="4" r="0.85" /><circle cx="40" cy="4" r="0.85" /><circle cx="44" cy="4" r="0.85" />
+                    <circle cx="4" cy="8" r="0.85" /><circle cx="8" cy="8" r="0.85" /><circle cx="12" cy="8" r="0.85" /><circle cx="16" cy="8" r="0.85" /><circle cx="20" cy="8" r="0.85" /><circle cx="24" cy="8" r="0.85" /><circle cx="28" cy="8" r="0.85" /><circle cx="32" cy="8" r="0.85" /><circle cx="36" cy="8" r="0.85" /><circle cx="40" cy="8" r="0.85" /><circle cx="44" cy="8" r="0.85" />
+                    <circle cx="4" cy="12" r="0.85" /><circle cx="8" cy="12" r="0.85" /><circle cx="12" cy="12" r="0.85" /><circle cx="16" cy="12" r="0.85" /><circle cx="20" cy="12" r="0.85" /><circle cx="24" cy="12" r="0.85" /><circle cx="28" cy="12" r="0.85" /><circle cx="32" cy="12" r="0.85" /><circle cx="36" cy="12" r="0.85" /><circle cx="40" cy="12" r="0.85" /><circle cx="44" cy="12" r="0.85" />
+                    <circle cx="4" cy="16" r="0.85" /><circle cx="8" cy="16" r="0.85" /><circle cx="12" cy="16" r="0.85" /><circle cx="16" cy="16" r="0.85" /><circle cx="20" cy="16" r="0.85" /><circle cx="24" cy="16" r="0.85" /><circle cx="28" cy="16" r="0.85" /><circle cx="32" cy="16" r="0.85" /><circle cx="36" cy="16" r="0.85" /><circle cx="40" cy="16" r="0.85" /><circle cx="44" cy="16" r="0.85" />
+                    <circle cx="4" cy="20" r="0.85" /><circle cx="8" cy="20" r="0.85" /><circle cx="12" cy="20" r="0.85" /><circle cx="16" cy="20" r="0.85" /><circle cx="20" cy="20" r="0.85" /><circle cx="24" cy="20" r="0.85" /><circle cx="28" cy="20" r="0.85" /><circle cx="32" cy="20" r="0.85" /><circle cx="36" cy="20" r="0.85" /><circle cx="40" cy="20" r="0.85" /><circle cx="44" cy="20" r="0.85" />
+                    <circle cx="4" cy="24" r="0.85" /><circle cx="8" cy="24" r="0.85" /><circle cx="12" cy="24" r="0.85" /><circle cx="16" cy="24" r="0.85" /><circle cx="20" cy="24" r="0.85" /><circle cx="24" cy="24" r="0.85" /><circle cx="28" cy="24" r="0.85" /><circle cx="32" cy="24" r="0.85" /><circle cx="36" cy="24" r="0.85" /><circle cx="40" cy="24" r="0.85" /><circle cx="44" cy="24" r="0.85" />
+                    <circle cx="4" cy="28" r="0.85" /><circle cx="8" cy="28" r="0.85" /><circle cx="12" cy="28" r="0.85" /><circle cx="16" cy="28" r="0.85" /><circle cx="20" cy="28" r="0.85" /><circle cx="24" cy="28" r="0.85" /><circle cx="28" cy="28" r="0.85" /><circle cx="32" cy="28" r="0.85" /><circle cx="36" cy="28" r="0.85" /><circle cx="40" cy="28" r="0.85" /><circle cx="44" cy="28" r="0.85" />
+                    <circle cx="4" cy="32" r="0.85" /><circle cx="8" cy="32" r="0.85" /><circle cx="12" cy="32" r="0.85" /><circle cx="16" cy="32" r="0.85" /><circle cx="20" cy="32" r="0.85" /><circle cx="24" cy="32" r="0.85" /><circle cx="28" cy="32" r="0.85" /><circle cx="32" cy="32" r="0.85" /><circle cx="36" cy="32" r="0.85" /><circle cx="40" cy="32" r="0.85" /><circle cx="44" cy="32" r="0.85" />
+                    <circle cx="4" cy="36" r="0.85" /><circle cx="8" cy="36" r="0.85" /><circle cx="12" cy="36" r="0.85" /><circle cx="16" cy="36" r="0.85" /><circle cx="20" cy="36" r="0.85" /><circle cx="24" cy="36" r="0.85" /><circle cx="28" cy="36" r="0.85" /><circle cx="32" cy="36" r="0.85" /><circle cx="36" cy="36" r="0.85" /><circle cx="40" cy="36" r="0.85" /><circle cx="44" cy="36" r="0.85" />
+                    <circle cx="4" cy="40" r="0.85" /><circle cx="8" cy="40" r="0.85" /><circle cx="12" cy="40" r="0.85" /><circle cx="16" cy="40" r="0.85" /><circle cx="20" cy="40" r="0.85" /><circle cx="24" cy="40" r="0.85" /><circle cx="28" cy="40" r="0.85" /><circle cx="32" cy="40" r="0.85" /><circle cx="36" cy="40" r="0.85" /><circle cx="40" cy="40" r="0.85" /><circle cx="44" cy="40" r="0.85" />
+                    <circle cx="4" cy="44" r="0.85" /><circle cx="8" cy="44" r="0.85" /><circle cx="12" cy="44" r="0.85" /><circle cx="16" cy="44" r="0.85" /><circle cx="20" cy="44" r="0.85" /><circle cx="24" cy="44" r="0.85" /><circle cx="28" cy="44" r="0.85" /><circle cx="32" cy="44" r="0.85" /><circle cx="36" cy="44" r="0.85" /><circle cx="40" cy="44" r="0.85" /><circle cx="44" cy="44" r="0.85" />
+                  </g>
+                  {/* Dark Calendar & Date Grid dots */}
+                  <g fill="#0b1f3a">
+                    {/* Top binders */}
+                    <circle cx="14" cy="6" r="2.0" /><circle cx="14" cy="10" r="2.0" />
+                    <circle cx="34" cy="6" r="2.0" /><circle cx="34" cy="10" r="2.0" />
+                    {/* Top header bar */}
+                    <circle cx="8" cy="12" r="2.0" /><circle cx="12" cy="12" r="2.0" /><circle cx="16" cy="12" r="2.0" /><circle cx="20" cy="12" r="2.0" /><circle cx="24" cy="12" r="2.0" /><circle cx="28" cy="12" r="2.0" /><circle cx="32" cy="12" r="2.0" /><circle cx="36" cy="12" r="2.0" /><circle cx="40" cy="12" r="2.0" />
+                    {/* Outer frame */}
+                    <circle cx="8" cy="16" r="2.0" /><circle cx="8" cy="20" r="2.0" /><circle cx="8" cy="24" r="2.0" /><circle cx="8" cy="28" r="2.0" /><circle cx="8" cy="32" r="2.0" /><circle cx="8" cy="36" r="2.0" />
+                    <circle cx="40" cy="16" r="2.0" /><circle cx="40" cy="20" r="2.0" /><circle cx="40" cy="24" r="2.0" /><circle cx="40" cy="28" r="2.0" /><circle cx="40" cy="32" r="2.0" /><circle cx="40" cy="36" r="2.0" />
+                    <circle cx="12" cy="36" r="2.0" /><circle cx="16" cy="36" r="2.0" /><circle cx="20" cy="36" r="2.0" /><circle cx="24" cy="36" r="2.0" /><circle cx="28" cy="36" r="2.0" /><circle cx="32" cy="36" r="2.0" /><circle cx="36" cy="36" r="2.0" />
+                    {/* Internal grid dates */}
+                    <circle cx="16" cy="20" r="1.8" /><circle cx="24" cy="20" r="1.8" /><circle cx="32" cy="20" r="1.8" />
+                    <circle cx="16" cy="26" r="1.8" /><circle cx="24" cy="26" r="1.8" /><circle cx="32" cy="26" r="1.8" />
+                    <circle cx="16" cy="31" r="1.8" /><circle cx="24" cy="31" r="1.8" />
+                  </g>
+                </svg>
+              </div>
+              <div className={styles.secondPartStatValue}>8+</div>
+              <div className={styles.secondPartStatLabel}>
+                {renderScrubText("YEARS INDUSTRY COVERAGE", "statlbl-4")}
+              </div>
+              <p className={styles.secondPartStatDesc}>
+                {renderScrubText("Established track record of independent editorial authority and market intelligence.", "statdesc-4")}
+              </p>
+            </div>
+
+            {/* Point 5: 30+ Mining Jurisdictions */}
+            <div className={styles.statEditorialItem}>
+              {/* Sign 5: Global Mining Jurisdictions Globe */}
+              <div className={styles.statSignWrap} aria-hidden="true">
+                <svg className={styles.statItemSign} viewBox="0 0 48 48" fill="none">
+                  {/* Matrix lattice background */}
+                  <g opacity="0.18" fill="#0b1f3a">
+                    <circle cx="4" cy="4" r="0.85" /><circle cx="8" cy="4" r="0.85" /><circle cx="12" cy="4" r="0.85" /><circle cx="16" cy="4" r="0.85" /><circle cx="20" cy="4" r="0.85" /><circle cx="24" cy="4" r="0.85" /><circle cx="28" cy="4" r="0.85" /><circle cx="32" cy="4" r="0.85" /><circle cx="36" cy="4" r="0.85" /><circle cx="40" cy="4" r="0.85" /><circle cx="44" cy="4" r="0.85" />
+                    <circle cx="4" cy="8" r="0.85" /><circle cx="8" cy="8" r="0.85" /><circle cx="12" cy="8" r="0.85" /><circle cx="16" cy="8" r="0.85" /><circle cx="20" cy="8" r="0.85" /><circle cx="24" cy="8" r="0.85" /><circle cx="28" cy="8" r="0.85" /><circle cx="32" cy="8" r="0.85" /><circle cx="36" cy="8" r="0.85" /><circle cx="40" cy="8" r="0.85" /><circle cx="44" cy="8" r="0.85" />
+                    <circle cx="4" cy="12" r="0.85" /><circle cx="8" cy="12" r="0.85" /><circle cx="12" cy="12" r="0.85" /><circle cx="16" cy="12" r="0.85" /><circle cx="20" cy="12" r="0.85" /><circle cx="24" cy="12" r="0.85" /><circle cx="28" cy="12" r="0.85" /><circle cx="32" cy="12" r="0.85" /><circle cx="36" cy="12" r="0.85" /><circle cx="40" cy="12" r="0.85" /><circle cx="44" cy="12" r="0.85" />
+                    <circle cx="4" cy="16" r="0.85" /><circle cx="8" cy="16" r="0.85" /><circle cx="12" cy="16" r="0.85" /><circle cx="16" cy="16" r="0.85" /><circle cx="20" cy="16" r="0.85" /><circle cx="24" cy="16" r="0.85" /><circle cx="28" cy="16" r="0.85" /><circle cx="32" cy="16" r="0.85" /><circle cx="36" cy="16" r="0.85" /><circle cx="40" cy="16" r="0.85" /><circle cx="44" cy="16" r="0.85" />
+                    <circle cx="4" cy="20" r="0.85" /><circle cx="8" cy="20" r="0.85" /><circle cx="12" cy="20" r="0.85" /><circle cx="16" cy="20" r="0.85" /><circle cx="20" cy="20" r="0.85" /><circle cx="24" cy="20" r="0.85" /><circle cx="28" cy="20" r="0.85" /><circle cx="32" cy="20" r="0.85" /><circle cx="36" cy="20" r="0.85" /><circle cx="40" cy="20" r="0.85" /><circle cx="44" cy="20" r="0.85" />
+                    <circle cx="4" cy="24" r="0.85" /><circle cx="8" cy="24" r="0.85" /><circle cx="12" cy="24" r="0.85" /><circle cx="16" cy="24" r="0.85" /><circle cx="20" cy="24" r="0.85" /><circle cx="24" cy="24" r="0.85" /><circle cx="28" cy="24" r="0.85" /><circle cx="32" cy="24" r="0.85" /><circle cx="36" cy="24" r="0.85" /><circle cx="40" cy="24" r="0.85" /><circle cx="44" cy="24" r="0.85" />
+                    <circle cx="4" cy="28" r="0.85" /><circle cx="8" cy="28" r="0.85" /><circle cx="12" cy="28" r="0.85" /><circle cx="16" cy="28" r="0.85" /><circle cx="20" cy="28" r="0.85" /><circle cx="24" cy="28" r="0.85" /><circle cx="28" cy="28" r="0.85" /><circle cx="32" cy="28" r="0.85" /><circle cx="36" cy="28" r="0.85" /><circle cx="40" cy="28" r="0.85" /><circle cx="44" cy="28" r="0.85" />
+                    <circle cx="4" cy="32" r="0.85" /><circle cx="8" cy="32" r="0.85" /><circle cx="12" cy="32" r="0.85" /><circle cx="16" cy="32" r="0.85" /><circle cx="20" cy="32" r="0.85" /><circle cx="24" cy="32" r="0.85" /><circle cx="28" cy="32" r="0.85" /><circle cx="32" cy="32" r="0.85" /><circle cx="36" cy="32" r="0.85" /><circle cx="40" cy="32" r="0.85" /><circle cx="44" cy="32" r="0.85" />
+                    <circle cx="4" cy="36" r="0.85" /><circle cx="8" cy="36" r="0.85" /><circle cx="12" cy="36" r="0.85" /><circle cx="16" cy="36" r="0.85" /><circle cx="20" cy="36" r="0.85" /><circle cx="24" cy="36" r="0.85" /><circle cx="28" cy="36" r="0.85" /><circle cx="32" cy="36" r="0.85" /><circle cx="36" cy="36" r="0.85" /><circle cx="40" cy="36" r="0.85" /><circle cx="44" cy="36" r="0.85" />
+                    <circle cx="4" cy="40" r="0.85" /><circle cx="8" cy="40" r="0.85" /><circle cx="12" cy="40" r="0.85" /><circle cx="16" cy="40" r="0.85" /><circle cx="20" cy="40" r="0.85" /><circle cx="24" cy="40" r="0.85" /><circle cx="28" cy="40" r="0.85" /><circle cx="32" cy="40" r="0.85" /><circle cx="36" cy="40" r="0.85" /><circle cx="40" cy="40" r="0.85" /><circle cx="44" cy="40" r="0.85" />
+                    <circle cx="4" cy="44" r="0.85" /><circle cx="8" cy="44" r="0.85" /><circle cx="12" cy="44" r="0.85" /><circle cx="16" cy="44" r="0.85" /><circle cx="20" cy="44" r="0.85" /><circle cx="24" cy="44" r="0.85" /><circle cx="28" cy="44" r="0.85" /><circle cx="32" cy="44" r="0.85" /><circle cx="36" cy="44" r="0.85" /><circle cx="40" cy="44" r="0.85" /><circle cx="44" cy="44" r="0.85" />
+                  </g>
+                  {/* Dark Globe Coordinates dots */}
+                  <g fill="#0b1f3a">
+                    {/* Outer circle */}
+                    <circle cx="20" cy="6" r="2.0" /><circle cx="24" cy="6" r="2.0" /><circle cx="28" cy="6" r="2.0" />
+                    <circle cx="12" cy="10" r="2.0" /><circle cx="36" cy="10" r="2.0" />
+                    <circle cx="8" cy="15" r="2.0" /><circle cx="40" cy="15" r="2.0" />
+                    <circle cx="6" cy="20" r="2.0" /><circle cx="42" cy="20" r="2.0" />
+                    <circle cx="6" cy="24" r="2.1" /><circle cx="42" cy="24" r="2.1" />
+                    <circle cx="6" cy="28" r="2.0" /><circle cx="42" cy="28" r="2.0" />
+                    <circle cx="8" cy="33" r="2.0" /><circle cx="40" cy="33" r="2.0" />
+                    <circle cx="12" cy="38" r="2.0" /><circle cx="36" cy="38" r="2.0" />
+                    <circle cx="20" cy="42" r="2.0" /><circle cx="24" cy="42" r="2.0" /><circle cx="28" cy="42" r="2.0" />
+                    {/* Equator */}
+                    <circle cx="10" cy="24" r="2.0" /><circle cx="16" cy="24" r="2.0" /><circle cx="20" cy="24" r="2.0" /><circle cx="24" cy="24" r="2.1" /><circle cx="28" cy="24" r="2.0" /><circle cx="32" cy="24" r="2.0" /><circle cx="38" cy="24" r="2.0" />
+                    {/* Prime meridian */}
+                    <circle cx="24" cy="12" r="2.0" /><circle cx="24" cy="18" r="2.0" /><circle cx="24" cy="30" r="2.0" /><circle cx="24" cy="36" r="2.0" />
+                    {/* Latitudes */}
+                    <circle cx="16" cy="15" r="1.8" /><circle cx="20" cy="15" r="1.8" /><circle cx="28" cy="15" r="1.8" /><circle cx="32" cy="15" r="1.8" />
+                    <circle cx="16" cy="33" r="1.8" /><circle cx="20" cy="33" r="1.8" /><circle cx="28" cy="33" r="1.8" /><circle cx="32" cy="33" r="1.8" />
+                  </g>
+                </svg>
+              </div>
+              <div className={styles.secondPartStatValue}>30+</div>
+              <div className={styles.secondPartStatLabel}>
+                {renderScrubText("MINING JURISDICTIONS", "statlbl-5")}
+              </div>
+              <p className={styles.secondPartStatDesc}>
+                {renderScrubText("Extensive reach across key financial capitals and global mining jurisdictions.", "statdesc-5")}
+              </p>
+            </div>
+
+            {/* Streamlined Editorial Callout Block (matching user picture) */}
+            <div className={styles.statCalloutBlock}>
+              <p className={styles.statCalloutHeadline}>
+                {renderScrubText(
+                  "With direct access to institutional investors and industry analysts, your company's news reaches the decision-makers who matter most in global mining.",
+                  "callout-head",
+                  "decision-makers"
+                )}
+              </p>
+              <div className={styles.statCalloutBulletRow}>
+                <div className={styles.statCalloutBulletBadge} aria-hidden="true">
+                  <span className={styles.statCalloutBulletDot} />
+                </div>
+                <p className={styles.statCalloutBulletText}>
+                  No fragmented messaging between channels. Just one dedicated team accountable for reaching decision-makers worldwide.
+                </p>
+              </div>
+              <Link href="/about" className={styles.statCalloutBtn}>
+                <span>LEARN MORE ABOUT US</span>
+                <span className={styles.statCalloutBtnArrow} aria-hidden="true">&rarr;</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+        {/* FULL-SCREEN SERVICES STAGE (slides normally from right to left) */}
+        <div ref={settleStageRef} className={styles.settleMountainStage}>
+          {/* Subtle Architectural Grid Lines Overlay */}
+          <div className={styles.lightGridOverlay} aria-hidden="true">
+            <div className={styles.lightGridLine} />
+            <div className={styles.lightGridLine} />
+            <div className={styles.lightGridLine} />
+            <div className={styles.lightGridLine} />
+            <div className={styles.lightGridLine} />
+            <div className={styles.lightGridLine} />
+          </div>
+
+
+
+          {/* Full-Screen Horizontal Cards Slider Wrap */}
+          <div className={styles.fullScreenSliderWrap} role="region" aria-label="Services Showcase">
+            <div ref={cardsTrackRef} className={styles.fullScreenSliderTrack}>
+              {SERVICE_CARDS.map((card, idx) => {
+                const isActive = activeCardIndex === idx;
+
+                return (
+                  <div
+                    key={card.id}
+                    className={`${styles.fullScreenCardItem} ${isActive ? styles.fullScreenCardActive : ""}`}
+                    style={{
+                      zIndex: idx + 1,
+                      transform: idx === 0 ? "translate3d(0, 0, 0)" : "translate3d(100vw, 0, 0)",
+                      visibility: idx === 0 ? "visible" : "hidden",
+                    }}
+                    role="tabpanel"
+                    aria-selected={isActive}
+                    tabIndex={0}
+                  >
+                    {/* Full-bleed Background Image */}
+                    <div className={styles.cardFlickImage}>
+                      <img
+                        src={card.image}
+                        alt={card.title}
+                        loading="lazy"
+                      />
+                      <div className={styles.cardFlickGradient} />
+                    </div>
+
+                    {/* Content on the Full Screen Card */}
+                    <div className={styles.fullScreenCardContent}>
+                      <div className={styles.cardFlickHeader}>
+                        <div className={styles.cardFlickHeaderRow}>
+                          <span className={styles.cardFlickBadge}>
+                            <span className={styles.cardFlickBadgeNum}>{card.num}</span>
+                            <span className={styles.cardFlickBadgeText}>{card.category}</span>
+                          </span>
+                        </div>
+                        <h3 className={styles.cardFlickTitle}>
+                          {card.italicTitle}
+                        </h3>
+                      </div>
+
+                        <div className={styles.cardFlickFooter}>
+                          <div className={styles.cardFlickMeta}>
+                            <span className={styles.cardFlickMetaItem}>{card.metaPrice}</span>
+                            <span className={styles.cardFlickMetaDivider} aria-hidden="true" />
+                            <span className={styles.cardFlickMetaItem}>{card.metaSeason}</span>
+                          </div>
+
+                          {card.id === "monthly-magazines" ? (
+                            <div className={styles.cardFlickButtonRow}>
+                              <button
+                                type="button"
+                                className={styles.cardFlickMagazineBtn}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleOpenReader(getLatestMagazine());
+                                }}
+                                aria-label="Open latest monthly magazine in interactive flipbook"
+                              >
+                                <BookOpen size={14} />
+                                <span>READ FLIPBOOK</span>
+                                <span className={styles.cardFlickLearnMoreStar}>✦</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                className={styles.cardFlickArchiveBtn}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setActiveCatalogModal("magazines");
+                                }}
+                                aria-label="Explore all 14 published monthly editions"
+                              >
+                                <span>ALL 14 EDITIONS</span>
+                                <ArrowRight size={13} />
+                              </button>
+                            </div>
+                          ) : card.id === "weekly-newspaper" ? (
+                            <div className={styles.cardFlickButtonRow}>
+                              <button
+                                type="button"
+                                className={styles.cardFlickMagazineBtn}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const latest = newsletters[0];
+                                  if (latest) {
+                                    handleOpenDocReader({
+                                      title: "Weekly Newspaper Dispatch",
+                                      subtitle: latest.title.toUpperCase(),
+                                      pdfUrl: getProxiedPdfUrl(latest.pdf),
+                                    });
+                                  }
+                                }}
+                                aria-label="Open latest weekly newsletter in interactive flipbook"
+                              >
+                                <BookOpen size={14} />
+                                <span>READ FLIPBOOK</span>
+                                <span className={styles.cardFlickLearnMoreStar}>✦</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                className={styles.cardFlickArchiveBtn}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setActiveCatalogModal("newsletters");
+                                }}
+                                aria-label={`Explore all ${newsletters.length} weekly editions`}
+                              >
+                                <span>ALL {newsletters.length} ISSUES</span>
+                                <ArrowRight size={13} />
+                              </button>
+                            </div>
+                          ) : card.id === "articles" ? (
+                            <div className={styles.cardFlickButtonRow}>
+                              <button
+                                type="button"
+                                className={styles.cardFlickMagazineBtn}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const featured = articles[0];
+                                  if (featured) {
+                                    handleOpenDocReader({
+                                      title: "Research & Editorial Article",
+                                      subtitle: featured.title.toUpperCase(),
+                                      pdfUrl: getProxiedPdfUrl(featured.pdf),
+                                    });
+                                  }
+                                }}
+                                aria-label="Read featured research article in interactive flipbook"
+                              >
+                                <BookOpen size={14} />
+                                <span>READ FLIPBOOK</span>
+                                <span className={styles.cardFlickLearnMoreStar}>✦</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                className={styles.cardFlickArchiveBtn}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setActiveCatalogModal("articles");
+                                }}
+                                aria-label={`Explore all ${articles.length} published research articles`}
+                              >
+                                <span>ALL {articles.length} ARTICLES</span>
+                                <ArrowRight size={13} />
+                              </button>
+                            </div>
+                          ) : (
+                            <Link
+                              href="/contact"
+                              className={styles.cardFlickLearnMore}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <span>Learn More</span>
+                              <span className={styles.cardFlickLearnMoreStar}>✦</span>
+                            </Link>
+                          )}
+
+                          <p className={`${styles.cardFlickExcerpt} ${styles.cardFlickExcerptThreeLines}`}>
+                            {card.description}
+                          </p>
+
+
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Bottom Card Navigation & Indicator Bar */}
+            <div className={styles.fullScreenNavControls} aria-label="Services Navigation">
+              <button
+                type="button"
+                className={styles.fullScreenNavBtn}
+                onClick={() => scrollToCard(Math.max(0, activeCardIndex - 1))}
+                disabled={activeCardIndex === 0}
+                aria-label="Previous service card"
+              >
+                <ChevronLeft size={16} />
+              </button>
+
+              <div className={styles.fullScreenDots} aria-hidden="true">
+                {SERVICE_CARDS.map((_, dotIdx) => (
+                  <span
+                    key={dotIdx}
+                    className={`${styles.fullScreenDot} ${dotIdx === activeCardIndex ? styles.fullScreenDotActive : ""}`}
+                    onClick={() => scrollToCard(dotIdx)}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Go to slide ${dotIdx + 1}`}
+                  />
+                ))}
+              </div>
+
+              <div className={styles.fullScreenCounter}>
+                <span className={styles.fullScreenCounterActive}>
+                  {String(activeCardIndex + 1).padStart(2, "0")}
+                </span>
+                <span>/</span>
+                <span>{String(SERVICE_CARDS.length).padStart(2, "0")}</span>
+              </div>
+
+              <button
+                type="button"
+                className={styles.fullScreenNavBtn}
+                onClick={() => scrollToCard(Math.min(SERVICE_CARDS.length - 1, activeCardIndex + 1))}
+                disabled={activeCardIndex === SERVICE_CARDS.length - 1}
+                aria-label="Next service card"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          </div>
+
+      {/* Complete Magazine Archive Modal */}
+      {activeCatalogModal === "magazines" && isMounted && createPortal(
+        <div
+          className={styles.archiveModalOverlay}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setActiveCatalogModal(null);
+          }}
+          onWheel={(e) => {
+            e.stopPropagation();
+          }}
+          onTouchMove={(e) => {
+            e.stopPropagation();
+          }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Complete Monthly Magazines Catalog"
+        >
+          <div className={styles.archiveModalContent}>
+            <div className={styles.archiveModalHeader}>
+              <div className={magStyles.archiveEyebrow}>
+                <span className={magStyles.archiveEyebrowRule} aria-hidden="true" />
+                <span>Monthly Magazine Library</span>
+                <span className={magStyles.archiveEyebrowRule} aria-hidden="true" />
+              </div>
+              <button
+                type="button"
+                className={magStyles.readerCloseBtn}
+                onClick={() => setActiveCatalogModal(null)}
+                aria-label="Close archive"
+              >
+                <X className={magStyles.readerCloseIcon} />
+                <span>CLOSE</span>
+              </button>
+            </div>
+            <h3 className={magStyles.archiveTitle}>All Published Editions</h3>
+            <p className={magStyles.archiveSubtitle}>
+              Explore all {allMagazines.length} monthly publications from the Mining Discovery library. Select any edition to open the complete magazine reader.
+            </p>
+            <div className={magStyles.archiveGrid}>
+              {allMagazines.map((edition) => (
+                <EditionCoverCard
+                  key={edition.id}
+                  edition={edition}
+                  isSelected={activeMagazine.id === edition.id}
+                  onSelect={(ed) => {
+                    setActiveCatalogModal(null);
+                    handleOpenReader(ed);
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Complete Weekly Newsletters Catalog Modal */}
+      {activeCatalogModal === "newsletters" && isMounted && createPortal(
+        <div
+          className={styles.archiveModalOverlay}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setActiveCatalogModal(null);
+          }}
+          onWheel={(e) => {
+            e.stopPropagation();
+          }}
+          onTouchMove={(e) => {
+            e.stopPropagation();
+          }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Complete Weekly Newsletters Catalog"
+        >
+          <div className={styles.archiveModalContent}>
+            <div className={styles.archiveModalHeader}>
+              <div className={magStyles.archiveEyebrow}>
+                <span className={magStyles.archiveEyebrowRule} aria-hidden="true" />
+                <span>Weekly Newspaper Dispatches</span>
+                <span className={magStyles.archiveEyebrowRule} aria-hidden="true" />
+              </div>
+              <button
+                type="button"
+                className={magStyles.readerCloseBtn}
+                onClick={() => setActiveCatalogModal(null)}
+                aria-label="Close archive"
+              >
+                <X className={magStyles.readerCloseIcon} />
+                <span>CLOSE</span>
+              </button>
+            </div>
+            <h3 className={magStyles.archiveTitle}>Weekly Newspaper Archive</h3>
+            <p className={magStyles.archiveSubtitle}>
+              Browse through all {newsletters.length} weekly dispatches and executive market briefings. Select any edition to open in the interactive flipbook.
+            </p>
+            <div className={magStyles.archiveGrid}>
+              {newsletters.map((item) => (
+                <div
+                  key={item.id}
+                  className={styles.publicationArchiveCard}
+                  onClick={() => {
+                    setActiveCatalogModal(null);
+                    handleOpenDocReader({
+                      title: "Weekly Newspaper Dispatch",
+                      subtitle: item.title.toUpperCase(),
+                      pdfUrl: getProxiedPdfUrl(item.pdf),
+                    });
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setActiveCatalogModal(null);
+                      handleOpenDocReader({
+                        title: "Weekly Newspaper Dispatch",
+                        subtitle: item.title.toUpperCase(),
+                        pdfUrl: getProxiedPdfUrl(item.pdf),
+                      });
+                    }
+                  }}
+                >
+                  <div className={styles.publicationArchiveCover}>
+                    <img src={item.cover} alt={item.title} loading="lazy" />
+                  </div>
+                  <div className={styles.publicationArchiveMeta}>
+                    <span className={styles.publicationArchiveTitle}>{item.title}</span>
+                    <span className={styles.publicationArchiveCta}>
+                      <span>READ ISSUE</span>
+                      <ArrowRight size={11} />
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Complete Articles & Research Catalog Modal */}
+      {activeCatalogModal === "articles" && isMounted && createPortal(
+        <div
+          className={styles.archiveModalOverlay}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setActiveCatalogModal(null);
+          }}
+          onWheel={(e) => {
+            e.stopPropagation();
+          }}
+          onTouchMove={(e) => {
+            e.stopPropagation();
+          }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Complete Research Articles Catalog"
+        >
+          <div className={styles.archiveModalContent}>
+            <div className={styles.archiveModalHeader}>
+              <div className={magStyles.archiveEyebrow}>
+                <span className={magStyles.archiveEyebrowRule} aria-hidden="true" />
+                <span>Editorial & Research Library</span>
+                <span className={magStyles.archiveEyebrowRule} aria-hidden="true" />
+              </div>
+              <button
+                type="button"
+                className={magStyles.readerCloseBtn}
+                onClick={() => setActiveCatalogModal(null)}
+                aria-label="Close archive"
+              >
+                <X className={magStyles.readerCloseIcon} />
+                <span>CLOSE</span>
+              </button>
+            </div>
+            <h3 className={magStyles.archiveTitle}>Published Articles & Features</h3>
+            <p className={magStyles.archiveSubtitle}>
+              Explore our library of {articles.length} in-depth research articles and exploration features. Select any article to read the full publication.
+            </p>
+            <div className={magStyles.archiveGrid}>
+              {articles.map((item) => (
+                <div
+                  key={item.id}
+                  className={styles.publicationArchiveCard}
+                  onClick={() => {
+                    setActiveCatalogModal(null);
+                    handleOpenDocReader({
+                      title: "Research & Editorial Article",
+                      subtitle: item.title.toUpperCase(),
+                      pdfUrl: getProxiedPdfUrl(item.pdf),
+                    });
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setActiveCatalogModal(null);
+                      handleOpenDocReader({
+                        title: "Research & Editorial Article",
+                        subtitle: item.title.toUpperCase(),
+                        pdfUrl: getProxiedPdfUrl(item.pdf),
+                      });
+                    }
+                  }}
+                >
+                  <div className={styles.publicationArchiveCover}>
+                    <img src={item.cover} alt={item.title} loading="lazy" />
+                  </div>
+                  <div className={styles.publicationArchiveMeta}>
+                    <span className={styles.publicationArchiveTitle}>{item.title}</span>
+                    <span className={styles.publicationArchiveCta}>
+                      <span>READ ARTICLE</span>
+                      <ArrowRight size={11} />
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Unified Two-Page Flipbook Reader Modal */}
+      {readerState !== "closed" && isMounted && createPortal(
+        <div
+          className={`${magStyles.readerOverlay} ${
+            readerState === "open"
+              ? magStyles.readerOverlayOpen
+              : readerState === "opening"
+              ? magStyles.readerOverlayOpening
+              : magStyles.readerOverlayClosing
+          }`}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              handleCloseReader();
+            }
+          }}
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${activeReaderDoc?.title || "Publication"} Reader`}
+        >
+          <div className={magStyles.readerHeader}>
+            <div className={magStyles.readerMetaLeft}>
+              <span className={magStyles.readerBrand}>MINING DISCOVERY</span>
+              <span className={magStyles.editionDot} aria-hidden="true" />
+              <span className={magStyles.readerIssue}>
+                {activeReaderDoc?.subtitle || "DIGITAL PUBLICATION"}
+              </span>
+            </div>
+            <button
+              type="button"
+              className={magStyles.readerCloseBtn}
+              onClick={handleCloseReader}
+              aria-label="Close reader"
+            >
+              <X className={magStyles.readerCloseIcon} />
+              <span>CLOSE</span>
+            </button>
+          </div>
+          <div
+            className={magStyles.readerStage}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                handleCloseReader();
+              }
+            }}
+          >
+            {activeReaderDoc && (
+              <MagazineSpread
+                pdfUrl={activeReaderDoc.pdfUrl}
+                title={activeReaderDoc.title}
+                onSpreadChange={setSpreadLabel}
+              />
+            )}
+          </div>
+          <div className={magStyles.readerFooter}>
+            <span>{spreadLabel}</span>
+          </div>
+        </div>,
+        document.body
+      )}
+    </div>
+  );
+};
+
+export default JourneyStory;

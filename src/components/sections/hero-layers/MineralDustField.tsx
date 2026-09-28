@@ -39,13 +39,15 @@ export const MineralDustField: React.FC<MineralDustFieldProps> = ({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const isTouch = window.matchMedia("(pointer: coarse)").matches;
+    const isTouch = window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 900;
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
 
-    // 40-60 particles on desktop, 20-25 on mobile
-    const particleCount = isTouch ? 25 : 50;
+    // On mobile touch viewports, skip background particle canvas to maximize frame scrubbing performance
+    if (isTouch || prefersReducedMotion) return;
+
+    const particleCount = 50;
     let particles: Particle[] = [];
 
     const resizeCanvas = () => {

@@ -1,0 +1,910 @@
+﻿.floatingNetworkWrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 35;
+  overflow: hidden;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.constellationSvg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.goldLine {
+  stroke: #d4af37;
+  stroke-width: 1.6;
+  opacity: 0.65;
+  fill: none;
+  filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.6));
+}
+
+.goldLineDashed {
+  stroke: #e6ca65;
+  stroke-width: 1.2;
+  stroke-dasharray: 4 4;
+  opacity: 0.75;
+  fill: none;
+}
+
+.goldNodeDot {
+  fill: #ffffff;
+  stroke: #d4af37;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.85));
+}
+
+.goldNodeDotPulse {
+  animation: pulseNode 2.5s infinite ease-in-out;
+  transform-origin: center;
+}
+
+@keyframes pulseNode {
+  0%, 100% {
+    r: 3.5;
+    opacity: 0.8;
+  }
+  50% {
+    r: 5.5;
+    opacity: 1;
+  }
+}
+
+/* Floating Card Base */
+.floatingCard {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow:
+    0 14px 32px -6px rgba(15, 23, 42, 0.1),
+    0 4px 12px rgba(0, 0, 0, 0.04),
+    0 0 0 1px rgba(0, 0, 0, 0.04);
+  padding: 0.65rem 0.8rem;
+  box-sizing: border-box;
+  pointer-events: auto;
+  cursor: pointer;
+  z-index: 2;
+  will-change: transform, opacity;
+  transform-origin: center center;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  user-select: none;
+}
+
+.floatingCard:hover {
+  box-shadow:
+    0 24px 50px -8px rgba(15, 23, 42, 0.22),
+    0 0 28px rgba(212, 175, 55, 0.42),
+    0 0 0 1.5px rgba(212, 175, 55, 0.7);
+  border-color: rgba(212, 175, 55, 0.85);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.4rem;
+}
+
+.cardHeaderIcon {
+  width: 13px;
+  height: 13px;
+  color: #b8860b;
+}
+
+.cardHeaderTag {
+  font-family: var(--font-mono-custom), ui-monospace, monospace;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #b8860b;
+}
+
+.cardTitle {
+  font-family: var(--font-display-custom), Georgia, serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.22;
+  margin: 0 0 0.18rem 0;
+}
+
+.cardBodyText {
+  font-family: var(--font-sans-custom), system-ui, sans-serif;
+  font-size: 0.68rem;
+  color: #64748b;
+  line-height: 1.3;
+  margin: 0;
+}
+
+.actionArrowBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(184, 134, 11, 0.12);
+  color: #b8860b;
+  border: 1px solid rgba(184, 134, 11, 0.25);
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.floatingCard:hover .actionArrowBtn {
+  background: #b8860b;
+  color: #ffffff;
+  transform: translateX(2px);
+}
+
+/* Individual Card Layouts */
+
+/* 1. Newsletters Card */
+.newslettersCard {
+  left: 26vw;
+  top: 13.5vh;
+  width: clamp(200px, 15vw, 235px);
+}
+
+.newslettersRow {
+  display: flex;
+  gap: 0.55rem;
+  align-items: center;
+}
+
+.newslettersInfo {
+  flex: 1;
+}
+
+.newslettersThumb {
+  width: 66px;
+  height: 48px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+/* 2. YouTube Card */
+.youtubeCard {
+  left: 47.5vw;
+  top: 9vh;
+  width: clamp(185px, 13.5vw, 215px);
+  background: rgba(15, 23, 42, 0.94);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.youtubeThumbWrap {
+  position: relative;
+  width: 100%;
+  height: 82px;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 0.35rem;
+}
+
+.youtubeThumbImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.playCenterBtn {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+  transition: background 0.2s ease;
+}
+
+.playCircle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: #dc2626;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  transition: transform 0.2s ease;
+}
+
+.floatingCard:hover .playCircle {
+  transform: scale(1.15);
+}
+
+.youtubeMetaRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.youtubeTitle {
+  font-family: var(--font-display-custom), Georgia, serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.youtubeViews {
+  font-family: var(--font-mono-custom), ui-monospace, monospace;
+  font-size: 0.6rem;
+  color: #94a3b8;
+}
+
+/* 3. Digital Media Card */
+.digitalMediaCard {
+  left: 20.5vw;
+  top: 37vh;
+  width: clamp(180px, 14vw, 215px);
+}
+
+.digitalMediaThumb {
+  width: 100%;
+  height: 64px;
+  border-radius: 6px;
+  object-fit: cover;
+  margin-bottom: 0.4rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* 4. Social Media Card (Positioned to the right of YouTube with clean clearance) */
+.socialMediaCard {
+  left: 62vw;
+  top: 28vh;
+  width: clamp(170px, 13vw, 205px);
+}
+
+.socialRow {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+  margin-bottom: 0.45rem;
+}
+
+.socialIconBtn {
+  width: 25px;
+  height: 25px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.68rem;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12);
+  transition: transform 0.2s ease;
+}
+
+.socialIconBtn:hover {
+  transform: translateY(-2px);
+}
+
+.socialLinkedin {
+  background: #0077b5;
+}
+
+.socialX {
+  background: #000000;
+  font-family: system-ui, sans-serif;
+}
+
+.socialInsta {
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+}
+
+.socialYoutube {
+  background: #ff0000;
+}
+
+
+/* 6. Magazines Card */
+.magazinesCard {
+  left: 63.5vw;
+  top: 46vh;
+  width: clamp(170px, 13vw, 205px);
+}
+
+.magazineCoverMini {
+  position: relative;
+  width: 100%;
+  height: 84px;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+}
+
+.magazineCoverImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.magazineCoverOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.2) 60%, transparent 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0.4rem;
+}
+
+.magazineTitleMini {
+  font-family: var(--font-display-custom), Georgia, serif;
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.magazineTagMini {
+  font-family: var(--font-sans-custom), system-ui, sans-serif;
+  font-size: 0.58rem;
+  color: #e2e8f0;
+  margin: 0.12rem 0 0 0;
+  line-height: 1.2;
+}
+
+/* ==========================================================================
+   POINT 3: BRANDING & INVESTOR ENGAGEMENT CARDS
+   ========================================================================== */
+
+/* 1. Branding Card */
+.brandingCard {
+  left: 31vw;
+  top: 12vh;
+  width: clamp(230px, 18vw, 275px);
+}
+
+.brandingRow {
+  display: flex;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.brandingInfo {
+  flex: 1;
+}
+
+.brandingThumb {
+  width: 78px;
+  height: 60px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0.4rem;
+  box-sizing: border-box;
+}
+
+.brandingThumbInner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  width: 100%;
+}
+
+.brandingThumbEyebrow {
+  font-family: var(--font-mono-custom), ui-monospace, monospace;
+  font-size: 0.45rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #d4af37;
+  text-transform: uppercase;
+}
+
+.brandingThumbText {
+  font-family: var(--font-display-custom), Georgia, serif;
+  font-size: 0.52rem;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.15;
+}
+
+.brandingSwatches {
+  display: flex;
+  gap: 3px;
+  margin-top: 0.2rem;
+}
+
+/* 2. Campaigns & Reach Card */
+.reachCard {
+  left: 52vw;
+  top: 35vh;
+  width: clamp(180px, 14.5vw, 220px);
+  padding: 0.55rem 0.75rem;
+}
+
+.reachRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.reachSocials {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.reachThumb {
+  width: 68px;
+  height: 46px;
+  border-radius: 6px;
+  object-fit: cover;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  flex-shrink: 0;
+}
+
+/* 3. Investor Engagement Card */
+.investorCard {
+  left: 23vw;
+  top: 54vh;
+  width: clamp(255px, 20.5vw, 310px);
+}
+
+.investorGrid {
+  display: flex;
+  gap: 0.75rem;
+  align-items: stretch;
+}
+
+.investorColLeft {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.investorBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.45rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(184, 134, 11, 0.4);
+  background: rgba(184, 134, 11, 0.08);
+  color: #b8860b;
+  font-family: var(--font-sans-custom), system-ui, sans-serif;
+  font-size: 0.64rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  width: fit-content;
+  cursor: pointer;
+}
+
+.investorCard:hover .investorBtn {
+  background: #b8860b;
+  color: #ffffff;
+}
+
+.investorColRight {
+  width: 76px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.investorChartWrap {
+  width: 100%;
+  height: 40px;
+  border-radius: 5px;
+  background: #0f172a;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  padding: 2px 4px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.investorMineThumb {
+  width: 100%;
+  height: 38px;
+  border-radius: 5px;
+  object-fit: cover;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12);
+}
+
+/* Bobbing keyframes */
+@keyframes floatSlow {
+  0% {
+    transform: translateY(0px);
+  }
+  100% {
+    transform: translateY(-7px);
+  }
+}
+
+@keyframes floatReverse {
+  0% {
+    transform: translateY(0px);
+  }
+  100% {
+    transform: translateY(7px);
+  }
+}
+
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   POINT 4 â€” FULL-SERVICE DIGITAL MEDIA AGENCY (2025)
+
+   Screen layout at 1366px:
+     Left panel:  leftâ‰ˆ27px + widthâ‰ˆ212px â†’ right edge â‰ˆ 239px
+     Right explainer: rightâ‰ˆ0px, widthâ‰ˆclamp(230px,18.5vw,280px) â†’ â‰ˆ253px from right
+
+   Left cards start at: left â‰ˆ 250px (just past left panel right edge)
+   Right cards start at: right â‰ˆ 265px (just past right explainer left edge)
+   Cards width: ~190px each
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+
+/* â”€â”€ CARD POSITIONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+/* Card 0: SOCIAL MEDIA â€” upper-left of highway */
+.p4SocialCard {
+  left: clamp(295px, 24vw, 360px);
+  top: 8vh;
+  width: clamp(162px, 13vw, 192px);
+}
+
+/* Card 1: BRAND STRATEGY â€” mid-left, slightly indented */
+.p4BrandCard {
+  left: clamp(288px, 23vw, 345px);
+  top: 31vh;
+  width: clamp(158px, 12.5vw, 188px);
+}
+
+/* Card 2: SEO & DIGITAL GROWTH â€” lower-left */
+.p4SeoCard {
+  left: clamp(293px, 24vw, 352px);
+  top: 54vh;
+  width: clamp(158px, 12.5vw, 188px);
+}
+
+/* Card 3: VIDEO PRODUCTION â€” upper-right of highway */
+.p4VideoCard {
+  right: clamp(305px, 25vw, 375px);
+  top: 8vh;
+  width: clamp(165px, 13.5vw, 198px);
+}
+
+/* Card 4: CONTENT CREATION â€” mid-right */
+.p4ContentCard {
+  right: clamp(300px, 24.5vw, 368px);
+  top: 36vh;
+  width: clamp(160px, 13vw, 190px);
+}
+
+/* â”€â”€ SOCIAL MEDIA internals â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+/* Two-column layout: text+icons left, mini phone right */
+.p4SocialInner {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin-top: 2px;
+}
+
+.p4SocialText {
+  flex: 1;
+  min-width: 0;
+}
+
+.p4SocialIcons {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+  flex-wrap: nowrap;
+}
+
+.p4SocialIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  font-size: 0.52rem;
+  font-weight: 800;
+  color: #fff;
+  cursor: default;
+  flex-shrink: 0;
+  letter-spacing: 0;
+}
+
+.p4Ig { background: linear-gradient(135deg, #f09433 0%, #dc2743 50%, #bc1888 100%); font-size: 0.48rem; }
+.p4Li { background: #0077b5; }
+.p4Yt { background: #ff0000; }
+.p4Tw { background: #1a1a1a; }
+.p4Fb { background: #1877f2; }
+
+/* Phone mini â€” inline, right column */
+.p4PhoneMini {
+  flex-shrink: 0;
+  width: 34px;
+  background: #111;
+  border-radius: 7px;
+  border: 1.5px solid #2a2a2a;
+  padding: 3px 2px 2px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.04);
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Notch dot */
+.p4PhoneMini::before {
+  content: "";
+  display: block;
+  width: 8px;
+  height: 3px;
+  background: #2a2a2a;
+  border-radius: 2px;
+  margin: 0 auto;
+  flex-shrink: 0;
+}
+
+.p4PhoneMiniScreen {
+  flex: 1;
+  border-radius: 3px;
+  overflow: hidden;
+  min-height: 48px;
+}
+
+.p4PhoneMiniImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* â”€â”€ BRAND STRATEGY internals â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+.p4BrandRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.p4BrandThumb {
+  flex-shrink: 0;
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  background: linear-gradient(145deg, #1a1a2e 0%, #2d2d44 100%);
+  border: 1px solid rgba(212,175,55,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(212,175,55,0.1);
+}
+
+.p4BrandThumbInner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.p4BrandLogo {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #d4af37;
+  letter-spacing: -0.02em;
+  font-family: Georgia, serif;
+  line-height: 1;
+}
+
+.p4BrandSwatches {
+  display: flex;
+  gap: 3px;
+}
+
+.p4Swatch1, .p4Swatch2, .p4Swatch3 {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+.p4Swatch1 { background: #0f172a; border: 1px solid #475569; }
+.p4Swatch2 { background: #d4af37; }
+.p4Swatch3 { background: #fde68a; }
+
+/* â”€â”€ SEO & DIGITAL GROWTH internals â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+.p4SeoChart {
+  margin-top: 6px;
+  position: relative;
+  background: linear-gradient(160deg, #0d1526 0%, #111c35 100%);
+  border-radius: 7px;
+  padding: 6px 8px 5px;
+  border: 1px solid rgba(212,175,55,0.22);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+  overflow: hidden;
+}
+
+.p4SeoChartSvg {
+  width: 100%;
+  height: 32px;
+  display: block;
+}
+
+.p4SeoGrowthBadge {
+  position: absolute;
+  top: 5px;
+  right: 6px;
+  background: #d4af37;
+  color: #000;
+  font-size: 0.5rem;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 3px;
+  letter-spacing: 0.04em;
+  box-shadow: 0 1px 4px rgba(212,175,55,0.5);
+}
+
+/* Up arrow watermark */
+.p4SeoChart::after {
+  content: "â†‘";
+  position: absolute;
+  bottom: 4px;
+  left: 8px;
+  font-size: 0.5rem;
+  color: rgba(212,175,55,0.5);
+  font-weight: 700;
+}
+
+/* â”€â”€ VIDEO PRODUCTION internals â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+.p4VideoThumbs {
+  display: flex;
+  gap: 5px;
+  margin-top: 6px;
+}
+
+.p4VideoThumb {
+  position: relative;
+  flex: 1;
+  border-radius: 5px;
+  overflow: hidden;
+  background: #0f172a;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.p4VideoThumbImg {
+  width: 100%;
+  height: 46px;
+  object-fit: cover;
+  display: block;
+  opacity: 0.80;
+}
+
+.p4VideoPlayBtn {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.95);
+  text-shadow: 0 0 5px rgba(0,0,0,0.8);
+}
+
+/* Gold play circle */
+.p4VideoPlayBtn::before {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(212,175,55,0.25);
+  border: 1.5px solid rgba(212,175,55,0.7);
+  backdrop-filter: blur(2px);
+}
+
+.p4VideoDuration {
+  position: absolute;
+  bottom: 3px;
+  right: 4px;
+  font-size: 0.44rem;
+  color: #fff;
+  background: rgba(0,0,0,0.7);
+  padding: 1px 3px;
+  border-radius: 2px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* â”€â”€ CONTENT CREATION internals â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+.p4ContentDevice {
+  margin-top: 7px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Browser-style header bar */
+.p4ContentDeviceBrow {
+  width: 88%;
+  background: #e2e8f0;
+  border: 1.5px solid #cbd5e1;
+  border-bottom: none;
+  border-radius: 5px 5px 0 0;
+  padding: 3px 6px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.p4BrowserDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.p4BrowserDot:nth-child(1) { background: #ef4444; }
+.p4BrowserDot:nth-child(2) { background: #f59e0b; }
+.p4BrowserDot:nth-child(3) { background: #22c55e; }
+
+.p4ContentDeviceScreen {
+  width: 88%;
+  border: 1.5px solid #cbd5e1;
+  border-top: none;
+  border-radius: 0 0 3px 3px;
+  background: #111;
+  overflow: hidden;
+  height: 40px;
+}
+
+.p4ContentDeviceImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.82;
+}
+
+.p4ContentDeviceBase {
+  width: 60%;
+  height: 5px;
+  background: #94a3b8;
+  border-radius: 0 0 3px 3px;
+}
+
+.p4ContentDeviceFoot {
+  width: 28%;
+  height: 4px;
+  background: #64748b;
+  border-radius: 0 0 2px 2px;
+  margin-top: 0;
+}
+
+@media (max-width: 1024px) {
+  .floatingNetworkWrap {
+    display: none;
+  }
+}

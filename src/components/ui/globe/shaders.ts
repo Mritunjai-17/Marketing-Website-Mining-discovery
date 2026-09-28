@@ -191,13 +191,18 @@ export const arcVertexShader = /* glsl */ `
   attribute float aT;
 
   varying float vT;
+  varying vec2 vUv;
   varying vec3 vWorldPosition;
+  varying vec3 vNormalWorld;
 
   void main() {
-    vT = aT;
+    vUv = uv;
+    // uv.x runs from 0.0 to 1.0 along the tube length
+    vT = uv.x > 0.0 || uv.y > 0.0 ? uv.x : aT;
 
     vec4 worldPosition = modelMatrix * vec4(position, 1.0);
     vWorldPosition = worldPosition.xyz;
+    vNormalWorld = normalize(mat3(modelMatrix) * normal);
 
     gl_Position = projectionMatrix * viewMatrix * worldPosition;
   }
@@ -215,53 +220,36 @@ export const arcFragmentShader = /* glsl */ `
   uniform float uPulseGain;
 
   varying float vT;
+  varying vec2 vUv;
   varying vec3 vWorldPosition;
+  varying vec3 vNormalWorld;
 
   void main() {
     // --- Occlusion by the planet ---------------------------------------------------
-    // The renderer runs with no depth buffer — see the WebGLRenderer options in
-    // EarthGlobe — so there is nothing to depth-test against, and re-adding one would
-    // cost more GPU memory than the drawing-buffer resolution the globe's sharpness is
-    // currently spending it on. This solves the same question analytically instead, and
-    // does it better: the planet is a unit sphere at the origin, so whether it stands
-    // between this fragment and the camera is a ray-sphere test with a closed form.
-    //
-    // V points from the fragment to the camera. t is where that ray comes closest to the
-    // origin. t <= 0 means the closest approach is BEHIND the fragment — the fragment is
-    // on the near face and nothing can be in front of it — which is the early out that
-    // keeps front-side arcs at full strength no matter how close to the limb they run.
-    // Otherwise the miss distance decides: under 1.0 the ray passes through the planet.
-    //
-    // The ramp softens the crossing so the arc dissolves into the limb rather than being
-    // severed at it — but its range is load-bearing, not taste. miss is bounded above by
-    // the point's own radius, and at t = 0 it equals that radius exactly, so a ramp that
-    // only reaches full strength at 1.05 could never be satisfied by an arc sitting at
-    // 1.006: visibility would read 1.0 on the near side of t = 0 and 0.04 on the far side,
-    // a hard edge down the middle of the disc. Finishing at 1.002, below ARC_RADIUS,
-    // is what makes the two branches agree where they meet.
     vec3 toCamera = cameraPosition - vWorldPosition;
     vec3 V = normalize(toCamera);
     float t = -dot(vWorldPosition, V);
     float miss = sqrt(max(dot(vWorldPosition, vWorldPosition) - t * t, 0.0));
-    float visible = t <= 0.0 ? 1.0 : smoothstep(0.99, 1.002, miss);
+    float visible = t <= 0.0 ? 1.0 : smoothstep(0.985, 1.002, miss);
 
-    // --- Ends ----------------------------------------------------------------------
-    // Faded in over the first and last tenth so an arc grows out of its region instead of
-    // beginning on a cut end sitting next to the marker dot.
-    float taper = smoothstep(0.0, 0.10, vT) * smoothstep(0.0, 0.10, 1.0 - vT);
+    // --- Soft ends -----------------------------------------------------------------
+    float taper = smoothstep(0.0, 0.03, vT) * smoothstep(0.0, 0.03, 1.0 - vT);
 
     // --- Travelling pulse ------------------------------------------------------------
-    // A short brighter run of line rather than a dot, and never the whole arc: the
-    // gaussian is ~1/20th of the arc wide, so at any moment 95% of the line is at its
-    // resting value. uPulse parks off the 0..1 range between cycles, which switches the
-    // pulse off with no branch and no second uniform to keep in step.
     float d = vT - uPulse;
-    float head = exp(-d * d * 450.0) * uPulseGain;
+    float head = exp(-d * d * 350.0) * uPulseGain;
+    float headGlow = exp(-d * d * 55.0) * 0.7 * uPulseGain;
 
-    float alpha = uOpacity * (1.0 + uEmphasis * 1.35) * taper * visible;
-    alpha += head * 0.30 * taper * visible;
+    // Crisp, delicate, clearly visible thin gold line with glowing travelling pulse
+    float alpha = (uOpacity * 0.92 + headGlow * 0.45 + head * 0.6) * taper * visible;
 
-    vec3 color = mix(uColor, uPulseColor, clamp(head * 1.2, 0.0, 1.0));
+    // Rich, glowing deep dark gold / warm bronze-gold base with luminous dark amber pulse
+    vec3 darkBronzeGold = vec3(0.78, 0.48, 0.08); // Deep burnished antique dark gold
+    vec3 richDarkGold   = vec3(0.92, 0.62, 0.14); // Intense glowing dark amber gold
+    vec3 pulseGold      = vec3(1.0, 0.82, 0.32);  // Radiant warm golden pulse
+
+    vec3 color = mix(darkBronzeGold, richDarkGold, clamp(0.4 + uEmphasis * 0.6, 0.0, 1.0));
+    color = mix(color, pulseGold, clamp(head * 1.5, 0.0, 1.0));
 
     gl_FragColor = vec4(color, clamp(alpha, 0.0, 1.0));
 
@@ -318,28 +306,46 @@ export const arcNodeFragmentShader = /* glsl */ `
   varying vec3 vWorldPosition;
 
   void main() {
-    // Same closed-form occlusion as the arcs: the planet is a unit sphere at the origin,
-    // so whether it stands between this fragment and the camera is a ray-sphere test.
-    // t <= 0 means the closest approach is behind the fragment, i.e. it is on the near
-    // face. The ramp finishes at 1.002, below the node radius, so the near and far
-    // branches agree where they meet instead of cutting a hard edge down the disc.
+    // Analytic ray-sphere occlusion
     vec3 V = normalize(cameraPosition - vWorldPosition);
     float t = -dot(vWorldPosition, V);
     float miss = sqrt(max(dot(vWorldPosition, vWorldPosition) - t * t, 0.0));
     float visible = t <= 0.0 ? 1.0 : smoothstep(0.99, 1.002, miss);
 
-    // 0 at the sprite centre, 1 at its edge.
-    float d = length(gl_PointCoord - vec2(0.5)) * 2.0;
+    vec2 p = gl_PointCoord - vec2(0.5);
+    float d = length(p) * 2.0;
 
-    // A solid core inside a gaussian halo. The core carries the dot's stated radius; the
-    // halo is the soft glow, and it is what stops the node reading as a hard pixel.
-    float core = 1.0 - smoothstep(0.0, 0.36, d);
-    float glow = exp(-d * d * 5.0) * 0.6;
-    float alpha = clamp(core + glow, 0.0, 1.0) * vPulse * uOpacity * visible;
+    // --- Shiny starburst flare rays ---
+    // Primary cross flare rays
+    float rayX = max(0.0, 1.0 - abs(p.y) * 16.0) * max(0.0, 1.0 - abs(p.x) * 2.2);
+    float rayY = max(0.0, 1.0 - abs(p.x) * 16.0) * max(0.0, 1.0 - abs(p.y) * 2.2);
+    float starFlare = (rayX + rayY) * 0.85;
 
-    if (alpha < 0.004) discard;
+    // Diagonal flare rays
+    vec2 pDiag = vec2(p.x + p.y, p.x - p.y) * 0.7071;
+    float dRay1 = max(0.0, 1.0 - abs(pDiag.y) * 20.0) * max(0.0, 1.0 - abs(pDiag.x) * 2.8);
+    float dRay2 = max(0.0, 1.0 - abs(pDiag.x) * 20.0) * max(0.0, 1.0 - abs(pDiag.y) * 2.8);
+    starFlare += (dRay1 + dRay2) * 0.40;
 
-    gl_FragColor = vec4(uColor, alpha);
+    // --- Brilliant core and golden bloom ---
+    float whiteHotCore = exp(-d * d * 30.0);
+    float goldCore = exp(-d * d * 8.0);
+    float wideGlow = exp(-d * 3.4) * 0.55;
+
+    float totalGlow = (whiteHotCore * 1.1 + goldCore * 0.9 + wideGlow + starFlare);
+    float alpha = clamp(totalGlow, 0.0, 1.0) * vPulse * uOpacity * visible;
+
+    if (alpha < 0.005) discard;
+
+    // Color gradient: warm amber outer glow -> brilliant gold -> incandescent white center
+    vec3 warmAmber = vec3(1.0, 0.68, 0.18);
+    vec3 radiantGold = vec3(1.0, 0.88, 0.38);
+    vec3 whiteHot = vec3(1.0, 0.98, 0.92);
+
+    vec3 pointColor = mix(warmAmber, radiantGold, clamp(goldCore + starFlare * 0.6, 0.0, 1.0));
+    pointColor = mix(pointColor, whiteHot, clamp(whiteHotCore * 1.25, 0.0, 1.0));
+
+    gl_FragColor = vec4(pointColor, alpha);
 
     #include <tonemapping_fragment>
     #include <colorspace_fragment>
