@@ -162,7 +162,7 @@ export const SERVICE_CARDS: ServiceCardItem[] = [
     metaSeason: "AI SENTIMENT",
     summary: "AI-DRIVEN INSIGHTS AND GLOBAL JURISDICTION DATA.",
     description:
-      "Access proprietary market sentiment, real-time commodity data and regulatory intelligence across 30+ mining jurisdictions.",
+      "Access proprietary market sentiment, real-time\ncommodity data and regulatory intelligence\nacross 30+ mining jurisdictions.",
     image: "/images/services/service_05_intelligence_light.webp",
     badge: "05 / MARKET DATA & INSIGHTS",
     features: [
@@ -188,7 +188,7 @@ export const SERVICE_CARDS: ServiceCardItem[] = [
     metaSeason: "MONTHLY EDITIONS",
     summary: "IN-DEPTH MINING INTELLIGENCE, INDUSTRY VOICES, AND EXECUTIVE PROFILES.",
     description:
-      "Curated monthly publications highlighting major discoveries, technological innovations, and strategic insights from mining leaders worldwide.",
+      "Curated monthly publications highlighting major\ndiscoveries, technological innovations, and strategic\ninsights from mining leaders worldwide.",
     image: "/images/services/service_06_magazines_light.webp",
     badge: "06 / PRINT & DIGITAL PUBLISHING",
     features: [
@@ -214,7 +214,7 @@ export const SERVICE_CARDS: ServiceCardItem[] = [
     metaSeason: "WEEKLY DISPATCH",
     summary: "REAL-TIME COMMODITY NEWS, MARKET MOMENTUM, AND STRATEGIC HEADLINES.",
     description:
-      "Weekly mining newspaper delivered to industry executives and investors, covering critical market shifts, policy updates, and breaking project news.",
+      "Weekly mining newspaper delivered to industry\nexecutives and investors, covering critical market shifts,\npolicy updates, and breaking project news.",
     image: "/images/services/service_07_newspaper_light.webp",
     badge: "07 / TIMELY INDUSTRY PRESS",
     features: [
@@ -240,7 +240,7 @@ export const SERVICE_CARDS: ServiceCardItem[] = [
     metaSeason: "DAILY INSIGHTS",
     summary: "DEEP-DIVE EDITORIALS, TECHNICAL ANALYSES, AND EXPERT COMMENTARY.",
     description:
-      "Authoritative research articles and market analyses bridging technical mining data with institutional investment strategy.",
+      "Authoritative research articles and market analyses\nbridging technical mining data with\ninstitutional investment strategy.",
     image: "/images/services/service_08_articles_light.webp",
     badge: "08 / EDITORIAL & RESEARCH",
     features: [
@@ -1408,7 +1408,13 @@ export const JourneyStory: React.FC = () => {
                             </Link>
                           )}
 
-                          <p className={styles.cardFlickExcerpt}>
+                          <p
+                            className={`${styles.cardFlickExcerpt} ${
+                              ["mining-intelligence", "monthly-magazines", "weekly-newspaper", "articles"].includes(card.id)
+                                ? styles.cardFlickExcerptThreeLines
+                                : ""
+                            }`}
+                          >
                             {card.description}
                           </p>
 

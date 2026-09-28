@@ -2020,6 +2020,11 @@
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.9);
 }
 
+.cardFlickExcerptThreeLines {
+  max-width: clamp(380px, 32vw, 440px);
+  white-space: pre-line;
+}
+
 /* Magazine Flipbook Action Buttons (Card 06) */
 .cardFlickButtonRow {
   align-self: flex-start;
