@@ -1703,7 +1703,7 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  max-width: clamp(480px, 35vw, 590px);
+  max-width: clamp(560px, 50vw, 840px);
   z-index: 10;
   color: #FFFFFF;
   box-sizing: border-box;
@@ -1883,7 +1883,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.65rem;
-  max-width: 90%;
+  max-width: 100%;
   padding: 0;
   background: none;
   border: none;
@@ -1923,14 +1923,15 @@
 
 .cardFlickTitle {
   font-family: var(--font-editorial-serif), var(--font-display-custom), "Cormorant Garamond", "Playfair Display", Georgia, serif;
-  font-size: clamp(2.5rem, 4.4vw, 4.6rem);
+  font-size: clamp(1.85rem, 3.4vw, 3.8rem);
   font-style: italic;
   font-weight: 500;
-  line-height: 1.05;
+  line-height: 1.1;
   color: #FFFFFF;
   margin: 0;
   letter-spacing: -0.01em;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.75);
+  white-space: nowrap;
 }
 
 /* Footer - Clean Typography, No Box */
@@ -2570,6 +2571,7 @@
   .cardFlickTitle {
     font-size: clamp(1.15rem, 4.8vw, 1.55rem);
     line-height: 1.15;
+    white-space: nowrap;
   }
 
   .cardFlickExcerpt {
