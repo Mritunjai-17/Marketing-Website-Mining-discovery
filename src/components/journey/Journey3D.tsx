@@ -63,6 +63,7 @@ export const Journey3D: React.FC<Journey3DProps> = ({ progress, active }) => {
       scene.time = (performance.now() - start) / 1000;
       scene.pitch = progress.pitch;
       scene.descent = progress.descent ?? 1.0;
+      scene.cardsProgress = progress.cardsProgress ?? 0;
       for (const listener of listenersRef.current) listener(scene);
 
       const descentP = progress.descent ?? 1.0;

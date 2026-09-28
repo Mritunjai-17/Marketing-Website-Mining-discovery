@@ -1,0 +1,160 @@
+/* ==========================================================================
+   LUSION-STYLE SCROLL-TRIGGERED CARD ENTRANCE ANIMATION
+   (Matching Reference Video Screen Recording 2026-09-28 103554.mp4)
+   ========================================================================== */
+
+.serviceCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+  opacity: 0;
+  transform: translateY(85px) scale(0.95);
+  transition:
+    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+}
+
+/* Stagger delay for right-hand column (even child index) */
+.serviceCard:nth-child(even) {
+  transition-delay: 130ms;
+}
+
+/* Active Visible State when entering viewport */
+.serviceCardVisible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* 1. Category & Number Eyebrow */
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.08s,
+    transform 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.08s;
+  will-change: transform, opacity;
+}
+
+.serviceCardVisible .cardMeta {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 2. Bold Editorial Title */
+.cardTitle {
+  font-family: var(--font-editorial-serif), "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(1.75rem, 2.3vw, 2.6rem);
+  font-weight: 700;
+  color: #0c2038;
+  text-transform: uppercase;
+  letter-spacing: -0.015em;
+  line-height: 1.12;
+  margin: 0;
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.16s,
+    transform 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.16s,
+    color 0.25s ease;
+  will-change: transform, opacity;
+}
+
+.serviceCardVisible .cardTitle {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 3. Rounded Dominant Image Wrap */
+.cardImageWrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: clamp(20px, 2.2vw, 26px);
+  background: #EAE5DC;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 14px 38px rgba(12, 32, 56, 0.07);
+  transition:
+    box-shadow 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, box-shadow;
+}
+
+.serviceCard:hover .cardImageWrap {
+  box-shadow: 0 24px 50px rgba(12, 32, 56, 0.14);
+}
+
+.cardImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: scale(1);
+  transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.serviceCard:hover .cardImg {
+  transform: scale(1.05);
+}
+
+.cardOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.25), transparent 45%);
+  opacity: 0.4;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+.serviceCard:hover .cardOverlay {
+  opacity: 0.18;
+}
+
+/* 4. Description Copy */
+.cardDesc {
+  margin-top: 1rem;
+  color: #334155;
+  font-family: var(--font-sans-custom), var(--font-geist-sans), system-ui, sans-serif;
+  font-size: clamp(0.95rem, 1.05vw, 1.05rem);
+  line-height: 1.55;
+  flex-grow: 1;
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.22s,
+    transform 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.22s;
+  will-change: transform, opacity;
+}
+
+.serviceCardVisible .cardDesc {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 5. Action Buttons */
+.cardActions {
+  margin-top: 1rem;
+  padding-top: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.28s,
+    transform 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.28s;
+  will-change: transform, opacity;
+}
+
+.serviceCardVisible .cardActions {
+  opacity: 1;
+  transform: translateY(0);
+}

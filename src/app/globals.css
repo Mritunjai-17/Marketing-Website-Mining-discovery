@@ -20,18 +20,26 @@
   --color-muted-text: #57595E;
 
   /*
-   * Typography Architecture for Mining Discovery:
-   * --font-geist: High-impact modern grotesque (Geist) for bold display titles, uppercase hero headers, and architectural statements.
-   * --font-display: Display headings default to Geist for powerful, crisp modern agency feel.
-   * --font-sans: Ultra-legible workhorse (Inter) for body copy, navigation, buttons, and UI components.
-   * --font-serif: Editorial serif (Playfair Display) for journalism quotes, long-form editorial headers, and prestige highlights.
-   * --font-mono: Precision terminal mono (Geist Mono / IBM Plex Mono) for coordinates, numbers, dates, and globe badges.
+   * Mining Discovery Typography System:
+   * Space Grotesk → Brand + headings + navigation + buttons + important numbers (weights: 500-600)
+   * Inter → Content + UI + body text + descriptions + cards + form fields (weights: 400-500)
+   * IBM Plex Mono → Data + technical details + statistics + numbers + dates + technical labels
    */
-  --font-geist: var(--font-geist-sans), "Geist", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-display: var(--font-geist);
-  --font-sans: var(--font-sans-custom), "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-serif: var(--font-display-custom), "Playfair Display", Georgia, "Times New Roman", serif;
-  --font-mono: var(--font-geist-mono), var(--font-mono-custom), "IBM Plex Mono", monospace;
+  --font-space-grotesk: var(--font-space-grotesk), "Space Grotesk", sans-serif;
+  --font-inter: var(--font-inter), "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-ibm-plex-mono: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
+
+  /* Global alias mappings ensuring 100% full site adoption across all modules */
+  --font-display: var(--font-space-grotesk);
+  --font-geist: var(--font-space-grotesk);
+  --font-editorial-serif: var(--font-space-grotesk);
+  --font-display-custom: var(--font-space-grotesk);
+  --font-serif: var(--font-space-grotesk);
+  --font-sans: var(--font-inter);
+  --font-sans-custom: var(--font-inter);
+  --font-mono: var(--font-ibm-plex-mono);
+  --font-mono-custom: var(--font-ibm-plex-mono);
+  --font-geist-mono: var(--font-ibm-plex-mono);
 
   --max-width-editorial: 1200px;
 }
@@ -39,6 +47,36 @@
 :root {
   --bg-color: #FAFAF9;
   --text-color: #1A1D21;
+  --font-space-grotesk: var(--font-space-grotesk), "Space Grotesk", sans-serif;
+  --font-inter: var(--font-inter), "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-ibm-plex-mono: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
+  --font-editorial-serif: var(--font-space-grotesk), "Space Grotesk", sans-serif;
+  --font-display-custom: var(--font-space-grotesk), "Space Grotesk", sans-serif;
+  --font-sans-custom: var(--font-inter), "Inter", sans-serif;
+  --font-mono-custom: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
+  --font-geist-sans: var(--font-space-grotesk), "Space Grotesk", sans-serif;
+  --font-geist-mono: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
+}
+
+/* Base Headings: Space Grotesk (500–600) */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
+  font-weight: 600;
+}
+
+/* Navigation & Interactive Controls: Space Grotesk (500–600) */
+nav, nav a, button, [role="button"], .btn {
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
+}
+
+/* Body & Content Copy: Inter (400–500) */
+body, p, li, a, input, textarea, select {
+  font-family: var(--font-inter), "Inter", sans-serif;
+}
+
+/* Data, Statistics & Technical Details: IBM Plex Mono */
+code, kbd, samp, pre, .font-mono, [data-mono] {
+  font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
 }
 
 /* Lenis Smooth Scroll Required CSS */
@@ -70,7 +108,7 @@ body {
   overflow-x: clip;
   background-color: var(--bg-color);
   color: var(--text-color);
-  font-family: var(--font-sans);
+  font-family: var(--font-inter), "Inter", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

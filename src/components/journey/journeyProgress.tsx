@@ -31,6 +31,10 @@ export interface JourneyProgress {
    * Drives the camera swooping down from the sky to the land as clouds part.
    */
   descent?: number;
+  /**
+   * Scroll progress (0..1) through the 8 editorial service cards inside Our Services.
+   */
+  cardsProgress?: number;
 }
 
 const JourneyProgressContext = createContext<JourneyProgress | null>(null);

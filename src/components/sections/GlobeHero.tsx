@@ -9,6 +9,7 @@ import {
   JOURNEY_RUNS_FROM,
 } from "@/components/journey/descentCamera";
 import { BoonHero, type BoonHeroHandle } from "@/components/sections/BoonHero";
+import { ClientInvestorGrowth } from "@/components/sections/ClientInvestorGrowth/ClientInvestorGrowth";
 
 const Journey3D = dynamic(
   () => import("@/components/journey/Journey3D"),
@@ -21,8 +22,8 @@ export type TransitionState =
   | "SIDE_VIEW_LOCKED"
   | "JOURNEY_ACTIVE";
 
-/** Total viewport heights for the continuous story (Hero -> Truck Journey) */
-const TOTAL_SCROLL_VH = 1500;
+/** Total viewport heights for the continuous story (Hero -> Client & Investor Bridge -> Truck Journey -> Our Services 8 Cards) */
+const TOTAL_SCROLL_VH = 3400;
 
 /**
  * How the sampled progress follows the true scroll position.
@@ -81,6 +82,11 @@ export const GlobeHero: React.FC = () => {
   const reduceMotionRef = useRef(false);
   const [reduceMotion, setReduceMotion] = useState(false);
 
+  const [bridgeOpacity, setBridgeOpacity] = useState(0);
+  const [bridgeScroll, setBridgeScroll] = useState(0);
+  const bridgeOpacityRef = useRef(0);
+  const bridgeScrollRef = useRef(0);
+
   /**
    * Writes the sequence state for the current scroll progress.
    * Only transform and opacity are touched — zero layout triggers.
@@ -115,32 +121,75 @@ export const GlobeHero: React.FC = () => {
 
     // 1. Hardware-scrubbed Hero sequence:
     // Act 1 (Alpine summit) -> Act 2 (Open Pit) -> Act 3 (Cave Continuous Miner)
-    // Scrubbed from t = 0.00 to t = 0.20
-    const heroP = clamp(t / 0.18, 0, 1);
+    // Scrubbed from t = 0.00 to t = 0.085
+    const HERO_END = 0.085;
+    const heroP = clamp(t / HERO_END, 0, 1);
     if (boonHeroRef.current) {
       boonHeroRef.current.scrub(heroP);
     }
 
-    // 2. 3D Truck Highway Journey:
-    // Takes over seamlessly after Hero finishes
-    const TRANS_START = 0.18;
-    const TRANS_END = 0.26;
+    // 2. Value Bridge: Client & Investor Growth Section
+    // 4 Alternating Cards: Left Card / Right Text -> Left Text / Right Card...
+    const BRIDGE_START = 0.085;
+    const BRIDGE_FADE_IN_END = 0.105;
+    const BRIDGE_SCROLL_END = 0.28;
+    const BRIDGE_END = 0.30;
+
+    let bOpacity = 0;
+    if (t < BRIDGE_START || t > BRIDGE_END) {
+      bOpacity = 0;
+    } else if (t < BRIDGE_FADE_IN_END) {
+      bOpacity = (t - BRIDGE_START) / (BRIDGE_FADE_IN_END - BRIDGE_START);
+    } else if (t <= BRIDGE_SCROLL_END) {
+      bOpacity = 1.0;
+    } else {
+      bOpacity = 1.0 - (t - BRIDGE_SCROLL_END) / (BRIDGE_END - BRIDGE_SCROLL_END);
+    }
+    bOpacity = clamp(bOpacity, 0, 1);
+
+    const bScroll = clamp((t - BRIDGE_FADE_IN_END) / (BRIDGE_SCROLL_END - BRIDGE_FADE_IN_END), 0, 1);
+
+    if (Math.abs(bOpacity - bridgeOpacityRef.current) > 0.005 || bOpacity === 0 || bOpacity === 1) {
+      bridgeOpacityRef.current = bOpacity;
+      setBridgeOpacity(bOpacity);
+    }
+
+    if (Math.abs(bScroll - bridgeScrollRef.current) > 0.003 || bScroll === 0 || bScroll === 1) {
+      bridgeScrollRef.current = bScroll;
+      setBridgeScroll(bScroll);
+    }
+
+    // 3. 3D Truck Highway Journey:
+    // Takes over seamlessly after the Value Bridge section finishes
+    const TRANS_START = 0.27;
+    const TRANS_END = 0.33;
     const transP = clamp((t - TRANS_START) / (TRANS_END - TRANS_START), 0, 1);
 
-    const JOURNEY_START = 0.21;
-    const MILESTONE_5_T = 0.72;
+    const JOURNEY_START = 0.30;
+    const MILESTONE_5_T = 0.52;
+    const TRUCK_FINISH_T = 0.62;
 
     let journeyP = 0;
     if (t <= JOURNEY_START) {
       journeyP = 0;
     } else if (t <= MILESTONE_5_T) {
       journeyP = clamp(((t - JOURNEY_START) / (MILESTONE_5_T - JOURNEY_START)) * 0.88, 0, 0.88);
+    } else if (t <= TRUCK_FINISH_T) {
+      journeyP = clamp(0.88 + ((t - MILESTONE_5_T) / (TRUCK_FINISH_T - MILESTONE_5_T)) * 0.12, 0.88, 1.0);
     } else {
-      journeyP = clamp(0.88 + ((t - MILESTONE_5_T) / (1.0 - MILESTONE_5_T)) * 0.12, 0.88, 1.0);
+      journeyP = 1.0;
+    }
+
+    // 4. Our Services 8-Card Editorial Grid Scroll:
+    // Glides through all 8 cards between t = 0.62 and t = 0.94
+    let cardsP = 0;
+    if (t > 0.62) {
+      cardsP = clamp((t - 0.62) / (0.94 - 0.62), 0, 1);
     }
 
     journeyProgress.current = journeyP;
     journeyProgress.descent = transP;
+    journeyProgress.cardsProgress = cardsP;
 
     // Throttle state update to keep React rendering lightweight
     if (
@@ -155,7 +204,7 @@ export const GlobeHero: React.FC = () => {
 
     // Explicit Transition State
     let nextState: TransitionState = "HERO_ACTIVE";
-    if (t < TRANS_START) nextState = "HERO_ACTIVE";
+    if (t < HERO_END) nextState = "HERO_ACTIVE";
     else if (transP < 0.99) nextState = "CAMERA_ANGLE_SHIFT";
     else if (t <= TRANS_END) nextState = "SIDE_VIEW_LOCKED";
     else nextState = "JOURNEY_ACTIVE";
@@ -218,7 +267,7 @@ export const GlobeHero: React.FC = () => {
 
     // The requestAnimationFrame loop samples window.scrollY continuously on every display frame
     // onScroll does not need to duplicate applyStage(), avoiding dual-execution timing jitter
-    const onScroll = () => {};
+    const onScroll = () => { };
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", measureRange);
 
@@ -245,6 +294,12 @@ export const GlobeHero: React.FC = () => {
           <div ref={slotRef} className="relative h-full w-full">
             {/* Boon-Inspired Dark Hero Overlay */}
             <BoonHero ref={boonHeroRef} />
+
+            {/* Value Bridge: How Mining Discovery Enhances Growth for Clients & Investors */}
+            <ClientInvestorGrowth
+              scrollProgress={bridgeScroll}
+              opacity={bridgeOpacity}
+            />
 
             {/* Dark Descent Backdrop & 3D Truck Journey */}
             <DescentBackdrop progress={transitionProgress} />

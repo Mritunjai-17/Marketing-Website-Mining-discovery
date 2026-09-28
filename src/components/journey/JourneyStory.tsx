@@ -24,6 +24,7 @@ import {
   getProxiedPdfUrl,
   type PublicationItem,
 } from "@/data/publications";
+import OurServicesSection from "@/components/sections/OurServicesSection";
 
 const MILESTONE_ICONS = [TrendingUp, Newspaper, BookOpen, Globe, Sparkles, Sparkles];
 
@@ -106,6 +107,17 @@ export const EDITORIAL_SERVICES: EditorialServiceItem[] = [
     ctaText: "Read Flipbook",
     ctaHref: "/magazines",
   },
+  {
+    id: "research-articles",
+    num: "07",
+    category: "RESEARCH & ARTICLES",
+    title: "Research & Articles",
+    description: "Authoritative technical teardowns, commodity deep-dives, and drill-result coverage published daily for mining executives.",
+    image: "/images/services/service_08_articles_light.webp",
+    alt: "Technical mining research and executive market reports",
+    ctaText: "View Articles",
+    ctaHref: "/contact",
+  },
 ];
 
 
@@ -148,13 +160,16 @@ const EditorialGridCard: React.FC<{
   idx: number;
   onOpenFlipbook?: () => void;
   onOpenArchive?: () => void;
-}> = ({ item, idx, onOpenFlipbook, onOpenArchive }) => {
-  const [isVisible, setIsVisible] = useState(false);
+  onOpenArticles?: () => void;
+}> = ({ item, idx, onOpenFlipbook, onOpenArchive, onOpenArticles }) => {
+  // First 4 cards are initialized visible so there is zero initial blank delay
+  const [isVisible, setIsVisible] = useState(idx < 4);
   const cardRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const el = cardRef.current;
-    if (!el) return;
+    if (!el || isVisible) return;
+    const scrollContainer = el.closest(`.${styles.settleMountainStage}`);
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -162,11 +177,15 @@ const EditorialGridCard: React.FC<{
           observer.unobserve(el);
         }
       },
-      { threshold: 0.12 }
+      {
+        root: scrollContainer || null,
+        rootMargin: "250px 0px 250px 0px",
+        threshold: 0.02,
+      }
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [isVisible]);
 
   return (
     <article
@@ -198,7 +217,22 @@ const EditorialGridCard: React.FC<{
 
       <div className={styles.editorialItemFooter}>
         <p className={styles.editorialItemDesc}>{item.description}</p>
-        {item.id === "news-publications" ? (
+        {item.id === "research-articles" ? (
+          <div className={styles.editorialActionRow}>
+            <button
+              type="button"
+              className={styles.editorialActionBtn}
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenArticles?.();
+              }}
+              aria-label="Open technical research articles"
+            >
+              <span>VIEW ARTICLES</span>
+              <span className={styles.editorialActionStar}>✦</span>
+            </button>
+          </div>
+        ) : item.id === "news-publications" ? (
           <div className={styles.editorialActionRow}>
             <button
               type="button"
@@ -454,6 +488,8 @@ export const JourneyStory: React.FC = () => {
   // Settle stage, controls, and interactive elements
   const settleStageRef = useRef<HTMLDivElement>(null);
   const settleWrapperRef = useRef<HTMLDivElement>(null);
+  const servicesTrackRef = useRef<HTMLDivElement>(null);
+  const servicesContainerRef = useRef<HTMLDivElement>(null);
   const spotlightRef = useRef<HTMLDivElement>(null);
 
   // Interactive mouse tracker for spotlight and mountain parallax
@@ -469,35 +505,9 @@ export const JourneyStory: React.FC = () => {
     active: false,
   });
 
-  // All 14 magazines and the 5 latest editions
-  const allMagazines = useMemo(() => getChronologicalMagazines(false), []);
-  const showcaseMagazines = useMemo(() => allMagazines.slice(0, 5), [allMagazines]);
-
-  const [activeIndex, setActiveIndex] = useState(1);
-  const [selectedMagazine, setSelectedMagazine] = useState<MagazineEdition | null>(null);
-  const [readerState, setReaderState] = useState<"closed" | "opening" | "open" | "closing">("closed");
-  const [spreadLabel, setSpreadLabel] = useState("INSIDE OPENING SPREAD • PAGES 2–3");
-  const [activeCatalogModal, setActiveCatalogModal] = useState<"magazines" | "newsletters" | "articles" | null>(null);
-  const [newsletters, setNewsletters] = useState<PublicationItem[]>(INITIAL_NEWSLETTERS);
-  const [articles, setArticles] = useState<PublicationItem[]>(INITIAL_ARTICLES);
-  const [activeReaderDoc, setActiveReaderDoc] = useState<{
-    title: string;
-    subtitle: string;
-    pdfUrl: string;
-  } | null>(null);
-
-  const [isMounted, setIsMounted] = useState(false);
-  const shelfTrackRef = useRef<HTMLDivElement>(null);
-  const newsletterShelfTrackRef = useRef<HTMLDivElement>(null);
-  const articleShelfTrackRef = useRef<HTMLDivElement>(null);
   const totalTravelRef = useRef(3200);
 
-
-
-  const activeMagazine = selectedMagazine || showcaseMagazines[activeIndex] || showcaseMagazines[0];
-
   useEffect(() => {
-    setIsMounted(true);
     const measure = () => {
       const trackEl = trackRef.current;
       if (!trackEl) return;
@@ -535,96 +545,6 @@ export const JourneyStory: React.FC = () => {
       clearTimeout(timer);
     };
   }, []);
-
-  const handleOpenReader = useCallback((mag: MagazineEdition) => {
-    setSelectedMagazine(mag);
-    setActiveReaderDoc({
-      title: mag.title,
-      subtitle: `${mag.month?.toUpperCase()} ${mag.year} • ISSUE ${mag.issueNumber ?? "13"}`,
-      pdfUrl: mag.pdf,
-    });
-    setReaderState("opening");
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        setReaderState("open");
-      });
-    });
-  }, []);
-
-  const handleOpenDocReader = useCallback(
-    (doc: { title: string; subtitle: string; pdfUrl: string }) => {
-      setSelectedMagazine(null);
-      setActiveReaderDoc(doc);
-      setReaderState("opening");
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          setReaderState("open");
-        });
-      });
-    },
-    []
-  );
-
-  const handleCloseReader = useCallback(() => {
-    if (readerState === "open" || readerState === "opening") {
-      setReaderState("closing");
-      setTimeout(() => {
-        setReaderState("closed");
-        setSelectedMagazine(null);
-        setActiveReaderDoc(null);
-      }, 350);
-    }
-  }, [readerState]);
-
-  const handleCardClick = useCallback((idx: number, mag: MagazineEdition) => {
-    setActiveIndex(idx);
-    handleOpenReader(mag);
-  }, [handleOpenReader]);
-
-  // Background refresh publications from internal Next.js proxy routes
-  useEffect(() => {
-    fetch("/api/newsletters")
-      .then((r) => r.json())
-      .then((res) => {
-        if (res?.data && Array.isArray(res.data) && res.data.length > 0) {
-          setNewsletters(res.data);
-        }
-      })
-      .catch(() => {});
-
-    fetch("/api/articles")
-      .then((r) => r.json())
-      .then((res) => {
-        if (res?.data && Array.isArray(res.data) && res.data.length > 0) {
-          setArticles(res.data);
-        }
-      })
-      .catch(() => {});
-  }, []);
-
-  // Lock scroll & handle Escape key when catalog modal or reader is active
-  useEffect(() => {
-    if (activeCatalogModal !== null || readerState === "open" || readerState === "opening") {
-      const originalOverflow = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
-
-      const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.key === "Escape") {
-          if (readerState === "open" || readerState === "opening") {
-            handleCloseReader();
-          } else if (activeCatalogModal !== null) {
-            setActiveCatalogModal(null);
-          }
-        }
-      };
-      window.addEventListener("keydown", handleKeyDown);
-
-      return () => {
-        document.body.style.overflow = originalOverflow;
-        window.removeEventListener("keydown", handleKeyDown);
-      };
-    }
-  }, [activeCatalogModal, readerState, handleCloseReader]);
 
 
 
@@ -788,95 +708,106 @@ export const JourneyStory: React.FC = () => {
         settleWrapperRef.current.style.pointerEvents = "auto";
       }
     }
+
+    // 5. SCRUBBED SERVICES CARDS SCROLL (All 8 Cards):
+    // Smoothly translates the editorial grid upwards as user scrolls between t = 0.54 and 0.94
+    if (servicesTrackRef.current) {
+      const cardsP = scene.cardsProgress ?? 0;
+      const contentH = servicesTrackRef.current.offsetHeight || 2600;
+      const clientH = window.innerHeight || 800;
+      const maxScroll = Math.max(0, contentH - clientH + 160);
+      const cardsY = cardsP * maxScroll;
+      servicesTrackRef.current.style.transform = `translate3d(0, -${cardsY.toFixed(1)}px, 0)`;
+    }
   });
 
   return (
     <>
       <div className={styles.overlay}>
-      {/* 00 KM/H Speedometer HUD (visible in top-left matching reference pictures) */}
-      <div className={styles.speedometerBadge} aria-hidden="true">
-        00 KM/H
-      </div>
+        {/* 00 KM/H Speedometer HUD (visible in top-left matching reference pictures) */}
+        <div className={styles.speedometerBadge} aria-hidden="true">
+          00 KM/H
+        </div>
 
-      {/* Circular Hotspot indicator for side view (matching Pic 2) */}
-      <div className={styles.sideHotspot} aria-hidden="true">
-        <div className={styles.hotspotRing} />
-        <div className={styles.hotspotDot} />
-      </div>
+        {/* Circular Hotspot indicator for side view (matching Pic 2) */}
+        <div className={styles.sideHotspot} aria-hidden="true">
+          <div className={styles.hotspotRing} />
+          <div className={styles.hotspotDot} />
+        </div>
 
-      {/* BLACK PART: ROADSIDE MILESTONE TRACK
+        {/* BLACK PART: ROADSIDE MILESTONE TRACK
           Text cards enter from the right side of the screen and travel across
           to the left side as the truck moves forward along the road */}
-      <div ref={underRoadRef} className={styles.underRoadSection} aria-live="polite">
-        <div ref={trackRef} className={styles.roadTextTrack}>
-          {STORY_POINTS.map((point, index) => {
-            const Icon = MILESTONE_ICONS[index] || Globe;
-            return (
-              <div
-                key={point.id}
-                className={styles.roadCard}
-              >
-                <div className={styles.milestoneIconRow}>
-                  <Icon className={styles.milestoneIcon} strokeWidth={1.5} />
-                  <span className={styles.milestoneTag}>{point.eyebrow}</span>
-                </div>
-                <h3 className={styles.milestoneHeadline}>
-                  {renderScrubText(point.headline, `mhead-${point.id}`, point.emphasis)}
-                </h3>
-                <div className={styles.milestoneBar} />
-                <p className={styles.milestoneDescription}>
-                  {renderScrubText(point.description, `mdesc-${point.id}`)}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* SECOND PART (VERTICAL ROAD HERO): UNITED CARRIERS STYLE EDITORIAL SCROLL */}
-      <div
-        ref={secondPartRef}
-        className={styles.secondPartSidesWrap}
-        aria-label="Visibility at every milestone. Every major mining audience."
-      >
-        {/* Left Side: Pinned Headline & Supporting Copy (Matching United Carriers Reference Video) */}
-        <div ref={leftColRef} className={styles.ucLeftBlock}>
-          <div className={styles.ucSpeedIndicator}>
-            <span ref={speedometerRef}>43 KM/H</span>
-          </div>
-
-          <h2 className={styles.ucLeftHeadline}>
-            <span className={styles.ucHeadlineMuted}>VISIBILITY</span><br />
-            <span>AT EVERY</span><br />
-            <span>MILESTONE</span>
-          </h2>
-
-          <p className={styles.ucLeftDesc}>
-            With every service under one roof and an authoritative editorial team, your company moves the way the global market demands: visibly, strategically, and with sustained investor conviction.
-          </p>
-        </div>
-
-        {/* Right Side: Vertically Scrolling Feature Track (Matching Reference Video) */}
-        <div className={styles.ucRightViewport}>
-          <div ref={rightTrackRef} className={styles.ucRightTrack}>
-            {TOP_DOWN_FEATURES.map((item) => {
-              const Icon = item.icon;
+        <div ref={underRoadRef} className={styles.underRoadSection} aria-live="polite">
+          <div ref={trackRef} className={styles.roadTextTrack}>
+            {STORY_POINTS.map((point, index) => {
+              const Icon = MILESTONE_ICONS[index] || Globe;
               return (
-                <div key={item.id} className={styles.ucFeatureCard}>
-                  <div className={styles.ucFeatureIconWrap}>
-                    <Icon className={styles.ucFeatureIcon} strokeWidth={1.75} />
+                <div
+                  key={point.id}
+                  className={styles.roadCard}
+                >
+                  <div className={styles.milestoneIconRow}>
+                    <Icon className={styles.milestoneIcon} strokeWidth={1.5} />
+                    <span className={styles.milestoneTag}>{point.eyebrow}</span>
                   </div>
-                  <h3 className={styles.ucFeatureTitle}>{item.title}</h3>
-                  <p className={styles.ucFeatureDesc}>{item.description}</p>
+                  <h3 className={styles.milestoneHeadline}>
+                    {renderScrubText(point.headline, `mhead-${point.id}`, point.emphasis)}
+                  </h3>
+                  <div className={styles.milestoneBar} />
+                  <p className={styles.milestoneDescription}>
+                    {renderScrubText(point.description, `mdesc-${point.id}`)}
+                  </p>
                 </div>
               );
             })}
           </div>
         </div>
-      </div>
-    </div>
 
-    {/* EDITORIAL SETTLE STAGE (OUR SERVICES) - Direct un-padded layer covering 100% of viewport */}
+        {/* SECOND PART (VERTICAL ROAD HERO): UNITED CARRIERS STYLE EDITORIAL SCROLL */}
+        <div
+          ref={secondPartRef}
+          className={styles.secondPartSidesWrap}
+          aria-label="Visibility at every milestone. Every major mining audience."
+        >
+          {/* Left Side: Pinned Headline & Supporting Copy (Matching United Carriers Reference Video) */}
+          <div ref={leftColRef} className={styles.ucLeftBlock}>
+            <div className={styles.ucSpeedIndicator}>
+              <span ref={speedometerRef}>43 KM/H</span>
+            </div>
+
+            <h2 className={styles.ucLeftHeadline}>
+              <span className={styles.ucHeadlineMuted}>VISIBILITY</span><br />
+              <span>AT EVERY</span><br />
+              <span>MILESTONE</span>
+            </h2>
+
+            <p className={styles.ucLeftDesc}>
+              With every service under one roof and an authoritative editorial team, your company moves the way the global market demands: visibly, strategically, and with sustained investor conviction.
+            </p>
+          </div>
+
+          {/* Right Side: Vertically Scrolling Feature Track (Matching Reference Video) */}
+          <div className={styles.ucRightViewport}>
+            <div ref={rightTrackRef} className={styles.ucRightTrack}>
+              {TOP_DOWN_FEATURES.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <div key={item.id} className={styles.ucFeatureCard}>
+                    <div className={styles.ucFeatureIconWrap}>
+                      <Icon className={styles.ucFeatureIcon} strokeWidth={1.75} />
+                    </div>
+                    <h3 className={styles.ucFeatureTitle}>{item.title}</h3>
+                    <p className={styles.ucFeatureDesc}>{item.description}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* EDITORIAL SETTLE STAGE (OUR SERVICES) - Direct un-padded layer covering 100% of viewport */}
       <div ref={settleWrapperRef} className={styles.settleStageWrapper}>
         {/* Dynamic Curved Off-White Crest (rising on both sides, center dip for truck passage) */}
         <div className={styles.curvedHorizonCrest} aria-hidden="true">
@@ -906,328 +837,15 @@ export const JourneyStory: React.FC = () => {
           <div className={styles.curvedAtmosphereGlow} />
         </div>
 
-        {/* Scrollable Services Section */}
-        <div ref={settleStageRef} className={styles.settleMountainStage}>
-
-          {/* Subtle Architectural Grid Lines Overlay (White Desert Light Theme) */}
-          <div className={styles.lightGridOverlay} aria-hidden="true">
-            <div className={styles.lightGridLine} />
-            <div className={styles.lightGridLine} />
-            <div className={styles.lightGridLine} />
-            <div className={styles.lightGridLine} />
-            <div className={styles.lightGridLine} />
-            <div className={styles.lightGridLine} />
-          </div>
-
-          {/* Light Theme Services Section Container */}
-          <div className={styles.lightServicesContainer}>
-            {/* Top Centered Header */}
-            {/* Top Centered Header - Big Prominent "OUR SERVICES" */}
-            <div className={styles.lightServicesHeader}>
-              <div className={styles.lightEyebrowRow}>
-                <span className={styles.lightEyebrowRule} aria-hidden="true" />
-                <h2 className={styles.lightServicesBigTitle}>OUR SERVICES</h2>
-                <span className={styles.lightEyebrowRule} aria-hidden="true" />
-              </div>
-            </div>
-
-            {/* Premium Two-Column Editorial Grid (Reference Video 1 Visual Structure) */}
-            <div className={styles.editorialGrid} role="region" aria-label="Our Services">
-              {EDITORIAL_SERVICES.map((item, idx) => (
-                <EditorialGridCard
-                  key={item.id}
-                  item={item}
-                  idx={idx}
-                  onOpenFlipbook={() => handleOpenReader(getLatestMagazine())}
-                  onOpenArchive={() => setActiveCatalogModal("magazines")}
-                />
-              ))}
-            </div>
-          </div>
+        {/* Embedded Services Section with all 8 delivered service cards */}
+        <div className={styles.servicesViewport}>
+          <OurServicesSection
+            isEmbedded
+            trackRef={servicesTrackRef}
+            containerRef={servicesContainerRef}
+          />
         </div>
       </div>
-
-      {/* Complete Magazine Archive Modal */}
-      {activeCatalogModal === "magazines" && isMounted && createPortal(
-        <div
-          className={styles.archiveModalOverlay}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setActiveCatalogModal(null);
-          }}
-          onWheel={(e) => {
-            e.stopPropagation();
-          }}
-          onTouchMove={(e) => {
-            e.stopPropagation();
-          }}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Complete Monthly Magazines Catalog"
-        >
-          <div className={styles.archiveModalContent}>
-            <div className={styles.archiveModalHeader}>
-              <div className={magStyles.archiveEyebrow}>
-                <span className={magStyles.archiveEyebrowRule} aria-hidden="true" />
-                <span>Monthly Magazine Library</span>
-                <span className={magStyles.archiveEyebrowRule} aria-hidden="true" />
-              </div>
-              <button
-                type="button"
-                className={magStyles.readerCloseBtn}
-                onClick={() => setActiveCatalogModal(null)}
-                aria-label="Close archive"
-              >
-                <X className={magStyles.readerCloseIcon} />
-                <span>CLOSE</span>
-              </button>
-            </div>
-            <h3 className={magStyles.archiveTitle}>All Published Editions</h3>
-            <p className={magStyles.archiveSubtitle}>
-              Explore all {allMagazines.length} monthly publications from the Mining Discovery library. Select any edition to open the complete magazine reader.
-            </p>
-            <div className={magStyles.archiveGrid}>
-              {allMagazines.map((edition) => (
-                <EditionCoverCard
-                  key={edition.id}
-                  edition={edition}
-                  isSelected={activeMagazine.id === edition.id}
-                  onSelect={(ed) => {
-                    setActiveCatalogModal(null);
-                    handleOpenReader(ed);
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-        </div>,
-        document.body
-      )}
-
-      {/* Complete Weekly Newsletters Catalog Modal */}
-      {activeCatalogModal === "newsletters" && isMounted && createPortal(
-        <div
-          className={styles.archiveModalOverlay}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setActiveCatalogModal(null);
-          }}
-          onWheel={(e) => {
-            e.stopPropagation();
-          }}
-          onTouchMove={(e) => {
-            e.stopPropagation();
-          }}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Complete Weekly Newsletters Catalog"
-        >
-          <div className={styles.archiveModalContent}>
-            <div className={styles.archiveModalHeader}>
-              <div className={magStyles.archiveEyebrow}>
-                <span className={magStyles.archiveEyebrowRule} aria-hidden="true" />
-                <span>Weekly Newspaper Dispatches</span>
-                <span className={magStyles.archiveEyebrowRule} aria-hidden="true" />
-              </div>
-              <button
-                type="button"
-                className={magStyles.readerCloseBtn}
-                onClick={() => setActiveCatalogModal(null)}
-                aria-label="Close archive"
-              >
-                <X className={magStyles.readerCloseIcon} />
-                <span>CLOSE</span>
-              </button>
-            </div>
-            <h3 className={magStyles.archiveTitle}>Weekly Newspaper Archive</h3>
-            <p className={magStyles.archiveSubtitle}>
-              Browse through all {newsletters.length} weekly dispatches and executive market briefings. Select any edition to open in the interactive flipbook.
-            </p>
-            <div className={magStyles.archiveGrid}>
-              {newsletters.map((item) => (
-                <div
-                  key={item.id}
-                  className={styles.publicationArchiveCard}
-                  onClick={() => {
-                    setActiveCatalogModal(null);
-                    handleOpenDocReader({
-                      title: "Weekly Newspaper Dispatch",
-                      subtitle: item.title.toUpperCase(),
-                      pdfUrl: getProxiedPdfUrl(item.pdf),
-                    });
-                  }}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      setActiveCatalogModal(null);
-                      handleOpenDocReader({
-                        title: "Weekly Newspaper Dispatch",
-                        subtitle: item.title.toUpperCase(),
-                        pdfUrl: getProxiedPdfUrl(item.pdf),
-                      });
-                    }
-                  }}
-                >
-                  <div className={styles.publicationArchiveCover}>
-                    <img src={item.cover} alt={item.title} loading="lazy" />
-                  </div>
-                  <div className={styles.publicationArchiveMeta}>
-                    <span className={styles.publicationArchiveTitle}>{item.title}</span>
-                    <span className={styles.publicationArchiveCta}>
-                      <span>READ ISSUE</span>
-                      <ArrowRight size={11} />
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>,
-        document.body
-      )}
-
-      {/* Complete Articles & Research Catalog Modal */}
-      {activeCatalogModal === "articles" && isMounted && createPortal(
-        <div
-          className={styles.archiveModalOverlay}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setActiveCatalogModal(null);
-          }}
-          onWheel={(e) => {
-            e.stopPropagation();
-          }}
-          onTouchMove={(e) => {
-            e.stopPropagation();
-          }}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Complete Research Articles Catalog"
-        >
-          <div className={styles.archiveModalContent}>
-            <div className={styles.archiveModalHeader}>
-              <div className={magStyles.archiveEyebrow}>
-                <span className={magStyles.archiveEyebrowRule} aria-hidden="true" />
-                <span>Editorial & Research Library</span>
-                <span className={magStyles.archiveEyebrowRule} aria-hidden="true" />
-              </div>
-              <button
-                type="button"
-                className={magStyles.readerCloseBtn}
-                onClick={() => setActiveCatalogModal(null)}
-                aria-label="Close archive"
-              >
-                <X className={magStyles.readerCloseIcon} />
-                <span>CLOSE</span>
-              </button>
-            </div>
-            <h3 className={magStyles.archiveTitle}>Published Articles & Features</h3>
-            <p className={magStyles.archiveSubtitle}>
-              Explore our library of {articles.length} in-depth research articles and exploration features. Select any article to read the full publication.
-            </p>
-            <div className={magStyles.archiveGrid}>
-              {articles.map((item) => (
-                <div
-                  key={item.id}
-                  className={styles.publicationArchiveCard}
-                  onClick={() => {
-                    setActiveCatalogModal(null);
-                    handleOpenDocReader({
-                      title: "Research & Editorial Article",
-                      subtitle: item.title.toUpperCase(),
-                      pdfUrl: getProxiedPdfUrl(item.pdf),
-                    });
-                  }}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      setActiveCatalogModal(null);
-                      handleOpenDocReader({
-                        title: "Research & Editorial Article",
-                        subtitle: item.title.toUpperCase(),
-                        pdfUrl: getProxiedPdfUrl(item.pdf),
-                      });
-                    }
-                  }}
-                >
-                  <div className={styles.publicationArchiveCover}>
-                    <img src={item.cover} alt={item.title} loading="lazy" />
-                  </div>
-                  <div className={styles.publicationArchiveMeta}>
-                    <span className={styles.publicationArchiveTitle}>{item.title}</span>
-                    <span className={styles.publicationArchiveCta}>
-                      <span>READ ARTICLE</span>
-                      <ArrowRight size={11} />
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>,
-        document.body
-      )}
-
-      {/* Unified Two-Page Flipbook Reader Modal */}
-      {readerState !== "closed" && isMounted && createPortal(
-        <div
-          className={`${magStyles.readerOverlay} ${
-            readerState === "open"
-              ? magStyles.readerOverlayOpen
-              : readerState === "opening"
-              ? magStyles.readerOverlayOpening
-              : magStyles.readerOverlayClosing
-          }`}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              handleCloseReader();
-            }
-          }}
-          role="dialog"
-          aria-modal="true"
-          aria-label={`${activeReaderDoc?.title || "Publication"} Reader`}
-        >
-          <div className={magStyles.readerHeader}>
-            <div className={magStyles.readerMetaLeft}>
-              <span className={magStyles.readerBrand}>MINING DISCOVERY</span>
-              <span className={magStyles.editionDot} aria-hidden="true" />
-              <span className={magStyles.readerIssue}>
-                {activeReaderDoc?.subtitle || "DIGITAL PUBLICATION"}
-              </span>
-            </div>
-            <button
-              type="button"
-              className={magStyles.readerCloseBtn}
-              onClick={handleCloseReader}
-              aria-label="Close reader"
-            >
-              <X className={magStyles.readerCloseIcon} />
-              <span>CLOSE</span>
-            </button>
-          </div>
-          <div
-            className={magStyles.readerStage}
-            onClick={(e) => {
-              if (e.target === e.currentTarget) {
-                handleCloseReader();
-              }
-            }}
-          >
-            {activeReaderDoc && (
-              <MagazineSpread
-                pdfUrl={activeReaderDoc.pdfUrl}
-                title={activeReaderDoc.title}
-                onSpreadChange={setSpreadLabel}
-              />
-            )}
-          </div>
-          <div className={magStyles.readerFooter}>
-            <span>{spreadLabel}</span>
-          </div>
-        </div>,
-        document.body
-      )}
     </>
   );
 };
