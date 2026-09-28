@@ -1703,7 +1703,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: clamp(1.4rem, 2.2vh, 2.2rem);
+  gap: clamp(3rem, 6vh, 5.2rem);
   max-width: clamp(580px, 55vw, 920px);
   z-index: 10;
   color: #FFFFFF;
@@ -1716,6 +1716,7 @@
   display: flex;
   flex-direction: column;
   gap: clamp(0.75rem, 1.4vh, 1.25rem);
+  margin-bottom: clamp(0.4rem, 1.2vh, 1rem);
 }
 
 /* Full-bleed Background Image */
@@ -1931,7 +1932,7 @@
   color: #FFFFFF;
   margin: 0;
   letter-spacing: -0.01em;
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.85);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95), 0 0 25px rgba(0, 0, 0, 0.7);
   white-space: nowrap;
 }
 
@@ -1946,6 +1947,7 @@
   border: none;
   border-radius: 0;
   box-shadow: none;
+  margin-top: clamp(0.4rem, 1.2vh, 1rem);
 }
 
 .cardFlickMeta {
