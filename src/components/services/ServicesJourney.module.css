@@ -330,10 +330,10 @@
   inset: 0;
   background: linear-gradient(
     90deg,
-    rgba(10, 9, 7, 0.88) 0%,
-    rgba(10, 9, 7, 0.55) 26%,
-    rgba(10, 9, 7, 0.12) 52%,
-    rgba(10, 9, 7, 0.3) 100%
+    rgba(10, 9, 7, 0.95) 0%,
+    rgba(10, 9, 7, 0.76) 32%,
+    rgba(10, 9, 7, 0.38) 64%,
+    rgba(10, 9, 7, 0.48) 100%
   );
 }
 
@@ -365,6 +365,7 @@
   font-weight: 600;
   letter-spacing: 0.24em;
   font-variant-numeric: tabular-nums;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
 }
 
 .sjTitle {
@@ -376,6 +377,7 @@
   line-height: 0.95;
   letter-spacing: -0.045em;
   text-transform: uppercase;
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.75);
 }
 
 /*
@@ -404,15 +406,17 @@
   font-weight: 600;
   line-height: 1.45;
   letter-spacing: -0.01em;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.7);
 }
 
 .sjConcept {
   margin: clamp(0.45rem, 1.2vh, 0.8rem) 0 0;
   max-width: 26rem;
-  color: rgba(247, 244, 237, 0.72);
+  color: rgba(247, 244, 237, 0.88);
   font-family: var(--font-sans, sans-serif);
   font-size: clamp(0.875rem, 1.05vw, 1rem);
   line-height: 1.65;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.65);
 }
 
 .sjList {

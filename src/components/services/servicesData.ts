@@ -3,23 +3,23 @@
  *
  * One source of truth for both /services experiences on this route: the pinned journey
  * reads the scene-level fields, and the detail overlay reads the same records plus the
- * long-form fields below. Nothing is duplicated between them — the overlay is handed a
+ * long-form fields below. Nothing is duplicated between them â€” the overlay is handed a
  * category's number and looks both halves up from here.
  *
  * CONTENT RULE. Everything in this file has to be traceable to the Mining Discovery
  * portfolio or to copy already approved elsewhere on this site. Where the portfolio has
  * no text for a field, the field is left empty and the overlay omits that section rather
- * than filling it with something plausible. `whatWeDo` is empty for categories 02–06 for
- * exactly that reason — see the note above SERVICE_DETAILS.
+ * than filling it with something plausible. `whatWeDo` is empty for categories 02â€“06 for
+ * exactly that reason â€” see the note above SERVICE_DETAILS.
  */
 
 export interface ServiceChapter {
   num: string;
   /** The word the index rail shows for this category. */
   short: string;
-  /** Two authored lines — the break is a decision, not a wrap. */
+  /** Two authored lines â€” the break is a decision, not a wrap. */
   titleLines: [string, string];
-  /** A short, bold value proposition — one line, 6–10 words. */
+  /** A short, bold value proposition â€” one line, 6â€“10 words. */
   valueStatement: string;
   concept: string;
   /** Named exactly as the portfolio names them. */
@@ -29,8 +29,8 @@ export interface ServiceChapter {
 }
 
 /*
- * On the imagery: the approved library holds nine distinct frames — four of the five
- * /stats files are byte-identical duplicates of the /services ones — exactly one of which
+ * On the imagery: the approved library holds nine distinct frames â€” four of the five
+ * /stats files are byte-identical duplicates of the /services ones â€” exactly one of which
  * has a person in it, and none of which show media, conference or branding work. So 04,
  * 05 and 06 have literal matches and 01, 02 and 03 use mining operations standing in for
  * capital, industry presence and creative presence. Alt text describes what is actually in
@@ -44,8 +44,8 @@ export const SERVICE_CHAPTERS: ServiceChapter[] = [
     valueStatement: "Capital connections, built for mining.",
     concept: "Turn mining opportunities into investor attention through targeted outreach and global stakeholder connections.",
     services: ["Investor Campaigns", "Global Outreach"],
-    image: "/services/04-pit.webp",
-    alt: "Aerial view of a large open-pit mine in production",
+    image: "/images/engine/real_investor_handshake.webp",
+    alt: "Executive leadership and capital advisors reviewing mining investor presentation metrics and portfolio growth strategy",
   },
   {
     num: "02",
@@ -54,8 +54,8 @@ export const SERVICE_CHAPTERS: ServiceChapter[] = [
     valueStatement: "Your story placed in the right rooms.",
     concept: "Build authority across the mining media landscape through industry coverage, press communication and conference visibility.",
     services: ["News & Syndication", "Press Office", "Conference Media"],
-    image: "/stats/newsletter-briefing.webp",
-    alt: "Open-pit mining operation at sunset",
+    image: "/images/engine/real_conference_summit.webp",
+    alt: "Keynote presentation in a mining industry conference auditorium with global audience",
   },
   {
     num: "03",
@@ -64,8 +64,8 @@ export const SERVICE_CHAPTERS: ServiceChapter[] = [
     valueStatement: "Identity that makes you recognisable and remembered.",
     concept: "Build a distinctive visual and digital identity that makes mining companies easier to recognise, understand and remember.",
     services: ["Digital Branding", "Multimedia"],
-    image: "/services/02-drill.webp",
-    alt: "Exploration drill rig and crew working in mountain terrain",
+    image: "/images/engine/real_digital_brand.webp",
+    alt: "Digital branding and web development workstation with responsive interface designs",
   },
   {
     num: "04",
@@ -74,8 +74,8 @@ export const SERVICE_CHAPTERS: ServiceChapter[] = [
     valueStatement: "Expand your reach. Own your audience.",
     concept: "Grow your mining audience through targeted campaigns, social growth and paid digital promotion.",
     services: ["Social Growth & Ads", "Paid Ad Campaigns"],
-    image: "/cards/bg_card_3.webp",
-    alt: "Smartphone held in front of a mining landscape",
+    image: "/cards/real_audience_strategy.webp",
+    alt: "Marketing strategy team planning audience reach and digital growth campaign metrics",
   },
   {
     num: "05",
@@ -84,8 +84,8 @@ export const SERVICE_CHAPTERS: ServiceChapter[] = [
     valueStatement: "Leadership voices that build industry credibility.",
     concept: "Put mining leadership at the centre of the story through executive conversations, interviews and industry insights.",
     services: ["Podcasts & Interviews", "Thought Leadership", "Executive Profiling"],
-    image: "/services/03-assay.webp",
-    alt: "Mining professional logging drill core samples on a core bench",
+    image: "/images/engine/real_podcast_mic.webp",
+    alt: "Professional studio microphone setup for executive podcasts and media interviews",
   },
   {
     num: "06",
@@ -94,8 +94,8 @@ export const SERVICE_CHAPTERS: ServiceChapter[] = [
     valueStatement: "Stay connected through direct, consistent communication.",
     concept: "Keep your audience engaged through direct and regular communication that extends beyond the campaign.",
     services: ["Newsletter & Emailer", "Subscriber Campaigns"],
-    image: "/cards/bg_card_2.webp",
-    alt: "Laptop and printed industry report on a desk at dusk",
+    image: "/stats/real_newsletter_desk.webp",
+    alt: "Modern executive desk with laptop, notes, and direct digital newsletter communications",
   },
 ];
 
@@ -112,7 +112,7 @@ export interface ServiceFigure {
 }
 
 export interface ServiceDetail {
-  /** The overlay's large heading — the category's descriptor. */
+  /** The overlay's large heading â€” the category's descriptor. */
   headline: string;
   /** One short paragraph under the heading. */
   intro: string;
@@ -134,10 +134,10 @@ export interface ServiceDetail {
  * WHAT IS STILL MISSING, and why it is blank rather than written.
  *
  * `whatWeDo` carries the portfolio's own description of each individual service. That
- * copy exists for Investor Campaigns and Global Outreach, so 01 is complete. For 02–06
+ * copy exists for Investor Campaigns and Global Outreach, so 01 is complete. For 02â€“06
  * the portfolio has given capability NAMES but no descriptions, so those arrays are empty
  * and the overlay drops the "What we do" section for those categories. Filling them in is
- * a matter of pasting the portfolio's text into these arrays — no code change needed.
+ * a matter of pasting the portfolio's text into these arrays â€” no code change needed.
  *
  * Every figure below already appears on this site: the four campaign results come from
  * the homepage's Our Impact section and are framed there as the outcome of one targeted
@@ -290,7 +290,7 @@ export const SERVICE_DETAILS: Record<string, ServiceDetail> = {
   "05": {
     headline: "Leadership & Industry Voice",
     intro:
-      "Mining is driven by projects, technology and capital — but it is also driven by the people leading the industry.\n\nMining Discovery creates opportunities for executives and industry leaders to share their perspectives through podcasts, interviews, features and editorial storytelling designed to connect leadership voices with the wider mining community.",
+      "Mining is driven by projects, technology and capital â€” but it is also driven by the people leading the industry.\n\nMining Discovery creates opportunities for executives and industry leaders to share their perspectives through podcasts, interviews, features and editorial storytelling designed to connect leadership voices with the wider mining community.",
     whatWeDo: [
       {
         title: "Podcasts & Interviews",
@@ -375,7 +375,7 @@ export const SERVICE_DETAILS: Record<string, ServiceDetail> = {
  * scenes. A single mining frame persists the whole way through and is re-cropped from
  * state to state; the identity stays on screen; only the supporting information changes
  * inside it. That is why there is no per-state image here and no closing state that
- * re-shows the service name — a second hero at the end reads as the story restarting.
+ * re-shows the service name â€” a second hero at the end reads as the story restarting.
  */
 export type StateLayout =
   | "intro"
@@ -389,12 +389,12 @@ export type StateLayout =
 
 export interface ServiceState {
   id: string;
-  /** Supporting heading. Deliberately not hero-sized — the service name is the hero. */
+  /** Supporting heading. Deliberately not hero-sized â€” the service name is the hero. */
   label: string;
   /**
    * The statement under the heading: what this chapter does for the reader, in one line.
-   * Set above the body and below the heading, so a state reads heading → claim → detail
-   * rather than heading → paragraph. Optional, because not every state has one.
+   * Set above the body and below the heading, so a state reads heading â†’ claim â†’ detail
+   * rather than heading â†’ paragraph. Optional, because not every state has one.
    */
   lead?: string;
   body?: string;
@@ -416,13 +416,13 @@ export interface ServiceState {
    * A crop that leaves a column of clear stage beside it is a wide-screen idea: on a
    * phone there is no width to split, so the type runs the full measure and a side plate
    * ends up underneath it. A state that reads as picture-beside-type on a laptop becomes
-   * picture-above-type here, and this is where it says so. Optional — most crops are
+   * picture-above-type here, and this is where it says so. Optional â€” most crops are
    * fractions of the stage and need no second version.
    */
   frameNarrow?: [number, number, number, number];
-  /** How far the frame is dimmed behind the type, 0–1. */
+  /** How far the frame is dimmed behind the type, 0â€“1. */
   dim: number;
-  /** Opacity of the connection motif drawn over the frame, 0–1. */
+  /** Opacity of the connection motif drawn over the frame, 0â€“1. */
   network?: number;
   /** State-specific visual asset for non-repetitive cinematic storytelling */
   image?: string;
@@ -432,7 +432,7 @@ export interface ServiceState {
 export interface ServiceStory {
   num: string;
   label: string;
-  /** The intro's own copy — rendered exactly as the approved first screen. */
+  /** The intro's own copy â€” rendered exactly as the approved first screen. */
   intro: {
     eyebrow: string;
     titleLines: [string, string];
@@ -452,13 +452,13 @@ export interface ServiceStory {
  * WHAT IS DELIBERATELY NOT HERE. No figures, in either story. Earlier
  * versions of this story carried both: four campaign percentages and a Substack count,
  * plus an "Investor Platform" state. Those numbers are real, but they belong to the
- * company — they are published on the homepage's Our Impact and on Market Influence &
+ * company â€” they are published on the homepage's Our Impact and on Market Influence &
  * Reach as the outcome of one targeted digital campaign and as platform-wide reach.
  * Restating them inside Investor Growth turns general company results into results for
  * that one service, which is a claim the portfolio does not make. The approved copy for
  * both of these services has no statistics, so neither story has any.
  *
- * The same applies to 02 and the reach figures on Market Influence & Reach — the monthly
+ * The same applies to 02 and the reach figures on Market Influence & Reach â€” the monthly
  * audience, the companies featured, the years of coverage. Those describe the Mining
  * Discovery platform, not what a client's own media presence will do, and this story does
  * not repeat them. It also names no publications, no conferences, no partnerships and no
@@ -479,8 +479,8 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         "Mining projects need more than visibility — they need to reach the right investors, stakeholders and decision-makers.",
         "Mining Discovery combines investor-focused campaigns, mining media and global outreach to help companies communicate their opportunities to a relevant industry audience and build meaningful connections around their projects.",
       ],
-      image: "/services/04-pit.webp",
-      alt: "Aerial view of a large open-pit mine in production",
+      image: "/images/engine/real_investor_handshake.webp",
+      alt: "Mining executives and investors shaking hands over project investment agreements",
     },
     states: [
       {
@@ -490,8 +490,8 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         // Replaced at runtime by the measured intro rect.
         frame: [0.52, 0.26, 0.43, 0.51],
         dim: 0,
-        image: "/services/04-pit.webp",
-        alt: "Aerial view of a large open-pit mine in production",
+        image: "/images/engine/real_investor_handshake.webp",
+        alt: "Mining executives and investors shaking hands over project investment agreements",
       },
       {
         id: "campaigns",
@@ -501,7 +501,7 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         layout: "lower",
         frame: [0.06, 0.1, 0.88, 0.8],
         dim: 0.62,
-        image: "/images/engine/conference_auditorium.webp",
+        image: "/images/engine/real_conference_summit.webp",
         alt: "Mining project opportunity presented to institutional investors and industry stakeholders",
       },
       {
@@ -525,7 +525,7 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         frame: [0, 0, 1, 1],
         dim: 0.8,
         network: 0.25,
-        image: "/images/engine/investor_meeting.webp",
+        image: "/images/engine/real_boardroom_meeting.webp",
         alt: "Mining executive and stakeholder meeting discussing project opportunity",
       },
       {
@@ -537,8 +537,8 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         frame: [0.53, 0.13, 0.43, 0.74],
         frameNarrow: [0.06, 0.04, 0.88, 0.44],
         dim: 0.34,
-        image: "/services/02-drill.webp",
-        alt: "Exploration drill rig and team showcasing the scale and opportunity of the mining project",
+        image: "/images/engine/real_digital_brand.webp",
+        alt: "Digital communication and presentation assets showcasing project opportunity",
       },
       {
         id: "close",
@@ -564,31 +564,8 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         "In mining, credibility is built through consistent presence, relevant communication and being visible where the industry is paying attention.",
         "Mining Discovery helps companies strengthen their industry presence through mining-focused news coverage, press communication and conference media — creating opportunities to put projects, companies and leadership in front of a relevant global audience.",
       ],
-      /*
-       * NOT the card's own photograph, which is the one place this story departs from
-       * how 01 was built. Worth explaining, because it looks like an inconsistency.
-       *
-       * 02's card carries /stats/newsletter-briefing.webp. Despite the filename, and
-       * despite the alt text on the card calling it an open-pit mine at sunset, that file
-       * is a photograph of an open magazine: a masthead reading GLOBAL VENTURE, a feature
-       * headline, and a line chart captioned "Clean Energy Returns (2018-2023)". None of
-       * it is real. As a small plate on a card it passes as texture, but this story would
-       * blow it up to fill the frame for the whole read — an invented publication and an
-       * invented chart standing as the entire visual argument for a service whose whole
-       * subject is media credibility. That is the one image in the library that must not
-       * be used here.
-       *
-       * So the environment is a survey rig instead: an actual mining scene, no logos, no
-       * embedded text, no charts, and the only frame in the approved library not already
-       * spoken for by another category. The cost is that the opening morph crosses from
-       * the card's plate into a different picture rather than the same one. That is a
-       * moment; the alternative is a fabricated masthead for the length of the story.
-       *
-       * The card itself is untouched — its image, its alt text and its place in the
-       * journey are exactly as they were.
-       */
-      image: "/services/01-survey.webp",
-      alt: "Drill rig and operator at work on an exploration site in open terrain",
+      image: "/images/engine/real_conference_summit.webp",
+      alt: "Mining industry keynote presentation in a full conference auditorium with global audience and media",
     },
     states: [
       {
@@ -598,8 +575,8 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         // Replaced at runtime by the measured intro rect.
         frame: [0.52, 0.26, 0.43, 0.51],
         dim: 0,
-        image: "/services/01-survey.webp",
-        alt: "Drill rig and operator at work on an exploration site in open terrain",
+        image: "/images/engine/real_conference_summit.webp",
+        alt: "Mining industry keynote presentation in a full conference auditorium with global audience and media",
       },
       {
         id: "news",
@@ -609,7 +586,7 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         layout: "lower",
         frame: [0.06, 0.1, 0.88, 0.8],
         dim: 0.7,
-        image: "/images/engine/editorial_magazine.webp",
+        image: "/images/engine/real_editorial_desk.webp",
         alt: "Executive briefing editorial publication and mining market intelligence report",
       },
       {
@@ -621,7 +598,7 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         frame: [0.53, 0.13, 0.43, 0.74],
         frameNarrow: [0.06, 0.04, 0.88, 0.44],
         dim: 0.34,
-        image: "/images/engine/executive_boardroom.webp",
+        image: "/images/engine/real_boardroom_meeting.webp",
         alt: "Corporate mining boardroom and press communication environment",
       },
       {
@@ -632,7 +609,7 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         layout: "left",
         frame: [0, 0, 1, 1],
         dim: 0.82,
-        image: "/images/engine/conference_auditorium.webp",
+        image: "/images/engine/real_conference_summit.webp",
         alt: "Mining industry conference auditorium and executive gathering",
       },
       {
@@ -644,8 +621,8 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         frame: [0.11, 0.11, 0.78, 0.78],
         dim: 0.8,
         network: 0.85,
-        image: "/services/04-pit.webp",
-        alt: "Tier-1 open pit mining operation representing established industry authority",
+        image: "/cards/bg_card_1.webp",
+        alt: "Tier-1 mining operation representing established industry authority",
       },
       {
         id: "close",
@@ -671,8 +648,8 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         "Mining companies operate in a highly technical industry, but strong digital communication starts with making that complexity understandable, recognizable and visually compelling.",
         "Mining Discovery combines digital branding and multimedia to help mining companies build a stronger visual presence and communicate their projects, expertise and story across digital channels.",
       ],
-      image: "/services/02-drill.webp",
-      alt: "Exploration drill rig and crew working in mountain terrain",
+      image: "/images/engine/real_digital_brand.webp",
+      alt: "Digital branding and web development workstation with responsive interface designs",
     },
     states: [
       {
@@ -681,8 +658,8 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         layout: "intro",
         frame: [0.52, 0.26, 0.43, 0.51],
         dim: 0,
-        image: "/services/02-drill.webp",
-        alt: "Exploration drill rig and crew working in mountain terrain",
+        image: "/images/engine/real_digital_brand.webp",
+        alt: "Digital branding and web development workstation with responsive interface designs",
       },
       {
         id: "branding",
@@ -692,8 +669,8 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         layout: "lower",
         frame: [0.06, 0.1, 0.88, 0.8],
         dim: 0.65,
-        image: "/images/engine/brand_identity.webp",
-        alt: "Corporate brand guidelines, identity showcase, and stationery for mining companies",
+        image: "/images/engine/real_brand_design.webp",
+        alt: "Corporate brand guidelines, identity showcase, and color system for mining companies",
       },
       {
         id: "multimedia",
@@ -704,8 +681,8 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         frame: [0.53, 0.13, 0.43, 0.74],
         frameNarrow: [0.06, 0.04, 0.88, 0.44],
         dim: 0.38,
-        image: "/images/engine/youtube_production.webp",
-        alt: "Professional 4K media production studio, podcast broadcast desk, and editorial recording suite",
+        image: "/images/engine/real_podcast_mic.webp",
+        alt: "Professional broadcast media microphone and studio suite",
       },
       {
         id: "visual-communication",
@@ -715,8 +692,8 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         layout: "left",
         frame: [0, 0, 1, 1],
         dim: 0.78,
-        image: "/cards/bg_card_3.webp",
-        alt: "Modern digital technology and mobile storytelling interface in front of mining operation",
+        image: "/cards/real_audience_strategy.webp",
+        alt: "Creative strategy and visual communication planning for mining companies",
       },
       {
         id: "digital-presence",
@@ -727,8 +704,8 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         frame: [0.11, 0.11, 0.78, 0.78],
         dim: 0.75,
         network: 0.7,
-        image: "/services/01-survey.webp",
-        alt: "Distinctive mining operation representing a recognizable digital brand",
+        image: "/images/engine/real_digital_brand.webp",
+        alt: "Distinctive digital interface and responsive presence for mining operations",
       },
       {
         id: "close",
@@ -737,8 +714,8 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         layout: "closing",
         frame: [0, 0, 1, 1],
         dim: 0.84,
-        image: "/about/open-pit-golden-hour.webp",
-        alt: "Panoramic golden hour mining operation representing established digital presence",
+        image: "/cards/bg_card_4.webp",
+        alt: "Vast horizon representing expansive digital brand authority",
       },
     ],
   },
@@ -754,8 +731,8 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         "Great mining stories only create impact when they reach the right audience.",
         "Mining Discovery combines social growth and paid digital campaigns to amplify mining-focused content, expand reach and create stronger connections with the audiences that matter to companies, projects and industry leaders.",
       ],
-      image: "/cards/bg_card_3.webp",
-      alt: "Smartphone held in front of a mining landscape",
+      image: "/cards/real_audience_strategy.webp",
+      alt: "Marketing strategy team planning audience reach and digital growth campaign metrics",
     },
     states: [
       {
@@ -764,8 +741,8 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         layout: "intro",
         frame: [0.52, 0.26, 0.43, 0.51],
         dim: 0,
-        image: "/cards/bg_card_3.webp",
-        alt: "Smartphone held in front of a mining landscape",
+        image: "/cards/real_audience_strategy.webp",
+        alt: "Marketing strategy team planning audience reach and digital growth campaign metrics",
       },
       {
         id: "social-growth",
@@ -775,8 +752,8 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         layout: "lower",
         frame: [0.06, 0.1, 0.88, 0.8],
         dim: 0.65,
-        image: "/services/03-assay.webp",
-        alt: "Mining professional examining drill core discoveries for digital storytelling",
+        image: "/cards/real_social_media.webp",
+        alt: "Mobile social media platform interface showing active industry engagement",
       },
       {
         id: "paid-campaigns",
@@ -787,8 +764,8 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         frame: [0.53, 0.13, 0.43, 0.74],
         frameNarrow: [0.06, 0.04, 0.88, 0.44],
         dim: 0.38,
-        image: "/images/engine/youtube_production.webp",
-        alt: "Professional media broadcasting and digital content distribution suite",
+        image: "/images/engine/real_digital_brand.webp",
+        alt: "Targeted digital advertising dashboard and campaign asset suite",
       },
       {
         id: "amplification",
@@ -810,8 +787,8 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         frame: [0.11, 0.11, 0.78, 0.78],
         dim: 0.75,
         network: 0.75,
-        image: "/cards/bg_card_4.webp",
-        alt: "Connected global mining community and industry audience",
+        image: "/cards/real_audience_strategy.webp",
+        alt: "Connected global mining community and industry audience strategy",
       },
       {
         id: "close",
@@ -837,8 +814,8 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         "Mining is driven by projects, technology and capital — but it is also driven by the people leading the industry.",
         "Mining Discovery creates opportunities for executives and industry leaders to share their perspectives through podcasts, interviews, features and editorial storytelling designed to connect leadership voices with the wider mining community.",
       ],
-      image: "/images/engine/executive_boardroom.webp",
-      alt: "Mining executive and leadership boardroom",
+      image: "/images/engine/real_podcast_mic.webp",
+      alt: "Professional studio microphone and broadcast setup for executive interviews and podcasts",
     },
     states: [
       {
@@ -847,8 +824,8 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         layout: "intro",
         frame: [0.52, 0.26, 0.43, 0.51],
         dim: 0,
-        image: "/images/engine/executive_boardroom.webp",
-        alt: "Mining executive and leadership boardroom",
+        image: "/images/engine/real_podcast_mic.webp",
+        alt: "Professional studio microphone and broadcast setup for executive interviews and podcasts",
       },
       {
         id: "podcasts-interviews",
@@ -858,8 +835,8 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         layout: "lower",
         frame: [0.06, 0.1, 0.88, 0.8],
         dim: 0.65,
-        image: "/images/engine/youtube_production.webp",
-        alt: "Broadcast podcast studio desk, microphones, and executive interview suite",
+        image: "/images/engine/real_podcast_studio.webp",
+        alt: "Executive podcast interview recording with professional studio microphones and headsets",
       },
       {
         id: "executive-spotlights",
@@ -870,7 +847,7 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         frame: [0.53, 0.13, 0.43, 0.74],
         frameNarrow: [0.06, 0.04, 0.88, 0.44],
         dim: 0.38,
-        image: "/images/engine/conference_auditorium.webp",
+        image: "/images/engine/real_conference_summit.webp",
         alt: "Executive leadership address and keynote spotlight at global mining conference",
       },
       {
@@ -881,8 +858,8 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         layout: "left",
         frame: [0, 0, 1, 1],
         dim: 0.78,
-        image: "/services/03-assay.webp",
-        alt: "Mining leader and technical specialist inspecting core discoveries on site",
+        image: "/images/engine/real_boardroom_meeting.webp",
+        alt: "Corporate executive boardroom meeting discussing industry insights and strategies",
       },
       {
         id: "ceo-features",
@@ -893,8 +870,8 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         frame: [0.11, 0.11, 0.78, 0.78],
         dim: 0.75,
         network: 0.7,
-        image: "/images/engine/investor_meeting.webp",
-        alt: "Executive conversation and strategic leadership discussion",
+        image: "/images/engine/real_investor_handshake.webp",
+        alt: "Executive conversation and strategic leadership partnership handshake",
       },
       {
         id: "close",
@@ -903,8 +880,8 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         layout: "closing",
         frame: [0, 0, 1, 1],
         dim: 0.84,
-        image: "/services/02-drill.webp",
-        alt: "Inspiring mining project leadership in mountain terrain",
+        image: "/images/engine/real_boardroom_meeting.webp",
+        alt: "Mining executive leadership in corporate boardroom setting",
       },
     ],
   },
@@ -920,8 +897,8 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         "Digital visibility can bring an audience to your story, but lasting engagement comes from creating a direct connection.",
         "Mining Discovery helps mining companies communicate consistently with their audience through newsletters and email campaigns designed to keep important stories, company updates and industry insights within reach.",
       ],
-      image: "/cards/bg_card_2.webp",
-      alt: "Laptop and printed industry report on a desk at dusk",
+      image: "/stats/real_newsletter_desk.webp",
+      alt: "Modern executive desk with laptop, notes, and direct digital newsletter communications",
     },
     states: [
       {
@@ -930,8 +907,8 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         layout: "intro",
         frame: [0.52, 0.26, 0.43, 0.51],
         dim: 0,
-        image: "/cards/bg_card_2.webp",
-        alt: "Laptop and printed industry report on a desk at dusk",
+        image: "/stats/real_newsletter_desk.webp",
+        alt: "Modern executive desk with laptop, notes, and direct digital newsletter communications",
       },
       {
         id: "newsletters",
@@ -941,7 +918,7 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         layout: "lower",
         frame: [0.06, 0.1, 0.88, 0.8],
         dim: 0.65,
-        image: "/images/engine/editorial_magazine.webp",
+        image: "/images/engine/real_editorial_desk.webp",
         alt: "Executive briefing newsletter and printed mining publication report",
       },
       {
@@ -953,7 +930,7 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         frame: [0.53, 0.13, 0.43, 0.74],
         frameNarrow: [0.06, 0.04, 0.88, 0.44],
         dim: 0.38,
-        image: "/cards/bg_card_1.webp",
+        image: "/stats/real_newsletter_desk.webp",
         alt: "Mining decision-maker engaging directly with project communications",
       },
       {
@@ -976,7 +953,7 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         frame: [0.11, 0.11, 0.78, 0.78],
         dim: 0.75,
         network: 0.75,
-        image: "/cards/bg_card_4.webp",
+        image: "/cards/real_audience_strategy.webp",
         alt: "Engaged direct mining community and sustained audience relationships",
       },
       {
@@ -986,9 +963,11 @@ export const SERVICE_STORIES: Record<string, ServiceStory> = {
         layout: "closing",
         frame: [0, 0, 1, 1],
         dim: 0.85,
-        image: "/about/open-pit-golden-hour.webp",
+        image: "/cards/bg_card_4.webp",
         alt: "Established mining enterprise with enduring stakeholder and audience trust",
       },
     ],
   },
 };
+
+
