@@ -72,10 +72,9 @@ export const Road: React.FC = () => {
     // As cards rise into center stage and truck zooms off,
     // gracefully lower and hide the road surface
     if (roadGroupRef.current) {
-      if (t >= 0.942) {
-        const roadFade = 1 - smoothstep(0.942, 0.956, t);
-        roadGroupRef.current.position.y = -(1 - roadFade) * 20;
-        roadGroupRef.current.visible = roadFade > 0.01;
+      if (t >= 0.968) {
+        roadGroupRef.current.position.y = -20;
+        roadGroupRef.current.visible = false;
       } else {
         roadGroupRef.current.position.y = 0;
         roadGroupRef.current.visible = true;

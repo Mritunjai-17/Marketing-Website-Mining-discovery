@@ -24,240 +24,220 @@ import {
   getProxiedPdfUrl,
   type PublicationItem,
 } from "@/data/publications";
-import { WorkerPullRig, type WorkerPullRigHandle } from "./WorkerPullRig";
 
 const MILESTONE_ICONS = [TrendingUp, Newspaper, BookOpen, Globe, Sparkles, Sparkles];
 
-export interface ServiceCardItem {
+export interface EditorialServiceItem {
   id: string;
   num: string;
   category: string;
   title: string;
-  italicTitle: string;
-  metaPrice: string;
-  metaSeason: string;
-  summary: string;
   description: string;
   image: string;
-  badge: string;
-  features: {
-    title: string;
-    text: string;
-  }[];
-  ctaText: string;
-  ctaHref: string;
+  alt: string;
+  ctaText?: string;
+  ctaHref?: string;
 }
 
-export const SERVICE_CARDS: ServiceCardItem[] = [
+export const EDITORIAL_SERVICES: EditorialServiceItem[] = [
   {
-    id: "investor-growth",
+    id: "investor-reach",
     num: "01",
-    category: "CAPITAL & INVESTOR REACH",
-    title: "Investor Growth",
-    italicTitle: "Investor Growth",
-    metaPrice: "CAPITAL STRATEGY",
-    metaSeason: "GLOBAL OUTREACH",
-    summary: "TURN MINING OPPORTUNITIES INTO INVESTOR ATTENTION.",
-    description:
-      "Connect mining projects with relevant investors, stakeholders and decision-makers through focused investor campaigns and global industry outreach.",
+    category: "INVESTOR REACH",
+    title: "Investor Reach",
+    description: "Connect mining stories with the audiences that matter through focused investor campaigns and global industry outreach.",
     image: "/images/services/service_01_investor_light.webp",
-    badge: "01 / CAPITAL & INVESTOR REACH",
-    features: [
-      {
-        title: "INVESTOR CAMPAIGNS",
-        text: "Targeted campaigns designed to communicate the opportunity and story behind mining projects to relevant audiences.",
-      },
-      {
-        title: "GLOBAL OUTREACH",
-        text: "Extend project visibility across international mining audiences and create connections with global stakeholders.",
-      },
-    ],
-    ctaText: "DISCUSS INVESTOR OUTREACH",
-    ctaHref: "/contact",
-  },
-  {
-    id: "media-authority",
-    num: "02",
-    category: "CREDIBILITY & INDUSTRY PRESENCE",
-    title: "Media Authority",
-    italicTitle: "Media Authority",
-    metaPrice: "TIER-1 SYNDICATION",
-    metaSeason: "CONFERENCE MEDIA",
-    summary: "BUILD AUTHORITY ACROSS THE MINING MEDIA LANDSCAPE.",
-    description:
-      "Strengthen credibility and visibility through mining media coverage, press communication and conference presence.",
-    image: "/images/services/service_02_media_light.webp",
-    badge: "02 / CREDIBILITY & INDUSTRY PRESENCE",
-    features: [
-      {
-        title: "NEWS & SYNDICATION",
-        text: "Direct editorial syndication into Bloomberg, Reuters, Mining Journal and Tier-1 terminals.",
-      },
-      {
-        title: "PRESS & CONFERENCE",
-        text: "Communicate key milestones and amplify the impact of mining stories through media coverage and industry events.",
-      },
-    ],
-    ctaText: "ELEVATE YOUR MEDIA PROFILE",
+    alt: "Investor outreach boardroom and strategic capital meetings",
+    ctaText: "Explore Outreach",
     ctaHref: "/contact",
   },
   {
     id: "brand-digital",
-    num: "03",
-    category: "IDENTITY & CREATIVE PRESENCE",
+    num: "02",
+    category: "BRAND & DIGITAL",
     title: "Brand & Digital",
-    italicTitle: "Brand & Digital",
-    metaPrice: "DIGITAL IDENTITY",
-    metaSeason: "3D VISUALIZATION",
-    summary: "BUILD A DISTINCTIVE DIGITAL IDENTITY FOR MINING.",
-    description:
-      "Build a distinctive visual and digital identity that makes mining companies easier to recognise, understand and remember.",
+    description: "Build a stronger digital presence for mining companies with distinctive visual and technical assets.",
     image: "/images/services/service_03_brand_light.webp",
-    badge: "03 / IDENTITY & CREATIVE PRESENCE",
-    features: [
-      {
-        title: "DIGITAL BRANDING",
-        text: "Modern visual identity, corporate presentations, and investor-facing digital assets.",
-      },
-      {
-        title: "MULTIMEDIA PRODUCTION",
-        text: "High-impact cinematography, drone mapping, and interactive mining asset models.",
-      },
-    ],
-    ctaText: "EXPLORE BRAND SOLUTIONS",
+    alt: "Distinctive mining branding and digital visual assets",
+    ctaText: "Explore Brand",
     ctaHref: "/contact",
   },
   {
     id: "audience-reach",
-    num: "04",
-    category: "REACH & AMPLIFICATION",
+    num: "03",
+    category: "AUDIENCE REACH",
     title: "Audience Reach",
-    italicTitle: "Audience Reach",
-    metaPrice: "40,000+ NETWORK",
-    metaSeason: "PAID AMPLIFICATION",
-    summary: "EXPAND YOUR REACH. OWN YOUR AUDIENCE.",
-    description:
-      "Turn content into measurable audience growth through targeted social campaigns, network distribution and paid promotion.",
+    description: "Put important mining developments in front of relevant audiences and family offices worldwide.",
     image: "/images/services/service_04_reach_light.webp",
-    badge: "04 / REACH & AMPLIFICATION",
-    features: [
-      {
-        title: "SOCIAL GROWTH & ADS",
-        text: "Targeted campaigns engaging family offices, brokers and institutional mining investors.",
-      },
-      {
-        title: "NETWORK DISTRIBUTION",
-        text: "Direct weekly newsletter reaching 40,000+ active mining decision-makers and brokers.",
-      },
-    ],
-    ctaText: "SCALE YOUR REACH",
+    alt: "Audience network and global distribution campaigns",
+    ctaText: "Scale Reach",
+    ctaHref: "/contact",
+  },
+  {
+    id: "media-editorial",
+    num: "04",
+    category: "MEDIA & EDITORIAL",
+    title: "Media & Editorial",
+    description: "Turn company developments into compelling industry stories through Tier-1 syndication and conference visibility.",
+    image: "/images/services/service_02_media_light.webp",
+    alt: "Authoritative mining media coverage and Tier-1 press office",
+    ctaText: "Elevate Media",
     ctaHref: "/contact",
   },
   {
     id: "mining-intelligence",
     num: "05",
-    category: "MARKET DATA & INSIGHTS",
+    category: "MINING INTELLIGENCE",
     title: "Mining Intelligence",
-    italicTitle: "Mining Intelligence",
-    metaPrice: "30+ JURISDICTIONS",
-    metaSeason: "AI SENTIMENT",
-    summary: "AI-DRIVEN INSIGHTS AND GLOBAL JURISDICTION DATA.",
-    description:
-      "Access proprietary market sentiment, real-time commodity data and regulatory intelligence across 30+ mining jurisdictions.",
+    description: "Surface the information investors and industry professionals care about with proprietary market analytics.",
     image: "/images/services/service_05_intelligence_light.webp",
-    badge: "05 / MARKET DATA & INSIGHTS",
-    features: [
-      {
-        title: "EXECUTIVE BRIEFINGS",
-        text: "Real-time market intel, commodity tracking, and strategic transaction analysis.",
-      },
-      {
-        title: "STRATEGIC ANALYTICS",
-        text: "AI sentiment models tracking global mining momentum and investor perception.",
-      },
-    ],
-    ctaText: "ACCESS INTELLIGENCE",
+    alt: "Proprietary market intelligence and commodity analytics",
+    ctaText: "Access Intelligence",
     ctaHref: "/contact",
   },
   {
-    id: "monthly-magazines",
+    id: "news-publications",
     num: "06",
-    category: "PRINT & DIGITAL PUBLISHING",
-    title: "Monthly Magazines",
-    italicTitle: "Monthly Magazines",
-    metaPrice: "GLOBAL CIRCULATION",
-    metaSeason: "MONTHLY EDITIONS",
-    summary: "IN-DEPTH MINING INTELLIGENCE, INDUSTRY VOICES, AND EXECUTIVE PROFILES.",
-    description:
-      "Curated monthly publications highlighting major discoveries, technological innovations, and strategic insights from mining leaders worldwide.",
+    category: "NEWS & PUBLICATIONS",
+    title: "News & Publications",
+    description: "Extend company visibility through relevant mining media, monthly magazines, and weekly market dispatches.",
     image: "/images/services/service_06_magazines_light.webp",
-    badge: "06 / PRINT & DIGITAL PUBLISHING",
-    features: [
-      {
-        title: "EXECUTIVE PROFILES",
-        text: "In-depth features and exclusive interviews with CEOs, exploration chiefs, and tier-1 investors.",
-      },
-      {
-        title: "GLOBAL DISTRIBUTION",
-        text: "Direct circulation to international mining conferences, financial hubs, and institutional desks.",
-      },
-    ],
-    ctaText: "EXPLORE EDITIONS",
+    alt: "Mining Discovery monthly magazines and weekly newspapers",
+    ctaText: "Read Flipbook",
     ctaHref: "/magazines",
   },
+];
+
+
+export interface TopDownFeature {
+  id: string;
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number; size?: number }>;
+  title: string;
+  description: string;
+}
+
+export const TOP_DOWN_FEATURES: TopDownFeature[] = [
   {
-    id: "weekly-newspaper",
-    num: "07",
-    category: "TIMELY INDUSTRY PRESS",
-    title: "Weekly Newspaper",
-    italicTitle: "Weekly Newspaper",
-    metaPrice: "EXECUTIVE BRIEFINGS",
-    metaSeason: "WEEKLY DISPATCH",
-    summary: "REAL-TIME COMMODITY NEWS, MARKET MOMENTUM, AND STRATEGIC HEADLINES.",
-    description:
-      "Weekly mining newspaper delivered to industry executives and investors, covering critical market shifts, policy updates, and breaking project news.",
-    image: "/images/services/service_07_newspaper_light.webp",
-    badge: "07 / TIMELY INDUSTRY PRESS",
-    features: [
-      {
-        title: "MARKET DISPATCH",
-        text: "Weekly analytical synthesis of global commodity trends, M&A activity, and regulatory shifts.",
-      },
-      {
-        title: "BREAKING DEVELOPMENTS",
-        text: "Rapid-response coverage of drill results, feasibility milestones, and capital raises.",
-      },
-    ],
-    ctaText: "SUBSCRIBE TO DISPATCH",
-    ctaHref: "/contact",
+    id: "intelligence",
+    icon: Sparkles,
+    title: "REAL-TIME MINING INTELLIGENCE",
+    description: "Know exactly where investor and market attention sits at every stage. Live intelligence means faster capital decisions and zero guesswork.",
   },
   {
-    id: "articles",
-    num: "08",
-    category: "EDITORIAL & RESEARCH",
-    title: "Articles",
-    italicTitle: "Articles",
-    metaPrice: "THOUGHT LEADERSHIP",
-    metaSeason: "DAILY INSIGHTS",
-    summary: "DEEP-DIVE EDITORIALS, TECHNICAL ANALYSES, AND EXPERT COMMENTARY.",
-    description:
-      "Authoritative research articles and market analyses bridging technical mining data with institutional investment strategy.",
-    image: "/images/services/service_08_articles_light.webp",
-    badge: "08 / EDITORIAL & RESEARCH",
-    features: [
-      {
-        title: "DEEP-DIVE RESEARCH",
-        text: "Data-grounded articles analyzing jurisdiction risk, processing innovation, and decarbonization.",
-      },
-      {
-        title: "OPINION & ANALYSIS",
-        text: "Expert perspectives from geologists, commodity economists, and senior mining analysts.",
-      },
-    ],
-    ctaText: "BROWSE ALL ARTICLES",
-    ctaHref: "/contact",
+    id: "network",
+    icon: Globe,
+    title: "GLOBAL INVESTOR NETWORK",
+    description: "From APAC resource funds to international financial corridors, our partner network spans every major mining trade route your business relies on.",
+  },
+  {
+    id: "support",
+    icon: Newspaper,
+    title: "24/7 STRATEGIC MEDIA DESK",
+    description: "Dedicated editorial team, always available. From drill-hole releases to Tier-1 publications, we manage every story from origin to delivery.",
+  },
+  {
+    id: "authority",
+    icon: TrendingUp,
+    title: "8+ YEARS INDUSTRY AUTHORITY",
+    description: "From early-stage exploration to Tier-1 global producers, delivering sustained market conviction and verifiable liquidity across critical mineral supply chains.",
   },
 ];
+
+const EditorialGridCard: React.FC<{
+  item: EditorialServiceItem;
+  idx: number;
+  onOpenFlipbook?: () => void;
+  onOpenArchive?: () => void;
+}> = ({ item, idx, onOpenFlipbook, onOpenArchive }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const cardRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.12 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <article
+      ref={cardRef}
+      className={`${styles.editorialGridItem} ${isVisible ? styles.editorialGridItemVisible : ""}`}
+      style={{
+        transitionDelay: `${(idx % 2) * 120}ms`,
+      }}
+    >
+      <div className={styles.editorialItemMeta}>
+        <span className={styles.editorialItemNum}>{item.num}</span>
+        <span className={styles.editorialItemDivider} aria-hidden="true">/</span>
+        <span className={styles.editorialItemCategory}>{item.category}</span>
+      </div>
+
+      <h3 className={styles.editorialItemTitle}>
+        {item.title}
+      </h3>
+
+      <div className={styles.editorialImageBlock}>
+        <img
+          src={item.image}
+          alt={item.alt}
+          className={styles.editorialImage}
+          loading="lazy"
+        />
+        <div className={styles.editorialImageOverlay} />
+      </div>
+
+      <div className={styles.editorialItemFooter}>
+        <p className={styles.editorialItemDesc}>{item.description}</p>
+        {item.id === "news-publications" ? (
+          <div className={styles.editorialActionRow}>
+            <button
+              type="button"
+              className={styles.editorialActionBtn}
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenFlipbook?.();
+              }}
+              aria-label="Open latest monthly magazine in interactive flipbook"
+            >
+              <span>READ FLIPBOOK</span>
+              <span className={styles.editorialActionStar}>✦</span>
+            </button>
+            <button
+              type="button"
+              className={styles.editorialSecondaryBtn}
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenArchive?.();
+              }}
+              aria-label="Explore all magazine editions"
+            >
+              <span>ALL EDITIONS</span>
+              <ArrowRight size={13} />
+            </button>
+          </div>
+        ) : (
+          <Link
+            href={item.ctaHref || "/contact"}
+            className={styles.editorialActionLink}
+          >
+            <span>{item.ctaText || "Explore"}</span>
+            <span className={styles.editorialActionArrow} aria-hidden="true">&rarr;</span>
+          </Link>
+        )}
+      </div>
+    </article>
+  );
+};
 
 
 
@@ -466,15 +446,15 @@ export const JourneyStory: React.FC = () => {
   const leftColRef = useRef<HTMLDivElement>(null);
   const leftSubtextRef = useRef<HTMLDivElement>(null);
   const rightColRef = useRef<HTMLDivElement>(null);
+  const rightTrackRef = useRef<HTMLDivElement>(null);
+  const speedometerRef = useRef<HTMLSpanElement>(null);
   const statsTrackRef = useRef<HTMLDivElement>(null);
   const industriesTitleRef = useRef<HTMLDivElement>(null);
 
   // Settle stage, controls, and interactive elements
   const settleStageRef = useRef<HTMLDivElement>(null);
-  const workerRigRef = useRef<WorkerPullRigHandle>(null);
+  const settleWrapperRef = useRef<HTMLDivElement>(null);
   const spotlightRef = useRef<HTMLDivElement>(null);
-  const creasesOverlayRef = useRef<HTMLDivElement>(null);
-  const grommetRef = useRef<HTMLDivElement>(null);
 
   // Interactive mouse tracker for spotlight and mountain parallax
   const mousePosRef = useRef({
@@ -512,20 +492,7 @@ export const JourneyStory: React.FC = () => {
   const articleShelfTrackRef = useRef<HTMLDivElement>(null);
   const totalTravelRef = useRef(3200);
 
-  // 5 Services Flick Accordion (White Desert Luxury Style)
-  // Default to 2 (Page 3 active in center, matching user screenshot)
-  const [activeService, setActiveService] = useState(2);
-  const activeServiceRef = useRef(2);
 
-  // When a card is clicked, that same card expands to cover the screen
-  const [expandedService, setExpandedService] = useState<number | null>(null);
-
-  const handleCardSelect = useCallback((idx: number) => {
-    if (activeServiceRef.current !== idx) {
-      activeServiceRef.current = idx;
-      setActiveService(idx);
-    }
-  }, []);
 
   const activeMagazine = selectedMagazine || showcaseMagazines[activeIndex] || showcaseMagazines[0];
 
@@ -659,21 +626,7 @@ export const JourneyStory: React.FC = () => {
     }
   }, [activeCatalogModal, readerState, handleCloseReader]);
 
-  // Handle Escape key to collapse expanded service card
-  useEffect(() => {
-    if (expandedService !== null) {
-      const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.key === "Escape") {
-          setExpandedService(null);
-        }
-      };
-      window.addEventListener("keydown", handleKeyDown);
 
-      return () => {
-        window.removeEventListener("keydown", handleKeyDown);
-      };
-    }
-  }, [expandedService]);
 
   useJourneyFrame((scene) => {
     const p = scene.progress;
@@ -742,30 +695,53 @@ export const JourneyStory: React.FC = () => {
     }
 
     // 3. Second Part roadside text (vertical highway run):
-    // Smooth entrance as road turns downward, stays visible through highway run,
-    // and cleanly fades out at p = 0.922 to 0.934 BEFORE the truck doors open
+    // ONLY starts and scrolls AFTER the road has completely finished rotating (p >= 0.890)
+    // and the road is 100% straight and vertical.
     if (secondPartRef.current) {
       let opacity = 0;
-      if (p >= 0.85 && p <= 0.934) {
-        const fadeIn = smoothstep(0.85, 0.895, p);
-        const fadeOut = 1 - smoothstep(0.922, 0.934, p);
+      if (p >= 0.890 && p <= 0.962) {
+        // Smooth fade-in strictly after camera rotation completes
+        const fadeIn = smoothstep(0.890, 0.902, p);
+        const fadeOut = 1 - smoothstep(0.930, 0.940, p);
         opacity = fadeIn * fadeOut;
 
-        if (leftColRef.current) {
-          const enterY = (1 - fadeIn) * 18;
-          leftColRef.current.style.transform = `translate3d(0, ${enterY.toFixed(1)}px, 0)`;
+        // Normalized scroll progress starts at 0.0 when road is straight (p >= 0.900)
+        // so Card 1 ("REAL-TIME MINING INTELLIGENCE") starts right at the top and never disappears prematurely!
+        const sectionP = Math.max(0, Math.min(1, (p - 0.900) / (0.936 - 0.900)));
+
+        // Live dynamic speedometer update
+        if (speedometerRef.current) {
+          const speed = Math.round(24 + sectionP * 34 + Math.sin(sectionP * Math.PI * 5) * 4);
+          speedometerRef.current.textContent = `${speed} KM/H`;
         }
 
-        if (rightColRef.current) {
-          const enterY = (1 - fadeIn) * 22;
-          rightColRef.current.style.transform = `translate3d(0, ${enterY.toFixed(1)}px, 0)`;
+        // LEFT SIDE: Synchronized vertical scroll starting after road is straight
+        if (leftColRef.current) {
+          const scrollY = (0.5 - sectionP) * 160;
+          leftColRef.current.style.transform = `translate3d(0, calc(-50% + ${scrollY.toFixed(1)}px), 0)`;
+        }
+
+        // RIGHT SIDE: Continuously stream feature cards upward as truck drives
+        if (rightTrackRef.current) {
+          const maxScrollRight = 640;
+          const rightY = sectionP * maxScrollRight;
+          rightTrackRef.current.style.transform = `translate3d(0, -${rightY.toFixed(1)}px, 0)`;
+
+          const cards = rightTrackRef.current.children;
+          for (let i = 0; i < cards.length; i++) {
+            const card = cards[i] as HTMLElement;
+            const cardCenter = 0.12 + i * 0.26;
+            const dist = Math.abs(sectionP - cardCenter);
+            const cardOpacity = Math.max(0.35, 1 - dist * 2.2);
+            card.style.opacity = cardOpacity.toFixed(3);
+          }
         }
       } else {
         opacity = 0;
       }
 
       secondPartRef.current.style.opacity = opacity.toFixed(3);
-      secondPartRef.current.style.pointerEvents = opacity > 0.5 ? "auto" : "none";
+      secondPartRef.current.style.pointerEvents = "none";
     }
 
     // Smooth mouse lerp for interactive dynamic spotlight and parallax
@@ -776,132 +752,47 @@ export const JourneyStory: React.FC = () => {
     m.py += (m.targetPy - m.py) * 0.08;
 
     if (spotlightRef.current) {
-      if (p < 0.934) {
+      if (p < 0.962) {
         spotlightRef.current.style.opacity = "0";
       } else {
-        const spotAlpha = Math.min(1, (p - 0.934) / 0.015);
+        const spotAlpha = Math.min(1, (p - 0.962) / 0.015);
         spotlightRef.current.style.opacity = spotAlpha.toFixed(3);
         spotlightRef.current.style.background = `radial-gradient(circle 540px at ${(m.x * 100).toFixed(1)}% ${(m.y * 100).toFixed(1)}%, rgba(212, 175, 55, 0.16) 0%, rgba(212, 175, 55, 0.05) 45%, transparent 75%)`;
       }
     }
 
     // ====================================================================
-    // CINEMATIC 3D HORIZONTAL SERVICES SECTION (PULLED BY 3D WORKER)
+    // CINEMATIC SERVICES SECTION REVEAL (CLEAN EDITORIAL SLIDE-IN)
     // ====================================================================
-    if (settleStageRef.current) {
-      const winW = typeof window !== "undefined" ? window.innerWidth : 1440;
-      const winH = typeof window !== "undefined" ? window.innerHeight : 900;
-
-      if (p < 0.934) {
-        settleStageRef.current.style.opacity = "0";
-        settleStageRef.current.style.pointerEvents = "none";
-        settleStageRef.current.style.transform = `translate3d(${winW}px, 0, 0)`;
-        settleStageRef.current.style.clipPath = "none";
-        if (creasesOverlayRef.current) creasesOverlayRef.current.style.opacity = "0";
-        if (grommetRef.current) grommetRef.current.style.opacity = "0";
-        workerRigRef.current?.update(0, winW, winW, winH, 0, 0, false, 0);
-      } else if (p >= 0.934 && p < 0.966) {
-        const progress = Math.max(0, Math.min(1, (p - 0.934) / (0.966 - 0.934)));
-        const isMobile = winW < 640;
-
-        // Phase split:
-        // 0.00 to 0.74: The webpage physically slides in horizontally from right to left (panelEdgeX: winW -> 0)
-        // 0.74 to 1.00: ONCE THE PAGE REACHES ITS FINAL POSITION (panelEdgeX = 0):
-        //               - The worker releases the rope (slack gravity sag & falls away)
-        //               - The page settles with a subtle bounce (elastic spring damped oscillation)
-        const PULL_COMPLETE = 0.74;
-
-        let panelEdgeX = 0;
-        let bounceX = 0;
-        let topLag = 0;
-        let bottomLag = 0;
-        let isReleasing = false;
-        let releaseProgress = 0;
-
-        if (progress < PULL_COMPLETE) {
-          const pullP = progress / PULL_COMPLETE;
-          const easePull = pullP < 0.5
-            ? 2 * pullP * pullP
-            : 1 - Math.pow(-2 * pullP + 2, 2) / 2;
-          panelEdgeX = (1 - easePull) * winW;
-
-          topLag = (1 - pullP) * Math.min(220, winW * 0.15);
-          bottomLag = (1 - pullP) * Math.min(320, winW * 0.22);
-
-          const tensionFade = Math.max(0, 1 - Math.pow(pullP, 2.2));
-          if (creasesOverlayRef.current) {
-            creasesOverlayRef.current.style.opacity = tensionFade.toFixed(3);
-          }
-          if (grommetRef.current) {
-            grommetRef.current.style.opacity = "1";
-          }
-
-          isReleasing = false;
-          releaseProgress = 0;
-        } else {
-          panelEdgeX = 0;
-          isReleasing = true;
-          releaseProgress = (progress - PULL_COMPLETE) / (1 - PULL_COMPLETE);
-
-          const bounceAmp = isMobile ? -8 : -12;
-          bounceX = bounceAmp * Math.sin(releaseProgress * 2.2 * Math.PI) * Math.exp(-releaseProgress * 3.2);
-
-          topLag = Math.max(0, 1 - releaseProgress * 2.2) * Math.min(30, winW * 0.02);
-          bottomLag = Math.max(0, 1 - releaseProgress * 2.2) * Math.min(45, winW * 0.03);
-
-          if (creasesOverlayRef.current) {
-            creasesOverlayRef.current.style.opacity = Math.max(0, 1 - releaseProgress * 2.5).toFixed(3);
-          }
-          if (grommetRef.current) {
-            grommetRef.current.style.opacity = Math.max(0, 1 - releaseProgress * 2.0).toFixed(3);
-          }
-        }
-
-        if (releaseProgress >= 0.5) {
-          settleStageRef.current.style.clipPath = "none";
-        } else {
-          const grommetY = winH * (isMobile ? 0.54 : 0.56);
-          const pts: string[] = [];
-          pts.push(`${topLag.toFixed(1)}px 0px`);
-          for (let i = 1; i <= 4; i++) {
-            const t = i / 5;
-            const cy = grommetY * t;
-            const cx = topLag * (1 - t) * (1 - 0.72 * t);
-            pts.push(`${cx.toFixed(1)}px ${cy.toFixed(1)}px`);
-          }
-          pts.push(`0px ${grommetY.toFixed(1)}px`);
-          for (let j = 1; j <= 3; j++) {
-            const u = j / 4;
-            const dy = grommetY + (winH - grommetY) * u;
-            const dx = bottomLag * u;
-            pts.push(`${dx.toFixed(1)}px ${dy.toFixed(1)}px`);
-          }
-          pts.push(`${bottomLag.toFixed(1)}px 100%`);
-          pts.push(`100% 100%`);
-          pts.push(`100% 0px`);
-
-          settleStageRef.current.style.clipPath = `polygon(${pts.join(", ")})`;
-        }
-
-        settleStageRef.current.style.opacity = "1";
-        settleStageRef.current.style.transform = `translate3d(${(panelEdgeX + bounceX).toFixed(1)}px, 0, 0)`;
-        settleStageRef.current.style.pointerEvents = "auto";
-        workerRigRef.current?.update(progress, panelEdgeX, winW, winH, topLag, bottomLag, isReleasing, releaseProgress);
-
+    // Settle Stage ("Our Services"): Curved off-white horizon rises from the BOTTOM
+    // Sides rise first, center has dip for truck passage, then smoothly overtakes full screen
+    if (settleWrapperRef.current) {
+      if (p < 0.936) {
+        settleWrapperRef.current.style.visibility = "hidden";
+        settleWrapperRef.current.style.pointerEvents = "none";
+        settleWrapperRef.current.style.transform = "translate3d(0, 100%, 0)";
+      } else if (p >= 0.936 && p < 0.976) {
+        const progress = Math.max(0, Math.min(1, (p - 0.936) / (0.976 - 0.936)));
+        // Smooth natural easing matching truck downward travel
+        const ease = 1 - Math.pow(1 - progress, 2.4);
+        const panelY = (1 - ease) * 100;
+        settleWrapperRef.current.style.visibility = "visible";
+        // 100% SOLID OPAQUE MASK: Never transparent so truck/road can NEVER bleed through!
+        settleWrapperRef.current.style.opacity = "1";
+        settleWrapperRef.current.style.transform = `translate3d(0, ${panelY.toFixed(2)}%, 0)`;
+        settleWrapperRef.current.style.pointerEvents = progress > 0.85 ? "auto" : "none";
       } else {
-        settleStageRef.current.style.opacity = "1";
-        settleStageRef.current.style.transform = "translate3d(0, 0, 0)";
-        settleStageRef.current.style.clipPath = "none";
-        settleStageRef.current.style.pointerEvents = "auto";
-        if (creasesOverlayRef.current) creasesOverlayRef.current.style.opacity = "0";
-        if (grommetRef.current) grommetRef.current.style.opacity = "0";
-        workerRigRef.current?.update(1.0, 0, winW, winH, 0, 0, true, 1.0);
+        settleWrapperRef.current.style.visibility = "visible";
+        settleWrapperRef.current.style.opacity = "1";
+        settleWrapperRef.current.style.transform = "translate3d(0, 0, 0)";
+        settleWrapperRef.current.style.pointerEvents = "auto";
       }
     }
   });
 
   return (
-    <div className={styles.overlay}>
+    <>
+      <div className={styles.overlay}>
       {/* 00 KM/H Speedometer HUD (visible in top-left matching reference pictures) */}
       <div className={styles.speedometerBadge} aria-hidden="true">
         00 KM/H
@@ -942,152 +833,81 @@ export const JourneyStory: React.FC = () => {
         </div>
       </div>
 
-      {/* SECOND PART (VERTICAL ROAD HERO): MINING DISCOVERY EDITORIAL & STATS */}
+      {/* SECOND PART (VERTICAL ROAD HERO): UNITED CARRIERS STYLE EDITORIAL SCROLL */}
       <div
         ref={secondPartRef}
         className={styles.secondPartSidesWrap}
-        aria-label="One platform. Every major mining audience."
+        aria-label="Visibility at every milestone. Every major mining audience."
       >
-        {/* Top-Left: MD Gold Monogram & Intelligence Tagline */}
-        <div className={styles.topDownBrandHeader}>
-          <div className={styles.topDownLogoMark}>
-            <svg className={styles.topDownLogoSvg} viewBox="0 0 24 24" fill="#d4af37">
-              <path d="M12 2L2 22h20L12 2zm0 6l5.5 11h-11L12 8z" />
-            </svg>
+        {/* Left Side: Pinned Headline & Supporting Copy (Matching United Carriers Reference Video) */}
+        <div ref={leftColRef} className={styles.ucLeftBlock}>
+          <div className={styles.ucSpeedIndicator}>
+            <span ref={speedometerRef}>43 KM/H</span>
           </div>
-          <div className={styles.topDownBrandText}>
-            <div className={styles.topDownBrandTitle}>MINING DISCOVERY</div>
-            <div className={styles.topDownBrandTagline}>GLOBAL MINING INTELLIGENCE</div>
-          </div>
-        </div>
 
-        {/* Far-Left: Vertical Stepper Timeline (01 PLATFORM -> 04 IMPACT) */}
-        <div className={styles.topDownTimeline}>
-          <div className={`${styles.timelineStep} ${styles.timelineStepActive}`}>
-            <span className={styles.timelineDot} />
-            <span className={styles.timelineLabel}>01 PLATFORM</span>
-          </div>
-          <div className={styles.timelineStep}>
-            <span className={styles.timelineDot} />
-            <span className={styles.timelineLabel}>02 COVERAGE</span>
-          </div>
-          <div className={styles.timelineStep}>
-            <span className={styles.timelineDot} />
-            <span className={styles.timelineLabel}>03 INSIGHTS</span>
-          </div>
-          <div className={styles.timelineStep}>
-            <span className={styles.timelineDot} />
-            <span className={styles.timelineLabel}>04 IMPACT</span>
-          </div>
-        </div>
-
-        {/* Left Side: Main Heading, Gold Italic, Divider, Description & Scroll explore prompt */}
-        <div ref={leftColRef} className={styles.topDownLeftBlock}>
-          <div className={styles.topDownSmallCaps}>ONE PLATFORM.</div>
-          <h2 className={styles.topDownMainHeadline}>
-            EVERY MAJOR <br />
-            <span className={styles.topDownGoldItalic}>MINING</span> <br />
-            AUDIENCE.
+          <h2 className={styles.ucLeftHeadline}>
+            <span className={styles.ucHeadlineMuted}>VISIBILITY</span><br />
+            <span>AT EVERY</span><br />
+            <span>MILESTONE</span>
           </h2>
-          <div className={styles.topDownGoldDash} />
-          <p className={styles.topDownDescription}>
-            Mining Discovery bridges the gap between mining companies and the global investment community through targeted editorial coverage and strategic visibility.
-          </p>
 
-          <div className={styles.topDownScrollExplore}>
-            <div className={styles.topDownScrollCircle} aria-hidden="true">&darr;</div>
-            <span>SCROLL TO EXPLORE</span>
-          </div>
+          <p className={styles.ucLeftDesc}>
+            With every service under one roof and an authoritative editorial team, your company moves the way the global market demands: visibly, strategically, and with sustained investor conviction.
+          </p>
         </div>
 
-        {/* Subtle Tech Telemetry Arc passing over the highway */}
-        <svg className={styles.topDownConnectingSvg} viewBox="0 0 1600 900" preserveAspectRatio="none" aria-hidden="true">
-          <path
-            d="M 220,180 C 580,120 1020,120 1380,180"
-            fill="none"
-            stroke="rgba(212, 175, 55, 0.4)"
-            strokeWidth="1"
-            strokeDasharray="4 6"
-          />
-          <circle cx="220" cy="180" r="3" fill="#d4af37" />
-          <circle cx="1380" cy="180" r="3" fill="#d4af37" />
-          <path
-            d="M 220,720 C 580,780 1020,780 1380,720"
-            fill="none"
-            stroke="rgba(212, 175, 55, 0.3)"
-            strokeWidth="1"
-            strokeDasharray="4 6"
-          />
-          <circle cx="220" cy="720" r="3" fill="#d4af37" />
-          <circle cx="1380" cy="720" r="3" fill="#d4af37" />
-        </svg>
-
-        {/* Right Side: Main Data matching Image 1 */}
-        <div ref={rightColRef} className={styles.topDownRightBlock}>
-          <div className={styles.topDownGoldDash} />
-          <h3 className={styles.topDownRightHeadline}>
-            Mining Discovery operates where mining complexity is highest and audience reach is essential.
-          </h3>
-          <p className={styles.topDownRightSubtext}>
-            From junior exploration companies to Tier-1 global mining producers across 30+ jurisdictions.
-          </p>
-
-          {/* Radar HUD Reticle */}
-          <div className={styles.topDownRadarHud} aria-hidden="true">
-            <div className={styles.radarOuterRing} />
-            <div className={styles.radarInnerRing} />
-            <div className={styles.radarCrosshairX} />
-            <div className={styles.radarCrosshairY} />
-            <div className={styles.radarCenterPip} />
+        {/* Right Side: Vertically Scrolling Feature Track (Matching Reference Video) */}
+        <div className={styles.ucRightViewport}>
+          <div ref={rightTrackRef} className={styles.ucRightTrack}>
+            {TOP_DOWN_FEATURES.map((item) => {
+              const Icon = item.icon;
+              return (
+                <div key={item.id} className={styles.ucFeatureCard}>
+                  <div className={styles.ucFeatureIconWrap}>
+                    <Icon className={styles.ucFeatureIcon} strokeWidth={1.75} />
+                  </div>
+                  <h3 className={styles.ucFeatureTitle}>{item.title}</h3>
+                  <p className={styles.ucFeatureDesc}>{item.description}</p>
+                </div>
+              );
+            })}
           </div>
-
-          {/* 8+ YEARS GLOBAL COVERAGE */}
-          <div className={styles.topDownStatBlock}>
-            <svg className={styles.topDownStatLogo} viewBox="0 0 24 24" fill="#d4af37">
-              <polygon points="12,2 22,20 2,20" />
-            </svg>
-            <div className={styles.topDownStatNumbers}>
-              <div className={styles.topDownStat8}>8+</div>
-              <div className={styles.topDownStatYears}>YEARS</div>
-            </div>
-            <div className={styles.topDownStatDivLine} aria-hidden="true" />
-            <div className={styles.topDownStatLabel}>
-              GLOBAL<br />COVERAGE
-            </div>
-          </div>
-
-          {/* Featured Glass HUD Card */}
-          <Link href="/about" className={styles.topDownFeaturedCard}>
-            <div className={styles.topDownCardThumb}>
-              <img
-                src="/images/services/service_marketing.webp"
-                alt="Connecting Global Mining"
-              />
-            </div>
-            <div className={styles.topDownCardContent}>
-              <span>CONNECTING GLOBAL MINING</span>
-              <span className={styles.topDownCardArrow} aria-hidden="true">&rarr;</span>
-            </div>
-          </Link>
         </div>
       </div>
+    </div>
 
-      {/* Realistic 3D Worker Pull Rig (positioned in the background behind the page) */}
-        <WorkerPullRig ref={workerRigRef} />
-
-        {/* MOUNTAIN LANDSCAPE & EDITORIAL SETTLE STAGE (rendered in front of the worker) */}
-        <div ref={settleStageRef} className={styles.settleMountainStage}>
-          {/* Photorealistic Silver Chrome Grommet Ring punched on the page leading edge */}
-          <div ref={grommetRef} className={styles.settleEdgeGrommet} aria-hidden="true">
-            <img
-              src="/images/page_pull_grommet.webp"
-              alt=""
-              className={styles.settleGrommetImg}
+    {/* EDITORIAL SETTLE STAGE (OUR SERVICES) - Direct un-padded layer covering 100% of viewport */}
+      <div ref={settleWrapperRef} className={styles.settleStageWrapper}>
+        {/* Dynamic Curved Off-White Crest (rising on both sides, center dip for truck passage) */}
+        <div className={styles.curvedHorizonCrest} aria-hidden="true">
+          <svg
+            viewBox="0 0 1440 240"
+            preserveAspectRatio="none"
+            className={styles.curvedHorizonSvg}
+          >
+            <defs>
+              <linearGradient id="crestStroke" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#C5A059" stopOpacity="0.55" />
+                <stop offset="50%" stopColor="#C5A059" stopOpacity="0.25" />
+                <stop offset="100%" stopColor="#C5A059" stopOpacity="0.55" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M 0 0 C 420 210, 1020 210, 1440 0 L 1440 240 L 0 240 Z"
+              fill="#FAF7F2"
             />
-          </div>
+            <path
+              d="M 0 0 C 420 210, 1020 210, 1440 0"
+              fill="none"
+              stroke="url(#crestStroke)"
+              strokeWidth="2.5"
+            />
+          </svg>
+          <div className={styles.curvedAtmosphereGlow} />
+        </div>
 
-          {/* Photorealistic Silk/Paper Tension Folds Overlay during Pull */}
-          <div ref={creasesOverlayRef} className={styles.settleCreasesOverlay} aria-hidden="true" />
+        {/* Scrollable Services Section */}
+        <div ref={settleStageRef} className={styles.settleMountainStage}>
 
           {/* Subtle Architectural Grid Lines Overlay (White Desert Light Theme) */}
           <div className={styles.lightGridOverlay} aria-hidden="true">
@@ -1111,508 +931,21 @@ export const JourneyStory: React.FC = () => {
               </div>
             </div>
 
-            {/* 5-Panel Expandable Flick Accordion Grid (Pages 1 to 5) */}
-            <div
-              className={`${styles.cardFlickWrap} ${expandedService !== null ? styles.cardFlickWrapExpanded : ""}`}
-              role="region"
-              aria-label="Services Showcase"
-            >
-              <div className={`${styles.cardFlickGrid} ${expandedService !== null ? styles.cardFlickGridExpanded : ""}`}>
-                {SERVICE_CARDS.map((card, idx) => {
-                  const isExpanded = expandedService === idx;
-                  const isCollapsed = expandedService !== null && !isExpanded;
-                  const isActive = isExpanded || (expandedService === null && activeService === idx);
-
-                  return (
-                    <div
-                      key={card.id}
-                      className={`${styles.cardFlickItem} ${
-                        isExpanded
-                          ? styles.cardFlickItemExpanded
-                          : isCollapsed
-                          ? styles.cardFlickItemCollapsed
-                          : isActive
-                          ? styles.cardFlickItemActive
-                          : ""
-                      }`}
-                      onMouseEnter={() => {
-                        if (expandedService === null) handleCardSelect(idx);
-                      }}
-                      onMouseMove={() => {
-                        if (expandedService === null) handleCardSelect(idx);
-                      }}
-                      onPointerEnter={() => {
-                        if (expandedService === null) handleCardSelect(idx);
-                      }}
-                      onPointerOver={() => {
-                        if (expandedService === null) handleCardSelect(idx);
-                      }}
-                      onPointerDown={() => {
-                        if (expandedService === null) handleCardSelect(idx);
-                      }}
-                      onTouchStart={() => {
-                        if (expandedService === null) handleCardSelect(idx);
-                      }}
-                      onClick={() => {
-                        if (expandedService === null) {
-                          if (activeService !== idx) {
-                            handleCardSelect(idx);
-                          } else {
-                            setExpandedService(idx);
-                          }
-                        }
-                      }}
-                      role="tabpanel"
-                      aria-selected={isActive}
-                      tabIndex={0}
-                    >
-                      {/* Full-bleed Background Image */}
-                      <div className={styles.cardFlickImage}>
-                        <img
-                          src={card.image}
-                          alt={card.title}
-                          loading="lazy"
-                        />
-                        <div className={styles.cardFlickGradient} />
-                      </div>
-
-                      {/* Gaussian Blur Overlay for Side (Inactive) Pages */}
-                      <div className={styles.cardFlickBlurOverlay} aria-hidden="true" />
-
-                      {/* Content on the Active / Expanded Page */}
-                      <div className={styles.cardFlickContent}>
-                        <div className={styles.cardFlickHeader}>
-                          <div className={styles.cardFlickHeaderRow}>
-                            <span className={styles.cardFlickBadge}>
-                              <span className={styles.cardFlickBadgeNum}>{card.num}</span>
-                              <span className={styles.cardFlickBadgeText}>{card.category}</span>
-                            </span>
-                            {isExpanded && (
-                              <button
-                                type="button"
-                                className={styles.cardFlickCloseBtn}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setExpandedService(null);
-                                }}
-                                aria-label="Collapse"
-                              >
-                                <X size={18} />
-                                <span>CLOSE</span>
-                              </button>
-                            )}
-                          </div>
-                          <h3 className={styles.cardFlickTitle}>
-                            {card.italicTitle}
-                          </h3>
-                        </div>
-
-                        <div className={styles.cardFlickFooter}>
-                          <div className={styles.cardFlickMeta}>
-                            <span className={styles.cardFlickMetaItem}>{card.metaPrice}</span>
-                            <span className={styles.cardFlickMetaDivider} aria-hidden="true" />
-                            <span className={styles.cardFlickMetaItem}>{card.metaSeason}</span>
-                          </div>
-
-                          {card.id === "monthly-magazines" ? (
-                            <div className={styles.cardFlickButtonRow}>
-                              <button
-                                type="button"
-                                className={styles.cardFlickMagazineBtn}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleOpenReader(getLatestMagazine());
-                                }}
-                                aria-label="Open latest monthly magazine in interactive flipbook"
-                              >
-                                <BookOpen size={14} />
-                                <span>READ FLIPBOOK</span>
-                                <span className={styles.cardFlickLearnMoreStar}>✦</span>
-                              </button>
-
-                              <button
-                                type="button"
-                                className={styles.cardFlickArchiveBtn}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setActiveCatalogModal("magazines");
-                                }}
-                                aria-label="Explore all 14 published monthly editions"
-                              >
-                                <span>ALL 14 EDITIONS</span>
-                                <ArrowRight size={13} />
-                              </button>
-                            </div>
-                          ) : card.id === "weekly-newspaper" ? (
-                            <div className={styles.cardFlickButtonRow}>
-                              <button
-                                type="button"
-                                className={styles.cardFlickMagazineBtn}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  const latest = newsletters[0];
-                                  if (latest) {
-                                    handleOpenDocReader({
-                                      title: "Weekly Newspaper Dispatch",
-                                      subtitle: latest.title.toUpperCase(),
-                                      pdfUrl: getProxiedPdfUrl(latest.pdf),
-                                    });
-                                  }
-                                }}
-                                aria-label="Open latest weekly newsletter in interactive flipbook"
-                              >
-                                <BookOpen size={14} />
-                                <span>READ FLIPBOOK</span>
-                                <span className={styles.cardFlickLearnMoreStar}>✦</span>
-                              </button>
-
-                              <button
-                                type="button"
-                                className={styles.cardFlickArchiveBtn}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setActiveCatalogModal("newsletters");
-                                }}
-                                aria-label={`Explore all ${newsletters.length} weekly editions`}
-                              >
-                                <span>ALL {newsletters.length} ISSUES</span>
-                                <ArrowRight size={13} />
-                              </button>
-                            </div>
-                          ) : card.id === "articles" ? (
-                            <div className={styles.cardFlickButtonRow}>
-                              <button
-                                type="button"
-                                className={styles.cardFlickMagazineBtn}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  const featured = articles[0];
-                                  if (featured) {
-                                    handleOpenDocReader({
-                                      title: "Research & Editorial Article",
-                                      subtitle: featured.title.toUpperCase(),
-                                      pdfUrl: getProxiedPdfUrl(featured.pdf),
-                                    });
-                                  }
-                                }}
-                                aria-label="Read featured research article in interactive flipbook"
-                              >
-                                <BookOpen size={14} />
-                                <span>READ FLIPBOOK</span>
-                                <span className={styles.cardFlickLearnMoreStar}>✦</span>
-                              </button>
-
-                              <button
-                                type="button"
-                                className={styles.cardFlickArchiveBtn}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setActiveCatalogModal("articles");
-                                }}
-                                aria-label={`Explore all ${articles.length} published research articles`}
-                              >
-                                <span>ALL {articles.length} ARTICLES</span>
-                                <ArrowRight size={13} />
-                              </button>
-                            </div>
-                          ) : (
-                            <Link
-                              href="/contact"
-                              className={styles.cardFlickLearnMore}
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <span>Learn More</span>
-                              <span className={styles.cardFlickLearnMoreStar}>✦</span>
-                            </Link>
-                          )}
-
-                          <p className={styles.cardFlickExcerpt}>
-                            {card.description}
-                          </p>
-
-                          {/* Card 06: Monthly Magazines Shelf */}
-                          {card.id === "monthly-magazines" && isExpanded && (
-                            <div className={styles.magazineExpandedShelf}>
-                              <div className={styles.magazineExpandedShelfHeader}>
-                                <div className={styles.magazineExpandedShelfTitle}>
-                                  ALL 14 MONTHLY EDITIONS — SELECT TO FLIP THROUGH
-                                </div>
-                                <div className={styles.magazineShelfControls}>
-                                  <button
-                                    type="button"
-                                    className={styles.magazineShelfNavBtn}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      shelfTrackRef.current?.scrollBy({ left: -260, behavior: "smooth" });
-                                    }}
-                                    aria-label="Scroll editions left"
-                                  >
-                                    <ChevronLeft size={14} />
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className={styles.magazineShelfNavBtn}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      shelfTrackRef.current?.scrollBy({ left: 260, behavior: "smooth" });
-                                    }}
-                                    aria-label="Scroll editions right"
-                                  >
-                                    <ChevronRight size={14} />
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className={styles.magazineViewAllBtn}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setActiveCatalogModal("magazines");
-                                    }}
-                                  >
-                                    <span>FULL CATALOG</span>
-                                    <ArrowRight size={12} />
-                                  </button>
-                                </div>
-                              </div>
-                              <div
-                                ref={shelfTrackRef}
-                                className={styles.magazineExpandedTrack}
-                                onWheel={(e) => {
-                                  if (e.deltaY !== 0 && !e.deltaX) {
-                                    e.currentTarget.scrollLeft += e.deltaY;
-                                    e.stopPropagation();
-                                  }
-                                }}
-                              >
-                                {allMagazines.map((ed) => (
-                                  <div
-                                    key={ed.id}
-                                    className={styles.magazineExpandedItem}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleOpenReader(ed);
-                                    }}
-                                    role="button"
-                                    tabIndex={0}
-                                    onKeyDown={(evt) => {
-                                      if (evt.key === "Enter" || evt.key === " ") {
-                                        evt.preventDefault();
-                                        handleOpenReader(ed);
-                                      }
-                                    }}
-                                    aria-label={`Read ${ed.month} ${ed.year} Edition`}
-                                  >
-                                    <div className={styles.magazineItemThumb}>
-                                      <ShowcaseCardCover mag={ed} />
-                                    </div>
-                                    <span className={styles.magazineItemLabel}>
-                                      {ed.month} {ed.year}
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Card 07: Weekly Newspaper Shelf */}
-                          {card.id === "weekly-newspaper" && isExpanded && (
-                            <div className={styles.magazineExpandedShelf}>
-                              <div className={styles.magazineExpandedShelfHeader}>
-                                <div className={styles.magazineExpandedShelfTitle}>
-                                  WEEKLY DISPATCHES ({newsletters.length}) — SELECT TO FLIP THROUGH
-                                </div>
-                                <div className={styles.magazineShelfControls}>
-                                  <button
-                                    type="button"
-                                    className={styles.magazineShelfNavBtn}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      newsletterShelfTrackRef.current?.scrollBy({ left: -260, behavior: "smooth" });
-                                    }}
-                                    aria-label="Scroll newsletters left"
-                                  >
-                                    <ChevronLeft size={14} />
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className={styles.magazineShelfNavBtn}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      newsletterShelfTrackRef.current?.scrollBy({ left: 260, behavior: "smooth" });
-                                    }}
-                                    aria-label="Scroll newsletters right"
-                                  >
-                                    <ChevronRight size={14} />
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className={styles.magazineViewAllBtn}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setActiveCatalogModal("newsletters");
-                                    }}
-                                  >
-                                    <span>FULL CATALOG</span>
-                                    <ArrowRight size={12} />
-                                  </button>
-                                </div>
-                              </div>
-                              <div
-                                ref={newsletterShelfTrackRef}
-                                className={styles.magazineExpandedTrack}
-                                onWheel={(e) => {
-                                  if (e.deltaY !== 0 && !e.deltaX) {
-                                    e.currentTarget.scrollLeft += e.deltaY;
-                                    e.stopPropagation();
-                                  }
-                                }}
-                              >
-                                {newsletters.map((item) => (
-                                  <div
-                                    key={item.id}
-                                    className={styles.magazineExpandedItem}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleOpenDocReader({
-                                        title: "Weekly Newspaper Dispatch",
-                                        subtitle: item.title.toUpperCase(),
-                                        pdfUrl: getProxiedPdfUrl(item.pdf),
-                                      });
-                                    }}
-                                    role="button"
-                                    tabIndex={0}
-                                    onKeyDown={(evt) => {
-                                      if (evt.key === "Enter" || evt.key === " ") {
-                                        evt.preventDefault();
-                                        handleOpenDocReader({
-                                          title: "Weekly Newspaper Dispatch",
-                                          subtitle: item.title.toUpperCase(),
-                                          pdfUrl: getProxiedPdfUrl(item.pdf),
-                                        });
-                                      }
-                                    }}
-                                    aria-label={`Read ${item.title}`}
-                                  >
-                                    <div className={styles.magazineItemThumb}>
-                                      <img
-                                        src={item.cover}
-                                        alt={item.title}
-                                        className={styles.publicationCoverImg}
-                                        loading="lazy"
-                                      />
-                                    </div>
-                                    <span className={styles.magazineItemLabel}>
-                                      {item.title}
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Card 08: Articles & Research Shelf */}
-                          {card.id === "articles" && isExpanded && (
-                            <div className={styles.magazineExpandedShelf}>
-                              <div className={styles.magazineExpandedShelfHeader}>
-                                <div className={styles.magazineExpandedShelfTitle}>
-                                  RESEARCH ARTICLES ({articles.length}) — SELECT TO READ
-                                </div>
-                                <div className={styles.magazineShelfControls}>
-                                  <button
-                                    type="button"
-                                    className={styles.magazineShelfNavBtn}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      articleShelfTrackRef.current?.scrollBy({ left: -260, behavior: "smooth" });
-                                    }}
-                                    aria-label="Scroll articles left"
-                                  >
-                                    <ChevronLeft size={14} />
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className={styles.magazineShelfNavBtn}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      articleShelfTrackRef.current?.scrollBy({ left: 260, behavior: "smooth" });
-                                    }}
-                                    aria-label="Scroll articles right"
-                                  >
-                                    <ChevronRight size={14} />
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className={styles.magazineViewAllBtn}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setActiveCatalogModal("articles");
-                                    }}
-                                  >
-                                    <span>ALL ARTICLES</span>
-                                    <ArrowRight size={12} />
-                                  </button>
-                                </div>
-                              </div>
-                              <div
-                                ref={articleShelfTrackRef}
-                                className={styles.magazineExpandedTrack}
-                                onWheel={(e) => {
-                                  if (e.deltaY !== 0 && !e.deltaX) {
-                                    e.currentTarget.scrollLeft += e.deltaY;
-                                    e.stopPropagation();
-                                  }
-                                }}
-                              >
-                                {articles.map((item) => (
-                                  <div
-                                    key={item.id}
-                                    className={styles.magazineExpandedItem}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleOpenDocReader({
-                                        title: "Research & Editorial Article",
-                                        subtitle: item.title.toUpperCase(),
-                                        pdfUrl: getProxiedPdfUrl(item.pdf),
-                                      });
-                                    }}
-                                    role="button"
-                                    tabIndex={0}
-                                    onKeyDown={(evt) => {
-                                      if (evt.key === "Enter" || evt.key === " ") {
-                                        evt.preventDefault();
-                                        handleOpenDocReader({
-                                          title: "Research & Editorial Article",
-                                          subtitle: item.title.toUpperCase(),
-                                          pdfUrl: getProxiedPdfUrl(item.pdf),
-                                        });
-                                      }
-                                    }}
-                                    aria-label={`Read ${item.title}`}
-                                  >
-                                    <div className={styles.magazineItemThumb}>
-                                      <img
-                                        src={item.cover}
-                                        alt={item.title}
-                                        className={styles.publicationCoverImg}
-                                        loading="lazy"
-                                      />
-                                    </div>
-                                    <span className={styles.magazineItemLabel}>
-                                      {item.title}
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+            {/* Premium Two-Column Editorial Grid (Reference Video 1 Visual Structure) */}
+            <div className={styles.editorialGrid} role="region" aria-label="Our Services">
+              {EDITORIAL_SERVICES.map((item, idx) => (
+                <EditorialGridCard
+                  key={item.id}
+                  item={item}
+                  idx={idx}
+                  onOpenFlipbook={() => handleOpenReader(getLatestMagazine())}
+                  onOpenArchive={() => setActiveCatalogModal("magazines")}
+                />
+              ))}
             </div>
           </div>
         </div>
+      </div>
 
       {/* Complete Magazine Archive Modal */}
       {activeCatalogModal === "magazines" && isMounted && createPortal(
@@ -1895,7 +1228,7 @@ export const JourneyStory: React.FC = () => {
         </div>,
         document.body
       )}
-    </div>
+    </>
   );
 };
 
