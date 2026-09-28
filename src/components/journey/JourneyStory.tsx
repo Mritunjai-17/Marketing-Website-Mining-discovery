@@ -1412,19 +1412,6 @@ export const JourneyStory: React.FC = () => {
                             {card.description}
                           </p>
 
-                          {/* Feature Badges */}
-                          {card.features && card.features.length > 0 && (
-                            <div className={styles.cardFeaturesRow}>
-                              {card.features.map((feat, fIdx) => (
-                                <div key={fIdx} className={styles.cardFeaturePill}>
-                                  <span className={styles.cardFeatureBullet}>✦</span>
-                                  <span className={styles.cardFeatureText}>
-                                    <strong>{feat.title}:</strong> {feat.text}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          )}
 
                         </div>
                       </div>
