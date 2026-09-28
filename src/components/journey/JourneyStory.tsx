@@ -58,7 +58,7 @@ export const SERVICE_CARDS: ServiceCardItem[] = [
     metaSeason: "GLOBAL OUTREACH",
     summary: "TURN MINING OPPORTUNITIES INTO INVESTOR ATTENTION.",
     description:
-      "Connect mining projects with relevant investors, stakeholders and decision-makers through focused investor campaigns and global industry outreach.",
+      "Connect mining projects with relevant investors,\nstakeholders and decision-makers through focused\ninvestor campaigns and global industry outreach.",
     image: "/images/services/service_01_investor_light.webp",
     badge: "01 / CAPITAL & INVESTOR REACH",
     features: [
@@ -110,7 +110,7 @@ export const SERVICE_CARDS: ServiceCardItem[] = [
     metaSeason: "3D VISUALIZATION",
     summary: "BUILD A DISTINCTIVE DIGITAL IDENTITY FOR MINING.",
     description:
-      "Build a distinctive visual and digital identity that makes mining companies easier to recognise, understand and remember.",
+      "Build a distinctive visual and digital identity\nthat makes mining companies easier to\nrecognise, understand and remember.",
     image: "/images/services/service_03_brand_light.webp",
     badge: "03 / IDENTITY & CREATIVE PRESENCE",
     features: [
@@ -136,7 +136,7 @@ export const SERVICE_CARDS: ServiceCardItem[] = [
     metaSeason: "PAID AMPLIFICATION",
     summary: "EXPAND YOUR REACH. OWN YOUR AUDIENCE.",
     description:
-      "Turn content into measurable audience growth through targeted social campaigns, network distribution and paid promotion.",
+      "Turn content into measurable audience growth\nthrough targeted social campaigns, network\ndistribution and paid promotion.",
     image: "/images/services/service_04_reach_light.webp",
     badge: "04 / REACH & AMPLIFICATION",
     features: [
@@ -1408,13 +1408,7 @@ export const JourneyStory: React.FC = () => {
                             </Link>
                           )}
 
-                          <p
-                            className={`${styles.cardFlickExcerpt} ${
-                              ["media-authority", "mining-intelligence", "monthly-magazines", "weekly-newspaper", "articles"].includes(card.id)
-                                ? styles.cardFlickExcerptThreeLines
-                                : ""
-                            }`}
-                          >
+                          <p className={`${styles.cardFlickExcerpt} ${styles.cardFlickExcerptThreeLines}`}>
                             {card.description}
                           </p>
 
