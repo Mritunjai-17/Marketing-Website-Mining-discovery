@@ -38,9 +38,8 @@ const GROWTH_PILLARS: GrowthPillar[] = [
       "Executive video dispatches filmed on-site at active rigs",
       "Multi-bourse editorial syndication across TSX, ASX, and OTC",
     ],
-    image:
-      "https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?auto=format&fit=crop&w=1200&q=80",
-    alt: "Mining exploration drill rig operating at twilight in a rugged mountain valley",
+    image: "/images/approach_drill_core.jpg",
+    alt: "High-grade geological drill core assays and rock samples arranged in core boxes",
     align: "left-card",
   },
   {

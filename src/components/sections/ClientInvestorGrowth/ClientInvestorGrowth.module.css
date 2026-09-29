@@ -20,7 +20,6 @@
   flex-direction: column;
   align-items: stretch;
   will-change: transform;
-  transition: transform 0.22s ease-out;
 }
 
 /* Part 1: Value Bridge full-width container on warm stone (#D9D6CE) */
@@ -388,7 +387,7 @@
 .metricValue {
   font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
   font-size: clamp(1.4rem, 2vw, 2.2rem);
-  font-weight: 600;
+  font-weight: 500;
   color: #E5C378;
   line-height: 1;
 }
