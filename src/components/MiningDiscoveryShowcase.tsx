@@ -181,6 +181,45 @@ const ClientLogosFlipRow: React.FC = () => {
    MASTER COMPONENT: MINING DISCOVERY SHOWCASE (ONE FILE)
    ========================================================================== */
 
+/** Total viewport heights for the continuous Mining Discovery Interactive Showcase */
+const TOTAL_SCROLL_VH = 1400;
+
+/**
+ * How the sampled progress follows the true scroll position.
+ * Critically damped Euler spring for smooth, responsive scroll-scrubbing.
+ * Matches GlobeHero's physics constants exactly.
+ */
+const PROGRESS_SPRING = { stiffness: 120, damping: 22 };
+const RESUME_GAP = 0.8;
+
+interface SpringState {
+  value: number;
+  velocity: number;
+}
+
+function stepSpring(
+  spring: SpringState,
+  target: number,
+  dt: number,
+  { stiffness, damping }: { stiffness: number; damping: number },
+) {
+  const steps = Math.min(6, Math.max(1, Math.ceil(dt * 60)));
+  const h = dt / steps;
+  for (let i = 0; i < steps; i += 1) {
+    const accel = (target - spring.value) * stiffness - spring.velocity * damping;
+    spring.velocity += accel * h;
+    spring.value += spring.velocity * h;
+  }
+  if (Math.abs(target - spring.value) < 1e-4 && Math.abs(spring.velocity) < 1e-3) {
+    spring.value = target;
+    spring.velocity = 0;
+  }
+}
+
+function clamp(v: number, lo: number, hi: number) {
+  return Math.min(Math.max(v, lo), hi);
+}
+
 export const MiningDiscoveryShowcase: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const quoteSectionRef = useRef<HTMLElement>(null);
@@ -196,18 +235,43 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   const horizontalCounterRef = useRef<HTMLSpanElement>(null);
   const finaleSlideRef = useRef<HTMLDivElement>(null);
 
-  const handleScroll = useCallback(() => {
-    if (!containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const winH = window.innerHeight;
-    const winW = window.innerWidth;
-    const scrollableDist = rect.height - winH;
+  const progressRef = useRef(0);
+  const progressSpring = useRef<SpringState>({ value: 0, velocity: 0 });
+  const rangeMetricsRef = useRef({ top: 0, travel: 0, winW: 1920, winH: 1080 });
+  const lastSampleRef = useRef(0);
+  const reduceMotionRef = useRef(false);
+  const [reduceMotion, setReduceMotion] = useState(false);
 
-    if (scrollableDist <= 0) return;
+  const applyStage = useCallback(() => {
+    if (reduceMotionRef.current) return;
 
-    // Progress p normalized from 0.00 (entered top) to 1.00 (scrolled to end)
-    const rawP = -rect.top / scrollableDist;
-    const p = Math.min(1.0, Math.max(0.0, rawP));
+    // --- Sample and damp scroll progress with exact Euler spring ---
+    const { top, travel } = rangeMetricsRef.current;
+    const target = travel > 0 ? clamp((window.scrollY - top) / travel, 0, 1) : 0;
+
+    const now = performance.now();
+    const gap = (now - lastSampleRef.current) / 1000;
+    lastSampleRef.current = now;
+
+    const isTouch =
+      typeof window !== "undefined" &&
+      (window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 900);
+    const progress = progressSpring.current;
+
+    if (isTouch) {
+      // Mobile touch devices natively apply inertia momentum scrolling.
+      progress.value = target;
+      progress.velocity = 0;
+    } else if (gap > RESUME_GAP) {
+      progress.value = target;
+      progress.velocity = 0;
+    } else if (gap > 0) {
+      stepSpring(progress, target, gap, PROGRESS_SPRING);
+    }
+    const p = clamp(progress.value, 0, 1);
+    progressRef.current = p;
+
+    const winW = rangeMetricsRef.current.winW || (typeof window !== "undefined" ? window.innerWidth : 1920);
 
     // STAGE 1: FULL PAGE EDITORIAL QUOTE (p: 0.00 -> 0.22)
     if (quoteSectionRef.current) {
@@ -431,25 +495,65 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", handleScroll, { passive: true });
-    handleScroll();
+    const container = containerRef.current;
+    if (!container) return;
+
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    reduceMotionRef.current = reduced;
+    setReduceMotion(reduced);
+    if (reduced) return;
+
+    const measureRange = () => {
+      const rect = container.getBoundingClientRect();
+      rangeMetricsRef.current = {
+        top: rect.top + window.scrollY,
+        travel: rect.height - window.innerHeight,
+        winW: window.innerWidth,
+        winH: window.innerHeight,
+      };
+    };
+
+    measureRange();
+    applyStage();
+
+    let animId: number;
+    const loop = () => {
+      applyStage();
+      animId = requestAnimationFrame(loop);
+    };
+    animId = requestAnimationFrame(loop);
+
+    const observer = new ResizeObserver(() => {
+      measureRange();
+      applyStage();
+    });
+    observer.observe(container);
+
+    const onScroll = () => {};
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", measureRange);
 
     return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleScroll);
+      cancelAnimationFrame(animId);
+      observer.disconnect();
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", measureRange);
     };
-  }, [handleScroll]);
+  }, [applyStage]);
 
   return (
-    <div ref={containerRef} className="mds-container">
+    <div
+      ref={containerRef}
+      className="mds-container"
+      style={{ height: reduceMotion ? "auto" : `${TOTAL_SCROLL_VH}vh` }}
+    >
       {/* Embedded Scoped Styles for Complete Standalone Portability */}
       <style dangerouslySetInnerHTML={{ __html: `
 /* BASE CONTAINER & SCROLL PIN */
 .mds-container {
   position: relative;
   width: 100%;
-  height: 480vh;
+  height: ${TOTAL_SCROLL_VH}vh;
   background-color: #0d131f;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: #1a365d;

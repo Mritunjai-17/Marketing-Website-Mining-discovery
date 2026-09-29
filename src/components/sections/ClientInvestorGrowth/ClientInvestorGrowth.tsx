@@ -9,6 +9,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import styles from "./ClientInvestorGrowth.module.css";
+import { FeaturedWorkShowcase } from "@/components/sections/FeaturedWorkShowcase";
 
 interface GrowthPillar {
   id: string;
@@ -104,12 +105,12 @@ export const ClientInvestorGrowth: React.FC<ClientInvestorGrowthProps> = ({
   const isVisible = clampedOpacity > 0.01;
   const pointerEvents = clampedOpacity > 0.6 ? "auto" : "none";
 
-  // Translate the alternating cards track smoothly as user scrolls through this section
+  // Translate the connected track smoothly as user scrolls through both sections
   useEffect(() => {
     if (!trackRef.current || !containerRef.current) return;
-    const contentH = trackRef.current.offsetHeight || 2600;
+    const contentH = trackRef.current.offsetHeight || 5500;
     const clientH = window.innerHeight || 800;
-    const maxScroll = Math.max(0, contentH - clientH + 140);
+    const maxScroll = Math.max(0, contentH - clientH + 180);
     const scrollY = scrollProgress * maxScroll;
     trackRef.current.style.transform = `translate3d(0, -${scrollY.toFixed(1)}px, 0)`;
   }, [scrollProgress]);
@@ -119,7 +120,6 @@ export const ClientInvestorGrowth: React.FC<ClientInvestorGrowthProps> = ({
       ref={containerRef}
       className={styles.bridgeContainer}
       style={{
-        backgroundColor: "#D9D6CE",
         zIndex: 35,
         opacity: clampedOpacity.toFixed(3),
         visibility: isVisible ? "visible" : "hidden",
@@ -129,8 +129,13 @@ export const ClientInvestorGrowth: React.FC<ClientInvestorGrowthProps> = ({
       aria-hidden={!isVisible}
     >
       <div ref={trackRef} className={styles.scrollTrack}>
-        {/* Top Header & Overview Description */}
-        <header className={styles.header}>
+        {/* ==============================================================
+            PART 1: VALUE BRIDGE (Warm Architectural Stone #D9D6CE)
+            ============================================================== */}
+        <section className={styles.valueBridgeSection}>
+          <div className={styles.sectionInner}>
+            {/* Top Header & Overview Description */}
+            <header className={styles.header}>
           <div className={styles.eyebrowRow}>
             <span className={styles.eyebrowRule} />
             <span className={styles.eyebrowText}>THE VALUE BRIDGE • DISCOVERY TO CAPITAL</span>
@@ -226,7 +231,16 @@ export const ClientInvestorGrowth: React.FC<ClientInvestorGrowthProps> = ({
           </div>
         </div>
       </div>
-    </div>
+    </section>
+
+    {/* ==============================================================
+        PART 2: CASE STUDIES & PROVEN IMPACT (Deep Mineral Blue #18222B)
+        Directly connected beneath Part 1 — scrolls into view seamlessly
+        just like the user's reference!
+        ============================================================== */}
+    <FeaturedWorkShowcase isConnectedFlow />
+  </div>
+</div>
   );
 };
 

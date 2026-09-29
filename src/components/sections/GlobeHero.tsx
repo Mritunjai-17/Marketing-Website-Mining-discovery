@@ -1,28 +1,11 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import dynamic from "next/dynamic";
-import { useCreateJourneyProgress } from "@/components/journey/journeyProgress";
-import { DescentBackdrop } from "@/components/journey/DescentBackdrop";
-import {
-  deriveDescentCamera,
-  JOURNEY_RUNS_FROM,
-} from "@/components/journey/descentCamera";
 import { BoonHero, type BoonHeroHandle } from "@/components/sections/BoonHero";
 import { ClientInvestorGrowth } from "@/components/sections/ClientInvestorGrowth/ClientInvestorGrowth";
+import OurServicesSection from "@/components/sections/OurServicesSection";
 
-const Journey3D = dynamic(
-  () => import("@/components/journey/Journey3D"),
-  { ssr: false },
-);
-
-export type TransitionState =
-  | "HERO_ACTIVE"
-  | "CAMERA_ANGLE_SHIFT"
-  | "SIDE_VIEW_LOCKED"
-  | "JOURNEY_ACTIVE";
-
-/** Total viewport heights for the continuous story (Hero -> Client & Investor Bridge -> Truck Journey -> Our Services 8 Cards) */
+/** Total viewport heights for the continuous story (Hero -> Value Bridge -> Featured Work & ROI -> Our Services 8 Cards) */
 const TOTAL_SCROLL_VH = 3400;
 
 /**
@@ -64,16 +47,19 @@ export const GlobeHero: React.FC = () => {
   const rangeRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const slotRef = useRef<HTMLDivElement>(null);
-  const journeyBoxRef = useRef<HTMLDivElement>(null);
-
-  const journeyProgress = useCreateJourneyProgress();
-  const [journeyActive, setJourneyActive] = useState(false);
-  const journeyActiveRef = useRef(false);
-  const [transitionProgress, setTransitionProgress] = useState(0);
-  const lastTransPRef = useRef(0);
-  const [transitionState, setTransitionState] = useState<TransitionState>("HERO_ACTIVE");
-  const transitionStateRef = useRef<TransitionState>("HERO_ACTIVE");
   const boonHeroRef = useRef<BoonHeroHandle>(null);
+
+  const [bridgeOpacity, setBridgeOpacity] = useState(0);
+  const [bridgeScroll, setBridgeScroll] = useState(0);
+  const bridgeOpacityRef = useRef(0);
+  const bridgeScrollRef = useRef(0);
+
+  const [servicesOpacity, setServicesOpacity] = useState(0);
+  const [servicesScroll, setServicesScroll] = useState(0);
+  const servicesOpacityRef = useRef(0);
+  const servicesScrollRef = useRef(0);
+  const servicesTrackRef = useRef<HTMLDivElement>(null);
+  const servicesContainerRef = useRef<HTMLDivElement>(null);
 
   const progressRef = useRef(0);
   const progressSpring = useRef<SpringState>({ value: 0, velocity: 0 });
@@ -82,17 +68,11 @@ export const GlobeHero: React.FC = () => {
   const reduceMotionRef = useRef(false);
   const [reduceMotion, setReduceMotion] = useState(false);
 
-  const [bridgeOpacity, setBridgeOpacity] = useState(0);
-  const [bridgeScroll, setBridgeScroll] = useState(0);
-  const bridgeOpacityRef = useRef(0);
-  const bridgeScrollRef = useRef(0);
-
   /**
    * Writes the sequence state for the current scroll progress.
    * Only transform and opacity are touched — zero layout triggers.
    */
   const applyStage = useCallback(() => {
-    const journeyBox = journeyBoxRef.current;
     if (reduceMotionRef.current) return;
 
     // --- Sample and damp scroll progress ---------------------------------------------
@@ -103,7 +83,9 @@ export const GlobeHero: React.FC = () => {
     const gap = (now - lastSampleRef.current) / 1000;
     lastSampleRef.current = now;
 
-    const isTouch = typeof window !== "undefined" && (window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 900);
+    const isTouch =
+      typeof window !== "undefined" &&
+      (window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 900);
     const progress = progressSpring.current;
 
     if (isTouch) {
@@ -128,12 +110,12 @@ export const GlobeHero: React.FC = () => {
       boonHeroRef.current.scrub(heroP);
     }
 
-    // 2. Value Bridge: Client & Investor Growth Section
-    // 4 Alternating Cards: Left Card / Right Text -> Left Text / Right Card...
+    // 2. Value Bridge & Real Client Case Studies (Connected Architectural Flow)
+    // Continuous physical scroll: Part 1 (#D9D6CE) -> Part 2 (#18222B)
     const BRIDGE_START = 0.085;
     const BRIDGE_FADE_IN_END = 0.105;
-    const BRIDGE_SCROLL_END = 0.28;
-    const BRIDGE_END = 0.30;
+    const BRIDGE_SCROLL_END = 0.58;
+    const BRIDGE_END = 0.61;
 
     let bOpacity = 0;
     if (t < BRIDGE_START || t > BRIDGE_END) {
@@ -147,90 +129,79 @@ export const GlobeHero: React.FC = () => {
     }
     bOpacity = clamp(bOpacity, 0, 1);
 
-    const bScroll = clamp((t - BRIDGE_FADE_IN_END) / (BRIDGE_SCROLL_END - BRIDGE_FADE_IN_END), 0, 1);
+    const bScroll = clamp(
+      (t - BRIDGE_FADE_IN_END) / (BRIDGE_SCROLL_END - BRIDGE_FADE_IN_END),
+      0,
+      1
+    );
 
-    if (Math.abs(bOpacity - bridgeOpacityRef.current) > 0.005 || bOpacity === 0 || bOpacity === 1) {
+    if (
+      Math.abs(bOpacity - bridgeOpacityRef.current) > 0.005 ||
+      bOpacity === 0 ||
+      bOpacity === 1
+    ) {
       bridgeOpacityRef.current = bOpacity;
       setBridgeOpacity(bOpacity);
     }
 
-    if (Math.abs(bScroll - bridgeScrollRef.current) > 0.003 || bScroll === 0 || bScroll === 1) {
+    if (
+      Math.abs(bScroll - bridgeScrollRef.current) > 0.003 ||
+      bScroll === 0 ||
+      bScroll === 1
+    ) {
       bridgeScrollRef.current = bScroll;
       setBridgeScroll(bScroll);
     }
 
-    // 3. 3D Truck Highway Journey:
-    // Takes over seamlessly after the Value Bridge section finishes
-    const TRANS_START = 0.27;
-    const TRANS_END = 0.33;
-    const transP = clamp((t - TRANS_START) / (TRANS_END - TRANS_START), 0, 1);
+    // 4. Our Services Section (All 8 Delivered Cards)
+    // Glides through all 8 cards between t = 0.59 and t = 0.94
+    const SERVICES_START = 0.59;
+    const SERVICES_FADE_IN_END = 0.62;
+    const SERVICES_END = 0.94;
 
-    const JOURNEY_START = 0.30;
-    const MILESTONE_5_T = 0.52;
-    const TRUCK_FINISH_T = 0.62;
-
-    let journeyP = 0;
-    if (t <= JOURNEY_START) {
-      journeyP = 0;
-    } else if (t <= MILESTONE_5_T) {
-      journeyP = clamp(((t - JOURNEY_START) / (MILESTONE_5_T - JOURNEY_START)) * 0.88, 0, 0.88);
-    } else if (t <= TRUCK_FINISH_T) {
-      journeyP = clamp(0.88 + ((t - MILESTONE_5_T) / (TRUCK_FINISH_T - MILESTONE_5_T)) * 0.12, 0.88, 1.0);
+    let sOpacity = 0;
+    if (t < SERVICES_START) {
+      sOpacity = 0;
+    } else if (t < SERVICES_FADE_IN_END) {
+      sOpacity = (t - SERVICES_START) / (SERVICES_FADE_IN_END - SERVICES_START);
     } else {
-      journeyP = 1.0;
+      sOpacity = 1.0;
     }
+    sOpacity = clamp(sOpacity, 0, 1);
 
-    // 4. Our Services 8-Card Editorial Grid Scroll:
-    // Glides through all 8 cards between t = 0.62 and t = 0.94
-    let cardsP = 0;
-    if (t > 0.62) {
-      cardsP = clamp((t - 0.62) / (0.94 - 0.62), 0, 1);
-    }
+    const sScroll = clamp(
+      (t - SERVICES_FADE_IN_END) / (SERVICES_END - SERVICES_FADE_IN_END),
+      0,
+      1
+    );
 
-    journeyProgress.current = journeyP;
-    journeyProgress.descent = transP;
-    journeyProgress.cardsProgress = cardsP;
-
-    // Throttle state update to keep React rendering lightweight
     if (
-      Math.abs(transP - lastTransPRef.current) > 0.002 ||
-      transP === 0 ||
-      transP === 1 ||
-      (transP >= 0.89 && lastTransPRef.current < 0.89)
+      Math.abs(sOpacity - servicesOpacityRef.current) > 0.005 ||
+      sOpacity === 0 ||
+      sOpacity === 1
     ) {
-      lastTransPRef.current = transP;
-      setTransitionProgress(transP);
+      servicesOpacityRef.current = sOpacity;
+      setServicesOpacity(sOpacity);
     }
 
-    // Explicit Transition State
-    let nextState: TransitionState = "HERO_ACTIVE";
-    if (t < HERO_END) nextState = "HERO_ACTIVE";
-    else if (transP < 0.99) nextState = "CAMERA_ANGLE_SHIFT";
-    else if (t <= TRANS_END) nextState = "SIDE_VIEW_LOCKED";
-    else nextState = "JOURNEY_ACTIVE";
-
-    if (nextState !== transitionStateRef.current) {
-      transitionStateRef.current = nextState;
-      setTransitionState(nextState);
+    if (
+      Math.abs(sScroll - servicesScrollRef.current) > 0.003 ||
+      sScroll === 0 ||
+      sScroll === 1
+    ) {
+      servicesScrollRef.current = sScroll;
+      setServicesScroll(sScroll);
     }
 
-    // Journey active state
-    const shouldJourneyBeActive = transP >= JOURNEY_RUNS_FROM;
-    if (shouldJourneyBeActive !== journeyActiveRef.current) {
-      journeyActiveRef.current = shouldJourneyBeActive;
-      setJourneyActive(shouldJourneyBeActive);
+    // Scrub the services editorial grid upwards
+    if (servicesTrackRef.current) {
+      const contentH = servicesTrackRef.current.offsetHeight || 2600;
+      const clientH = typeof window !== "undefined" ? window.innerHeight : 800;
+      const maxScroll = Math.max(0, contentH - clientH + 160);
+      const cardsY = sScroll * maxScroll;
+      servicesTrackRef.current.style.transform = `translate3d(0, -${cardsY.toFixed(1)}px, 0)`;
     }
-
-    // --- The descent camera, flown over the real Journey ---------------------------
-    if (journeyBox) {
-      const camera = deriveDescentCamera(transP);
-      journeyProgress.pitch = camera.pitch;
-      journeyProgress.descent = transP;
-      journeyBox.style.opacity = camera.opacity.toFixed(3);
-      journeyBox.style.visibility = camera.opacity <= 0.005 ? "hidden" : "visible";
-      journeyBox.style.pointerEvents = camera.locked ? "auto" : "none";
-    }
-  }, [journeyProgress]);
+  }, []);
 
   useEffect(() => {
     const range = rangeRef.current;
@@ -265,9 +236,7 @@ export const GlobeHero: React.FC = () => {
     });
     observer.observe(range);
 
-    // The requestAnimationFrame loop samples window.scrollY continuously on every display frame
-    // onScroll does not need to duplicate applyStage(), avoiding dual-execution timing jitter
-    const onScroll = () => { };
+    const onScroll = () => {};
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", measureRange);
 
@@ -292,30 +261,32 @@ export const GlobeHero: React.FC = () => {
           className="sticky top-0 h-screen w-full overflow-hidden bg-[#030509]"
         >
           <div ref={slotRef} className="relative h-full w-full">
-            {/* Boon-Inspired Dark Hero Overlay */}
+            {/* 1. Boon-Inspired Dark Hero Overlay */}
             <BoonHero ref={boonHeroRef} />
 
-            {/* Value Bridge: How Mining Discovery Enhances Growth for Clients & Investors */}
+            {/* 2. Value Bridge & Real Client Case Studies (Connected Architectural Flow) */}
             <ClientInvestorGrowth
               scrollProgress={bridgeScroll}
               opacity={bridgeOpacity}
             />
 
-            {/* Dark Descent Backdrop & 3D Truck Journey */}
-            <DescentBackdrop progress={transitionProgress} />
-
+            {/* 4. Our Services Section (All 8 Delivered Cards) */}
             <div
-              className="pointer-events-none absolute inset-0 z-24 h-full w-full"
+              ref={servicesContainerRef}
+              className="absolute inset-0 h-full w-full overflow-hidden"
+              style={{
+                opacity: servicesOpacity,
+                visibility: servicesOpacity <= 0.005 ? "hidden" : "visible",
+                pointerEvents: servicesOpacity > 0.5 ? "auto" : "none",
+                background: "#FAF7F2",
+                zIndex: 38,
+              }}
             >
-              <div
-                ref={journeyBoxRef}
-                className="h-full w-full"
-                style={{
-                  opacity: 0,
-                }}
-              >
-                <Journey3D progress={journeyProgress} active={journeyActive} />
-              </div>
+              <OurServicesSection
+                isEmbedded
+                trackRef={servicesTrackRef}
+                containerRef={servicesContainerRef}
+              />
             </div>
           </div>
         </div>
