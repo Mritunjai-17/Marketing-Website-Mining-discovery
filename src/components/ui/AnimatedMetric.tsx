@@ -158,7 +158,14 @@ export const AnimatedMetric: React.FC<AnimatedMetricProps> = ({
   }, [inView, value, duration]);
 
   return (
-    <span ref={spanRef} className={className}>
+    <span
+      ref={spanRef}
+      className={className}
+      style={{
+        fontFamily: 'var(--font-space-grotesk), "Space Grotesk", sans-serif',
+        fontWeight: 500,
+      }}
+    >
       {displayValue}
     </span>
   );
