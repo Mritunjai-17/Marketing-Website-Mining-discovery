@@ -145,7 +145,7 @@ export const JourneyCamera: React.FC = () => {
     // Side profile view is active from t = 0.
     // After Milestone 05 (t >= 0.82), the camera smoothly turns 90 degrees downward by t = 0.90
     // so the road aligns vertically from top to bottom, and the truck runs vertically down the screen!
-    const turnS = smoothstep(0.82, 0.90, t);
+    const turnS = smoothstep(0.81, 0.885, t);
     const easeTurn = turnS * turnS * (3 - 2 * turnS);
 
     // 2. Downward Vertical Overhead View (t >= 0.90)

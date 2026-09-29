@@ -7,7 +7,6 @@ import { Environment as DreiEnvironment } from "@react-three/drei";
 import { JourneyCamera } from "./JourneyCamera";
 import { Road } from "./Road";
 import { Truck } from "./Truck";
-import { TopDownForest } from "./TopDownForest";
 import { getJourneyPoint, getJourneySide, getJourneyTangent } from "./journeyPath";
 import { JourneyProgressProvider, type JourneyProgress } from "../journeyProgress";
 
@@ -163,17 +162,17 @@ const ProceduralEnvironmentLight: React.FC = () => (
 const DynamicSceneBackground: React.FC<{ progress: JourneyProgress }> = ({ progress }) => {
   const { scene } = useThree();
   const whiteFog = useMemo(() => new THREE.Color(WHITE_BG), []);
-  const forestFog = useMemo(() => new THREE.Color("#08140c"), []);
+  const offWhiteFog = useMemo(() => new THREE.Color("#FAF7F2"), []);
   const currentColor = useMemo(() => new THREE.Color(WHITE_BG), []);
 
   useFrame(() => {
     if (scene.fog instanceof THREE.FogExp2) {
       const t = progress.current;
-      if (t >= 0.80 && t <= 0.965) {
+      if (t >= 0.80 && t <= 0.980) {
         const topDownAlpha =
           THREE.MathUtils.smoothstep(t, 0.80, 0.84) *
-          (1 - THREE.MathUtils.smoothstep(t, 0.945, 0.965));
-        currentColor.copy(whiteFog).lerp(forestFog, topDownAlpha);
+          (1 - THREE.MathUtils.smoothstep(t, 0.960, 0.980));
+        currentColor.copy(whiteFog).lerp(offWhiteFog, topDownAlpha);
         scene.fog.color.copy(currentColor);
         scene.fog.density = THREE.MathUtils.lerp(FOG_DENSITY, 0.0006, topDownAlpha);
       } else {
@@ -203,8 +202,6 @@ const SceneContents: React.FC<{ progress: JourneyProgress }> = ({ progress }) =>
 
     <JourneyCamera />
     <Road />
-    <Truck />
-    <TopDownForest />
   </JourneyProgressProvider>
 );
 
@@ -246,7 +243,7 @@ export const JourneyScene: React.FC<JourneySceneProps> = ({ progress, active }) 
       toneMapping: THREE.ACESFilmicToneMapping,
       toneMappingExposure: 1.08,
     }}
-    style={{ width: "100%", height: "100%", display: "block", position: "relative", zIndex: 2 }}
+    style={{ width: "100%", height: "100%", display: "block", position: "relative", zIndex: 10 }}
   >
     <SceneContents progress={progress} />
   </Canvas>

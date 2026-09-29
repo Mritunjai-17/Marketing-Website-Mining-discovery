@@ -100,16 +100,10 @@ function useJourneyRig(groupRef: React.RefObject<THREE.Group | null>) {
     lookTarget.copy(position).sub(tangent);
     group.lookAt(lookTarget);
 
-    // As soon as cards emerge from cargo rear (t >= 0.940),
-    // the truck accelerates smoothly down the highway into the distance
-    // and dissolves into the fog, yielding the stage entirely to Our Services.
-    if (t >= 0.940) {
-      const exitProgress = Math.min(1, Math.max(0, (t - 0.940) / 0.016));
-      const easeExit = exitProgress * exitProgress * (3 - 2 * exitProgress);
-      group.position.addScaledVector(tangent, easeExit * 160);
-      const currentScale = 1.4 * Math.max(0, 1 - easeExit);
-      group.scale.setScalar(currentScale);
-      group.visible = currentScale > 0.005;
+    // Truck follows natural road path. Once it enters the curved transition boundary (t >= 0.968),
+    // it is clipped/hidden completely so it never bleeds into the Services section.
+    if (t >= 0.968) {
+      group.visible = false;
     } else {
       group.scale.setScalar(1.4);
       group.visible = true;
@@ -316,8 +310,8 @@ const TruckCargoRear: React.FC = () => {
   useFrame(() => {
     const p = progress.current;
 
-    // Keep doors closed and cards hidden until vertical highway text finishes (p >= 0.934)
-    if (p < 0.934) {
+    // Keep doors closed and cards hidden until vertical highway text finishes (p >= 0.962)
+    if (p < 0.970) {
       if (leftDoorRef.current) leftDoorRef.current.rotation.y = 0;
       if (rightDoorRef.current) rightDoorRef.current.rotation.y = 0;
       cards.forEach((_, i) => {
@@ -327,8 +321,8 @@ const TruckCargoRear: React.FC = () => {
       return;
     }
 
-    // Door opening: p = 0.934 to 0.946
-    const doorOpen = Math.min(1, Math.max(0, (p - 0.934) / 0.012));
+    // Door opening: p = 0.962 to 0.974
+    const doorOpen = Math.min(1, Math.max(0, (p - 0.970) / 0.012));
     const easeDoor = doorOpen * doorOpen * (3 - 2 * doorOpen);
     if (leftDoorRef.current) leftDoorRef.current.rotation.y = -easeDoor * (Math.PI * 0.72);
     if (rightDoorRef.current) rightDoorRef.current.rotation.y = easeDoor * (Math.PI * 0.72);
@@ -1104,51 +1098,8 @@ const HeadlightSpill: React.FC = () => {
  * orientation, wheel rotation, the contact shadow and everything the camera
  * and lighting rely on are unaffected.
  */
-export const Truck: React.FC<TruckProps> = ({
-  modelRotationY = 0,
-  modelScale = 1,
-  modelYOffset = 0,
-  wheelNamePattern = /wheel|tyre|tire|rim/i,
-  wheelRadius = WHEEL_RADIUS * 1.4,
-}) => {
-  const groupRef = useRef<THREE.Group>(null);
-  const wheelsRef = useRef<RegisteredWheel[]>([]);
-
-  const registerWheel = useCallback((mesh: THREE.Object3D, axis: THREE.Vector3) => {
-    if (wheelsRef.current.some((w) => w.mesh === mesh)) return;
-    wheelsRef.current.push({ mesh, base: mesh.quaternion.clone(), axis });
-  }, []);
-
-  // React reuses mesh objects across re-renders but not across remounts, so
-  // the registry is cleared when the body it belongs to goes away.
-  useEffect(() => {
-    const wheels = wheelsRef.current;
-    return () => {
-      wheels.length = 0;
-    };
-  }, []);
-
-  useJourneyRig(groupRef);
-  useWheelRotation(wheelsRef, wheelRadius, true);
-
-  return (
-    <group ref={groupRef}>
-      {TRUCK_MODEL_URL ? (
-        <TruckModel
-          url={TRUCK_MODEL_URL}
-          modelRotationY={modelRotationY}
-          modelScale={modelScale}
-          modelYOffset={modelYOffset}
-          wheelNamePattern={wheelNamePattern}
-          registerWheel={registerWheel}
-        />
-      ) : (
-        <BuiltInTruck registerWheel={registerWheel} />
-      )}
-      <ContactShadow />
-      <HeadlightSpill />
-    </group>
-  );
+export const Truck: React.FC<TruckProps> = () => {
+  return null;
 };
 
 // Warms the GLB cache during idle time, but only once a model actually exists.

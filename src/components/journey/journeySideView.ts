@@ -201,6 +201,8 @@ export interface SceneState {
    * cannot, because which of its faces is toward camera depends on it.
    */
   pitch: number;
+  /** Scroll progress through the 8 editorial cards (0..1) */
+  cardsProgress?: number;
   metrics: StageMetrics;
 }
 

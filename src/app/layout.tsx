@@ -1,51 +1,40 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter, IBM_Plex_Mono, Playfair_Display, Cormorant_Garamond } from "next/font/google";
+import { Space_Grotesk, Inter, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { Header, Footer, SmoothScroll } from "@/components/layout";
 import MiningAICHatWidget from "@/components/ui/MiningAICHatWidget";
 import CustomCursor from "@/components/ui/CustomCursor";
 
-const geistSans = Geist({
+/**
+ * Primary Font: Space Grotesk
+ * Used for: Main headings, Section headings, Navigation, Buttons, Important numbers, Short labels
+ */
+const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
-  variable: "--font-geist-sans",
-  display: "swap",
-});
-
-const geistMono = Geist_Mono({
-  subsets: ["latin"],
-  variable: "--font-geist-mono",
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-space-grotesk",
   display: "swap",
 });
 
 /**
- * Cormorant Garamond: The high-end luxury editorial serif matching the reference (Forge luxury aesthetic)
+ * Secondary Font: Inter
+ * Used for: Body text, Descriptions, Supporting copy, Cards, Form fields, Small UI text
  */
-const cormorantGaramond = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-editorial-serif",
-  display: "swap",
-});
-
-/**
- * Playfair Display, the brand display serif for editorial pull-quotes and headlines.
- */
-const playfairDisplay = Playfair_Display({
-  subsets: ["latin"],
-  variable: "--font-display-custom",
-  display: "swap",
-});
-
 const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-sans-custom",
+  weight: ["400", "500", "600"],
+  variable: "--font-inter",
   display: "swap",
 });
 
+/**
+ * Data Font: IBM Plex Mono
+ * Used for: Statistics, Numbers, Mining data, Dates, Technical labels, Small metadata
+ */
 const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin"],
-  variable: "--font-mono-custom",
   weight: ["400", "500", "600"],
+  variable: "--font-ibm-plex-mono",
   display: "swap",
 });
 
@@ -63,7 +52,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${cormorantGaramond.variable} ${playfairDisplay.variable} ${inter.variable} ${ibmPlexMono.variable}`}
+      className={`${spaceGrotesk.variable} ${inter.variable} ${ibmPlexMono.variable}`}
     >
       <body className="min-h-screen flex flex-col bg-[#FAFAF9] text-[#1A1D21] antialiased selection:bg-[#B8860B]/20 selection:text-[#0B1F3A]">
         <SmoothScroll>
