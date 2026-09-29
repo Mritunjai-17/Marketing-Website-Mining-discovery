@@ -202,7 +202,6 @@ const SceneContents: React.FC<{ progress: JourneyProgress }> = ({ progress }) =>
 
     <JourneyCamera />
     <Road />
-    <Truck />
   </JourneyProgressProvider>
 );
 

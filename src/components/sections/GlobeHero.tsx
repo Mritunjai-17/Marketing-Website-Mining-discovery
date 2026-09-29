@@ -3,11 +3,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useCreateJourneyProgress } from "@/components/journey/journeyProgress";
-import { DescentBackdrop } from "@/components/journey/DescentBackdrop";
-import {
-  deriveDescentCamera,
-  JOURNEY_RUNS_FROM,
-} from "@/components/journey/descentCamera";
 import { BoonHero, type BoonHeroHandle } from "@/components/sections/BoonHero";
 import { ClientInvestorGrowth } from "@/components/sections/ClientInvestorGrowth/ClientInvestorGrowth";
 
@@ -22,8 +17,8 @@ export type TransitionState =
   | "SIDE_VIEW_LOCKED"
   | "JOURNEY_ACTIVE";
 
-/** Total viewport heights for the continuous story (Hero -> Client & Investor Bridge -> Truck Journey -> Our Services 8 Cards) */
-const TOTAL_SCROLL_VH = 3400;
+/** Total viewport heights for the continuous story (Hero -> Client & Investor Bridge -> Our Services 8 Cards) */
+const TOTAL_SCROLL_VH = 2000;
 
 /**
  * How the sampled progress follows the true scroll position.
@@ -159,54 +154,26 @@ export const GlobeHero: React.FC = () => {
       setBridgeScroll(bScroll);
     }
 
-    // 3. 3D Truck Highway Journey:
+    // 3. Services Section (8 Interactive Cards):
     // Takes over seamlessly after the Value Bridge section finishes
-    const TRANS_START = 0.27;
-    const TRANS_END = 0.33;
-    const transP = clamp((t - TRANS_START) / (TRANS_END - TRANS_START), 0, 1);
+    const SERVICES_START = 0.28;
+    const SERVICES_END = 0.98;
 
-    const JOURNEY_START = 0.30;
-    const MILESTONE_5_T = 0.52;
-    const TRUCK_FINISH_T = 0.62;
-
-    let journeyP = 0;
-    if (t <= JOURNEY_START) {
-      journeyP = 0;
-    } else if (t <= MILESTONE_5_T) {
-      journeyP = clamp(((t - JOURNEY_START) / (MILESTONE_5_T - JOURNEY_START)) * 0.88, 0, 0.88);
-    } else if (t <= TRUCK_FINISH_T) {
-      journeyP = clamp(0.88 + ((t - MILESTONE_5_T) / (TRUCK_FINISH_T - MILESTONE_5_T)) * 0.12, 0.88, 1.0);
+    let servicesP = 0;
+    if (t <= SERVICES_START) {
+      servicesP = 0;
     } else {
-      journeyP = 1.0;
+      servicesP = clamp((t - SERVICES_START) / (SERVICES_END - SERVICES_START), 0, 1);
     }
 
-    // 4. Our Services 8-Card Editorial Grid Scroll:
-    // Glides through all 8 cards between t = 0.62 and t = 0.94
-    let cardsP = 0;
-    if (t > 0.62) {
-      cardsP = clamp((t - 0.62) / (0.94 - 0.62), 0, 1);
-    }
+    journeyProgress.current = servicesP;
+    journeyProgress.descent = 1.0;
+    journeyProgress.cardsProgress = 0;
 
-    journeyProgress.current = journeyP;
-    journeyProgress.descent = transP;
-    journeyProgress.cardsProgress = cardsP;
-
-    // Throttle state update to keep React rendering lightweight
-    if (
-      Math.abs(transP - lastTransPRef.current) > 0.002 ||
-      transP === 0 ||
-      transP === 1 ||
-      (transP >= 0.89 && lastTransPRef.current < 0.89)
-    ) {
-      lastTransPRef.current = transP;
-      setTransitionProgress(transP);
-    }
-
-    // Explicit Transition State
+    // Transition state
     let nextState: TransitionState = "HERO_ACTIVE";
     if (t < HERO_END) nextState = "HERO_ACTIVE";
-    else if (transP < 0.99) nextState = "CAMERA_ANGLE_SHIFT";
-    else if (t <= TRANS_END) nextState = "SIDE_VIEW_LOCKED";
+    else if (t < SERVICES_START) nextState = "SIDE_VIEW_LOCKED";
     else nextState = "JOURNEY_ACTIVE";
 
     if (nextState !== transitionStateRef.current) {
@@ -214,21 +181,24 @@ export const GlobeHero: React.FC = () => {
       setTransitionState(nextState);
     }
 
-    // Journey active state
-    const shouldJourneyBeActive = transP >= JOURNEY_RUNS_FROM;
+    // Services section active state
+    const shouldJourneyBeActive = t >= 0.26;
     if (shouldJourneyBeActive !== journeyActiveRef.current) {
       journeyActiveRef.current = shouldJourneyBeActive;
       setJourneyActive(shouldJourneyBeActive);
     }
 
-    // --- The descent camera, flown over the real Journey ---------------------------
     if (journeyBox) {
-      const camera = deriveDescentCamera(transP);
-      journeyProgress.pitch = camera.pitch;
-      journeyProgress.descent = transP;
-      journeyBox.style.opacity = camera.opacity.toFixed(3);
-      journeyBox.style.visibility = camera.opacity <= 0.005 ? "hidden" : "visible";
-      journeyBox.style.pointerEvents = camera.locked ? "auto" : "none";
+      if (t < 0.26) {
+        journeyBox.style.opacity = "0";
+        journeyBox.style.visibility = "hidden";
+        journeyBox.style.pointerEvents = "none";
+      } else {
+        const fade = clamp((t - 0.26) / (0.30 - 0.26), 0, 1);
+        journeyBox.style.opacity = fade.toFixed(3);
+        journeyBox.style.visibility = "visible";
+        journeyBox.style.pointerEvents = "auto";
+      }
     }
   }, [journeyProgress]);
 
@@ -301,11 +271,9 @@ export const GlobeHero: React.FC = () => {
               opacity={bridgeOpacity}
             />
 
-            {/* Dark Descent Backdrop & 3D Truck Journey */}
-            <DescentBackdrop progress={transitionProgress} />
-
+            {/* Services Section (All 8 Interactive Cards) */}
             <div
-              className="pointer-events-none absolute inset-0 z-24 h-full w-full"
+              className="absolute inset-0 z-24 h-full w-full"
             >
               <div
                 ref={journeyBoxRef}
