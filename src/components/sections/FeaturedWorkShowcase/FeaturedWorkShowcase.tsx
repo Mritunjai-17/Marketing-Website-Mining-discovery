@@ -128,9 +128,25 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
   const headerRef = useRef<HTMLElement>(null);
   const chapterRefs = useRef<(HTMLElement | null)[]>([]);
 
-  const [headerInView, setHeaderInView] = useState(true);
+  const [headerInView, setHeaderInView] = useState(false);
   const [revealedChapters, setRevealedChapters] = useState<boolean[]>([true, true, true, true]);
   const [activeChapterIndex, setActiveChapterIndex] = useState<number>(0);
+
+  // Dedicated IntersectionObserver to reliably trigger kinetic header reveal as soon as it enters viewport
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setHeaderInView(true);
+        }
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -40px 0px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   // Overall section visibility and opacity
   const clampedOpacity = Math.max(0, Math.min(1, opacity));
@@ -152,7 +168,7 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
     const checkPositions = () => {
       const clientH = window.innerHeight || 800;
 
-      // Check header in-view
+      // Check header in-view fallback
       if (headerRef.current) {
         const hRect = headerRef.current.getBoundingClientRect();
         if (hRect.top < clientH * 0.88 && hRect.bottom > 0) {

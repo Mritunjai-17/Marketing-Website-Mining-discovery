@@ -139,6 +139,15 @@
   text-transform: uppercase;
   color: #C89A32;
   white-space: nowrap;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.75s ease, transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.inView .eyebrowText {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* Main heading: Warm White (#F1EEE6) - 2 structured lines with Space Grotesk matching other sections */
@@ -166,7 +175,7 @@
   display: block;
   transform: translateY(115%);
   opacity: 0;
-  transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.75s ease;
+  transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s ease;
   will-change: transform, opacity;
 }
 
@@ -177,11 +186,11 @@
 }
 
 .line1 {
-  transition-delay: 0.05s;
+  transition-delay: 0.08s;
 }
 
 .line2 {
-  transition-delay: 0.18s;
+  transition-delay: 0.22s;
 }
 
 /* Gold Specular Shimmer Sweep on Accent Words */
@@ -198,7 +207,7 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   display: inline-block;
-  animation: goldShimmer 5s ease-in-out infinite;
+  animation: goldShimmer 4s ease-in-out infinite;
 }
 
 @keyframes goldShimmer {
@@ -223,9 +232,19 @@
   color: #AEB7BD;
   max-width: 820px;
   margin: 0;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: 0.32s;
+  will-change: opacity, transform;
 }
 
-/* Minimal Editorial KPI Strip — Precision Grid Alignment */
+.inView .description {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Minimal Editorial KPI Strip — Precision Grid Alignment with Staggered Entrance */
 .editorialMetricsStrip {
   display: grid;
   grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
@@ -234,10 +253,21 @@
   max-width: 960px;
   margin-top: clamp(1.6rem, 2.8vh, 2.2rem);
   padding: clamp(0.9rem, 1.6vh, 1.2rem) clamp(1rem, 2vw, 1.8rem);
-  background: rgba(24, 34, 43, 0.45);
+  background: rgba(24, 34, 43, 0.55);
   border: 1px solid rgba(241, 238, 230, 0.12);
+  border-top: 1px solid rgba(214, 168, 79, 0.35);
   border-radius: 4px;
   box-sizing: border-box;
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease;
+  transition-delay: 0.42s;
+  will-change: opacity, transform;
+}
+
+.inView .editorialMetricsStrip {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .editorialMetric {
