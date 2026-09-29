@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
+import { AnimatedMetric } from "@/components/ui/AnimatedMetric";
 import styles from "./FeaturedWorkShowcase.module.css";
 
 export interface FeaturedWorkShowcaseProps {
@@ -21,6 +22,8 @@ interface ChapterData {
   ticker: string;
   titleLine1: string;
   titleLine2: string;
+  coordinates: string;
+  bgImage: string;
   clientName: string;
   storyLead: string;
   storyDetail: string;
@@ -40,11 +43,12 @@ const CHAPTERS: ChapterData[] = [
     ticker: "TSX-V: PGZ • OTCQB: PGZFF",
     titleLine1: "DELINEATING SPAIN'S",
     titleLine2: "PREMIER MINERAL DISTRICT",
+    coordinates: "LAT 37°31'N / LON 6°19'W // ESCACENA DRILL CORRIDOR",
+    bgImage: "/images/chapters/chapter_01_spain.jpg",
     clientName: "Pan Global Resources Inc.",
     storyLead:
-      "When Pan Global began hitting high-grade copper and gold at Escacena, the challenge wasn't the geology—it was cutting through market noise and getting European and North American institutional desks to pay attention before financing windows closed.",
-    storyDetail:
-      "We took their complex technical assays and built an undeniable market narrative across executive video dispatches and direct institutional syndication. The result was over 45,000 engaged investors and immediate participation in their C$1.15M warrant funding round.",
+      "We transformed Pan Global's Escacena copper-gold technical assays into institutional executive video dispatches and direct European syndication, engaging 45,000+ investors and driving oversubscribed C$1.15M warrant funding.",
+    storyDetail: "",
     metric1Val: "C$1.15M",
     metric1Lbl: "Warrant Financing Closed",
     metric2Val: "+185%",
@@ -59,11 +63,12 @@ const CHAPTERS: ChapterData[] = [
     ticker: "TSX-V: PHNM • OTCQX: PHNMF",
     titleLine1: "FROM CARLIN TARGETS TO",
     titleLine2: "TIER-1 PRODUCER VALIDATION",
+    coordinates: "LAT 40°47'N / LON 116°15'W // CARLIN STRATIGRAPHY",
+    bgImage: "/images/chapters/chapter_02_nevada.jpg",
     clientName: "Phenom Resources Corp.",
     storyLead:
-      "Exploring deep Carlin-type gold systems in Nevada takes immense technical discipline. But retail shareholders rarely read 40-page geophysical reports, and institutional backers needed clarity on the path toward a major discovery.",
-    storyDetail:
-      "We transformed Phenom's technical drill data into clear visual storytelling and strategic dispatches. That focused spotlight helped Phenom close a $1.275M private placement and negotiate an executed strategic JV agreement with Tier-1 producer SSR Mining.",
+      "We translated Phenom's deep Carlin-trend geophysics into clear visual storytelling and strategic market spotlights, accelerating a $1.275M private placement and negotiating a Tier-1 JV with SSR Mining.",
+    storyDetail: "",
     metric1Val: "$1.275M",
     metric1Lbl: "Private Placement Closed",
     metric2Val: "SSR Mining JV",
@@ -78,11 +83,12 @@ const CHAPTERS: ChapterData[] = [
     ticker: "TSX-V: AZS • OTCQB: AZASF",
     titleLine1: "TRANSLATING DRILL CORE ASSAYS",
     titleLine2: "INTO MARKET CONVICTION",
+    coordinates: "LAT 35°05'N / LON 114°21'W // PHILADELPHIA VEIN SYSTEM",
+    bgImage: "/images/chapters/chapter_03_arizona.jpg",
     clientName: "Arizona Gold & Silver Inc.",
     storyLead:
-      "A 10-meter intercept of bonanza-grade gold means nothing if the broader market never understands its continuity. Arizona Gold & Silver had exceptional assays at Philadelphia, but needed sustained liquidity and trading interest.",
-    storyDetail:
-      "We mapped their drill holes and vein structures into interactive 3D visualizations and concise mobile dispatches. By showing investors exactly where the drill was turning, qualified investor engagement leaped +320% and trading liquidity stabilized.",
+      "We mapped Philadelphia's bonanza drill intercepts into interactive 3D assays and mobile briefs, proving vein continuity to North American desks, expanding qualified engagement +320% and stabilizing liquidity.",
+    storyDetail: "",
     metric1Val: "+320%",
     metric1Lbl: "Investor Engagement Lift",
     metric2Val: "High-Grade",
@@ -97,11 +103,12 @@ const CHAPTERS: ChapterData[] = [
     ticker: "TSX-V: ASTR • OFFICIAL MEDIA ALLIANCE",
     titleLine1: "BRIDGING GRASSROOTS DISCOVERY",
     titleLine2: "WITH BAY STREET TITANS",
+    coordinates: "LAT 25°28'S / LON 69°55'W // ATACAMA TO BAY STREET",
+    bgImage: "/images/chapters/chapter_04_chile.jpg",
     clientName: "Astra Exploration & National Mining Event",
     storyLead:
-      "Whether announcing bonanza gold-silver veins at Pampa Paciencia in Chile or hosting international mining dignitaries in Quebec City, real market momentum comes from being in the right room with the right decision-makers.",
-    storyDetail:
-      "Alongside generating millions of campaign impressions for Astra, Mining Discovery signed an exclusive 2-year media partnership for The Mining Investment Event of the North—putting our partner companies directly alongside Glencore, Agnico Eagle, and Bay Street leaders.",
+      "Alongside generating millions of campaign impressions for Astra, Mining Discovery signed an exclusive 2-year partnership with The Mining Investment Event of the North, placing client assets directly before Tier-1 institutional leaders.",
+    storyDetail: "",
     metric1Val: "13.7M+",
     metric1Lbl: "Network Campaign Reach",
     metric2Val: "2-Year Partner",
@@ -118,6 +125,12 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
 }) => {
   const trackRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
+  const chapterRefs = useRef<(HTMLElement | null)[]>([]);
+
+  const [headerInView, setHeaderInView] = useState(true);
+  const [revealedChapters, setRevealedChapters] = useState<boolean[]>([true, true, true, true]);
+  const [activeChapterIndex, setActiveChapterIndex] = useState<number>(0);
 
   // Overall section visibility and opacity
   const clampedOpacity = Math.max(0, Math.min(1, opacity));
@@ -134,10 +147,71 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
     trackRef.current.style.transform = `translate3d(0, -${scrollY.toFixed(1)}px, 0)`;
   }, [scrollProgress, isConnectedFlow]);
 
+  // Dynamic in-view and active focal depth detection
+  useEffect(() => {
+    const checkPositions = () => {
+      const clientH = window.innerHeight || 800;
+
+      // Check header in-view
+      if (headerRef.current) {
+        const hRect = headerRef.current.getBoundingClientRect();
+        if (hRect.top < clientH * 0.88 && hRect.bottom > 0) {
+          setHeaderInView(true);
+        }
+      }
+
+      // Check chapters for reveal and focal depth
+      let bestDist = Infinity;
+      let closestIdx = 0;
+
+      chapterRefs.current.forEach((el, idx) => {
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+
+        // Reveal chapter when it approaches viewport
+        if (rect.top < clientH * 0.88 && rect.bottom > clientH * 0.08) {
+          setRevealedChapters((prev) => {
+            if (prev[idx]) return prev;
+            const updated = [...prev];
+            updated[idx] = true;
+            return updated;
+          });
+        }
+
+        // Focal depth: calculate distance from screen vertical center
+        const elCenter = rect.top + rect.height / 2;
+        const screenCenter = clientH * 0.52;
+        const dist = Math.abs(elCenter - screenCenter);
+
+        if (dist < bestDist && rect.bottom > clientH * 0.2 && rect.top < clientH * 0.8) {
+          bestDist = dist;
+          closestIdx = idx;
+        }
+      });
+
+      if (bestDist < clientH * 0.5) {
+        setActiveChapterIndex(closestIdx);
+      }
+    };
+
+    checkPositions();
+    const rafId = requestAnimationFrame(checkPositions);
+    window.addEventListener("scroll", checkPositions, { passive: true });
+    window.addEventListener("resize", checkPositions);
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener("scroll", checkPositions);
+      window.removeEventListener("resize", checkPositions);
+    };
+  }, [scrollProgress]);
+
   const innerContent = (
     <>
-      {/* Top Header — Pure Editorial Typography Connecting Methodology to Execution */}
-      <header className={styles.header}>
+      {/* Top Header — Pure Editorial Typography with Masked Line Reveals */}
+      <header
+        ref={headerRef}
+        className={`${styles.header} ${headerInView ? styles.inView : ""}`}
+      >
         <div className={styles.eyebrowRow}>
           <span className={styles.eyebrowRule} />
           <span className={styles.eyebrowText}>
@@ -147,8 +221,16 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
         </div>
 
         <h2 className={styles.mainTitle}>
-          <span className={styles.titleLine}>WHERE HIGH-GRADE EXPLORATION</span>
-          <span className={styles.titleLine}>MEETS <em>REAL CAPITAL.</em></span>
+          <span className={styles.maskWrapper}>
+            <span className={`${styles.maskedLine} ${styles.line1}`}>
+              WHERE HIGH-GRADE EXPLORATION
+            </span>
+          </span>
+          <span className={styles.maskWrapper}>
+            <span className={`${styles.maskedLine} ${styles.line2}`}>
+              MEETS <em className={styles.shimmerText}>REAL CAPITAL.</em>
+            </span>
+          </span>
         </h2>
 
         <p className={styles.description}>
@@ -157,48 +239,79 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
           turns drill core assays into institutional conviction, active liquidity, and Tier-1 joint ventures.
         </p>
 
-        {/* Minimal Editorial KPI Strip — Pure Text, No Card Boxes */}
+        {/* Minimal Editorial KPI Strip with Animated Count-Ups and Laser Dividers */}
         <div className={styles.editorialMetricsStrip}>
           <div className={styles.editorialMetric}>
-            <span className={styles.metricBigVal}>13.7M+</span>
+            <AnimatedMetric
+              value="13.7M+"
+              inView={headerInView}
+              className={styles.metricBigVal}
+            />
             <span className={styles.metricSubLbl}>Targeted Investor Views</span>
           </div>
           <div className={styles.metricSeparator} />
           <div className={styles.editorialMetric}>
-            <span className={styles.metricBigVal}>+120%</span>
+            <AnimatedMetric
+              value="+120%"
+              inView={headerInView}
+              className={styles.metricBigVal}
+            />
             <span className={styles.metricSubLbl}>Lead Generation Surge</span>
           </div>
           <div className={styles.metricSeparator} />
           <div className={styles.editorialMetric}>
-            <span className={styles.metricBigVal}>13,780</span>
+            <AnimatedMetric
+              value="13,780"
+              inView={headerInView}
+              className={styles.metricBigVal}
+            />
             <span className={styles.metricSubLbl}>Watch Hours Logged</span>
           </div>
           <div className={styles.metricSeparator} />
           <div className={styles.editorialMetric}>
-            <span className={styles.metricBigVal}>500K+</span>
+            <AnimatedMetric
+              value="500K+"
+              inView={headerInView}
+              className={styles.metricBigVal}
+            />
             <span className={styles.metricSubLbl}>Global Mining Network</span>
           </div>
         </div>
       </header>
 
-      {/* Alternating Pure-Text Chapters:
-          Chapter 1: Heading Left, Content Right
-          Chapter 2: Content Left, Heading Right
-          Chapter 3: Heading Left, Content Right
-          Chapter 4: Content Left, Heading Right
-          Zero cards, zero boxes, pure humanized editorial storytelling.
-      */}
+      {/* Alternating Pure-Text Chapters with Kinetic Reveals and Focal Spotlight */}
       <div className={styles.chaptersStack}>
-        {CHAPTERS.map((chapter) => {
+        {CHAPTERS.map((chapter, idx) => {
           const isHeadingLeft = chapter.align === "heading-left";
+          const isRevealed = revealedChapters[idx];
+          const isActive = activeChapterIndex === idx;
 
           return (
             <section
               key={chapter.id}
-              className={`${styles.alternatingRow} ${
-                isHeadingLeft ? styles.rowHeadingLeft : styles.rowHeadingRight
-              }`}
+              ref={(el) => {
+                chapterRefs.current[idx] = el;
+              }}
+              className={`${styles.alternatingRow} ${isHeadingLeft ? styles.rowHeadingLeft : styles.rowHeadingRight
+                } ${isRevealed ? styles.rowRevealed : ""} ${isActive ? styles.rowActive : ""
+                }`}
             >
+              {/* Dedicated Chapter Background Image strictly contained within its row — Zero overlap */}
+              <div className={styles.chapterBgWrap} aria-hidden="true">
+                <img
+                  src={chapter.bgImage}
+                  alt=""
+                  className={styles.chapterBgImg}
+                  loading="lazy"
+                />
+                <div className={styles.chapterBgOverlay} />
+              </div>
+
+              {/* Subtle Atmospheric Coordinate Watermark */}
+              <div className={styles.geoWatermark} aria-hidden="true">
+                {chapter.coordinates}
+              </div>
+
               {/* Heading Block */}
               <div className={styles.headingColumn}>
                 <div className={styles.metaRow}>
@@ -208,8 +321,16 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
                 </div>
 
                 <h3 className={styles.chapterTitle}>
-                  <span className={styles.titleLine}>{chapter.titleLine1}</span>
-                  <span className={styles.titleLine}>{chapter.titleLine2}</span>
+                  <span className={styles.maskWrapper}>
+                    <span className={`${styles.maskedLine} ${styles.line1}`}>
+                      {chapter.titleLine1}
+                    </span>
+                  </span>
+                  <span className={styles.maskWrapper}>
+                    <span className={`${styles.maskedLine} ${styles.line2}`}>
+                      {chapter.titleLine2}
+                    </span>
+                  </span>
                 </h3>
 
                 <div className={styles.clientDetails}>
@@ -218,22 +339,29 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
                 </div>
               </div>
 
-              {/* Content Block — Pure Narrative & Typography (No Card Background) */}
+              {/* Content Block — Pure Narrative (3 lines) & Dynamic Animated Metrics */}
               <div className={styles.contentColumn}>
                 <p className={styles.storyLead}>{chapter.storyLead}</p>
-                <p className={styles.storyDetail}>{chapter.storyDetail}</p>
 
-                {/* Clean Typographic Metrics Line — No Cards, Just Editorial Text */}
+                {/* Clean Typographic Metrics Line with Count-Ups and Laser Divider */}
                 <div className={styles.textMetricsLine}>
                   <div className={styles.textMetricCol}>
-                    <span className={styles.textMetricNum}>{chapter.metric1Val}</span>
+                    <AnimatedMetric
+                      value={chapter.metric1Val}
+                      inView={isRevealed}
+                      className={styles.textMetricNum}
+                    />
                     <span className={styles.textMetricLbl}>{chapter.metric1Lbl}</span>
                   </div>
 
                   <div className={styles.textMetricDivider} />
 
                   <div className={styles.textMetricCol}>
-                    <span className={styles.textMetricNum}>{chapter.metric2Val}</span>
+                    <AnimatedMetric
+                      value={chapter.metric2Val}
+                      inView={isRevealed}
+                      className={styles.textMetricNum}
+                    />
                     <span className={styles.textMetricLbl}>{chapter.metric2Lbl}</span>
                   </div>
                 </div>
@@ -271,7 +399,10 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
 
   if (isConnectedFlow) {
     return (
-      <section className={styles.featuredWorkSection} aria-label="Client Case Studies & Market Performance">
+      <section
+        className={styles.featuredWorkSection}
+        aria-label="Client Case Studies & Market Performance"
+      >
         {/* Subtle Architectural Coordinate Grid on Deep Mineral Blue */}
         <div className={styles.gridOverlay} aria-hidden="true">
           <div className={styles.gridLine} />
@@ -280,9 +411,7 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
           <div className={styles.gridLine} />
         </div>
 
-        <div className={styles.sectionInner}>
-          {innerContent}
-        </div>
+        <div className={styles.sectionInner}>{innerContent}</div>
       </section>
     );
   }
@@ -317,4 +446,3 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
 };
 
 export default FeaturedWorkShowcase;
-

@@ -1,15 +1,17 @@
 "use client";
 
-import React, { useRef, useEffect } from "react";
-import {
-  TrendingUp,
-  BarChart3,
-  Users,
-  Globe2,
-  CheckCircle2,
-} from "lucide-react";
+import React, { useRef, useEffect, useState } from "react";
+import { CheckCircle2 } from "lucide-react";
+import { FeaturedWorkShowcase } from "@/components/sections/FeaturedWorkShowcase/FeaturedWorkShowcase";
+import { AnimatedMetric } from "@/components/ui/AnimatedMetric";
 import styles from "./ClientInvestorGrowth.module.css";
-import { FeaturedWorkShowcase } from "@/components/sections/FeaturedWorkShowcase";
+
+export interface ClientInvestorGrowthProps {
+  /** Scroll scrub progress through the connected section (0.0 to 1.0) */
+  scrollProgress?: number;
+  /** Section fade opacity (0.0 to 1.0) */
+  opacity?: number;
+}
 
 interface GrowthPillar {
   id: string;
@@ -25,80 +27,88 @@ interface GrowthPillar {
 
 const GROWTH_PILLARS: GrowthPillar[] = [
   {
-    id: "valuation-reach",
-    badge: "01 / CORPORATE VALUATION & REACH",
-    targetAudience: "FOR MINING OPERATORS & EXPLORERS",
-    title: "Sovereign Capital Reach & Multi-Bourse Valuation",
+    id: "campaigns",
+    badge: "MILESTONE-DRIVEN CAMPAIGNS",
+    targetAudience: "FOR DISCOVERY MINERS & PROJECT GENERATORS",
+    title: "Translating Drill Hole Assays into Market Narrative",
     description:
-      "We connect your drill discoveries and technical feasibility milestones directly to institutional mining funds in London, Toronto, Sydney, and New York, helping your company command premium multiples and lower its cost of capital.",
+      "A 50-meter intercept of high-grade copper or gold doesn't create market conviction on its own. We structure continuous editorial and video dispatches that explain the geological continuity, jurisdictional leverage, and exploration upside to qualified global buyers.",
     bullets: [
-      "Direct exposure to 140,000+ institutional fund decision-makers",
-      "Sustained equity valuation to support non-dilutive capital raises",
+      "Technical assay teardowns translated for institutional capital",
+      "Executive video dispatches filmed on-site at active rigs",
+      "Multi-bourse editorial syndication across TSX, ASX, and OTC",
     ],
-    image: "/images/approach_drill_core.jpg",
-    alt: "Mining exploration drill core assay evaluation",
+    image:
+      "https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?auto=format&fit=crop&w=1200&q=80",
+    alt: "Mining exploration drill rig operating at twilight in a rugged mountain valley",
     align: "left-card",
   },
   {
-    id: "vetted-dealflow",
-    badge: "02 / UNBIASED INTELLIGENCE & ALPHA",
-    targetAudience: "FOR INSTITUTIONAL INVESTORS & RESOURCE FUNDS",
-    title: "Verified Technical Intelligence & High-Conviction Dealflow",
+    id: "syndication",
+    badge: "INSTITUTIONAL SYNDICATION",
+    targetAudience: "FOR FAMILY OFFICES, FUNDS & RESOURCE INVESTORS",
+    title: "Direct Access to Pre-Discovery & Growth-Stage Drill Programs",
     description:
-      "Gain early, unfiltered access to verified drill assays, metallurgical testwork, and pre-production feasibility models before broad market repricing, vetted by seasoned geological analysts.",
+      "Institutional and high-net-worth resource investors receive curated, data-rich intelligence dispatches. We highlight tier-one geological jurisdictions, experienced management teams, and near-term catalysts before generalist retail markets catch on.",
     bullets: [
-      "Independent geological teardowns and commodity cost curve analytics",
-      "Early-stage discovery dispatches with ESG compliance scoring",
+      "Curated discovery intelligence before headline press releases",
+      "Direct introductions to C-suite and lead geological teams",
+      "Strict due diligence on jurisdiction, permits, and balance sheets",
     ],
-    image: "/images/approach_gold_vein_macro.jpg",
-    alt: "High-grade mineral vein macro geological analysis",
+    image:
+      "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
+    alt: "Institutional financial trading floor with analysts reviewing technical geological data",
     align: "right-card",
   },
   {
-    id: "executive-access",
-    badge: "03 / C-SUITE DIALOGUE & GOVERNANCE",
-    targetAudience: "FOR INSTITUTIONAL DEAL-MAKERS & MANAGEMENT",
-    title: "Direct Leadership Access & Boardroom Briefings",
+    id: "liquidity",
+    badge: "MULTI-BOURSE LIQUIDITY",
+    targetAudience: "FOR PUBLIC JUNIOR & MID-TIER MINERS",
+    title: "Stabilizing Trading Volume & Expanding Cross-Border Bourses",
     description:
-      "We facilitate exclusive boardroom introductions, closed-door CEO roundtables, and technical site tours that bridge corporate management with institutional capital allocators.",
+      "Market caps erode when trading volume goes dormant between drill seasons. Our sustained communication strategy keeps global trading desks active across Canadian, Australian, US, and European capital markets throughout 12-month exploration cycles.",
     bullets: [
-      "1-on-1 private executive briefings and site-tour intelligence",
-      "Direct communication channels with geological and operations leads",
+      "Continuous trading desk visibility between assay news releases",
+      "Cross-border investor expansion (TSX-V, CSE, OTCQX, Frankfurt)",
+      "Warrant acceleration support and liquidity depth stabilization",
     ],
-    image: "/images/approach_molten_gold.jpg",
-    alt: "Refined precious metals production and executive briefing",
+    image:
+      "https://images.unsplash.com/photo-1542744094-24638eff58bb?auto=format&fit=crop&w=1200&q=80",
+    alt: "High-level board meeting analyzing mining valuation models and cross-border liquidity",
     align: "left-card",
   },
   {
-    id: "global-syndication",
-    badge: "04 / TIER-1 MEDIA & CONTINUOUS VISIBILITY",
-    targetAudience: "GLOBAL MINING AUDIENCE & CAPITAL ECOSYSTEM",
-    title: "Omnichannel Visibility That Sustains Conviction",
+    id: "partnerships",
+    badge: "TIER-1 STRATEGIC JVS",
+    targetAudience: "FOR SENIOR MINERS & STRATEGIC ALLIANCES",
+    title: "Positioning Premier Deposits for Major Producer Buyouts",
     description:
-      "From our premier monthly magazine publication to daily digital dispatches and Tier-1 financial press syndication, your story commands sustained attention across the global mining ecosystem.",
+      "The ultimate validation of a junior explorer is a farm-in agreement or joint venture with a Tier-1 major. We position your land package, technical data room, and ESG track record directly in front of M&A desks looking to replace reserves.",
     bullets: [
-      "Monthly print & digital magazine distribution across institutional desks",
-      "Tier-1 press syndication reaching sovereign wealth and family offices",
+      "Strategic showcase targeting senior producer corporate development",
+      "Technical credibility verified through independent QP data",
+      "High-profile exposure at The Mining Investment Event of the North",
     ],
-    image: "/images/mining_discovery_aerial_landscape.jpg",
-    alt: "Global Tier-1 mining discovery aerial landscape",
+    image:
+      "https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1200&q=80",
+    alt: "Large-scale modern mining processing facility and open pit production infrastructure",
     align: "right-card",
   },
 ];
 
-interface ClientInvestorGrowthProps {
-  /** Scroll scrub progress through the 4 alternating cards (0.0 to 1.0) */
-  scrollProgress: number;
-  /** Section fade opacity (0.0 to 1.0) */
-  opacity: number;
-}
-
 export const ClientInvestorGrowth: React.FC<ClientInvestorGrowthProps> = ({
-  scrollProgress,
-  opacity,
+  scrollProgress = 0,
+  opacity = 1,
 }) => {
   const trackRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
+  const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const metricsRef = useRef<HTMLDivElement>(null);
+
+  const [headerInView, setHeaderInView] = useState(false);
+  const [revealedPillars, setRevealedPillars] = useState<boolean[]>([true, false, false, false]);
+  const [metricsInView, setMetricsInView] = useState(false);
 
   // Overall section visibility and opacity
   const clampedOpacity = Math.max(0, Math.min(1, opacity));
@@ -113,6 +123,47 @@ export const ClientInvestorGrowth: React.FC<ClientInvestorGrowthProps> = ({
     const maxScroll = Math.max(0, contentH - clientH + 180);
     const scrollY = scrollProgress * maxScroll;
     trackRef.current.style.transform = `translate3d(0, -${scrollY.toFixed(1)}px, 0)`;
+  }, [scrollProgress]);
+
+  // Track in-view states for smooth reveals as user scrolls
+  useEffect(() => {
+    const checkPositions = () => {
+      const clientH = window.innerHeight || 800;
+
+      // Header in-view
+      if (headerRef.current) {
+        const rect = headerRef.current.getBoundingClientRect();
+        if (rect.top < clientH * 0.9 && rect.bottom > 0) {
+          setHeaderInView(true);
+        }
+      }
+
+      // Pillars in-view
+      rowRefs.current.forEach((el, idx) => {
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        if (rect.top < clientH * 0.88 && rect.bottom > clientH * 0.08) {
+          setRevealedPillars((prev) => {
+            if (prev[idx]) return prev;
+            const updated = [...prev];
+            updated[idx] = true;
+            return updated;
+          });
+        }
+      });
+
+      // Bottom proof metrics in-view
+      if (metricsRef.current) {
+        const rect = metricsRef.current.getBoundingClientRect();
+        if (rect.top < clientH * 0.92 && rect.bottom > 0) {
+          setMetricsInView(true);
+        }
+      }
+    };
+
+    checkPositions();
+    const rafId = requestAnimationFrame(checkPositions);
+    return () => cancelAnimationFrame(rafId);
   }, [scrollProgress]);
 
   return (
@@ -134,113 +185,153 @@ export const ClientInvestorGrowth: React.FC<ClientInvestorGrowthProps> = ({
             ============================================================== */}
         <section className={styles.valueBridgeSection}>
           <div className={styles.sectionInner}>
-            {/* Top Header & Overview Description */}
-            <header className={styles.header}>
-          <div className={styles.eyebrowRow}>
-            <span className={styles.eyebrowRule} />
-            <span className={styles.eyebrowText}>THE VALUE BRIDGE • DISCOVERY TO CAPITAL</span>
-            <span className={styles.eyebrowRule} />
-          </div>
+            {/* Top Header & Overview Description with Masked Line Reveals */}
+            <header
+              ref={headerRef}
+              className={`${styles.header} ${headerInView ? styles.inView : ""}`}
+            >
+              <div className={styles.eyebrowRow}>
+                <span className={styles.eyebrowRule} />
+                <span className={styles.eyebrowText}>THE VALUE BRIDGE • DISCOVERY TO CAPITAL</span>
+                <span className={styles.eyebrowRule} />
+              </div>
 
-          <h2 className={styles.mainTitle}>
-            TURNING GEOLOGY INTO <em>ENTERPRISE VALUE</em>
-          </h2>
+              <h2 className={styles.mainTitle}>
+                <span className={styles.maskWrapper}>
+                  <span className={`${styles.maskedLine} ${styles.line1}`}>
+                    TURNING GEOLOGY INTO
+                  </span>
+                </span>
+                <span className={styles.maskWrapper}>
+                  <span className={`${styles.maskedLine} ${styles.line2}`}>
+                    <em className={styles.shimmerText}>ENTERPRISE VALUE</em>
+                  </span>
+                </span>
+              </h2>
 
-          <p className={styles.subtitle}>
-            Exploration unearths the mineral deposit. Mining Discovery ensures global institutional capital recognizes, values, and finances it. We bridge physical exploration milestones with multi-bourse liquidity and sustained investor conviction.
-          </p>
-        </header>
+              <p className={styles.subtitle}>
+                Exploration unearths the mineral deposit. Mining Discovery ensures global
+                institutional capital recognizes, values, and finances it. We bridge physical
+                exploration milestones with multi-bourse liquidity and sustained investor conviction.
+              </p>
+            </header>
 
-        {/* Alternating Zig-Zag Showcase Rows (3 to 4 Cards) */}
-        <div className={styles.cardsStack}>
-          {GROWTH_PILLARS.map((item, idx) => {
-            const isLeftCard = item.align === "left-card";
+            {/* Alternating Zig-Zag Showcase Rows (4 Pillars) */}
+            <div className={styles.cardsStack}>
+              {GROWTH_PILLARS.map((item, idx) => {
+                const isLeftCard = item.align === "left-card";
+                const isRevealed = revealedPillars[idx];
 
-            return (
-              <div
-                key={item.id}
-                className={`${styles.alternatingRow} ${isLeftCard ? styles.rowLeftCard : styles.rowRightCard
-                  }`}
-              >
-                {/* Visual Image Card */}
-                <div className={styles.cardVisualWrap}>
-                  <div className={styles.imageCard}>
-                    <img
-                      src={item.image}
-                      alt={item.alt}
-                      className={styles.cardImage}
-                      loading="lazy"
-                    />
-                    <div className={styles.imageOverlay} />
-                    <div className={styles.cardBadge}>
-                      <span>{item.badge}</span>
+                return (
+                  <div
+                    key={item.id}
+                    ref={(el) => {
+                      rowRefs.current[idx] = el;
+                    }}
+                    className={`${styles.alternatingRow} ${
+                      isLeftCard ? styles.rowLeftCard : styles.rowRightCard
+                    } ${isRevealed ? styles.rowRevealed : ""}`}
+                  >
+                    {/* Visual Image Card */}
+                    <div className={styles.cardVisualWrap}>
+                      <div className={styles.imageCard}>
+                        <img
+                          src={item.image}
+                          alt={item.alt}
+                          className={styles.cardImage}
+                          loading="lazy"
+                        />
+                        <div className={styles.imageOverlay} />
+                        <div className={styles.cardBadge}>
+                          <span>{item.badge}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Text Content Block */}
+                    <div className={styles.cardTextWrap}>
+                      <div className={styles.targetAudience}>{item.targetAudience}</div>
+
+                      <h3 className={styles.itemTitle}>{item.title}</h3>
+
+                      <p className={styles.itemDescription}>{item.description}</p>
+
+                      <ul className={styles.bulletList}>
+                        {item.bullets.map((bullet, bIdx) => (
+                          <li
+                            key={bIdx}
+                            className={styles.bulletItem}
+                            style={{ ["--b-idx" as string]: bIdx }}
+                          >
+                            <CheckCircle2 size={18} className={styles.bulletIcon} />
+                            <span>{bullet}</span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                   </div>
-                </div>
+                );
+              })}
+            </div>
 
-                {/* Text Content Block */}
-                <div className={styles.cardTextWrap}>
-                  <div className={styles.targetAudience}>
-                    {item.targetAudience}
-                  </div>
-
-                  <h3 className={styles.itemTitle}>{item.title}</h3>
-
-                  <p className={styles.itemDescription}>{item.description}</p>
-
-                  <ul className={styles.bulletList}>
-                    {item.bullets.map((bullet, bIdx) => (
-                      <li key={bIdx} className={styles.bulletItem}>
-                        <CheckCircle2 size={18} className={styles.bulletIcon} />
-                        <span>{bullet}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+            {/* Bottom Clean Proof Metrics Strip with Dynamic Counter */}
+            <div
+              ref={metricsRef}
+              className={`${styles.metricsBar} ${metricsInView ? styles.inView : ""}`}
+            >
+              <div className={styles.metricItem}>
+                <AnimatedMetric
+                  value="$2.4B+"
+                  inView={metricsInView}
+                  className={styles.metricValue}
+                />
+                <span className={styles.metricLabel}>Institutional Capital Network</span>
               </div>
-            );
-          })}
-        </div>
 
-        {/* Bottom Clean Proof Metrics Strip */}
-        <div className={styles.metricsBar}>
-          <div className={styles.metricItem}>
-            <span className={styles.metricValue}>$2.4B+</span>
-            <span className={styles.metricLabel}>Institutional Capital Network</span>
+              <div className={styles.metricDivider} />
+
+              <div className={styles.metricItem}>
+                <AnimatedMetric
+                  value="140,000+"
+                  inView={metricsInView}
+                  className={styles.metricValue}
+                />
+                <span className={styles.metricLabel}>C-Suite &amp; Fund Decision-Makers</span>
+              </div>
+
+              <div className={styles.metricDivider} />
+
+              <div className={styles.metricItem}>
+                <AnimatedMetric
+                  value="48+"
+                  inView={metricsInView}
+                  className={styles.metricValue}
+                />
+                <span className={styles.metricLabel}>Mining Jurisdictions Covered</span>
+              </div>
+
+              <div className={styles.metricDivider} />
+
+              <div className={styles.metricItem}>
+                <AnimatedMetric
+                  value="100%"
+                  inView={metricsInView}
+                  className={styles.metricValue}
+                />
+                <span className={styles.metricLabel}>Verified Geological Teardowns</span>
+              </div>
+            </div>
           </div>
+        </section>
 
-          <div className={styles.metricDivider} />
-
-          <div className={styles.metricItem}>
-            <span className={styles.metricValue}>140,000+</span>
-            <span className={styles.metricLabel}>C-Suite &amp; Fund Decision-Makers</span>
-          </div>
-
-          <div className={styles.metricDivider} />
-
-          <div className={styles.metricItem}>
-            <span className={styles.metricValue}>48+</span>
-            <span className={styles.metricLabel}>Mining Jurisdictions Covered</span>
-          </div>
-
-          <div className={styles.metricDivider} />
-
-          <div className={styles.metricItem}>
-            <span className={styles.metricValue}>100%</span>
-            <span className={styles.metricLabel}>Verified Geological Teardowns</span>
-          </div>
-        </div>
+        {/* ==============================================================
+            PART 2: CASE STUDIES & PROVEN IMPACT (Deep Mineral Blue #18222B)
+            Directly connected beneath Part 1 — scrolls into view seamlessly
+            with scroll-linked animations and focal spotlight!
+            ============================================================== */}
+        <FeaturedWorkShowcase isConnectedFlow scrollProgress={scrollProgress} />
       </div>
-    </section>
-
-    {/* ==============================================================
-        PART 2: CASE STUDIES & PROVEN IMPACT (Deep Mineral Blue #18222B)
-        Directly connected beneath Part 1 — scrolls into view seamlessly
-        just like the user's reference!
-        ============================================================== */}
-    <FeaturedWorkShowcase isConnectedFlow />
-  </div>
-</div>
+    </div>
   );
 };
 

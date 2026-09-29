@@ -169,7 +169,7 @@
 .heroTitle {
   font-family: var(--font-editorial-serif), var(--font-display-custom), "Cormorant Garamond", "Playfair Display", Georgia, serif;
   font-size: clamp(3.2rem, 8.5vw, 8.5rem);
-  font-weight: 350;
+  font-weight: 700;
   letter-spacing: -0.015em;
   text-transform: uppercase;
   color: #FAF8F5;
@@ -180,6 +180,7 @@
 
 .heroTitle span {
   display: block;
+  font-weight: 700;
 }
 
 .heroSubline {

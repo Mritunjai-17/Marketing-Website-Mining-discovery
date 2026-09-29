@@ -75,26 +75,30 @@ export const Header: React.FC = () => {
   }, [menuOpen]);
 
   // Determine theme: About hero is warm ivory (#F7F5EF), while Home/Services/Work/Contact are dark
+  // Determine theme: About hero is warm ivory (#F7F5EF), while Home/Services/Work/Contact are dark
   const isLightHero = pathname?.startsWith("/about") ?? false;
-  const isDarkNav = isScrolled || !isLightHero;
+  const isDarkNav = !isLightHero;
 
   return (
     <>
-      {/* Outer fixed positioning wrapper - full length across the screen */}
+      {/* Outer fixed positioning wrapper - full length across the screen with stylish transparency */}
       <header
         className={`fixed top-0 left-0 right-0 w-full z-[110] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${isScrolled
-          ? "bg-[#06080d]/95 backdrop-blur-2xl border-b border-white/10 shadow-[0_12px_35px_-8px_rgba(0,0,0,0.85)]"
+          ? isLightHero
+            ? "bg-[#F7F5EF]/85 backdrop-blur-xl shadow-[0_8px_24px_rgba(0,0,0,0.04)]"
+            : "bg-[#0b131c]/65 backdrop-blur-xl shadow-[0_12px_32px_-8px_rgba(0,0,0,0.5)]"
           : isLightHero
-            ? "bg-transparent border-b border-[#E5E4DE]/60"
-            : "bg-transparent border-b border-transparent"
+            ? "bg-transparent"
+            : "bg-gradient-to-b from-[#080d14]/80 via-[#080d14]/20 to-transparent"
           }`}
       >
+
         {/* Full-length container with refined responsive padding */}
         <div
-          className={`w-full flex items-center justify-between px-5 sm:px-8 md:px-10 lg:px-12 xl:px-16 transition-all duration-500 ${isScrolled ? "py-2.5 sm:py-3" : "py-4 sm:py-5"
+          className={`w-full flex items-center justify-between px-5 sm:px-8 md:px-10 lg:px-12 xl:px-16 transition-all duration-500 ${isScrolled ? "py-2.5 sm:py-3" : "py-3.5 sm:py-4.5"
             }`}
         >
-          {/* Left: Brand Logo with increased size */}
+          {/* Left: Brand Logo */}
           <Link
             href="/"
             className="group flex items-center gap-2.5 sm:gap-3 focus:outline-none shrink-0"
@@ -106,48 +110,50 @@ export const Header: React.FC = () => {
               width={260}
               height={75}
               priority
-              className={`w-auto object-contain transition-all duration-500 ${isScrolled ? "h-9 sm:h-11 md:h-12" : "h-10 sm:h-12 md:h-14"
+              className={`w-auto object-contain transition-all duration-500 ${isScrolled ? "h-9 sm:h-10 md:h-11" : "h-10 sm:h-12 md:h-13"
                 }`}
             />
           </Link>
 
-          {/* Center: Desktop Navigation Links with Active Golden Dot */}
-          <nav className="hidden lg:flex items-center gap-7 xl:gap-9">
+          {/* Center: Stylish Floating Glass Pill Nav Capsule (Adapts to Light / Dark) */}
+          <nav
+            className={`hidden lg:flex items-center gap-1 p-1 rounded-full backdrop-blur-md transition-all duration-300 ${isDarkNav
+              ? "bg-white/[0.04] border border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)]"
+              : "bg-[#0B1F3A]/[0.05] border border-[#0B1F3A]/[0.1] shadow-[inset_0_1px_1px_rgba(11,31,58,0.06)]"
+              }`}
+          >
             {navLinks.map((link) => {
               const isActive =
                 link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
-
-              const linkColorClass = isDarkNav
-                ? isActive
-                  ? "text-[#FAF8F5]"
-                  : "text-[#FAF8F5]/80 group-hover:text-[#E5A93C]"
-                : isActive
-                  ? "text-[#0B1F3A]"
-                  : "text-[#0B1F3A]/75 group-hover:text-[#B8860B]";
-
-              const dotColorClass = isDarkNav
-                ? "bg-[#E5A93C] shadow-[0_0_8px_#E5A93C]"
-                : "bg-[#B8860B] shadow-[0_0_8px_#B8860B]";
 
               return (
                 <Link
                   key={link.name}
                   href={link.href}
-                  className="relative py-1 group flex flex-col items-center"
+                  className={`relative px-4 py-1.5 rounded-full transition-all duration-300 flex items-center gap-1.5 group ${isActive
+                    ? isDarkNav
+                      ? "bg-white/[0.14] text-[#FAF8F5] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_2px_8px_rgba(0,0,0,0.25)] border border-white/[0.15]"
+                      : "bg-[#0B1F3A] text-white shadow-[0_2px_10px_rgba(11,31,58,0.25)] border border-[#0B1F3A]"
+                    : isDarkNav
+                      ? "text-[#FAF8F5]/75 hover:text-white hover:bg-white/[0.06]"
+                      : "text-[#0B1F3A]/85 hover:text-[#0B1F3A] hover:bg-[#0B1F3A]/[0.08]"
+                    }`}
                 >
-                  <span
-                    className={`text-[11px] xl:text-xs font-semibold tracking-[0.2em] uppercase transition-colors duration-300 ${linkColorClass}`}
-                  >
+                  <span className={`text-[11px] xl:text-xs font-semibold tracking-[0.16em] uppercase ${
+                    isActive && !isDarkNav ? "text-white" : ""
+                  }`}>
                     {link.name}
                   </span>
 
                   {/* Golden indicator dot */}
-                  <span
-                    className={`absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full ${dotColorClass} transition-all duration-300 ${isActive
-                      ? "opacity-100 scale-100"
-                      : "opacity-0 scale-50 group-hover:opacity-60 group-hover:scale-75"
-                      }`}
-                  />
+                  {isActive && (
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${isDarkNav
+                        ? "bg-[#D6A84F] shadow-[0_0_8px_#D6A84F]"
+                        : "bg-[#F3DC96] shadow-[0_0_6px_rgba(243,220,150,0.8)]"
+                        }`}
+                    />
+                  )}
                 </Link>
               );
             })}
@@ -158,8 +164,8 @@ export const Header: React.FC = () => {
             {/* Circular Action Button */}
             <Link
               href="/contact"
-              className={`w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full border transition-all duration-300 backdrop-blur-sm cursor-pointer group flex items-center justify-center ${isDarkNav
-                ? "border-white/20 hover:border-[#E5A93C] text-white/85 hover:text-[#E5A93C] bg-white/5 hover:bg-white/10"
+              className={`w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full border transition-all duration-300 backdrop-blur-md cursor-pointer group flex items-center justify-center ${isDarkNav
+                ? "border-white/15 hover:border-[#D6A84F]/60 text-white/85 hover:text-[#D6A84F] bg-white/[0.04] hover:bg-white/[0.09] hover:shadow-[0_0_18px_rgba(214,168,79,0.25)]"
                 : "border-[#0B1F3A]/20 hover:border-[#B8860B] text-[#0B1F3A]/85 hover:text-[#B8860B] bg-[#0B1F3A]/5 hover:bg-[#0B1F3A]/10"
                 }`}
               aria-label="Schedule Consultation"
@@ -170,7 +176,7 @@ export const Header: React.FC = () => {
             {/* Golden Amber Pill CTA Button */}
             <Link
               href="/contact"
-              className="inline-flex items-center justify-center px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 rounded-full bg-gradient-to-r from-[#E5A93C] via-[#E8B045] to-[#D49525] text-[#111713] font-sans font-bold text-[10px] sm:text-xs uppercase tracking-[0.16em] hover:brightness-110 hover:shadow-[0_0_24px_rgba(229,169,60,0.5)] transition-all duration-300 hover:scale-[1.02] shrink-0 active:scale-[0.98]"
+              className="inline-flex items-center justify-center px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 rounded-full bg-gradient-to-r from-[#D6A84F] via-[#F3DC96] to-[#C89A32] text-[#0C141E] font-sans font-bold text-[10px] sm:text-xs uppercase tracking-[0.16em] hover:brightness-110 hover:shadow-[0_0_24px_rgba(214,168,79,0.55)] transition-all duration-300 hover:scale-[1.03] shrink-0 active:scale-[0.98]"
             >
               <span className="hidden sm:inline">SCHEDULE BRIEFING</span>
               <span className="sm:hidden">BRIEFING</span>
@@ -180,8 +186,8 @@ export const Header: React.FC = () => {
             <button
               type="button"
               onClick={() => setMenuOpen(!menuOpen)}
-              className={`lg:hidden w-8 h-8 sm:w-9 sm:h-9 rounded-full border flex items-center justify-center transition-colors focus:outline-none cursor-pointer ${isDarkNav
-                ? "border-white/20 text-white/90 hover:text-white hover:border-white/40 bg-white/5"
+              className={`lg:hidden w-8 h-8 sm:w-9 sm:h-9 rounded-full border flex items-center justify-center transition-all duration-300 focus:outline-none cursor-pointer backdrop-blur-md ${isDarkNav
+                ? "border-white/15 text-white/90 hover:text-white hover:border-white/35 bg-white/[0.04] hover:bg-white/[0.08]"
                 : "border-[#0B1F3A]/20 text-[#0B1F3A] hover:text-[#0B1F3A] hover:border-[#0B1F3A]/40 bg-[#0B1F3A]/5"
                 }`}
               aria-label={menuOpen ? "Close menu" : "Open menu"}

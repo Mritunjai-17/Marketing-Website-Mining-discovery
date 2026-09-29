@@ -72,10 +72,18 @@
   width: clamp(24px, 3.5vw, 50px);
   height: 1.5px;
   background: linear-gradient(90deg, transparent, rgba(138, 104, 32, 0.75));
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .eyebrowRule:last-child {
   background: linear-gradient(90deg, rgba(138, 104, 32, 0.75), transparent);
+  transform-origin: right center;
+}
+
+.inView .eyebrowRule {
+  transform: scaleX(1);
 }
 
 .eyebrowText {
@@ -99,10 +107,60 @@
   max-width: 860px;
 }
 
-.mainTitle em {
+/* Kinetic Mask Wrappers for Staggered Slide-Up Text Reveals */
+.maskWrapper {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+}
+
+.maskedLine {
+  display: block;
+  transform: translateY(115%);
+  opacity: 0;
+  transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.75s ease;
+  will-change: transform, opacity;
+}
+
+.inView .maskedLine {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.line1 {
+  transition-delay: 0.05s;
+}
+
+.line2 {
+  transition-delay: 0.18s;
+}
+
+/* Gold Specular Shimmer Sweep on Accent Word */
+.shimmerText {
   font-style: italic;
-  color: #8B6820;
   font-weight: 400;
+  background: linear-gradient(
+    115deg,
+    #8B6820 0%,
+    #B8860B 35%,
+    #C89A32 50%,
+    #7A5E22 100%
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+  animation: stoneGoldShimmer 5s ease-in-out infinite;
+}
+
+@keyframes stoneGoldShimmer {
+  0%, 15% {
+    background-position: 180% 0;
+  }
+  65%, 100% {
+    background-position: -180% 0;
+  }
 }
 
 .subtitle {
@@ -113,6 +171,14 @@
   margin: 0;
   max-width: 820px;
   padding: 0 clamp(0.25rem, 1vw, 1rem);
+  opacity: 0.45;
+  transform: translateY(8px);
+  transition: opacity 0.75s ease 0.15s, transform 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.15s;
+}
+
+.inView .subtitle {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* ==========================================================================
@@ -132,6 +198,15 @@
   justify-content: space-between;
   gap: clamp(2rem, 4.5vw, 4.75rem);
   width: 100%;
+  opacity: 0.4;
+  transform: translateY(16px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.rowRevealed {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* Row with Card on Left, Text on Right */
@@ -267,6 +342,15 @@
   font-size: clamp(0.82rem, 0.92vw, 0.92rem);
   line-height: 1.5;
   color: #1E293B;
+  opacity: 0.35;
+  transform: translateX(-10px);
+  transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: calc(var(--b-idx, 0) * 0.12s + 0.1s);
+}
+
+.rowRevealed .bulletItem {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .bulletIcon {
@@ -321,6 +405,13 @@
   width: 1px;
   height: clamp(28px, 4vh, 36px);
   background: rgba(255, 255, 255, 0.12);
+  transform: scaleY(0);
+  transform-origin: top center;
+  transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.25s;
+}
+
+.inView .metricDivider {
+  transform: scaleY(1);
 }
 
 /* ==========================================================================
