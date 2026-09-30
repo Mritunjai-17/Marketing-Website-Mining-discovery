@@ -38,9 +38,8 @@ const GROWTH_PILLARS: GrowthPillar[] = [
       "Executive video dispatches filmed on-site at active rigs",
       "Multi-bourse editorial syndication across TSX, ASX, and OTC",
     ],
-    image:
-      "https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?auto=format&fit=crop&w=1200&q=80",
-    alt: "Mining exploration drill rig operating at twilight in a rugged mountain valley",
+    image: "/services/02-drill.webp",
+    alt: "High-grade geological drill core assays and rock samples arranged in core boxes",
     align: "left-card",
   },
   {
@@ -55,8 +54,7 @@ const GROWTH_PILLARS: GrowthPillar[] = [
       "Direct introductions to C-suite and lead geological teams",
       "Strict due diligence on jurisdiction, permits, and balance sheets",
     ],
-    image:
-      "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
+    image: "/services/03-assay.webp",
     alt: "Institutional financial trading floor with analysts reviewing technical geological data",
     align: "right-card",
   },
@@ -72,8 +70,7 @@ const GROWTH_PILLARS: GrowthPillar[] = [
       "Cross-border investor expansion (TSX-V, CSE, OTCQX, Frankfurt)",
       "Warrant acceleration support and liquidity depth stabilization",
     ],
-    image:
-      "https://images.unsplash.com/photo-1542744094-24638eff58bb?auto=format&fit=crop&w=1200&q=80",
+    image: "/services/01-survey.webp",
     alt: "High-level board meeting analyzing mining valuation models and cross-border liquidity",
     align: "left-card",
   },
@@ -89,8 +86,7 @@ const GROWTH_PILLARS: GrowthPillar[] = [
       "Technical credibility verified through independent QP data",
       "High-profile exposure at The Mining Investment Event of the North",
     ],
-    image:
-      "https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1200&q=80",
+    image: "/services/04-pit.webp",
     alt: "Large-scale modern mining processing facility and open pit production infrastructure",
     align: "right-card",
   },
@@ -108,63 +104,138 @@ export const ClientInvestorGrowth: React.FC<ClientInvestorGrowthProps> = ({
 
   const [headerInView, setHeaderInView] = useState(false);
   const [revealedPillars, setRevealedPillars] = useState<boolean[]>([true, false, false, false]);
+  const [activeFocalIndex, setActiveFocalIndex] = useState<number>(0);
   const [metricsInView, setMetricsInView] = useState(false);
+
+  const activeFocalRef = useRef<number>(0);
+  const layoutMetricsRef = useRef<{
+    maxScroll: number;
+    headerTop: number;
+    rowCenters: number[];
+    metricsTop: number;
+    clientH: number;
+  }>({
+    maxScroll: 4000,
+    headerTop: 100,
+    rowCenters: [400, 950, 1500, 2050],
+    metricsTop: 2600,
+    clientH: 800,
+  });
 
   // Overall section visibility and opacity
   const clampedOpacity = Math.max(0, Math.min(1, opacity));
   const isVisible = clampedOpacity > 0.01;
   const pointerEvents = clampedOpacity > 0.6 ? "auto" : "none";
 
-  // Translate the connected track smoothly as user scrolls through both sections
-  useEffect(() => {
-    if (!trackRef.current || !containerRef.current) return;
-    const contentH = trackRef.current.offsetHeight || 5500;
+  // Measure static layout metrics once on mount/resize (zero DOM reads during scroll)
+  const measureLayout = () => {
+    if (!trackRef.current) return;
+    const track = trackRef.current;
+    const trackRect = track.getBoundingClientRect();
+    const currentTransformY = -parseFloat(
+      track.style.transform.replace(/[^0-9.-]/g, "") || "0"
+    );
+    const trackTop = trackRect.top - currentTransformY;
     const clientH = window.innerHeight || 800;
+    const contentH = track.offsetHeight || 5500;
     const maxScroll = Math.max(0, contentH - clientH + 180);
-    const scrollY = scrollProgress * maxScroll;
-    trackRef.current.style.transform = `translate3d(0, -${scrollY.toFixed(1)}px, 0)`;
-  }, [scrollProgress]);
 
-  // Track in-view states for smooth reveals as user scrolls
-  useEffect(() => {
-    const checkPositions = () => {
-      const clientH = window.innerHeight || 800;
+    const headerTop = headerRef.current
+      ? headerRef.current.getBoundingClientRect().top - trackTop - currentTransformY
+      : 100;
 
-      // Header in-view
-      if (headerRef.current) {
-        const rect = headerRef.current.getBoundingClientRect();
-        if (rect.top < clientH * 0.9 && rect.bottom > 0) {
-          setHeaderInView(true);
-        }
+    const rowCenters: number[] = [];
+    rowRefs.current.forEach((el) => {
+      if (el) {
+        const r = el.getBoundingClientRect();
+        const topRelativeToTrack = r.top - trackTop - currentTransformY;
+        rowCenters.push(topRelativeToTrack + r.height * 0.5);
+      } else {
+        rowCenters.push(0);
       }
+    });
 
-      // Pillars in-view
-      rowRefs.current.forEach((el, idx) => {
-        if (!el) return;
-        const rect = el.getBoundingClientRect();
-        if (rect.top < clientH * 0.88 && rect.bottom > clientH * 0.08) {
-          setRevealedPillars((prev) => {
-            if (prev[idx]) return prev;
-            const updated = [...prev];
-            updated[idx] = true;
-            return updated;
-          });
+    const metricsTop = metricsRef.current
+      ? metricsRef.current.getBoundingClientRect().top - trackTop - currentTransformY
+      : 2600;
+
+    layoutMetricsRef.current = {
+      maxScroll,
+      headerTop,
+      rowCenters,
+      metricsTop,
+      clientH,
+    };
+  };
+
+  useEffect(() => {
+    measureLayout();
+    const timer = setTimeout(measureLayout, 250);
+    const observer = new ResizeObserver(() => {
+      measureLayout();
+    });
+    if (trackRef.current) {
+      observer.observe(trackRef.current);
+    }
+    window.addEventListener("resize", measureLayout);
+    return () => {
+      clearTimeout(timer);
+      observer.disconnect();
+      window.removeEventListener("resize", measureLayout);
+    };
+  }, []);
+
+  // Silky-smooth GPU scroll translation & non-thrashing in-view detection
+  useEffect(() => {
+    if (!trackRef.current) return;
+
+    const { maxScroll, headerTop, rowCenters, metricsTop, clientH } = layoutMetricsRef.current;
+    const scrollY = scrollProgress * maxScroll;
+
+    // Direct GPU-accelerated transform
+    trackRef.current.style.transform = `translate3d(0, -${scrollY.toFixed(1)}px, 0)`;
+
+    // Header reveal
+    if (!headerInView && scrollY + clientH * 0.9 > headerTop) {
+      setHeaderInView(true);
+    }
+
+    // Reveal pillars once reached
+    setRevealedPillars((prev) => {
+      let changed = false;
+      const next = [...prev];
+      rowCenters.forEach((center, idx) => {
+        if (!next[idx] && scrollY + clientH * 0.95 > center - 180) {
+          next[idx] = true;
+          changed = true;
         }
       });
+      return changed ? next : prev;
+    });
 
-      // Bottom proof metrics in-view
-      if (metricsRef.current) {
-        const rect = metricsRef.current.getBoundingClientRect();
-        if (rect.top < clientH * 0.92 && rect.bottom > 0) {
-          setMetricsInView(true);
-        }
+    // Optical center focal row
+    const opticalCenter = scrollY + clientH * 0.5;
+    let closestIdx = 0;
+    let minDistance = Infinity;
+
+    rowCenters.forEach((center, idx) => {
+      const dist = Math.abs(center - opticalCenter);
+      if (dist < minDistance) {
+        minDistance = dist;
+        closestIdx = idx;
       }
-    };
+    });
 
-    checkPositions();
-    const rafId = requestAnimationFrame(checkPositions);
-    return () => cancelAnimationFrame(rafId);
-  }, [scrollProgress]);
+    if (closestIdx !== activeFocalRef.current) {
+      activeFocalRef.current = closestIdx;
+      setActiveFocalIndex(closestIdx);
+    }
+
+    // Metrics strip reveal
+    if (!metricsInView && scrollY + clientH * 0.92 > metricsTop) {
+      setMetricsInView(true);
+    }
+  }, [scrollProgress, headerInView, metricsInView]);
 
   return (
     <div
@@ -221,6 +292,7 @@ export const ClientInvestorGrowth: React.FC<ClientInvestorGrowthProps> = ({
               {GROWTH_PILLARS.map((item, idx) => {
                 const isLeftCard = item.align === "left-card";
                 const isRevealed = revealedPillars[idx];
+                const isFocal = activeFocalIndex === idx;
 
                 return (
                   <div
@@ -230,7 +302,9 @@ export const ClientInvestorGrowth: React.FC<ClientInvestorGrowthProps> = ({
                     }}
                     className={`${styles.alternatingRow} ${
                       isLeftCard ? styles.rowLeftCard : styles.rowRightCard
-                    } ${isRevealed ? styles.rowRevealed : ""}`}
+                    } ${isRevealed ? styles.rowRevealed : ""} ${
+                      isFocal ? styles.rowFocal : ""
+                    }`}
                   >
                     {/* Visual Image Card */}
                     <div className={styles.cardVisualWrap}>
@@ -252,7 +326,9 @@ export const ClientInvestorGrowth: React.FC<ClientInvestorGrowthProps> = ({
                     <div className={styles.cardTextWrap}>
                       <div className={styles.targetAudience}>{item.targetAudience}</div>
 
-                      <h3 className={styles.itemTitle}>{item.title}</h3>
+                      <div className={styles.itemTitleMask}>
+                        <h3 className={styles.itemTitle}>{item.title}</h3>
+                      </div>
 
                       <p className={styles.itemDescription}>{item.description}</p>
 

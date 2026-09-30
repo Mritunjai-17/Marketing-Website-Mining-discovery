@@ -11,6 +11,7 @@ export interface FocusCard {
   id: string;
   badge: string;
   category: string;
+  punchline?: string;
   title: string;
   description: string;
   image: string;
@@ -21,47 +22,63 @@ export interface FocusCard {
 
 export const FOCUS_CARDS: FocusCard[] = [
   {
-    id: "alliance-1",
-    badge: "01 — CONFERENCE & POLICY",
-    category: "STRATEGIC ALLIANCE",
-    title: "Leading Mining Associations",
-    description: "Knowledge sharing, policy alignment, and keynote conference partnerships.",
-    image: "/images/cards/card_01_alliances.jpg",
-    locationTag: "[ 01 · CONFERENCE & POLICY ]",
-    ctaText: "Explore Alliance",
+    id: "stage-1-build-brand",
+    badge: "01 — BUILD YOUR BRAND",
+    category: "01 — BUILD YOUR BRAND",
+    punchline: "Create a mining brand people remember.",
+    title: "Build Your Brand",
+    description: "From logo and visual identity to digital branding and website development, we create a professional presence that clearly communicates your company, projects and value.",
+    image: "/images/cards/card_01_alliances.jpg?v=real_v1",
+    locationTag: "Digital Branding · Logo & Visual Design · Website Development",
+    ctaText: "Build Brand",
     ctaHref: "/contact",
   },
   {
-    id: "alliance-2",
-    badge: "02 — TECH & PLATFORMS",
-    category: "INTEGRATED INFRASTRUCTURE",
-    title: "Service & Technology Providers",
-    description: "Co-branded digital campaigns, software integration, and investor showcase events.",
-    image: "/images/cards/card_02_technology.jpg",
-    locationTag: "[ 02 · TECH & PLATFORMS ]",
-    ctaText: "Explore Alliance",
+    id: "stage-2-amplify-story",
+    badge: "02 — AMPLIFY YOUR STORY",
+    category: "02 — AMPLIFY YOUR STORY",
+    punchline: "Turn company news into industry visibility.",
+    title: "Amplify Your Story",
+    description: "We transform project updates, announcements and milestones into compelling content through PR, media coverage, social media and industry-focused storytelling.",
+    image: "/images/cards/card_02_technology.jpg?v=clean_v8",
+    locationTag: "Public Relations · Social Media · Media Coverage · Content",
+    ctaText: "Amplify Story",
     ctaHref: "/contact",
   },
   {
-    id: "alliance-3",
-    badge: "03 — GROWTH & CAPITAL",
-    category: "CORPORATE EXPANSION",
-    title: "Corporate Growth Partners",
-    description: "Digital transformation in marketing, corporate re-branding, and liquidity acceleration.",
-    image: "/images/cards/card_03_growth.jpg",
-    locationTag: "[ 03 · GROWTH & CAPITAL ]",
-    ctaText: "Explore Alliance",
+    id: "stage-3-reach-audience",
+    badge: "03 — REACH THE RIGHT AUDIENCE",
+    category: "03 — REACH THE RIGHT AUDIENCE",
+    punchline: "Put your story in front of the people who matter.",
+    title: "Reach the Right Audience",
+    description: "Reach investors, mining professionals, industry leaders and decision-makers through targeted digital campaigns, Google Ads, LinkedIn, Meta and Mining Discovery's industry audience.",
+    image: "/images/cards/card_03_growth.jpg?v=notext_v5",
+    locationTag: "Google Ads · LinkedIn & Meta Ads · Investor Campaigns · Industry Outreach",
+    ctaText: "Reach Audience",
     ctaHref: "/contact",
   },
   {
-    id: "alliance-4",
-    badge: "04 — ESG & GOVERNANCE",
-    category: "MARKET INTEGRITY",
-    title: "Regulatory & Transparency Bodies",
-    description: "Promoting ESG reporting standards, investor trust, and verified market intelligence.",
-    image: "/images/cards/card_04_governance.jpg",
-    locationTag: "[ 04 · ESG & GOVERNANCE ]",
-    ctaText: "Explore Alliance",
+    id: "stage-4-industry-authority",
+    badge: "04 — BUILD INDUSTRY AUTHORITY",
+    category: "04 — BUILD INDUSTRY AUTHORITY",
+    punchline: "Make your company part of the mining conversation.",
+    title: "Build Industry Authority",
+    description: "Strengthen your reputation through executive visibility, interviews, webinars, events, publications and thought leadership that position your company within the global mining industry.",
+    image: "/images/cards/card_04_governance.jpg?v=clean_v3",
+    locationTag: "PR · Executive Profiles · Webinars & Events · Publications",
+    ctaText: "Build Authority",
+    ctaHref: "/contact",
+  },
+  {
+    id: "stage-5-turn-attention",
+    badge: "05 — TURN ATTENTION INTO GROWTH",
+    category: "05 — TURN ATTENTION INTO GROWTH",
+    punchline: "Connect visibility with measurable business outcomes.",
+    title: "Turn Attention Into Growth",
+    description: "From increasing digital reach to generating investor interest and building long-term audience relationships, every campaign is designed to turn your mining story into meaningful market engagement.",
+    image: "/images/cards/card_05_turn_attention.jpg?v=real_v1",
+    locationTag: "Audience Growth · Investor Reach · Lead Generation · Digital Growth",
+    ctaText: "Drive Growth",
     ctaHref: "/contact",
   },
 ];
@@ -461,31 +478,36 @@ export const MiningDiscoveryShowcase: React.FC = () => {
           const currentX = startX - scrollP * totalDistance;
           horizontalTrackRef.current.style.transform = `translate3d(${currentX.toFixed(1)}px, 0, 0)`;
 
-          if (currentX > centerCard4X) {
-            // Moving across cards 1 -> 4
+          const totalCards = FOCUS_CARDS.length;
+          const centerLastCardX = centerOffset - (totalCards - 1) * stride;
+
+          if (currentX > centerLastCardX) {
+            // Moving across cards 1 -> totalCards
             let activeIndex = 1;
-            if (currentX <= centerOffset - stride * 2.5) activeIndex = 4;
-            else if (currentX <= centerOffset - stride * 1.5) activeIndex = 3;
-            else if (currentX <= centerOffset - stride * 0.5) activeIndex = 2;
-            else activeIndex = 1;
+            for (let c = totalCards; c >= 2; c--) {
+              if (currentX <= centerOffset - stride * (c - 1.5)) {
+                activeIndex = c;
+                break;
+              }
+            }
 
             if (horizontalCounterRef.current) {
-              horizontalCounterRef.current.textContent = `0${activeIndex} / 0${FOCUS_CARDS.length}`;
+              horizontalCounterRef.current.textContent = `0${activeIndex} / 0${totalCards}`;
               horizontalCounterRef.current.style.opacity = "1";
             }
             if (finaleSlideRef.current) {
               finaleSlideRef.current.style.transform = `translate3d(${winW + 20}px, 0, 0)`;
             }
           } else {
-            // As Card 4 exits to left, finale slide glides in from right
-            const exitP = Math.min(1, Math.max(0, (currentX - centerCard4X) / (exitX - centerCard4X)));
+            // As last card exits to left, finale slide glides in from right
+            const exitP = Math.min(1, Math.max(0, (currentX - centerLastCardX) / (exitX - centerLastCardX)));
             const slideX = (1 - exitP) * winW;
 
             if (finaleSlideRef.current) {
               finaleSlideRef.current.style.transform = `translate3d(${slideX.toFixed(1)}px, 0, 0)`;
             }
             if (horizontalCounterRef.current) {
-              horizontalCounterRef.current.textContent = `04 / 0${FOCUS_CARDS.length}`;
+              horizontalCounterRef.current.textContent = `0${totalCards} / 0${totalCards}`;
               horizontalCounterRef.current.style.opacity = Math.max(0, 1 - exitP * 1.5).toFixed(2);
             }
           }
@@ -555,7 +577,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   width: 100%;
   height: ${TOTAL_SCROLL_VH}vh;
   background-color: #0d131f;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--font-space-grotesk, "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
   color: #1a365d;
   box-sizing: border-box;
 }
@@ -669,7 +691,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 }
 
 .quoteMarkChar {
-  font-family: var(--font-display-custom), Georgia, "Times New Roman", Garamond, serif;
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
   font-size: clamp(1.85rem, 2.4vw, 2.2rem);
   font-weight: 400;
   color: #1A202C;
@@ -680,7 +702,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 
 .quoteClosingMark {
   display: inline-block;
-  font-family: var(--font-display-custom), Georgia, "Times New Roman", Garamond, serif;
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
   font-style: normal;
   font-weight: 400;
   font-size: clamp(1.85rem, 2.4vw, 2.2rem);
@@ -694,18 +716,18 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 .quoteBodyText {
   margin: 0 0 clamp(1.2rem, 2.2vh, 1.8rem) 0;
   padding: 0;
-  font-family: var(--font-display-custom), Georgia, "Times New Roman", Garamond, serif;
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
   font-size: clamp(1.02rem, 1.18vw, 1.22rem);
-  font-style: italic;
+  font-style: normal;
   font-weight: 400;
-  line-height: 1.82;
+  line-height: 1.72;
   letter-spacing: -0.005em;
   color: #1A202C;
   text-indent: clamp(2.6rem, 4.2vw, 4rem);
 }
 
 .quoteDividerDash {
-  font-family: var(--font-display-custom), Georgia, "Times New Roman", serif;
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
   font-size: 1.1rem;
   color: #94A3B8;
   margin-bottom: clamp(0.4rem, 0.8vh, 0.7rem);
@@ -843,9 +865,9 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   inset: 0;
   background: linear-gradient(
     to bottom,
-    rgba(15, 23, 42, 0.26) 0%,
-    rgba(15, 23, 42, 0.08) 50%,
-    rgba(15, 23, 42, 0.32) 100%
+    rgba(10, 15, 25, 0.42) 0%,
+    rgba(10, 15, 25, 0.22) 45%,
+    rgba(10, 15, 25, 0.68) 100%
   );
   pointer-events: none;
 }
@@ -870,40 +892,34 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 }
 
 .zoomTitle {
-  font-family: var(--font-display-custom), Georgia, "Times New Roman", serif;
-  font-size: clamp(2.8rem, 5.5vw, 5.5rem);
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
+  font-size: clamp(1.65rem, 2.7vw, 3.1rem);
   font-weight: 500;
-  letter-spacing: 0.04em;
-  line-height: 1.05;
+  font-style: normal;
+  letter-spacing: -0.02em;
+  line-height: 1.08;
   margin: 0;
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  gap: 0.18em;
   will-change: transform;
   transform-origin: left center;
 }
 
 .zoomTitlePrimary {
   color: #FFFFFF;
-  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.8), 0 1px 4px rgba(0, 0, 0, 0.9);
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.85), 0 1px 4px rgba(0, 0, 0, 0.95);
+  white-space: nowrap;
 }
 
 .zoomTitleSecondary {
   color: #FFFFFF;
-  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.8), 0 1px 4px rgba(0, 0, 0, 0.9);
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.85), 0 1px 4px rgba(0, 0, 0, 0.95);
   display: inline-flex;
   align-items: baseline;
-}
-
-.zoomTitleDot {
-  display: inline-block;
-  width: clamp(6px, 0.7vw, 10px);
-  height: clamp(6px, 0.7vw, 10px);
-  background-color: #E65100;
-  border-radius: 50%;
-  margin-left: 0.4rem;
-  box-shadow: 0 0 10px rgba(230, 81, 0, 0.8);
+  white-space: nowrap;
 }
 
 .zoomInfoCol {
@@ -954,8 +970,8 @@ export const MiningDiscoveryShowcase: React.FC = () => {
     gap: 1rem;
   }
   .zoomTitle {
-    font-size: clamp(1.85rem, 6.8vw, 2.5rem);
-    line-height: 1.1;
+    font-size: clamp(1.4rem, 4.6vw, 1.95rem);
+    line-height: 1.15;
   }
   .zoomInfoEyebrow {
     font-size: 0.72rem;
@@ -973,7 +989,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
     gap: 0.75rem;
   }
   .zoomTitle {
-    font-size: clamp(1.65rem, 7.5vw, 2.1rem);
+    font-size: clamp(1.25rem, 5.2vw, 1.65rem);
   }
   .zoomInfoText {
     font-size: 0.78rem;
@@ -1128,38 +1144,42 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   box-sizing: border-box;
 }
 
-/* Background image filling the entire inner card */
+/* Background image filling the entire inner card - shifted downward so subjects' heads remain clearly visible below text */
 .horizontalCardBgImage {
   position: absolute;
-  inset: 0;
+  top: -60px;
+  left: 0;
   width: 100%;
-  height: 100%;
+  height: calc(100% + 80px);
   object-fit: cover;
   object-position: center top;
+  transform: translateY(52px);
   display: block;
   z-index: 1;
   transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .horizontalCardItem:hover .horizontalCardBgImage {
-  transform: scale(1.03);
+  transform: translateY(52px) scale(1.03);
 }
 
-/* Subtle overlay that enhances seamless blend at top without blocking */
+/* Richer contrast overlay that gives darkness under text for perfect legibility */
 .horizontalCardOverlay {
   position: absolute;
   inset: 0;
   background: linear-gradient(
     to bottom,
-    rgba(138, 142, 150, 0.4) 0%,
-    transparent 35%,
-    rgba(15, 23, 42, 0.35) 100%
+    rgba(6, 11, 20, 0.78) 0%,
+    rgba(6, 11, 20, 0.65) 28%,
+    rgba(6, 11, 20, 0.35) 45%,
+    rgba(6, 11, 20, 0.12) 62%,
+    rgba(6, 11, 20, 0.75) 100%
   );
   z-index: 2;
   pointer-events: none;
 }
 
-/* Upper Section with text - floats naturally over the seamlessly blended gray top */
+/* Upper Section with text - floats naturally over the tinted top */
 .horizontalCardUpper {
   position: relative;
   z-index: 3;
@@ -1203,33 +1223,34 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: #F59E0B;
-  margin-bottom: 0.15rem;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
+  color: #FBBF24;
+  margin-bottom: 0.25rem;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95), 0 1px 3px rgba(0, 0, 0, 0.9);
 }
 
 .horizontalCardTitle {
-  font-family: var(--font-display-custom), Georgia, "Times New Roman", serif;
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
   font-size: clamp(1.4rem, 1.9vw, 2.1rem);
-  font-weight: 400;
-  color: #FFFFFF;
-  line-height: 1.15;
+  font-weight: 500;
+  font-style: normal;
+  color: #FAF8F5;
+  line-height: 1.1;
   margin: 0;
-  letter-spacing: 0.02em;
-  text-transform: none;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
   text-align: center;
-  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.7);
+  text-shadow: 0 3px 20px rgba(0, 0, 0, 0.95), 0 1px 4px rgba(0, 0, 0, 0.9);
 }
 
 .horizontalCardDesc {
   font-family: var(--font-sans, -apple-system, sans-serif);
-  font-size: clamp(0.8rem, 0.86vw, 0.9rem);
-  line-height: 1.45;
-  color: rgba(255, 255, 255, 0.94);
-  margin: clamp(0.2rem, 0.4vh, 0.35rem) auto 0;
-  max-width: 460px;
+  font-size: clamp(0.82rem, 0.88vw, 0.92rem);
+  line-height: 1.48;
+  color: #F1F5F9;
+  margin: clamp(0.3rem, 0.5vh, 0.45rem) auto 0;
+  max-width: 480px;
   text-align: center;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.65);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95), 0 1px 3px rgba(0, 0, 0, 0.9);
 }
 
 .horizontalCardAction {
@@ -1274,12 +1295,12 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 }
 
 .horizontalCardLocationTag {
-  color: rgba(255, 255, 255, 0.92);
+  color: #FFFFFF;
   font-family: var(--font-mono, monospace);
   font-size: clamp(0.68rem, 0.76vw, 0.8rem);
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.16em;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.7);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.95), 0 1px 3px rgba(0, 0, 0, 0.9);
 }
 
 /* Footer Pagination floating at bottom */
@@ -1792,8 +1813,8 @@ export const MiningDiscoveryShowcase: React.FC = () => {
                     className="revealColumnStrip"
                   >
                     <img
-                      src="/images/client_mining_discovery_light.jpg"
-                      alt="Mining Discovery Client Strategic Presentation"
+                      src="/images/client_mining_discovery_light.jpg?v=grid_boliden_hd_v1"
+                      alt="Mining Discovery Critical Minerals Exploration & Joint Venture Partnership"
                       className="revealImage"
                       style={{
                         transform: `translate3d(${(-colIndex * 16.666667).toFixed(4)}vw, 0, 0)`,
@@ -1815,8 +1836,8 @@ export const MiningDiscoveryShowcase: React.FC = () => {
             >
               <img
                 ref={zoomImageRef}
-                src="/images/white_desert_mining_landscape.jpg"
-                alt="Mining Discovery Landscape"
+                src="/images/white_desert_mining_landscape.jpg?v=marketing_growth_v2"
+                alt="Mining Discovery Market Presence"
                 className="zoomImage"
               />
               <div className="zoomImageOverlay" />
@@ -1824,18 +1845,18 @@ export const MiningDiscoveryShowcase: React.FC = () => {
               <div className="zoomContentWrap">
                 <div className="zoomHeadlineCol">
                   <h2 ref={zoomTitleRef} className="zoomTitle">
-                    <span className="zoomTitlePrimary">SUSTAINABLE</span>
+                    <span className="zoomTitlePrimary">BUILDING VISIBILITY.</span>
+                    <span className="zoomTitlePrimary">CREATING INFLUENCE.</span>
                     <span className="zoomTitleSecondary">
-                      MINING
-                      <span className="zoomTitleDot" />
+                      DRIVING MINING GROWTH.
                     </span>
                   </h2>
                 </div>
 
                 <div ref={zoomInfoColRef} className="zoomInfoCol">
-                  <span className="zoomInfoEyebrow">OUR FOCUS AREAS</span>
+                  <span className="zoomInfoEyebrow">WHERE MINING MEETS MARKETING</span>
                   <p className="zoomInfoText">
-                    We connect industry leaders, foster strategic global collaboration, and unlock capital opportunities for a stronger, more resilient and sustainable mining future across critical mineral supply chains worldwide.
+                    Mining companies need more than a strong project &mdash; they need a strong market presence. Mining Discovery helps mining companies build their brand, amplify their story, reach the right audiences, and connect with investors through integrated digital marketing and industry media.
                   </p>
                 </div>
               </div>
@@ -1914,7 +1935,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
                               </span>
                             )}
                             <h3 className="horizontalCardTitle">
-                              {card.title}
+                              {card.punchline || card.title}
                             </h3>
                             <p className="horizontalCardDesc">
                               {card.description}
@@ -1938,7 +1959,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
               {/* Track Counter */}
               <div className="horizontalCardsFooter">
                 <span ref={horizontalCounterRef} className="horizontalCardsCounter">
-                  01 / 04
+                  01 / 05
                 </span>
                 <span className="horizontalCardsPrompt">
                   SCROLL TO EXPLORE &rarr;
