@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" width="320" height="80">
+  <!-- Target ring icon -->
+  <g transform="translate(10, 12)">
+    <!-- Outer thick navy ring with notch on right -->
+    <path d="M 28 4 A 24 24 0 1 0 52 28 H 43 A 15 15 0 1 1 28 13 V 4 Z" fill="#0F172A" />
+    <rect x="44" y="24" width="8" height="8" rx="1.5" fill="#0F172A" />
+    <!-- Center amber core -->
+    <circle cx="28" cy="28" r="7" fill="#ECC03B" />
+  </g>
+  <text x="82" y="49" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="28" font-weight="900" letter-spacing="2" fill="#0F172A">DIGIPOWER</text>
+</svg>

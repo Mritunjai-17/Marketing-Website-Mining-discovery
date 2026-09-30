@@ -494,212 +494,134 @@ export interface ServiceCardItem {
 
 export const SERVICE_CARDS: ServiceCardItem[] = [
   {
-    id: "investor-growth",
+    id: "brand-visual-identity",
     num: "01",
-    category: "CAPITAL & INVESTOR REACH",
-    title: "Investor Growth",
-    italicTitle: "Investor Growth",
-    metaPrice: "CAPITAL STRATEGY",
-    metaSeason: "GLOBAL OUTREACH",
-    summary: "TURN MINING OPPORTUNITIES INTO INVESTOR ATTENTION.",
+    category: "BRAND & VISUAL IDENTITY",
+    title: "Brand & Visual Identity",
+    italicTitle: "Brand & Visual Identity",
+    metaPrice: "DIGITAL BRANDING",
+    metaSeason: "LOGO & VISUAL DESIGN",
+    summary: "YOUR BRAND'S VISIBILITY IS NOT ENOUGH; IT SHOULD ALSO BE ACKNOWLEDGED.",
     description:
-      "Connect mining projects with relevant investors,\nstakeholders and decision-makers through focused\ninvestor campaigns and global industry outreach.",
-    image: "/images/services/service_01_investor_light.webp",
-    badge: "01 / CAPITAL & INVESTOR REACH",
-    features: [
-      {
-        title: "INVESTOR CAMPAIGNS",
-        text: "Targeted campaigns designed to communicate the opportunity and story behind mining projects to relevant audiences.",
-      },
-      {
-        title: "GLOBAL OUTREACH",
-        text: "Extend project visibility across international mining audiences and create connections with global stakeholders.",
-      },
-    ],
-    ctaText: "DISCUSS INVESTOR OUTREACH",
-    ctaHref: "/contact",
-  },
-  {
-    id: "media-authority",
-    num: "02",
-    category: "CREDIBILITY & INDUSTRY PRESENCE",
-    title: "Media Authority",
-    italicTitle: "Media Authority",
-    metaPrice: "TIER-1 SYNDICATION",
-    metaSeason: "CONFERENCE MEDIA",
-    summary: "BUILD AUTHORITY ACROSS THE MINING MEDIA LANDSCAPE.",
-    description:
-      "Strengthen credibility and visibility through\nmining media coverage, press communication\nand conference presence.",
-    image: "/images/services/service_02_media_light.webp",
-    badge: "02 / CREDIBILITY & INDUSTRY PRESENCE",
-    features: [
-      {
-        title: "NEWS & SYNDICATION",
-        text: "Direct editorial syndication into Bloomberg, Reuters, Mining Journal and Tier-1 terminals.",
-      },
-      {
-        title: "PRESS & CONFERENCE",
-        text: "Communicate key milestones and amplify the impact of mining stories through media coverage and industry events.",
-      },
-    ],
-    ctaText: "ELEVATE YOUR MEDIA PROFILE",
-    ctaHref: "/contact",
-  },
-  {
-    id: "brand-digital",
-    num: "03",
-    category: "IDENTITY & CREATIVE PRESENCE",
-    title: "Brand & Digital",
-    italicTitle: "Brand & Digital",
-    metaPrice: "DIGITAL IDENTITY",
-    metaSeason: "3D VISUALIZATION",
-    summary: "BUILD A DISTINCTIVE DIGITAL IDENTITY FOR MINING.",
-    description:
-      "Build a distinctive visual and digital identity\nthat makes mining companies easier to\nrecognise, understand and remember.",
+      "Your brand's visibility is not enough; it should also be acknowledged. We create brand identities and visual assets designed to make mining and industrial enterprises recognized, trusted, and remembered across global capital and industrial markets.",
     image: "/images/services/service_03_brand_light.webp",
-    badge: "03 / IDENTITY & CREATIVE PRESENCE",
+    badge: "01 / BRAND & VISUAL IDENTITY",
     features: [
       {
         title: "DIGITAL BRANDING",
-        text: "Modern visual identity, corporate presentations, and investor-facing digital assets.",
+        text: "We create brand identities with layout, value, and recognition as their main characteristics, thus making the mining and industrial fields remember the company.",
       },
       {
-        title: "MULTIMEDIA PRODUCTION",
-        text: "High-impact cinematography, drone mapping, and interactive mining asset models.",
+        title: "LOGO & VISUAL DESIGN",
+        text: "The logo is the marketing element that brands use the most. Our team of designers will create visuals that define and portray your brand accurately and with much imagination and skill.",
       },
     ],
-    ctaText: "EXPLORE BRAND SOLUTIONS",
-    ctaHref: "/contact",
+    ctaText: "",
+    ctaHref: "",
   },
   {
-    id: "audience-reach",
-    num: "04",
-    category: "REACH & AMPLIFICATION",
-    title: "Audience Reach",
-    italicTitle: "Audience Reach",
-    metaPrice: "40,000+ NETWORK",
-    metaSeason: "PAID AMPLIFICATION",
-    summary: "EXPAND YOUR REACH. OWN YOUR AUDIENCE.",
+    id: "social-media-marketing",
+    num: "02",
+    category: "SOCIAL MEDIA MARKETING",
+    title: "Social Media Marketing",
+    italicTitle: "Social Media Marketing",
+    metaPrice: "CAMPAIGN STRATEGY",
+    metaSeason: "DATA-BACKED CONTENT",
+    summary: "CREATE DEBATES THAT ARE SIGNIFICANT FOR BOTH YOU AND YOUR CUSTOMERS.",
     description:
-      "Turn content into measurable audience growth\nthrough targeted social campaigns, network\ndistribution and paid promotion.",
-    image: "/images/services/service_04_reach_light.webp",
-    badge: "04 / REACH & AMPLIFICATION",
-    features: [
-      {
-        title: "SOCIAL GROWTH & ADS",
-        text: "Targeted campaigns engaging family offices, brokers and institutional mining investors.",
-      },
-      {
-        title: "NETWORK DISTRIBUTION",
-        text: "Direct weekly newsletter reaching 40,000+ active mining decision-makers and brokers.",
-      },
-    ],
-    ctaText: "SCALE YOUR REACH",
-    ctaHref: "/contact",
-  },
-  {
-    id: "mining-intelligence",
-    num: "05",
-    category: "MARKET DATA & INSIGHTS",
-    title: "Mining Intelligence",
-    italicTitle: "Mining Intelligence",
-    metaPrice: "30+ JURISDICTIONS",
-    metaSeason: "AI SENTIMENT",
-    summary: "AI-DRIVEN INSIGHTS AND GLOBAL JURISDICTION DATA.",
-    description:
-      "Access proprietary market sentiment, real-time\ncommodity data and regulatory intelligence\nacross 30+ mining jurisdictions.",
-    image: "/images/services/service_05_intelligence_light.webp",
-    badge: "05 / MARKET DATA & INSIGHTS",
-    features: [
-      {
-        title: "EXECUTIVE BRIEFINGS",
-        text: "Real-time market intel, commodity tracking, and strategic transaction analysis.",
-      },
-      {
-        title: "STRATEGIC ANALYTICS",
-        text: "AI sentiment models tracking global mining momentum and investor perception.",
-      },
-    ],
-    ctaText: "ACCESS INTELLIGENCE",
-    ctaHref: "/contact",
-  },
-  {
-    id: "monthly-magazines",
-    num: "06",
-    category: "PRINT & DIGITAL PUBLISHING",
-    title: "Monthly Magazines",
-    italicTitle: "Monthly Magazines",
-    metaPrice: "GLOBAL CIRCULATION",
-    metaSeason: "MONTHLY EDITIONS",
-    summary: "IN-DEPTH MINING INTELLIGENCE, INDUSTRY VOICES, AND EXECUTIVE PROFILES.",
-    description:
-      "Curated monthly publications highlighting major\ndiscoveries, technological innovations, and strategic\ninsights from mining leaders worldwide.",
-    image: "/images/services/service_06_magazines_light.webp",
-    badge: "06 / PRINT & DIGITAL PUBLISHING",
-    features: [
-      {
-        title: "EXECUTIVE PROFILES",
-        text: "In-depth features and exclusive interviews with CEOs, exploration chiefs, and tier-1 investors.",
-      },
-      {
-        title: "GLOBAL DISTRIBUTION",
-        text: "Direct circulation to international mining conferences, financial hubs, and institutional desks.",
-      },
-    ],
-    ctaText: "EXPLORE EDITIONS",
-    ctaHref: "/magazines",
-  },
-  {
-    id: "weekly-newspaper",
-    num: "07",
-    category: "TIMELY INDUSTRY PRESS",
-    title: "Weekly Newspaper",
-    italicTitle: "Weekly Newspaper",
-    metaPrice: "EXECUTIVE BRIEFINGS",
-    metaSeason: "WEEKLY DISPATCH",
-    summary: "REAL-TIME COMMODITY NEWS, MARKET MOMENTUM, AND STRATEGIC HEADLINES.",
-    description:
-      "Weekly mining newspaper delivered to industry\nexecutives and investors, covering critical market shifts,\npolicy updates, and breaking project news.",
+      "Create debates that are significant for both you and your customers. Our team takes care of your social media by inventing campaigns, applying strategies backed with data, and producing the kind of content that will resonate with your audience and strengthen your brand's voice.",
     image: "/images/services/service_07_newspaper_light.webp",
-    badge: "07 / TIMELY INDUSTRY PRESS",
+    badge: "02 / SOCIAL MEDIA MARKETING",
     features: [
       {
-        title: "MARKET DISPATCH",
-        text: "Weekly analytical synthesis of global commodity trends, M&A activity, and regulatory shifts.",
+        title: "DATA-BACKED CAMPAIGNS",
+        text: "Inventing data-driven social campaigns that foster constructive dialogue and continuous audience interest across the mining sector.",
       },
       {
-        title: "BREAKING DEVELOPMENTS",
-        text: "Rapid-response coverage of drill results, feasibility milestones, and capital raises.",
+        title: "BRAND VOICE & REACH",
+        text: "Producing content that resonates with decision-makers, retail investors, and resource professionals worldwide.",
       },
     ],
-    ctaText: "SUBSCRIBE TO DISPATCH",
-    ctaHref: "/contact",
+    ctaText: "",
+    ctaHref: "",
   },
   {
-    id: "articles",
-    num: "08",
-    category: "EDITORIAL & RESEARCH",
-    title: "Articles",
-    italicTitle: "Articles",
-    metaPrice: "THOUGHT LEADERSHIP",
-    metaSeason: "DAILY INSIGHTS",
-    summary: "DEEP-DIVE EDITORIALS, TECHNICAL ANALYSES, AND EXPERT COMMENTARY.",
+    id: "paid-campaigns-ads",
+    num: "03",
+    category: "PAID CAMPAIGNS & TARGETED ADS",
+    title: "Google, LinkedIn & Meta Ads",
+    italicTitle: "Google, LinkedIn & Meta Ads",
+    metaPrice: "GOOGLE ADS",
+    metaSeason: "LINKEDIN & META ADS",
+    summary: "GET TO YOUR CUSTOMERS WHERE IT IS MOST EFFECTIVE.",
     description:
-      "Authoritative research articles and market analyses\nbridging technical mining data with\ninstitutional investment strategy.",
+      "Get to your customers where it is most effective. We create and manage targeted ad campaigns across Google, LinkedIn, and Meta that connect with professionals and large audiences to drive brand visibility, qualified leads, and measurable growth.",
     image: "/images/services/service_08_articles_light.webp",
-    badge: "08 / EDITORIAL & RESEARCH",
+    badge: "03 / PAID CAMPAIGNS & TARGETED ADS",
     features: [
       {
-        title: "DEEP-DIVE RESEARCH",
-        text: "Data-grounded articles analyzing jurisdiction risk, processing innovation, and decarbonization.",
+        title: "GOOGLE ADS & PAID CAMPAIGNS",
+        text: "Get to your customers where it is most effective. The Google Ads that we create and manage will lead to clicks, sales, and your company's growth that can be tracked and quantified.",
       },
       {
-        title: "OPINION & ANALYSIS",
-        text: "Expert perspectives from geologists, commodity economists, and senior mining analysts.",
+        title: "LINKEDIN & META ADS",
+        text: "We create and maintain ad campaigns on LinkedIn and Meta for different purposes, from connecting with professionals to engaging with a large audience that will lead to brand visibility, leads, and awareness of the brand.",
       },
     ],
-    ctaText: "BROWSE ALL ARTICLES",
-    ctaHref: "/contact",
+    ctaText: "",
+    ctaHref: "",
+  },
+  {
+    id: "pr-events",
+    num: "04",
+    category: "PUBLIC RELATIONS & EVENTS",
+    title: "Public Relations & Webinars",
+    italicTitle: "Public Relations & Webinars",
+    metaPrice: "PUBLIC RELATIONS (PR)",
+    metaSeason: "WEBINARS & EVENTS",
+    summary: "PUT YOUR COMPANY IN THE LIMELIGHT THROUGH CREDIBILITY & INTERACTIONS.",
+    description:
+      "We make sure that your company is in the limelight not by spending money but by gaining it. Through media contacts, press releases, thought leadership, and proficient webinars and events, we build industry authority and capture audience attention.",
+    image: "/images/services/service_02_media_light.webp",
+    badge: "04 / PUBLIC RELATIONS & EVENTS",
+    features: [
+      {
+        title: "PUBLIC RELATIONS (PR)",
+        text: "We make sure that your company is in the limelight not by spending money but by gaining it. Through media contacts, press releases, and thought leadership, we create credibility and influence the way your story is told.",
+      },
+      {
+        title: "WEBINARS & EVENTS",
+        text: "Capture the attention of your audience through significant digital interactions. We organize and conduct proficient webinars and events that provide education, motivation, and development of your position in the industry.",
+      },
+    ],
+    ctaText: "",
+    ctaHref: "",
+  },
+  {
+    id: "web-app-development",
+    num: "05",
+    category: "WEBSITE & APP DEVELOPMENT",
+    title: "Website & App Development",
+    italicTitle: "Website & App Development",
+    metaPrice: "WEBSITE DEVELOPMENT",
+    metaSeason: "APP DEVELOPMENT",
+    summary: "THE CORNERSTONE OF YOUR ONLINE PRESENCE & INTELLIGENT APPLICATIONS.",
+    description:
+      "Your website is the cornerstone of your online presence. We create quick, user-friendly, and good-looking websites paired with intelligent, easy-to-use mobile and web applications that improve interaction, make operations easier, and bring actual value to your company.",
+    image: "/images/services/service_05_web_development.webp",
+    badge: "05 / WEBSITE & APP DEVELOPMENT",
+    features: [
+      {
+        title: "WEBSITE DEVELOPMENT",
+        text: "Your website is the cornerstone of your online presence. We create and produce quick, user-friendly, and good-looking websites that turn visitors into customers and business allies.",
+      },
+      {
+        title: "APP DEVELOPMENT",
+        text: "Be in the lead with intelligent, easy-to-use mobile and web applications. We design and launch apps that improve interaction, make operations easier, and bring actual value to the company from beginning to end.",
+      },
+    ],
+    ctaText: "",
+    ctaHref: "",
   },
 ];
 
@@ -1059,146 +981,53 @@ export const JourneyStory: React.FC = () => {
                       <div className={styles.cardFlickGradient} />
                     </div>
 
-                    {/* Content on the Full Screen Card */}
+                    {/* Content on the Full Screen Card - Distributed Equally Across Both Sides */}
                     <div className={styles.fullScreenCardContent}>
-                      <div className={styles.cardFlickHeader}>
+                      {/* Left Column: Heading (Category Badge, Main Title, Meta Tags) on Top */}
+                      <div className={styles.fullScreenColLeft}>
                         <div className={styles.cardFlickHeaderRow}>
                           <span className={styles.cardFlickBadge}>
                             <span className={styles.cardFlickBadgeNum}>{card.num}</span>
                             <span className={styles.cardFlickBadgeText}>{card.category}</span>
                           </span>
                         </div>
+
                         <h3 className={styles.cardFlickTitle}>
-                          {card.italicTitle}
+                          {card.title}
                         </h3>
+
+                        <div className={styles.cardFlickMeta}>
+                          <span className={styles.cardFlickMetaItem}>{card.metaPrice}</span>
+                          <span className={styles.cardFlickMetaDivider} aria-hidden="true" />
+                          <span className={styles.cardFlickMetaItem}>{card.metaSeason}</span>
+                        </div>
+
+                        <p className={styles.cardFlickExcerpt}>
+                          {card.description}
+                        </p>
                       </div>
 
-                        <div className={styles.cardFlickFooter}>
-                          <div className={styles.cardFlickMeta}>
-                            <span className={styles.cardFlickMetaItem}>{card.metaPrice}</span>
-                            <span className={styles.cardFlickMetaDivider} aria-hidden="true" />
-                            <span className={styles.cardFlickMetaItem}>{card.metaSeason}</span>
+                      {/* Right Column: Sub Text & Feature Breakdown on Bottom */}
+                      <div className={styles.fullScreenColRight}>
+                        {card.features && card.features.length > 0 ? (
+                          <div className={styles.cardFlickFeaturesList}>
+                            {card.features.map((feat, fIdx) => (
+                              <div key={fIdx} className={styles.cardFlickFeatureItem}>
+                                <span className={styles.cardFlickFeatureBullet}>◆</span>
+                                <div className={styles.cardFlickFeatureBody}>
+                                  <strong className={styles.cardFlickFeatureTitle}>{feat.title}</strong>
+                                  <p className={styles.cardFlickFeatureText}>{feat.text}</p>
+                                </div>
+                              </div>
+                            ))}
                           </div>
-
-                          {card.id === "monthly-magazines" ? (
-                            <div className={styles.cardFlickButtonRow}>
-                              <button
-                                type="button"
-                                className={styles.cardFlickMagazineBtn}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleOpenReader(getLatestMagazine());
-                                }}
-                                aria-label="Open latest monthly magazine in interactive flipbook"
-                              >
-                                <BookOpen size={14} />
-                                <span>READ FLIPBOOK</span>
-                                <span className={styles.cardFlickLearnMoreStar}>✦</span>
-                              </button>
-
-                              <button
-                                type="button"
-                                className={styles.cardFlickArchiveBtn}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setActiveCatalogModal("magazines");
-                                }}
-                                aria-label="Explore all 14 published monthly editions"
-                              >
-                                <span>ALL 14 EDITIONS</span>
-                                <ArrowRight size={13} />
-                              </button>
-                            </div>
-                          ) : card.id === "weekly-newspaper" ? (
-                            <div className={styles.cardFlickButtonRow}>
-                              <button
-                                type="button"
-                                className={styles.cardFlickMagazineBtn}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  const latest = newsletters[0];
-                                  if (latest) {
-                                    handleOpenDocReader({
-                                      title: "Weekly Newspaper Dispatch",
-                                      subtitle: latest.title.toUpperCase(),
-                                      pdfUrl: getProxiedPdfUrl(latest.pdf),
-                                    });
-                                  }
-                                }}
-                                aria-label="Open latest weekly newsletter in interactive flipbook"
-                              >
-                                <BookOpen size={14} />
-                                <span>READ FLIPBOOK</span>
-                                <span className={styles.cardFlickLearnMoreStar}>✦</span>
-                              </button>
-
-                              <button
-                                type="button"
-                                className={styles.cardFlickArchiveBtn}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setActiveCatalogModal("newsletters");
-                                }}
-                                aria-label={`Explore all ${newsletters.length} weekly editions`}
-                              >
-                                <span>ALL {newsletters.length} ISSUES</span>
-                                <ArrowRight size={13} />
-                              </button>
-                            </div>
-                          ) : card.id === "articles" ? (
-                            <div className={styles.cardFlickButtonRow}>
-                              <button
-                                type="button"
-                                className={styles.cardFlickMagazineBtn}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  const featured = articles[0];
-                                  if (featured) {
-                                    handleOpenDocReader({
-                                      title: "Research & Editorial Article",
-                                      subtitle: featured.title.toUpperCase(),
-                                      pdfUrl: getProxiedPdfUrl(featured.pdf),
-                                    });
-                                  }
-                                }}
-                                aria-label="Read featured research article in interactive flipbook"
-                              >
-                                <BookOpen size={14} />
-                                <span>READ FLIPBOOK</span>
-                                <span className={styles.cardFlickLearnMoreStar}>✦</span>
-                              </button>
-
-                              <button
-                                type="button"
-                                className={styles.cardFlickArchiveBtn}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setActiveCatalogModal("articles");
-                                }}
-                                aria-label={`Explore all ${articles.length} published research articles`}
-                              >
-                                <span>ALL {articles.length} ARTICLES</span>
-                                <ArrowRight size={13} />
-                              </button>
-                            </div>
-                          ) : (
-                            <Link
-                              href="/contact"
-                              className={styles.cardFlickLearnMore}
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <span>Learn More</span>
-                              <span className={styles.cardFlickLearnMoreStar}>✦</span>
-                            </Link>
-                          )}
-
-                          <p className={`${styles.cardFlickExcerpt} ${styles.cardFlickExcerptThreeLines}`}>
+                        ) : (
+                          <p className={styles.cardFlickExcerpt}>
                             {card.description}
                           </p>
-
-
-                        </div>
+                        )}
                       </div>
+                    </div>
                     </div>
                   );
                 })}

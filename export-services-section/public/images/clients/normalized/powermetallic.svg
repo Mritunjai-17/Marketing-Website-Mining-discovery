@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" width="400" height="120">
+  <defs>
+    <linearGradient id="pmLightning" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FBBF24" />
+      <stop offset="100%" stop-color="#D97706" />
+    </linearGradient>
+  </defs>
+  <g transform="translate(71, 17)">
+    <!-- Lightning Bolt P -->
+    <g transform="translate(0, 6)">
+      <path d="M 12 0 L 46 0 C 58 0, 68 8, 68 22 C 68 36, 58 44, 46 44 L 28 44 L 20 72 L 8 72 L 20 28 L 38 28 L 44 28 C 48 28, 54 26, 54 22 C 54 16, 48 12, 42 12 L 18 12 Z" fill="url(#pmLightning)" />
+      <!-- Inner Lightning Strike -->
+      <polygon points="34,8 24,34 38,34 26,62 46,28 32,28" fill="#F59E0B" />
+    </g>
+    <!-- Text -->
+    <text x="82" y="40" font-family="'Georgia', 'Times New Roman', serif" font-size="34" font-weight="900" letter-spacing="1.5" fill="#0F172A">POWER</text>
+    <text x="82" y="70" font-family="'Georgia', 'Times New Roman', serif" font-size="28" font-weight="900" letter-spacing="2" fill="#334155">METALLIC</text>
+  </g>
+</svg>

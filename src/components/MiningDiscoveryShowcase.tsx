@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import Link from "next/link";
@@ -21,52 +21,59 @@ export interface FocusCard {
 
 export const FOCUS_CARDS: FocusCard[] = [
   {
-    id: "mining-investment-north",
-    badge: "01 — OFFICIAL MEDIA PARTNER",
-    category: "QUEBEC CITY, CANADA",
-    title: "The Mining Investment Event of the North",
-    description:
-      "Canada’s premier tier-1 invitation-only mining conference. It connects institutional funds and c-suite executives to evaluate development-stage projects and arrange financings.",
-    image: "/images/events/the_mining_investment_event_logo.png",
-    locationTag: "[ QUEBEC CITY · FAIRMONT LE CHÂTEAU FRONTENAC ]",
-    ctaText: "View Event Coverage",
-    ctaHref: "/work",
+    id: "service-1",
+    badge: "01 — BUILD YOUR BRAND",
+    category: "BRAND & VISUAL IDENTITY",
+    title: "Create a mining brand people remember.",
+    description: "From logo and visual identity to digital branding and website development, we create a professional presence that clearly communicates your company, projects and value.",
+    image: "/images/cards/card_01_alliances.jpg",
+    locationTag: "[ Digital Branding · Logo & Visual Design · Website Development ]",
+    ctaText: "Learn More",
+    ctaHref: "/services",
   },
   {
-    id: "pdac-convention",
-    badge: "02 — WORLD'S LARGEST MINING CONVENTION",
-    category: "TORONTO, CANADA",
-    title: "PDAC Convention",
-    description:
-      "The world’s premier mineral exploration gathering, bringing over 30,000 attendees from 130 countries to Toronto each year for dealmaking and exploration capital.",
-    image: "/images/events/pdac_logo.png",
-    locationTag: "[ TORONTO · METRO TORONTO CONVENTION CENTRE ]",
-    ctaText: "View Event Coverage",
-    ctaHref: "/work",
+    id: "service-2",
+    badge: "02 — AMPLIFY YOUR STORY",
+    category: "MEDIA & PUBLIC RELATIONS",
+    title: "Turn company news into industry visibility.",
+    description: "We transform project updates, announcements and milestones into compelling content through PR, media coverage, social media and industry-focused storytelling.",
+    image: "/images/cards/card_02_technology.jpg",
+    locationTag: "[ Public Relations · Social Media · Media Coverage · Content ]",
+    ctaText: "Learn More",
+    ctaHref: "/services",
   },
   {
-    id: "mines-and-money",
-    badge: "03 — EUROPE & GLOBAL CAPITAL",
-    category: "LONDON, UNITED KINGDOM",
-    title: "Mines and Money",
-    description:
-      "Europe’s flagship mining investment forum, linking active exploration companies with London City asset managers, private equity funds, and family offices.",
-    image: "/images/events/mines_and_money_logo.png",
-    locationTag: "[ LONDON · BUSINESS DESIGN CENTRE ]",
-    ctaText: "View Event Coverage",
-    ctaHref: "/work",
+    id: "service-3",
+    badge: "03 — REACH THE RIGHT AUDIENCE",
+    category: "DIGITAL CAMPAIGNS",
+    title: "Put your story in front of the people who matter.",
+    description: "Reach investors, mining professionals, industry leaders and decision-makers through targeted digital campaigns, Google Ads, LinkedIn, Meta and Mining Discovery's industry audience.",
+    image: "/images/cards/card_03_growth.jpg",
+    locationTag: "[ Google Ads · LinkedIn & Meta Ads · Investor Campaigns · Industry Outreach ]",
+    ctaText: "Learn More",
+    ctaHref: "/services",
   },
   {
-    id: "mining-indaba",
-    badge: "04 — AFRICAN & EMERGING MARKETS",
-    category: "CAPE TOWN, SOUTH AFRICA",
-    title: "Investing in African Mining Indaba",
-    description:
-      "Africa’s largest mining investment summit, bringing together sovereign wealth funds, major producers, and global financiers to fund major resource projects.",
-    image: "/images/events/mining_indaba_logo.png",
-    locationTag: "[ CAPE TOWN · CTICC ]",
-    ctaText: "View Event Coverage",
-    ctaHref: "/work",
+    id: "service-4",
+    badge: "04 — BUILD INDUSTRY AUTHORITY",
+    category: "THOUGHT LEADERSHIP",
+    title: "Make your company part of the mining conversation.",
+    description: "Strengthen your reputation through executive visibility, interviews, webinars, events, publications and thought leadership that position your company within the global mining industry.",
+    image: "/images/cards/card_04_governance.jpg",
+    locationTag: "[ PR · Executive Profiles · Webinars & Events · Publications ]",
+    ctaText: "Learn More",
+    ctaHref: "/services",
+  },
+  {
+    id: "service-5",
+    badge: "05 — TURN ATTENTION INTO GROWTH",
+    category: "INVESTOR & AUDIENCE GROWTH",
+    title: "Connect visibility with measurable business outcomes.",
+    description: "From increasing digital reach to generating investor interest and building long-term audience relationships, every campaign is designed to turn your mining story into meaningful market engagement.",
+    image: "/images/cards/card_05_turn_attention.jpg",
+    locationTag: "[ Audience Growth · Investor Reach · Lead Generation · Digital Growth ]",
+    ctaText: "Learn More",
+    ctaHref: "/services",
   },
 ];
 
@@ -186,7 +193,7 @@ const ClientLogosFlipRow: React.FC = () => {
    ========================================================================== */
 
 /** Total viewport heights for the continuous Mining Discovery Interactive Showcase */
-const TOTAL_SCROLL_VH = 1400;
+const TOTAL_SCROLL_VH = 1900;
 
 /**
  * How the sampled progress follows the true scroll position.
@@ -559,7 +566,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   width: 100%;
   height: ${TOTAL_SCROLL_VH}vh;
   background-color: #0d131f;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--font-space-grotesk, "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
   color: #1a365d;
   box-sizing: border-box;
 }
@@ -673,7 +680,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 }
 
 .quoteMarkChar {
-  font-family: var(--font-display-custom), Georgia, "Times New Roman", Garamond, serif;
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
   font-size: clamp(1.85rem, 2.4vw, 2.2rem);
   font-weight: 400;
   color: #1A202C;
@@ -684,7 +691,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 
 .quoteClosingMark {
   display: inline-block;
-  font-family: var(--font-display-custom), Georgia, "Times New Roman", Garamond, serif;
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
   font-style: normal;
   font-weight: 400;
   font-size: clamp(1.85rem, 2.4vw, 2.2rem);
@@ -698,9 +705,9 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 .quoteBodyText {
   margin: 0 0 clamp(1.2rem, 2.2vh, 1.8rem) 0;
   padding: 0;
-  font-family: var(--font-display-custom), Georgia, "Times New Roman", Garamond, serif;
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
   font-size: clamp(1.02rem, 1.18vw, 1.22rem);
-  font-style: italic;
+  font-style: normal;
   font-weight: 400;
   line-height: 1.82;
   letter-spacing: -0.005em;
@@ -709,7 +716,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 }
 
 .quoteDividerDash {
-  font-family: var(--font-display-custom), Georgia, "Times New Roman", serif;
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
   font-size: 1.1rem;
   color: #94A3B8;
   margin-bottom: clamp(0.4rem, 0.8vh, 0.7rem);
@@ -874,7 +881,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 }
 
 .zoomTitle {
-  font-family: var(--font-display-custom), Georgia, "Times New Roman", serif;
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
   font-size: clamp(2.8rem, 5.5vw, 5.5rem);
   font-weight: 500;
   letter-spacing: 0.04em;
@@ -1213,7 +1220,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 }
 
 .horizontalCardTitle {
-  font-family: var(--font-display-custom), Georgia, "Times New Roman", serif;
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
   font-size: clamp(1.4rem, 1.9vw, 2.1rem);
   font-weight: 400;
   color: #FFFFFF;
@@ -1496,7 +1503,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 }
 
 .finaleQuoteMark {
-  font-family: var(--font-display-custom), Georgia, serif;
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
   font-size: clamp(2.6rem, 4.8vw, 4.4rem);
   line-height: 0.75;
   color: rgba(26, 54, 93, 0.4);
@@ -1505,8 +1512,8 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 }
 
 .finaleQuoteBody {
-  font-family: var(--font-display-custom), Georgia, "Times New Roman", serif;
-  font-style: italic;
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
+  font-style: normal;
   font-size: clamp(1.25rem, 2.1vw, 2.2rem);
   font-weight: 400;
   line-height: 1.34;
@@ -1756,7 +1763,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
               <div className="quoteMarkChar" aria-hidden="true">“</div>
 
               <blockquote className="quoteBodyText">
-                Discovery is only the beginning. Strategic marketing is the catalyst that transforms mineral discovery into global market conviction. In an era where critical resources define industrial progress, exploration without visibility remains buried. Through authoritative media and focused capital outreach, we turn subsurface potential into lasting enterprise value.<span className="quoteClosingMark" aria-hidden="true">”</span>
+                Mining companies need more than a strong project — they need a strong market presence. Mining Discovery helps mining companies build their brand, amplify their story, reach the right audiences, and connect with investors through integrated digital marketing and industry media.<span className="quoteClosingMark" aria-hidden="true">”</span>
               </blockquote>
             </div>
           </section>
@@ -1828,18 +1835,18 @@ export const MiningDiscoveryShowcase: React.FC = () => {
               <div className="zoomContentWrap">
                 <div className="zoomHeadlineCol">
                   <h2 ref={zoomTitleRef} className="zoomTitle">
-                    <span className="zoomTitlePrimary">MAJOR MINING</span>
+                    <span className="zoomTitlePrimary">SUSTAINABLE</span>
                     <span className="zoomTitleSecondary">
-                      INVESTMENT EVENTS
+                      MINING
                       <span className="zoomTitleDot" />
                     </span>
                   </h2>
                 </div>
 
                 <div ref={zoomInfoColRef} className="zoomInfoCol">
-                  <span className="zoomInfoEyebrow">GLOBAL EVENT COVERAGE</span>
+                  <span className="zoomInfoEyebrow">OUR FOCUS AREAS</span>
                   <p className="zoomInfoText">
-                    Where mining companies meet institutional capital. We cover the world&apos;s most influential mining conferences on the ground, putting junior explorers and mid-tier producers directly in front of active investors.
+                    Mining Discovery helps mining companies build their brand, amplify their story, reach the right audiences, and connect with investors — turning exploration into market conviction.
                   </p>
                 </div>
               </div>
@@ -1849,7 +1856,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
             <div
               ref={horizontalStageRef}
               className="horizontalCardsStage"
-              aria-label="Major Mining Investment Events"
+              aria-label="Our Focus Areas"
             >
               {/* Full-Screen Sand Finale Slide with Closing Quote & 3D Client Logos */}
               <div
