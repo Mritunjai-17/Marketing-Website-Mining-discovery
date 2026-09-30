@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import Link from "next/link";
@@ -80,30 +80,30 @@ export const FOCUS_CARDS: FocusCard[] = [
 export const CLIENT_GROUPS: { name: string; logo: string }[][] = [
   // Group 1 (Strip 2 - exactly 6 logos)
   [
-    { name: "Kodiak Copper", logo: "/images/clients/normalized/kodiak.png?v=6" },
-    { name: "Pan Global Resources", logo: "/images/clients/normalized/panglobal.png?v=6" },
-    { name: "HE Capital Markets", logo: "/images/clients/normalized/hecapital.png?v=6" },
-    { name: "Harfang Exploration", logo: "/images/clients/normalized/harfang.png?v=6" },
-    { name: "NeoCloudz", logo: "/images/clients/normalized/neocloudz.png?v=6" },
-    { name: "West Red Lake Gold Mines", logo: "/images/clients/normalized/westredlake.png?v=6" },
+    { name: "Kodiak Copper", logo: "/images/clients/official/kodiak.png" },
+    { name: "Pan Global Resources", logo: "/images/clients/official/panglobal.svg" },
+    { name: "HE Capital Markets", logo: "/images/clients/official/hecapital.png" },
+    { name: "Harfang Exploration", logo: "/images/clients/official/harfang.png" },
+    { name: "NeoCloudz", logo: "/images/clients/official/neocloudz.png" },
+    { name: "West Red Lake Gold Mines", logo: "/images/clients/official/westredlake.png" },
   ],
   // Group 2 (Strip 3 - exactly 6 logos)
   [
-    { name: "Astra Exploration", logo: "/images/clients/normalized/astra.png?v=6" },
-    { name: "U.S. Gold Corp", logo: "/images/clients/normalized/usgold.png?v=6" },
-    { name: "Guanajuato Silver", logo: "/images/clients/normalized/guanajuato.png?v=6" },
-    { name: "Arras Minerals", logo: "/images/clients/normalized/arras.png?v=6" },
-    { name: "Arizona Gold & Silver", logo: "/images/clients/normalized/arizona.png?v=6" },
-    { name: "Power Metallic", logo: "/images/clients/normalized/powermetallic.png?v=6" },
+    { name: "Astra Exploration", logo: "/images/clients/official/astra.svg" },
+    { name: "U.S. Gold Corp", logo: "/images/clients/official/usgold.png" },
+    { name: "Guanajuato Silver", logo: "/images/clients/official/guanajuato.png" },
+    { name: "Arras Minerals", logo: "/images/clients/official/arras.png" },
+    { name: "Arizona Gold & Silver", logo: "/images/clients/official/arizona.png" },
+    { name: "Power Metallic", logo: "/images/clients/official/powermetallic.png" },
   ],
   // Group 3 (Strip 1 - exactly 6 logos)
   [
-    { name: "USDC Data Centers", logo: "/images/clients/normalized/usdc.png?v=6" },
-    { name: "Digipower", logo: "/images/clients/normalized/digipower.png?v=6" },
-    { name: "Aurion Resources", logo: "/images/clients/normalized/aurion.png?v=6" },
-    { name: "Phenom Resources", logo: "/images/clients/normalized/phenom.png?v=6" },
-    { name: "Loyalist Exploration", logo: "/images/clients/normalized/loyalist.png?v=6" },
-    { name: "BluEnergy SolarMind", logo: "/images/clients/normalized/bluenergies.png?v=6" },
+    { name: "USDC Data Centers", logo: "/images/clients/official/usdc.png" },
+    { name: "Digipower", logo: "/images/clients/official/digipower.png" },
+    { name: "Aurion Resources", logo: "/images/clients/official/aurion.png" },
+    { name: "Phenom Resources", logo: "/images/clients/official/phenom.png" },
+    { name: "Loyalist Exploration", logo: "/images/clients/official/loyalist.webp" },
+    { name: "BluEnergy SolarMind", logo: "/images/clients/official/bluenergies.png" },
   ],
 ];
 
@@ -882,17 +882,25 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 
 .zoomTitle {
   font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
-  font-size: clamp(2.8rem, 5.5vw, 5.5rem);
+  font-size: clamp(1.8rem, 3.4vw, 3.6rem);
   font-weight: 500;
-  letter-spacing: 0.04em;
-  line-height: 1.05;
+  letter-spacing: 0.03em;
+  line-height: 1.15;
   margin: 0;
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  gap: 0.12em;
   will-change: transform;
   transform-origin: left center;
+}
+
+.zoomTitleLine {
+  color: #FFFFFF;
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.85), 0 1px 4px rgba(0, 0, 0, 0.95);
+  display: block;
+  white-space: nowrap;
 }
 
 .zoomTitlePrimary {
@@ -957,6 +965,9 @@ export const MiningDiscoveryShowcase: React.FC = () => {
     width: 100%;
     max-width: 500px;
   }
+  .zoomTitleLine {
+    white-space: normal;
+  }
 }
 
 @media (max-width: 768px) {
@@ -965,8 +976,8 @@ export const MiningDiscoveryShowcase: React.FC = () => {
     gap: 1rem;
   }
   .zoomTitle {
-    font-size: clamp(1.85rem, 6.8vw, 2.5rem);
-    line-height: 1.1;
+    font-size: clamp(1.35rem, 5.2vw, 1.9rem);
+    line-height: 1.18;
   }
   .zoomInfoEyebrow {
     font-size: 0.72rem;
@@ -984,7 +995,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
     gap: 0.75rem;
   }
   .zoomTitle {
-    font-size: clamp(1.65rem, 7.5vw, 2.1rem);
+    font-size: clamp(1.15rem, 5.8vw, 1.45rem);
   }
   .zoomInfoText {
     font-size: 0.78rem;
@@ -1134,7 +1145,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background: #8a8e96;
+  background: #0f172a;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
   box-sizing: border-box;
 }
@@ -1156,15 +1167,17 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   transform: scale(1.03);
 }
 
-/* Subtle overlay that enhances seamless blend at top without blocking */
+/* Smooth natural gradient across the upper part of the card with zero boxes */
 .horizontalCardOverlay {
   position: absolute;
   inset: 0;
   background: linear-gradient(
     to bottom,
-    rgba(138, 142, 150, 0.4) 0%,
-    transparent 35%,
-    rgba(15, 23, 42, 0.35) 100%
+    rgba(10, 15, 26, 0.88) 0%,
+    rgba(10, 15, 26, 0.72) 30%,
+    rgba(10, 15, 26, 0.38) 52%,
+    rgba(10, 15, 26, 0.08) 72%,
+    rgba(10, 15, 26, 0.42) 100%
   );
   z-index: 2;
   pointer-events: none;
@@ -1195,7 +1208,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   pointer-events: auto;
 }
 
-/* Upper sky content with title and short description */
+/* Upper content with title and short description - zero box */
 .horizontalCardTop {
   position: relative;
   padding: 0 clamp(1.2rem, 2.2vw, 2rem);
@@ -1206,6 +1219,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   max-width: 540px;
   margin: 0 auto;
   pointer-events: auto;
+  background: transparent;
 }
 
 .horizontalCardCategory {
@@ -1216,7 +1230,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   text-transform: uppercase;
   color: #F59E0B;
   margin-bottom: 0.15rem;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95), 0 1px 3px rgba(0, 0, 0, 0.9);
 }
 
 .horizontalCardTitle {
@@ -1229,18 +1243,18 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   letter-spacing: 0.02em;
   text-transform: none;
   text-align: center;
-  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.7);
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.95), 0 1px 4px rgba(0, 0, 0, 0.95);
 }
 
 .horizontalCardDesc {
   font-family: var(--font-sans, -apple-system, sans-serif);
   font-size: clamp(0.8rem, 0.86vw, 0.9rem);
   line-height: 1.45;
-  color: rgba(255, 255, 255, 0.94);
+  color: rgba(255, 255, 255, 0.96);
   margin: clamp(0.2rem, 0.4vh, 0.35rem) auto 0;
   max-width: 460px;
   text-align: center;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.65);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95), 0 1px 4px rgba(0, 0, 0, 0.9);
 }
 
 .horizontalCardAction {
@@ -1566,17 +1580,17 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   grid-template-columns: repeat(6, 1fr);
   align-items: center;
   justify-items: center;
-  gap: clamp(0.8rem, 1.8vw, 2.2rem);
+  gap: clamp(1.4rem, 2.8vw, 3.2rem);
   width: 100%;
-  max-width: 1260px;
+  max-width: 1320px;
   margin: 0 auto;
   perspective: 1200px;
 }
 
 .flipCard {
   width: 100%;
-  height: clamp(56px, 7vh, 74px);
-  padding: 0 clamp(4px, 0.6vw, 10px);
+  height: clamp(52px, 6.5vh, 68px);
+  padding: 0 clamp(6px, 0.8vw, 12px);
   background: transparent;
   border: none;
   box-shadow: none;
@@ -1612,11 +1626,11 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 
 .finaleLogoImg {
   width: auto;
-  max-width: clamp(140px, 15vw, 185px);
-  height: clamp(42px, 5.4vh, 54px);
-  max-height: clamp(42px, 5.4vh, 54px);
+  max-width: clamp(135px, 14vw, 175px);
+  height: clamp(40px, 5.2vh, 52px);
+  max-height: clamp(40px, 5.2vh, 52px);
   object-fit: contain;
-  filter: drop-shadow(0 1px 2px rgba(15, 35, 65, 0.05));
+  filter: drop-shadow(0 1px 3px rgba(15, 35, 65, 0.08));
   transition: transform 0.2s ease;
 }
 
@@ -1644,7 +1658,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 
 @media (max-width: 900px) {
   .flipRowWrapper {
-    gap: 0.8rem;
+    gap: 1.2rem;
     max-width: 100%;
   }
   .flipCard {
@@ -1664,36 +1678,36 @@ export const MiningDiscoveryShowcase: React.FC = () => {
     justify-content: center;
   }
   .finaleBrandKicker {
-    font-size: 0.65rem;
-    padding: 0.25rem 0.75rem;
+    font-size: 0.68rem;
+    padding: 0.25rem 0.8rem;
     letter-spacing: 0.2em;
   }
   .finaleQuoteMark {
-    font-size: 2.4rem;
-    margin-bottom: 0.25rem;
+    font-size: 2.2rem;
+    margin-bottom: 0.2rem;
   }
   .finaleQuoteBody {
-    font-size: clamp(1.05rem, 4.2vw, 1.35rem);
-    line-height: 1.36;
+    font-size: clamp(1.05rem, 3.8vw, 1.35rem);
+    line-height: 1.34;
   }
   .finaleClientsSection {
-    margin-top: clamp(1.2rem, 2.5vh, 2rem);
+    margin-top: clamp(1.4rem, 2.8vh, 2.2rem);
   }
   .flipRowWrapper {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 0.65rem;
-    max-width: 380px;
+    gap: 1.0rem;
+    max-width: 420px;
     margin: 0 auto;
   }
   .flipCard {
-    height: 46px;
+    height: 48px;
     padding: 0 4px;
   }
   .finaleLogoImg {
     height: 32px;
     max-height: 32px;
-    max-width: 105px;
+    max-width: 110px;
   }
 }
 
@@ -1702,24 +1716,24 @@ export const MiningDiscoveryShowcase: React.FC = () => {
     padding: 1.25rem 0.75rem;
   }
   .finaleQuoteMark {
-    font-size: 2rem;
+    font-size: 1.8rem;
   }
   .finaleQuoteBody {
-    font-size: 0.98rem;
-    line-height: 1.34;
+    font-size: 0.95rem;
+    line-height: 1.35;
   }
   .flipRowWrapper {
-    gap: 0.4rem;
-    max-width: 320px;
+    max-width: 330px;
+    gap: 0.75rem;
   }
   .flipCard {
     height: 40px;
-    padding: 0 2px;
+    padding: 0 3px;
   }
   .finaleLogoImg {
     height: 26px;
     max-height: 26px;
-    max-width: 88px;
+    max-width: 92px;
   }
   .flipPaginationDots {
     margin-top: 0.4rem;
@@ -1835,11 +1849,9 @@ export const MiningDiscoveryShowcase: React.FC = () => {
               <div className="zoomContentWrap">
                 <div className="zoomHeadlineCol">
                   <h2 ref={zoomTitleRef} className="zoomTitle">
-                    <span className="zoomTitlePrimary">SUSTAINABLE</span>
-                    <span className="zoomTitleSecondary">
-                      MINING
-                      <span className="zoomTitleDot" />
-                    </span>
+                    <span className="zoomTitleLine">BUILDING VISIBILITY.</span>
+                    <span className="zoomTitleLine">CREATING INFLUENCE.</span>
+                    <span className="zoomTitleLine">DRIVING MINING GROWTH.</span>
                   </h2>
                 </div>
 

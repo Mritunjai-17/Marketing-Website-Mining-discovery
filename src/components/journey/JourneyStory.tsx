@@ -1034,49 +1034,6 @@ export const JourneyStory: React.FC = () => {
               </div>
             </div>
 
-            {/* Bottom Card Navigation & Indicator Bar */}
-            <div className={styles.fullScreenNavControls} aria-label="Services Navigation">
-              <button
-                type="button"
-                className={styles.fullScreenNavBtn}
-                onClick={() => scrollToCard(Math.max(0, activeCardIndex - 1))}
-                disabled={activeCardIndex === 0}
-                aria-label="Previous service card"
-              >
-                <ChevronLeft size={16} />
-              </button>
-
-              <div className={styles.fullScreenDots} aria-hidden="true">
-                {SERVICE_CARDS.map((_, dotIdx) => (
-                  <span
-                    key={dotIdx}
-                    className={`${styles.fullScreenDot} ${dotIdx === activeCardIndex ? styles.fullScreenDotActive : ""}`}
-                    onClick={() => scrollToCard(dotIdx)}
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`Go to slide ${dotIdx + 1}`}
-                  />
-                ))}
-              </div>
-
-              <div className={styles.fullScreenCounter}>
-                <span className={styles.fullScreenCounterActive}>
-                  {String(activeCardIndex + 1).padStart(2, "0")}
-                </span>
-                <span>/</span>
-                <span>{String(SERVICE_CARDS.length).padStart(2, "0")}</span>
-              </div>
-
-              <button
-                type="button"
-                className={styles.fullScreenNavBtn}
-                onClick={() => scrollToCard(Math.min(SERVICE_CARDS.length - 1, activeCardIndex + 1))}
-                disabled={activeCardIndex === SERVICE_CARDS.length - 1}
-                aria-label="Next service card"
-              >
-                <ChevronRight size={16} />
-              </button>
-            </div>
           </div>
 
       {/* Complete Magazine Archive Modal */}

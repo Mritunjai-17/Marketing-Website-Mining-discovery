@@ -18,13 +18,13 @@ export type TransitionState =
   | "JOURNEY_ACTIVE";
 
 /** Total viewport heights for the continuous story (Hero -> Client & Investor Bridge -> Our Services 8 Cards) */
-const TOTAL_SCROLL_VH = 2000;
+const TOTAL_SCROLL_VH = 4600;
 
 /**
  * How the sampled progress follows the true scroll position.
  * Critically damped Euler spring for smooth, responsive scroll-scrubbing.
  */
-const PROGRESS_SPRING = { stiffness: 120, damping: 22 };
+const PROGRESS_SPRING = { stiffness: 90, damping: 20 };
 const RESUME_GAP = 0.8;
 
 interface SpringState {
@@ -116,19 +116,19 @@ export const GlobeHero: React.FC = () => {
 
     // 1. Hardware-scrubbed Hero sequence:
     // Act 1 (Alpine summit) -> Act 2 (Open Pit) -> Act 3 (Cave Continuous Miner)
-    // Scrubbed from t = 0.00 to t = 0.085
-    const HERO_END = 0.085;
+    // Scrubbed gracefully from t = 0.00 to t = 0.18
+    const HERO_END = 0.18;
     const heroP = clamp(t / HERO_END, 0, 1);
     if (boonHeroRef.current) {
       boonHeroRef.current.scrub(heroP);
     }
 
-    // 2. Value Bridge: Client & Investor Growth Section
-    // 4 Alternating Cards: Left Card / Right Text -> Left Text / Right Card...
-    const BRIDGE_START = 0.085;
-    const BRIDGE_FADE_IN_END = 0.105;
-    const BRIDGE_SCROLL_END = 0.28;
-    const BRIDGE_END = 0.30;
+    // 2. Value Bridge: Client & Investor Growth Section ("Building Value for Every Stakeholder")
+    // Generously paced scroll runway so each pillar card can be comfortably read
+    const BRIDGE_START = 0.18;
+    const BRIDGE_FADE_IN_END = 0.21;
+    const BRIDGE_SCROLL_END = 0.54;
+    const BRIDGE_END = 0.57;
 
     let bOpacity = 0;
     if (t < BRIDGE_START || t > BRIDGE_END) {
@@ -156,7 +156,7 @@ export const GlobeHero: React.FC = () => {
 
     // 3. Services Section (8 Interactive Cards):
     // Takes over seamlessly after the Value Bridge section finishes
-    const SERVICES_START = 0.28;
+    const SERVICES_START = 0.55;
     const SERVICES_END = 0.98;
 
     let servicesP = 0;
@@ -182,19 +182,19 @@ export const GlobeHero: React.FC = () => {
     }
 
     // Services section active state
-    const shouldJourneyBeActive = t >= 0.26;
+    const shouldJourneyBeActive = t >= 0.53;
     if (shouldJourneyBeActive !== journeyActiveRef.current) {
       journeyActiveRef.current = shouldJourneyBeActive;
       setJourneyActive(shouldJourneyBeActive);
     }
 
     if (journeyBox) {
-      if (t < 0.26) {
+      if (t < 0.53) {
         journeyBox.style.opacity = "0";
         journeyBox.style.visibility = "hidden";
         journeyBox.style.pointerEvents = "none";
       } else {
-        const fade = clamp((t - 0.26) / (0.30 - 0.26), 0, 1);
+        const fade = clamp((t - 0.53) / (0.57 - 0.53), 0, 1);
         journeyBox.style.opacity = fade.toFixed(3);
         journeyBox.style.visibility = "visible";
         journeyBox.style.pointerEvents = "auto";
@@ -273,7 +273,8 @@ export const GlobeHero: React.FC = () => {
 
             {/* Services Section (All 8 Interactive Cards) */}
             <div
-              className="absolute inset-0 z-24 h-full w-full"
+              className="absolute inset-0 h-full w-full"
+              style={{ zIndex: 40 }}
             >
               <div
                 ref={journeyBoxRef}
