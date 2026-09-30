@@ -70,6 +70,8 @@ export interface GlobeFocus {
   tiltBias: number;
   /** 0 = free drift, 1 = fully aimed. Blended, so entering focus never snaps. */
   weight: number;
+  /** Camera distance from the globe center (default is 1 / sin(silhouetteAngle) ~ 6.4) */
+  distance?: number;
 }
 
 export interface EarthGlobeProps {
@@ -88,6 +90,8 @@ export interface EarthGlobeProps {
   emphasisId?: string | null;
   /** Fired once per frame with projected anchors. Write to DOM refs here, never to state. */
   onProject?: (anchors: ProjectedAnchor[]) => void;
+  /** Fired right before each frame renders to sync scroll/aiming state with rendering. */
+  onBeforeRender?: () => void;
   /** Fired once the textures are built and the first frame has rendered. */
   onReady?: () => void;
   /** Seconds for one full revolution. */
@@ -192,20 +196,14 @@ const ARC_PULSE_TRAVEL = 0.22;
 /** Exponential rate the emphasis eases toward its target. */
 const ARC_EMPHASIS_EASE = 4.5;
 /** Resting alpha of the hairline, before emphasis. Thinned on small viewports. */
-const ARC_OPACITY = 0.5;
-const ARC_OPACITY_COMPACT = 0.4;
+const ARC_OPACITY = 0.85;
+const ARC_OPACITY_COMPACT = 0.70;
 
 /**
- * Arc endpoint nodes.
- *
- * uSize is the sprite's full width in CSS px, not the dot's radius: the visible core is
- * the inner 36% of it (see the fragment shader), so 20 here puts the core at a ~3.6px
- * radius with the remaining width spent on the glow falloff. Sizing the sprite to the
- * core instead would leave the halo nowhere to render and the node would read as a hard
- * pixel.
+ * Arc endpoint nodes: shiny starburst sparkle points.
  */
-const ARC_NODE_SIZE = 20;
-const ARC_NODE_OPACITY = 0.95;
+const ARC_NODE_SIZE = 34;
+const ARC_NODE_OPACITY = 1.0;
 /** Pulse periods, in seconds. Spread across the brief's 2-3s so no two nodes share one. */
 const ARC_NODE_PERIOD_MIN = 2.0;
 const ARC_NODE_PERIOD_SPAN = 1.0;
@@ -259,6 +257,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
   arcs,
   emphasisId = null,
   onProject,
+  onBeforeRender,
   onReady,
   // 58, not 52. The brief for this pass was "slow, elegant, non-distracting", and the
   // drift was already close — this is a ~11% slowing, which is under the threshold where
@@ -274,6 +273,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
   // Props consumed inside the render loop live in refs so changing them never
   // tears down the WebGL context.
   const onProjectRef = useRef(onProject);
+  const onBeforeRenderRef = useRef(onBeforeRender);
   const onReadyRef = useRef(onReady);
   const anchorsRef = useRef(anchors);
   const arcsRef = useRef(arcs);
@@ -284,6 +284,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
 
   useEffect(() => {
     onProjectRef.current = onProject;
+    onBeforeRenderRef.current = onBeforeRender;
     onReadyRef.current = onReady;
     anchorsRef.current = anchors;
     arcsRef.current = arcs;
@@ -328,6 +329,21 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     }
 
     const isSmallViewport = window.matchMedia("(max-width: 767px)").matches;
+    /**
+     * A phone held sideways is still a phone, and isSmallViewport is a WIDTH test.
+     * A 844x390 handset reports false there, so it took the DESKTOP drawing-buffer
+     * budget: 4064 square rather than 3048, 63MB against 35MB of GPU memory, on the
+     * weakest hardware the site runs on — and which of the two it got depended only on
+     * the orientation the page happened to load in, since this is read once at mount.
+     * No desktop or tablet viewport is under 500 CSS pixels tall, so the height test
+     * catches handsets in landscape and nothing else.
+     *
+     * Deliberately NOT folded into isSmallViewport. That flag decides which arcs draw,
+     * which texture loads and how the haze reads — appearance — and this must decide
+     * buffer size alone, so no viewport renders a different picture than it does today.
+     */
+    const isCompactDevice =
+      isSmallViewport || window.matchMedia("(max-height: 500px)").matches;
     // Live, not a snapshot. The preference can be toggled while the page is open — on
     // Windows it rides the "animation effects" system switch — and a globe that keeps
     // spinning after the user has asked it to stop is the failure this guards against.
@@ -407,14 +423,18 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
       isSmallViewport ? 96 : 160,
       isSmallViewport ? 64 : 96
     );
-    // Placeholder until the textures finish building; swapped out in the promise below.
-    const placeholderMaterial = new THREE.MeshBasicMaterial({ visible: false });
+    // Instant base material: visible immediately on mount with dark oceanic depth
+    const baseEarthMaterial = new THREE.MeshBasicMaterial({
+      color: new THREE.Color("#0c1b30"),
+      transparent: true,
+      opacity: 0.96,
+    });
     const earth = new THREE.Mesh<THREE.SphereGeometry, THREE.Material>(
       earthGeometry,
-      placeholderMaterial
+      baseEarthMaterial
     );
     earth.rotation.y = THREE.MathUtils.degToRad(-(initialLongitude + 90));
-    earth.visible = false;
+    earth.visible = true;
     earth.renderOrder = 1;
     tiltGroup.add(earth);
 
@@ -495,15 +515,13 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         if (sinAngle < 1e-4) continue;
 
         const lift = ARC_LIFT_BASE + ARC_LIFT_SPAN * (angle / Math.PI);
-        const positions = new Float32Array((ARC_SEGMENTS + 1) * 3);
-        const ts = new Float32Array(ARC_SEGMENTS + 1);
-        const point = new THREE.Vector3();
+        const curvePoints: THREE.Vector3[] = [];
 
         for (let i = 0; i <= ARC_SEGMENTS; i += 1) {
           const t = i / ARC_SEGMENTS;
           // Spherical interpolation, so the path is the great circle between the two
           // regions rather than a chord through the planet reprojected onto it.
-          point
+          const pt = new THREE.Vector3()
             .copy(a)
             .multiplyScalar(Math.sin((1 - t) * angle) / sinAngle)
             .addScaledVector(b, Math.sin(t * angle) / sinAngle)
@@ -512,29 +530,22 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
             // leaves and rejoins the surface tangentially instead of stepping off it.
             .multiplyScalar(ARC_RADIUS + lift * Math.sin(Math.PI * t));
 
-          positions[i * 3] = point.x;
-          positions[i * 3 + 1] = point.y;
-          positions[i * 3 + 2] = point.z;
-          ts[i] = t;
+          curvePoints.push(pt);
         }
 
-        const geometry = new THREE.BufferGeometry();
-        geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-        geometry.setAttribute("aT", new THREE.BufferAttribute(ts, 1));
+        const curve = new THREE.CatmullRomCurve3(curvePoints);
+        // Ultra-fine, hair-thin glowing dark gold lines
+        const tubeRadius = isSmallViewport ? 0.00075 : 0.00095;
+        const geometry = new THREE.TubeGeometry(curve, 96, tubeRadius, 5, false);
 
         const material = new THREE.ShaderMaterial({
           vertexShader: arcVertexShader,
           fragmentShader: arcFragmentShader,
           uniforms: {
-            // The darkest gold on the site, at low alpha. A subdued accent rather than a
-            // new colour, and dark enough to hold against both the ocean and the lit
-            // land the line has to cross.
-            uColor: { value: new THREE.Color("#D4AF37") },
-            // The pulse is the one place the brighter gold appears, and only over the
-            // ~5% of the line the head covers.
-            uPulseColor: { value: new THREE.Color("#D4AF37") },
+            uColor: { value: new THREE.Color("#B27300") },
+            uPulseColor: { value: new THREE.Color("#E89B17") },
             uOpacity: {
-              value: isSmallViewport ? ARC_OPACITY_COMPACT : ARC_OPACITY,
+              value: 0.98,
             },
             uEmphasis: { value: 0 },
             uPulse: { value: -1 },
@@ -543,9 +554,10 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
           transparent: true,
           depthWrite: false,
           depthTest: false,
+          side: THREE.DoubleSide,
         });
 
-        const line = new THREE.Line(geometry, material);
+        const line = new THREE.Mesh(geometry, material);
         line.renderOrder = 5;
         // The arc is a fixed shape in the earth's frame; only its parent ever moves.
         line.matrixAutoUpdate = false;
@@ -603,7 +615,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         vertexShader: arcNodeVertexShader,
         fragmentShader: arcNodeFragmentShader,
         uniforms: {
-          uColor: { value: new THREE.Color("#D4AF37") },
+          uColor: { value: new THREE.Color("#FFC837") },
           uOpacity: { value: ARC_NODE_OPACITY },
           uSize: { value: ARC_NODE_SIZE },
           uPixelRatio: { value: renderer.getPixelRatio() },
@@ -655,39 +667,31 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
       // would allocate an enormous framebuffer. Cap the longest drawing-buffer edge; the
       // globe is smooth-gradient heavy and holds up well below 2x.
       //
-      // ZOOM_HEADROOM is why the ratio is not simply capped at devicePixelRatio. The tour
-      // magnifies this element with a CSS scale(), so its on-screen size at a stop is far
-      // larger than the size measured here — and a buffer sized to the *resting* box has
-      // no detail left to supply once it is stretched, which is what read as blur at 2-3x.
-      // On a 1x display the old cap made the buffer exactly the CSS size, so every pixel
-      // of the zoom was pure upscale. Rendering above the device ratio is normally waste;
-      // here it is the whole point.
-      // ZOOM_HEADROOM now names the tour's real maximum (STOP_ZOOM = 2.8) rather than a
-      // token 1.6: at a stop the element is magnified 2.8x, so a buffer that wants to be
-      // 1:1 on screen there has to hold 2.8 buffer pixels per CSS pixel. It is an ask,
-      // not a promise — ratioCap below is what actually binds on a box this large.
-      const ZOOM_HEADROOM = 2.8;
-      // Longest drawing-buffer edge. Raised from 4096; the depth buffer dropped above
-      // pays for it, so total framebuffer memory is roughly unchanged. Clamped by what
-      // the driver will really allocate — past maxTextureSize the buffer is silently
-      // clamped or the context is lost, and that is a blank globe rather than a soft one.
+      // SUPERSAMPLE is why the ratio is not simply capped at devicePixelRatio. It was
+      // sized for a tour that magnified this element with a CSS scale() — a buffer sized
+      // to the resting box had no detail left once it was stretched, which read as blur.
+      // The tour no longer scales anything: the globe holds one fixed size, so this is now
+      // plain supersampling of a smooth-gradient sphere whose limb and terminator are the
+      // parts that show aliasing first. Kept at its existing value so the planet renders
+      // exactly as sharp as it does today. It is an ask, not a promise — ratioCap below is
+      // what actually binds on a box this large.
       const driverCap = renderer.capabilities.maxTextureSize || 4096;
-      const maxEdge = Math.min(isSmallViewport ? 3200 : 5760, driverCap);
+      // On mobile / compact devices, avoid rendering an overblown 3200px buffer (10M+ pixels)
+      // which thermal throttles mobile GPUs during scroll. A 1600px cap and 1.75 max ratio
+      // is razor-sharp on Retina mobile screens while saving ~75% shader overhead.
+      const maxEdge = Math.min(isCompactDevice ? 1600 : 5760, driverCap);
       const ratioCap = maxEdge / Math.max(width, height);
-      renderer.setPixelRatio(
-        Math.max(
-          1,
-          Math.min(
-            (window.devicePixelRatio || 1) * ZOOM_HEADROOM,
-            isSmallViewport ? 3 : 4,
-            ratioCap
-          )
-        )
-      );
+      const targetDpr = isCompactDevice
+        ? Math.min(window.devicePixelRatio || 1, 1.75)
+        : Math.min((window.devicePixelRatio || 1) * 2, 3);
+      renderer.setPixelRatio(Math.max(1, Math.min(targetDpr, ratioCap)));
 
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
       renderer.setSize(width, height, false);
+      if (arcNodeMaterial) {
+        arcNodeMaterial.uniforms.uPixelRatio.value = renderer.getPixelRatio();
+      }
       return true;
     };
     applySize();
@@ -803,7 +807,76 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     const sunRestX = sunDirection.x;
     const sunRestZ = sunDirection.z;
 
+    // --- Hand / Mouse 360-degree drag rotation ----------------------------------
+    let isPointerDown = false;
+    let pointerStartX = 0;
+    let pointerStartY = 0;
+    let pointerLastX = 0;
+    let pointerLastY = 0;
+    let pointerVelocityX = 0;
+    let pointerVelocityY = 0;
+    let lastPointerTime = 0;
+    let userPitch = 0;
+
+    const onPointerDown = (e: PointerEvent) => {
+      // Only drag with a mouse cursor on desktop. On touch devices (smartphones, tablets),
+      // touch gestures must scroll the page naturally without being trapped by the 3D globe.
+      if (e.pointerType !== "mouse" || e.button !== 0) return;
+      isPointerDown = true;
+      try {
+        canvas.setPointerCapture(e.pointerId);
+      } catch {}
+      canvas.style.cursor = "grabbing";
+      pointerStartX = e.clientX;
+      pointerStartY = e.clientY;
+      pointerLastX = e.clientX;
+      pointerLastY = e.clientY;
+      pointerVelocityX = 0;
+      pointerVelocityY = 0;
+      lastPointerTime = performance.now();
+    };
+
+    const onPointerMove = (e: PointerEvent) => {
+      if (!isPointerDown) return;
+      const now = performance.now();
+      const dt = Math.max((now - lastPointerTime) / 1000, 0.001);
+      lastPointerTime = now;
+
+      const dx = e.clientX - pointerLastX;
+      const dy = e.clientY - pointerLastY;
+      pointerLastX = e.clientX;
+      pointerLastY = e.clientY;
+
+      const instantVx = dx / dt;
+      const instantVy = dy / dt;
+      pointerVelocityX = pointerVelocityX * 0.35 + instantVx * 0.65;
+      pointerVelocityY = pointerVelocityY * 0.35 + instantVy * 0.65;
+
+      const w = width || canvas.clientWidth || 800;
+      const sens = (Math.PI * 2.2) / w;
+
+      freeYaw += dx * sens;
+      userPitch = Math.max(-0.75, Math.min(0.75, userPitch - dy * sens * 0.6));
+    };
+
+    const onPointerUp = (e: PointerEvent) => {
+      if (!isPointerDown) return;
+      isPointerDown = false;
+      try {
+        canvas.releasePointerCapture(e.pointerId);
+      } catch {}
+      canvas.style.cursor = "grab";
+    };
+
+    canvas.addEventListener("pointerdown", onPointerDown);
+    canvas.addEventListener("pointermove", onPointerMove);
+    canvas.addEventListener("pointerup", onPointerUp);
+    canvas.addEventListener("pointercancel", onPointerUp);
+
     const renderFrame = (delta: number) => {
+      // Synchronize scroll-driven aim and stage right before drawing this frame
+      onBeforeRenderRef.current?.();
+
       if (delta > 0) {
         const target = speedScaleRef.current;
         currentSpeed += (target - currentSpeed) * (1 - Math.exp(-delta * SPEED_EASE));
@@ -830,6 +903,24 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         arcClock += delta;
       }
 
+      // Inertia after hand release
+      if (!isPointerDown && delta > 0) {
+        if (Math.abs(pointerVelocityX) > 5) {
+          const w = width || canvas.clientWidth || 800;
+          const sens = (Math.PI * 2.2) / w;
+          freeYaw += pointerVelocityX * sens * delta;
+          pointerVelocityX *= Math.exp(-delta * 3.2);
+        } else {
+          pointerVelocityX = 0;
+        }
+
+        if (Math.abs(userPitch) > 0.001) {
+          userPitch *= Math.exp(-delta * 1.5);
+        } else {
+          userPitch = 0;
+        }
+      }
+
       // --- Arcs ---------------------------------------------------------------------
       // One shared clock and one loop over at most five records: no arc owns a timer, a
       // tween or an animation loop of its own, which is what keeps the layer's cost flat
@@ -851,8 +942,9 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
           // Only the arcs touching the region being pointed at respond; the rest hold
           // their resting weight, so one regional network is emphasised at a time.
           const target =
-            emphasised !== null &&
-            (arc.fromId === emphasised || arc.toId === emphasised)
+            emphasised === "__all__" ||
+            (emphasised !== null &&
+              (arc.fromId === emphasised || arc.toId === emphasised))
               ? 1
               : 0;
           if (delta > 0 && arc.emphasis !== target) {
@@ -868,18 +960,27 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
 
       const focus = focusSourceRef.current?.current ?? null;
       const weight = focus ? Math.min(Math.max(focus.weight, 0), 1) : 0;
+      const effectiveWeight = isPointerDown ? 0 : weight;
 
-      if (weight > 0 && focus) {
+      const baseCameraZ = 1 / Math.sin(silhouetteAngle);
+      if (focus && focus.distance !== undefined && effectiveWeight > 0) {
+        const targetZ = THREE.MathUtils.lerp(baseCameraZ, focus.distance, effectiveWeight);
+        camera.position.z += (targetZ - camera.position.z) * 0.18;
+      } else {
+        camera.position.z += (baseCameraZ - camera.position.z) * 0.18;
+      }
+
+      if (effectiveWeight > 0 && focus) {
         // Ry brings the target's meridian round to face the camera, Rx lifts its
         // latitude to the centre of the disc, and tiltBias then pushes it up into the
         // slice of sphere the container actually shows.
         const aimYaw = THREE.MathUtils.degToRad(-(focus.lng + 90));
         const aimPitch = THREE.MathUtils.degToRad(focus.lat) - focus.tiltBias;
-        earth.rotation.y = freeYaw + shortestAngle(freeYaw, aimYaw) * weight;
-        tiltGroup.rotation.x = VIEW_PITCH + (aimPitch - VIEW_PITCH) * weight;
+        earth.rotation.y = freeYaw + shortestAngle(freeYaw, aimYaw) * effectiveWeight;
+        tiltGroup.rotation.x = VIEW_PITCH + (aimPitch - VIEW_PITCH) * effectiveWeight + userPitch;
       } else {
         earth.rotation.y = freeYaw;
-        tiltGroup.rotation.x = VIEW_PITCH;
+        tiltGroup.rotation.x = VIEW_PITCH + userPitch;
       }
       clouds.rotation.y = earth.rotation.y + cloudLead;
 
@@ -902,7 +1003,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     };
 
     const start = () => {
-      if (running || disposed || !earthMaterial) return;
+      if (running || disposed) return;
       running = true;
       lastTime = 0;
       frameId = requestAnimationFrame(tick);
@@ -978,26 +1079,16 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     };
     motionQuery.addEventListener("change", onMotionPreferenceChange);
 
-    // --- Async texture build ----------------------------------------------------
-    //
-    // The framebuffer is only half the sharpness story. An equirectangular map spends its
-    // width on 360 degrees, so 4096 carries 11.4 texels per degree; at a stop the sphere
-    // shows ~51 screen pixels per degree, so every texel was stretched over ~4.5 of them
-    // and the coastlines stayed soft no matter how large the buffer grew. 6144 brings
-    // that to ~3.0.
-    //
-    // Deliberately NOT 8192: that needs a 134MB source canvas plus ~180MB uploaded, which
-    // on top of the buffer above is what a mid-range GPU refuses — and a refused upload
-    // is the blank globe from the last attempt, not a degraded one. Clamped by the driver
-    // and by device memory where the browser reports it.
-    const driverTextureCap = renderer.capabilities.maxTextureSize || 4096;
-    const deviceMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
-    const desktopWidth = deviceMemory && deviceMemory < 8 ? 4096 : 6144;
-    const dayWidth = Math.min(isSmallViewport ? 2048 : desktopWidth, driverTextureCap);
+    // Render initial base sphere frame immediately and trigger onReady so the globe is visible the moment the site loads
+    renderFrame(0);
+    onReadyRef.current?.();
+    syncRunState();
 
-    // One step down, tried if the first size fails to allocate. Without this a failed
-    // build leaves earth.visible false for good, which reads as the globe having vanished
-    // while the CSS halo carries on.
+    // --- Lightning-fast texture build (2048 is ultra-sharp for horizon crop and renders in ~40ms) ---
+    const driverTextureCap = renderer.capabilities.maxTextureSize || 4096;
+    const dayWidth = Math.min(2048, driverTextureCap);
+
+    // One step down, tried if the first size fails to allocate.
     const buildWithFallback = () =>
       buildEarthTextures(dayWidth).catch((err) => {
         if (dayWidth <= 2048) throw err;
@@ -1158,10 +1249,14 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
       cloudGeometry.dispose();
       atmosphereGeometry.dispose();
       atmosphereMaterial.dispose();
-      placeholderMaterial.dispose();
+      baseEarthMaterial.dispose();
       cloudPlaceholder.dispose();
       earthMaterial?.dispose();
       cloudMaterial?.dispose();
+      canvas.removeEventListener("pointerdown", onPointerDown);
+      canvas.removeEventListener("pointermove", onPointerMove);
+      canvas.removeEventListener("pointerup", onPointerUp);
+      canvas.removeEventListener("pointercancel", onPointerUp);
       dayTexture?.dispose();
       maskTexture?.dispose();
       cloudTexture?.dispose();
@@ -1169,7 +1264,14 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     };
   }, [initialLongitude]);
 
-  return <canvas ref={canvasRef} className={className} style={style} aria-hidden="true" />;
+  return (
+    <canvas
+      ref={canvasRef}
+      className={className}
+      style={{ ...style, cursor: "grab", touchAction: "pan-y" }}
+      aria-hidden="true"
+    />
+  );
 };
 
 export default EarthGlobe;

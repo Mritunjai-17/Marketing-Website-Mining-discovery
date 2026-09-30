@@ -1,0 +1,498 @@
+/* ==========================================================================
+   CINEMATIC 300-FRAME CANVAS SCROLL SEQUENCE HERO WITH GSAP & GLASSMORPHISM
+   Theme: Mountain Summit ➔ Open Pit Haulage ➔ Deep Underground Mine
+   ========================================================================== */
+
+.heroContainer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100vh;
+  min-height: 100svh;
+  background-color: #030509;
+  color: #f4f2ea;
+  overflow: hidden;
+  z-index: 30;
+  user-select: none;
+  pointer-events: auto;
+  touch-action: pan-y;
+  will-change: transform, opacity;
+  box-sizing: border-box;
+}
+
+/* ==========================================================================
+   1. FULL-BLEED HIGH-PERFORMANCE VIDEO & CANVAS
+   ========================================================================== */
+
+.videoContainer,
+.canvasContainer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  touch-action: pan-y;
+  background: #030509 url("/frames/hero-sequence/frame_0001.webp") center center / cover no-repeat;
+}
+
+.sequenceVideo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+  background-color: #030509;
+}
+
+.sequenceCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+
+/* Subtle cinematic lens vignette & film contrast grade */
+.cinematicVignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+      ellipse 95% 85% at 50% 50%,
+      rgba(3, 5, 9, 0) 35%,
+      rgba(3, 5, 9, 0.45) 75%,
+      rgba(3, 5, 9, 0.85) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(3, 5, 9, 0.55) 0%,
+      rgba(3, 5, 9, 0) 22%,
+      rgba(3, 5, 9, 0) 70%,
+      rgba(3, 5, 9, 0.8) 100%
+    );
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* ==========================================================================
+   2. LUXURY GLASSMORPHISM OVERLAY & GSAP PARALLAX CONTAINERS
+   ========================================================================== */
+
+.overlayStage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  pointer-events: none;
+  touch-action: pan-y;
+}
+
+/* Glass Card Component */
+.glassPanel {
+  background: rgba(10, 16, 26, 0.48);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 215, 0, 0.22);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.18);
+  border-radius: 1.25rem;
+  padding: 1.5rem 2rem;
+  pointer-events: auto;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glassPanel:hover {
+  border-color: rgba(255, 215, 0, 0.45);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 25px rgba(255, 215, 0, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.25);
+}
+
+/* Glass Badge / Eyebrow Pill */
+.glassBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.45rem 1.1rem;
+  background: rgba(8, 12, 20, 0.65);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 9999px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  pointer-events: auto;
+  margin-bottom: 1.25rem;
+}
+
+.badgePulseDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ffd700;
+  box-shadow: 0 0 10px #ffd700;
+  animation: pulseDot 1.8s infinite alternate;
+}
+
+.badgeText {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #f4f2ea;
+}
+
+/* ==========================================================================
+   ACT 1: SURFACE MOUNTAIN OVERLAY (p: 0 -> 0.35)
+   ========================================================================== */
+
+.surfaceLayer {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 90%;
+  max-width: 1100px;
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  pointer-events: none;
+  will-change: transform, opacity, filter;
+  z-index: 12;
+}
+
+.heroTitle {
+  font-family: var(--font-editorial-serif), var(--font-display-custom), "Cormorant Garamond", "Playfair Display", Georgia, serif;
+  font-size: clamp(3.2rem, 8.5vw, 8.5rem);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
+  color: #FAF8F5;
+  line-height: 1.02;
+  margin: 0 0 1.2rem 0;
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.95);
+}
+
+.heroTitle span {
+  display: block;
+  font-weight: 700;
+}
+
+.heroSubline {
+  font-family: var(--font-sans-custom), var(--font-geist-sans), system-ui, sans-serif;
+  font-size: clamp(0.95rem, 1.2vw, 1.25rem);
+  font-weight: 400;
+  color: rgba(244, 242, 234, 0.9);
+  max-width: 600px;
+  line-height: 1.6;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95);
+  margin: 0 auto;
+}
+
+/* ==========================================================================
+   ACT 2: OPEN PIT TRANSITION OVERLAY (p: 0.35 -> 0.68)
+   ========================================================================== */
+
+.openPitLayer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: clamp(3rem, 9vw, 9rem);
+  margin: auto 0;
+  height: fit-content;
+  max-width: 580px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  pointer-events: none;
+  will-change: transform, opacity, filter;
+  opacity: 0;
+  z-index: 12;
+}
+
+.actHeadline {
+  font-family: var(--font-editorial-serif), var(--font-display-custom), "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(2.8rem, 5.5vw, 5rem);
+  font-weight: 350;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
+  color: #FAF8F5;
+  line-height: 1.05;
+  margin: 0 0 1.2rem 0;
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.95);
+}
+
+.actSubline {
+  font-family: var(--font-sans-custom), var(--font-geist-sans), system-ui, sans-serif;
+  font-size: clamp(1rem, 1.25vw, 1.2rem);
+  font-weight: 400;
+  color: rgba(244, 242, 234, 0.9);
+  line-height: 1.6;
+  margin: 0;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.95);
+  max-width: 520px;
+}
+
+/* ==========================================================================
+   ACT 3: UNDERGROUND EXTRACTION OVERLAY (p: 0.68 -> 1.00)
+   ========================================================================== */
+
+.undergroundLayer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: clamp(3rem, 9vw, 9rem);
+  margin: auto 0;
+  height: fit-content;
+  max-width: 580px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  pointer-events: none;
+  will-change: transform, opacity, filter;
+  opacity: 0;
+  z-index: 12;
+}
+
+.undergroundCtaButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0.85rem 2.2rem;
+  margin-top: 1.5rem;
+  background: rgba(212, 175, 55, 0.2);
+  border: 1px solid rgba(255, 215, 0, 0.65);
+  border-radius: 9999px;
+  color: #FAF8F5;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  cursor: pointer;
+  pointer-events: auto;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 30px rgba(212, 175, 55, 0.25);
+}
+
+.undergroundCtaButton:hover {
+  background: rgba(255, 215, 0, 0.35);
+  border-color: #ffd700;
+  box-shadow: 0 0 45px rgba(255, 215, 0, 0.55);
+  transform: translateY(-2px);
+}
+
+/* ==========================================================================
+   BOTTOM BAR & PROGRESS TIMELINE CUE
+   ========================================================================== */
+
+.bottomBar {
+  position: absolute;
+  bottom: clamp(1.8rem, 4vh, 3rem);
+  left: clamp(2rem, 6vw, 6rem);
+  right: clamp(2rem, 6vw, 6rem);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  pointer-events: auto;
+  z-index: 25;
+}
+
+/* Progress bar displaying current depth */
+.depthIndicator {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(10, 16, 26, 0.55);
+  backdrop-filter: blur(12px);
+  padding: 0.5rem 1.2rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.depthTrack {
+  width: 120px;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.depthFill {
+  height: 100%;
+  background: linear-gradient(90deg, #00e5a3, #ffd700);
+  transition: width 0.1s ease-out;
+}
+
+.depthLabel {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: #FAF8F5;
+}
+
+.scrollCue {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  pointer-events: auto;
+  padding: 0.6rem 1.25rem;
+  background: rgba(10, 14, 22, 0.6);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 9999px;
+  backdrop-filter: blur(12px);
+  transition: all 0.25s ease;
+}
+
+.scrollCue:hover {
+  background: rgba(20, 28, 44, 0.85);
+  border-color: rgba(255, 215, 0, 0.55);
+  transform: translateY(2px);
+}
+
+.scrollText {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(244, 242, 234, 0.85);
+}
+
+.scrollDots {
+  display: grid;
+  grid-template-columns: repeat(2, 3px);
+  gap: 3px;
+  align-items: center;
+}
+
+.scrollDot {
+  width: 3px;
+  height: 3px;
+  background-color: #ffd700;
+  border-radius: 50%;
+  animation: pulseDot 1.8s ease-in-out infinite alternate;
+}
+
+.scrollDot:nth-child(2) {
+  animation-delay: 0.3s;
+}
+.scrollDot:nth-child(3) {
+  animation-delay: 0.6s;
+}
+.scrollDot:nth-child(4) {
+  animation-delay: 0.9s;
+}
+
+@keyframes pulseDot {
+  0% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1.2);
+    box-shadow: 0 0 8px #ffd700;
+  }
+}
+
+/* ==========================================================================
+   RESPONSIVE MOBILE BREAKPOINTS
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  .heroContainer {
+    padding: 0;
+  }
+
+  .surfaceLayer {
+    width: 100%;
+    max-width: 100%;
+    padding: 0 1.25rem;
+    box-sizing: border-box;
+  }
+
+  .heroTitle {
+    font-size: clamp(2.1rem, 9.2vw, 3.8rem);
+    letter-spacing: -0.015em;
+    margin: 0 0 1rem 0;
+  }
+
+  .heroSubline {
+    font-size: clamp(0.88rem, 3.6vw, 1.05rem);
+    line-height: 1.55;
+    padding: 0 0.5rem;
+    max-width: 440px;
+  }
+
+  .openPitLayer,
+  .undergroundLayer {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: 460px;
+    height: fit-content;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 0 1.25rem;
+    box-sizing: border-box;
+  }
+
+  .actHeadline {
+    font-size: clamp(1.75rem, 7vw, 2.6rem);
+    line-height: 1.1;
+    margin: 0 0 0.85rem 0;
+    text-align: center;
+  }
+
+  .actSubline {
+    font-size: clamp(0.86rem, 3.5vw, 1.02rem);
+    line-height: 1.55;
+    text-align: center;
+    margin: 0 auto;
+    max-width: 400px;
+  }
+
+  .undergroundCtaButton {
+    margin: 1.4rem auto 0 auto;
+    padding: 0.75rem 1.8rem;
+    font-size: 0.76rem;
+    letter-spacing: 0.18em;
+  }
+
+  .glassTelemetryCard {
+    display: none;
+  }
+
+  .bottomBar {
+    left: 1rem;
+    right: 1rem;
+    bottom: 1.5rem;
+    justify-content: center;
+  }
+
+  .depthIndicator {
+    display: none;
+  }
+}
+

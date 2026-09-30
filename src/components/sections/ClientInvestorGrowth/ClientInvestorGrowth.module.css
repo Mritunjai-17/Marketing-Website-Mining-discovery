@@ -1,0 +1,608 @@
+.bridgeContainer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 35;
+  box-sizing: border-box;
+  overflow: hidden;
+  will-change: opacity, transform;
+  transition: opacity 0.4s ease-out;
+}
+
+.scrollTrack {
+  position: relative;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  will-change: transform;
+}
+
+/* Part 1: Value Bridge full-width container on warm stone (#D9D6CE) */
+.valueBridgeSection {
+  position: relative;
+  width: 100%;
+  background: #D9D6CE;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.sectionInner {
+  position: relative;
+  width: 100%;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: clamp(5.5rem, 9vh, 7.5rem) clamp(1.25rem, 4vw, 3.5rem) clamp(4rem, 8vh, 6.5rem);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(2.75rem, 5.5vh, 4.75rem);
+  z-index: 5;
+}
+
+/* ==========================================================================
+   TOP HEADER & OVERVIEW DESCRIPTION
+   ========================================================================== */
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 900px;
+  width: 100%;
+}
+
+.eyebrowRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.6rem, 1.6vw, 1.25rem);
+  margin-bottom: clamp(0.5rem, 1.2vh, 0.85rem);
+  width: 100%;
+}
+
+.eyebrowRule {
+  width: clamp(24px, 3.5vw, 50px);
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent, rgba(138, 104, 32, 0.75));
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.eyebrowRule:last-child {
+  background: linear-gradient(90deg, rgba(138, 104, 32, 0.75), transparent);
+  transform-origin: right center;
+}
+
+.inView .eyebrowRule {
+  transform: scaleX(1);
+}
+
+.eyebrowText {
+  font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
+  font-size: clamp(0.64rem, 0.78vw, 0.76rem);
+  font-weight: 700;
+  letter-spacing: clamp(0.14em, 0.22em, 0.24em);
+  color: #7A5E22;
+  text-transform: uppercase;
+}
+
+.mainTitle {
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
+  font-size: clamp(1.75rem, 3.4vw, 3.4rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+  color: #111622;
+  margin: 0 0 clamp(0.65rem, 1.4vh, 1rem);
+  text-transform: uppercase;
+  max-width: 860px;
+}
+
+/* Kinetic Mask Wrappers for Staggered Slide-Up Text Reveals */
+.maskWrapper {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+}
+
+.maskedLine {
+  display: block;
+  transform: translateY(115%);
+  opacity: 0;
+  transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.75s ease;
+  will-change: transform, opacity;
+}
+
+.inView .maskedLine {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.line1 {
+  transition-delay: 0.05s;
+}
+
+.line2 {
+  transition-delay: 0.18s;
+}
+
+/* Gold Specular Shimmer Sweep on Accent Word */
+.shimmerText {
+  font-style: italic;
+  font-weight: 400;
+  background: linear-gradient(
+    115deg,
+    #8B6820 0%,
+    #B8860B 35%,
+    #C89A32 50%,
+    #7A5E22 100%
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+  animation: stoneGoldShimmer 5s ease-in-out infinite;
+}
+
+@keyframes stoneGoldShimmer {
+  0%, 15% {
+    background-position: 180% 0;
+  }
+  65%, 100% {
+    background-position: -180% 0;
+  }
+}
+
+.subtitle {
+  font-family: var(--font-inter), "Inter", sans-serif;
+  font-size: clamp(0.88rem, 1.05vw, 1.05rem);
+  line-height: 1.62;
+  color: #374151;
+  margin: 0;
+  max-width: 820px;
+  padding: 0 clamp(0.25rem, 1vw, 1rem);
+  opacity: 0.45;
+  transform: translateY(8px);
+  transition: opacity 0.75s ease 0.15s, transform 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.15s;
+}
+
+.inView .subtitle {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ==========================================================================
+   ALTERNATING CARDS STACK
+   ========================================================================== */
+
+.cardsStack {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(3rem, 6vh, 5.5rem);
+  width: 100%;
+}
+
+.alternatingRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(2rem, 4.5vw, 4.75rem);
+  width: 100%;
+  opacity: 0.4;
+  transition: opacity 0.35s ease-out;
+  will-change: opacity;
+}
+
+.rowRevealed {
+  opacity: 0.82;
+}
+
+.rowRevealed.rowFocal {
+  opacity: 1;
+}
+
+/* Row with Card on Left, Text on Right */
+.rowLeftCard {
+  flex-direction: row;
+}
+
+/* Row with Text on Left, Card on Right */
+.rowRightCard {
+  flex-direction: row-reverse;
+}
+
+/* Visual Image Card Wrap with Dual-Rail Rise */
+.cardVisualWrap {
+  flex: 1 1 50%;
+  max-width: 580px;
+  width: 100%;
+  transform: translateY(60px) translateZ(0);
+  opacity: 0;
+  transition: transform 0.72s cubic-bezier(0.22, 1, 0.36, 1) 0s, opacity 0.55s ease-out 0s;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+.rowRevealed .cardVisualWrap {
+  transform: translateY(0) translateZ(0);
+  opacity: 1;
+}
+
+.imageCard {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: clamp(16px, 2vw, 24px);
+  overflow: hidden;
+  background: #0f172a;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(138, 104, 32, 0.08);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.35s ease, box-shadow 0.35s ease;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.rowFocal .imageCard {
+  border-color: rgba(184, 134, 11, 0.55);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25), 0 0 36px rgba(245, 158, 11, 0.22), 0 0 0 2px rgba(245, 158, 11, 0.45);
+}
+
+.imageCard:hover {
+  transform: translateY(-4px) scale(1.01) translateZ(0);
+  box-shadow: 0 28px 65px rgba(0, 0, 0, 0.24), 0 0 32px rgba(184, 134, 11, 0.25);
+  border-color: rgba(184, 134, 11, 0.55);
+}
+
+/* Internal Photo Settling: starts scaled at 1.12, settles smoothly to 1.0 */
+.cardImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: scale(1.12) translateZ(0);
+  transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.rowRevealed .cardImage {
+  transform: scale(1) translateZ(0);
+}
+
+.imageCard:hover .cardImage {
+  transform: scale(1.04) translateZ(0);
+}
+
+.imageOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.05) 0%, rgba(3, 5, 9, 0.45) 100%);
+  pointer-events: none;
+}
+
+.cardBadge {
+  position: absolute;
+  top: clamp(0.75rem, 1.5vw, 1rem);
+  left: clamp(0.75rem, 1.5vw, 1rem);
+  background: rgba(3, 8, 18, 0.85);
+  border: 1px solid rgba(197, 160, 89, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 0.35rem clamp(0.65rem, 1vw, 0.85rem);
+  border-radius: 9999px;
+  font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
+  font-size: clamp(0.6rem, 0.7vw, 0.68rem);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: #E5C378;
+  text-transform: uppercase;
+}
+
+/* Text Content Wrap — Dual Rail: rises 0.12s after image rail */
+.cardTextWrap {
+  flex: 1 1 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: clamp(0.65rem, 1.2vh, 0.95rem);
+  max-width: 580px;
+  transform: translateY(40px) translateZ(0);
+  opacity: 0;
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.12s, opacity 0.55s ease-out 0.12s;
+  will-change: transform, opacity;
+}
+
+.rowRevealed .cardTextWrap {
+  transform: translateY(0) translateZ(0);
+  opacity: 1;
+}
+
+.targetAudience {
+  font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
+  font-size: clamp(0.65rem, 0.74vw, 0.76rem);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: #725316;
+  text-transform: uppercase;
+  background: rgba(139, 104, 32, 0.12);
+  padding: 0.28rem clamp(0.65rem, 1vw, 0.85rem);
+  border-radius: 6px;
+  border: 1px solid rgba(139, 104, 32, 0.28);
+  width: fit-content;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.18s, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.18s;
+  will-change: opacity, transform;
+}
+
+.rowRevealed .targetAudience {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Masked Editorial Reveal for Title */
+.itemTitleMask {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+  width: 100%;
+}
+
+.itemTitle {
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
+  font-size: clamp(1.5rem, 2.25vw, 2.35rem);
+  font-weight: 600;
+  color: #0F172A;
+  line-height: 1.18;
+  letter-spacing: -0.015em;
+  margin: 0;
+  transform: translateY(105%);
+  opacity: 0;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.22s, opacity 0.5s ease 0.22s;
+  will-change: transform, opacity;
+}
+
+.rowRevealed .itemTitle {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.itemDescription {
+  font-family: var(--font-inter), "Inter", sans-serif;
+  font-size: clamp(0.88rem, 1vw, 1.02rem);
+  line-height: 1.6;
+  color: #334155;
+  margin: 0;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.5s ease-out 0.30s, transform 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.30s;
+  will-change: opacity, transform;
+}
+
+.rowRevealed .itemDescription {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.bulletList {
+  list-style: none;
+  padding: 0;
+  margin: clamp(0.35rem, 0.8vh, 0.6rem) 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.55rem, 1vh, 0.75rem);
+  width: 100%;
+}
+
+.bulletItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-family: var(--font-inter), "Inter", sans-serif;
+  font-size: clamp(0.82rem, 0.92vw, 0.92rem);
+  line-height: 1.5;
+  color: #1E293B;
+  opacity: 0;
+  transform: translateX(-12px) scale(0.97);
+  transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1), transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition-delay: calc(0.32s + var(--b-idx, 0) * 0.08s);
+  will-change: opacity, transform;
+}
+
+.rowRevealed .bulletItem {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+}
+
+.bulletIcon {
+  flex-shrink: 0;
+  color: #B8860B;
+  margin-top: 0.15rem;
+  filter: drop-shadow(0 1px 2px rgba(184, 134, 11, 0.22));
+}
+
+/* ==========================================================================
+   BOTTOM METRICS STRIP
+   ========================================================================== */
+
+.metricsBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  width: 100%;
+  background: #0E1626;
+  border: 1px solid rgba(139, 104, 32, 0.25);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+  border-radius: clamp(14px, 1.8vw, 18px);
+  padding: clamp(0.9rem, 1.5vw, 1.25rem) clamp(0.85rem, 2vw, 2.5rem);
+  box-sizing: border-box;
+  margin-top: clamp(0.5rem, 1.2vh, 1rem);
+}
+
+.metricItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.2rem;
+}
+
+.metricValue {
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
+  font-size: clamp(1.4rem, 2vw, 2.2rem);
+  font-weight: 500;
+  color: #E5C378;
+  line-height: 1;
+}
+
+.metricLabel {
+  font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
+  font-size: clamp(0.6rem, 0.7vw, 0.72rem);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(226, 233, 243, 0.7);
+}
+
+.metricDivider {
+  width: 1px;
+  height: clamp(28px, 4vh, 36px);
+  background: rgba(255, 255, 255, 0.12);
+  transform: scaleY(0);
+  transform-origin: top center;
+  transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.25s;
+}
+
+.inView .metricDivider {
+  transform: scaleY(1);
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN (Tablets & Mobile)
+   ========================================================================== */
+
+/* Tablets & Small Desktops (<= 980px) */
+@media (max-width: 980px) {
+  .scrollTrack {
+    padding: clamp(4.25rem, 7vh, 5.5rem) 1.5rem clamp(3.5rem, 6vh, 5rem);
+    gap: 3rem;
+  }
+
+  .alternatingRow {
+    flex-direction: column !important;
+    gap: 1.75rem;
+    align-items: flex-start;
+  }
+
+  .cardVisualWrap,
+  .cardTextWrap {
+    max-width: 100%;
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  .cardTextWrap {
+    gap: 0.75rem;
+  }
+
+  .metricsBar {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem 1rem;
+    padding: 1.25rem 1rem;
+  }
+
+  .metricDivider {
+    display: none;
+  }
+}
+
+/* Compact Smartphones (<= 640px) */
+@media (max-width: 640px) {
+  .scrollTrack {
+    padding: clamp(4rem, 7vh, 5rem) 1rem 3rem;
+    gap: 2.5rem;
+  }
+
+  .cardsStack {
+    gap: 2.75rem;
+  }
+
+  .alternatingRow {
+    gap: 1.25rem;
+  }
+
+  .mainTitle {
+    font-size: clamp(1.55rem, 5.5vw, 2.1rem);
+    margin-bottom: 0.6rem;
+  }
+
+  .subtitle {
+    font-size: 0.88rem;
+    line-height: 1.55;
+    padding: 0;
+  }
+
+  .imageCard {
+    border-radius: 14px;
+  }
+
+  .itemTitle {
+    font-size: clamp(1.3rem, 4.8vw, 1.65rem);
+    line-height: 1.22;
+  }
+
+  .itemDescription {
+    font-size: 0.85rem;
+    line-height: 1.52;
+  }
+
+  .bulletItem {
+    font-size: 0.8rem;
+  }
+
+  .metricsBar {
+    gap: 1rem 0.5rem;
+    padding: 1rem 0.75rem;
+    border-radius: 14px;
+  }
+
+  .metricValue {
+    font-size: 1.35rem;
+  }
+
+  .metricLabel {
+    font-size: 0.58rem;
+    letter-spacing: 0.08em;
+  }
+}
+
+/* Very Small Devices (<= 380px) */
+@media (max-width: 380px) {
+  .eyebrowRule {
+    width: 18px;
+  }
+
+  .eyebrowText {
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
+  }
+
+  .mainTitle {
+    font-size: 1.45rem;
+  }
+
+  .metricsBar {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+}

@@ -1,0 +1,1818 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #FAFAF9;
+  --color-foreground: #1A1D21;
+  
+  --color-navy: #0B1F3A;
+  --color-navy-dark: #061224;
+  --color-navy-light: #162E50;
+  --color-navy-subtle: #F0F4F8;
+  
+  --color-gold: #B8860B;
+  --color-gold-hover: #9E7208;
+  --color-gold-light: #FAF5E8;
+  --color-gold-muted: #D4AF37;
+  
+  --color-border-subtle: #E5E5E3;
+  --color-surface: #F4F4F2;
+  --color-surface-white: #FFFFFF;
+  --color-muted-text: #57595E;
+
+  /*
+   * Typography Architecture for Mining Discovery:
+   * --font-geist: High-impact modern grotesque (Geist) for bold display titles, uppercase hero headers, and architectural statements.
+   * --font-display: Display headings default to Geist for powerful, crisp modern agency feel.
+   * --font-sans: Ultra-legible workhorse (Inter) for body copy, navigation, buttons, and UI components.
+   * --font-serif: Editorial serif (Playfair Display) for journalism quotes, long-form editorial headers, and prestige highlights.
+   * --font-mono: Precision terminal mono (Geist Mono / IBM Plex Mono) for coordinates, numbers, dates, and globe badges.
+   */
+  --font-geist: var(--font-geist-sans), "Geist", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: var(--font-geist);
+  --font-sans: var(--font-sans-custom), "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif: var(--font-display-custom), "Playfair Display", Georgia, "Times New Roman", serif;
+  --font-mono: var(--font-geist-mono), var(--font-mono-custom), "IBM Plex Mono", monospace;
+
+  --max-width-editorial: 1200px;
+}
+
+:root {
+  --bg-color: #FAFAF9;
+  --text-color: #1A1D21;
+}
+
+/* Lenis Smooth Scroll Required CSS */
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+html {
+  overflow-x: clip;
+}
+
+body {
+  overflow-x: clip;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Hide default cursor on desktop fine pointer devices to use custom animated cursor */
+@media (pointer: fine) {
+  body, a, button, input, select, textarea, [role="button"] {
+    cursor: none !important;
+  }
+}
+
+/* Hide Next.js dev indicator badge in dev mode */
+nextjs-portal,
+[data-nextjs-toast],
+[data-nextjs-dialog-overlay] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Editorial Container Utility */
+.container-editorial {
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .container-editorial {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Keyframe animations for clean fade-in on load */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/*
+ * Hero entrance. Driven by CSS rather than a JS motion library so that
+ * prefers-reduced-motion is honoured on the very first paint — a hook cannot,
+ * because the initial client render has to match the server HTML.
+ * `both` fill keeps the from-state applied through any animation-delay.
+ */
+.hero-rise {
+  opacity: 0;
+  animation: fadeInUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-rise {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/*
+ * Mining-site pins on the hero globe. Restrained on purpose: a slow breathing dot and
+ * one soft expanding ring, staggered per marker from the component.
+ */
+@keyframes globePinDot {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.14);
+    opacity: 1;
+  }
+}
+
+/*
+ * The expanding pulse: a ring that leaves the dot at its own size and fades as it opens.
+ *
+ * Starting at scale(1) rather than 0.8 matters — the ring is the same 12px the dot's glow
+ * reaches, so the pulse appears to be shed BY the marker instead of materialising inside
+ * it. It finishes at 1.8x and holds there transparent for the back third of the cycle,
+ * which is the rest between beats: a ring that restarts the instant it finishes reads as
+ * a continuous ripple rather than a heartbeat.
+ */
+@keyframes globePinRing {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  65%,
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+/*
+ * Globe markers: a lit gold bead inside a pulse ring.
+ *
+ * --pin-dot and --pin-ring are the sizing knobs; nothing sets them at the moment, so
+ * every marker renders at the fallbacks below. --pin-delay and --pin-period ARE set, per
+ * marker, by GlobeHero — see the stagger note there.
+ *
+ * WHY THE WHITE HALO IS GONE. These rules were written when the globe sat on a white
+ * card, where a 2px white ring around each bead was what separated it from the land
+ * underneath. The sphere is a night Earth now: that ring read as a sticker punched onto
+ * the dark surface, and it was the single thing making the markers look unfinished. The
+ * separation is done with a dark rim instead, which does the same job against both the
+ * near-black ocean and a bright city-light cluster without adding a second colour.
+ */
+.globe-pin-dot {
+  width: var(--pin-dot, 9px);
+  height: var(--pin-dot, 9px);
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle at 35% 35%,
+    #ffffff 0%,
+    #fff3b5 25%,
+    #ffc837 55%,
+    #c49015 100%
+  );
+  box-shadow:
+    0 0 0 1px rgba(255, 235, 170, 0.7),
+    0 0 8px 3px rgba(255, 205, 55, 0.95),
+    0 0 16px 5px rgba(212, 175, 55, 0.55);
+  animation: globePinDot var(--pin-period, 2.6s) ease-in-out var(--pin-delay, 0s) infinite;
+  transition:
+    box-shadow 200ms ease,
+    background-color 200ms ease,
+    width 200ms ease,
+    height 200ms ease;
+}
+
+/*
+ * The tour's current stop, and the hovered marker: the one marker the section is pointing
+ * at, lifted to an incandescent gold sparkle with a wide radiant bloom.
+ */
+.globe-pin-dot--active {
+  background: radial-gradient(
+    circle at 35% 35%,
+    #ffffff 0%,
+    #fffbee 25%,
+    #ffd700 60%,
+    #e5a712 100%
+  );
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.9),
+    0 0 16px 6px rgba(255, 215, 0, 1),
+    0 0 32px 10px rgba(212, 175, 55, 0.75);
+}
+
+.globe-pin-ring {
+  position: absolute;
+  width: var(--pin-ring, 14px);
+  height: var(--pin-ring, 14px);
+  border-radius: 9999px;
+  border: 1.5px solid rgba(255, 215, 0, 0.85);
+  box-shadow: 0 0 10px 2px rgba(255, 200, 50, 0.7);
+  animation: globePinRing var(--pin-period, 2.6s) ease-out var(--pin-delay, 0s) infinite;
+  transition:
+    border-color 200ms ease,
+    width 200ms ease,
+    height 200ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .globe-pin-dot,
+  .globe-pin-ring {
+    animation: none;
+  }
+  .globe-pin-ring {
+    opacity: 0.3;
+    transform: scale(1.5);
+  }
+}
+
+/* Custom Scrollbar for sleek editorial feel */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #FAFAF9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D1D1CE;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #0B1F3A;
+}
+
+
+/*
+ * Hero backdrop motion. Four movements, all slow and all plain CSS keyframes: nothing
+ * here is scroll-linked, so none of it can touch the globe's scroll timeline or cost
+ * main-thread work while the user scrolls.
+ *
+ * The drift is 4px over 18s - enough that the field is not frozen, far too slow to
+ * catch in the act.
+ */
+@keyframes heroBackdropDrift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(-4px, 3px, 0);
+  }
+}
+
+@keyframes heroBackdropBreathe {
+  0%,
+  100% {
+    opacity: 0.78;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* One route draws itself in, holds, then resets while its own layer is at its faintest. */
+@keyframes heroBackdropDraw {
+  0% {
+    stroke-dashoffset: 620;
+  }
+  55%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes heroBackdropPulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.hero-backdrop-drift {
+  animation: heroBackdropDrift 18s ease-in-out infinite;
+  will-change: transform;
+}
+
+.hero-backdrop-breathe {
+  animation: heroBackdropBreathe 12s ease-in-out infinite;
+}
+
+.hero-backdrop-draw {
+  stroke-dasharray: 620;
+  animation: heroBackdropDraw 16s ease-in-out infinite;
+}
+
+.hero-backdrop-pulse {
+  animation: heroBackdropPulse 9s ease-in-out infinite;
+}
+
+.hero-backdrop-pulse:nth-of-type(2) {
+  animation-delay: -3s;
+}
+
+.hero-backdrop-pulse:nth-of-type(3) {
+  animation-delay: -6s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-backdrop-drift,
+  .hero-backdrop-breathe,
+  .hero-backdrop-draw,
+  .hero-backdrop-pulse {
+    animation: none;
+  }
+  .hero-backdrop-draw {
+    stroke-dasharray: none;
+  }
+}
+
+/* ── Hero entrance: slide-up + fade ─────────────────────────────────────────
+   Used by the dark cinematic hero (GlobeHero) for the eyebrow, heading,
+   paragraph and CTA row. Each element is independently delayed via an
+   inline `animation-delay` Tailwind class.
+
+   Starts 24px below and fully transparent; ends in place and fully opaque.
+   Duration is 780ms with an expo-out curve so each element arrives crisply
+   without overshooting.
+*/
+@keyframes heroRise {
+  from {
+    opacity: 0;
+    translate: 0 24px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+.hero-rise {
+  animation: heroRise 780ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-rise {
+    animation: none;
+    opacity: 1;
+    translate: none;
+  }
+}
+
+/* ============================================================
+   CHATBOT WIDGET STYLES (EXACT MATCH TO MINING_ASSISTENT DESIGN)
+============================================================ */
+
+.chat-launcher-wrapper {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.chat-speech-bubble {
+  position: relative;
+  background: #0B1220;
+  border: 1.5px solid #FFC837;
+  border-radius: 16px;
+  padding: 8px 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  user-select: none;
+  cursor: pointer;
+  margin-bottom: 10px;
+  margin-right: 0px;
+  pointer-events: auto;
+  transition: box-shadow 0.2s ease;
+  animation: chatbot-bubble-float 3s ease-in-out infinite;
+}
+
+.chat-speech-bubble:hover {
+  animation-play-state: paused;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+}
+
+/* Speech bubble caret */
+.chat-speech-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -9px;
+  right: 22px;
+  width: 0;
+  height: 0;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 9px solid #FFC837;
+}
+
+.chat-speech-bubble::before {
+  content: '';
+  position: absolute;
+  bottom: -7px;
+  right: 23px;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 8px solid #0B1220;
+  z-index: 2;
+}
+
+.chat-bubble-wave {
+  font-size: 16px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  transform-origin: 70% 70%;
+  animation: wave-hand 2.2s infinite;
+}
+
+.chat-bubble-text-white {
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 14.5px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+.chat-bubble-text-gold {
+  color: #FFC837;
+  font-weight: 800;
+  font-size: 14.5px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+
+.chat-button-new {
+  position: relative;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: #0B1220;
+  border: 2px solid #FFC837;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  pointer-events: auto;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+}
+
+.chat-button-new:hover {
+  transform: scale(1.06);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.5), 0 0 18px rgba(255, 200, 55, 0.25);
+}
+
+.chat-pickaxe-icon {
+  display: block;
+}
+
+.chat-status-dot {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #10B981;
+  border: 2px solid #0B1220;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.4);
+}
+
+@keyframes chatbot-bubble-appear {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes chatbot-bubble-float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes wave-hand {
+  0% {
+    transform: rotate(0deg);
+  }
+  10% {
+    transform: rotate(14deg);
+  }
+  20% {
+    transform: rotate(-8deg);
+  }
+  30% {
+    transform: rotate(14deg);
+  }
+  40% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
+  60% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@media (max-width: 640px) {
+  .chat-launcher-wrapper {
+    right: max(14px, env(safe-area-inset-right));
+    bottom: max(14px, env(safe-area-inset-bottom));
+  }
+}
+
+.chat-window-new {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  width: 460px;
+  height: 640px;
+  max-width: calc(100vw - 24px);
+  max-height: calc(100vh - 32px);
+  background: #ffffff;
+  border-radius: 20px;
+  overflow: hidden;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(7, 20, 38, 0.10);
+  box-shadow: 0 24px 60px rgba(5, 20, 38, 0.22), 0 8px 24px rgba(5, 20, 38, 0.09);
+  animation: chatbot-open 0.25s ease-out;
+  transition: width 0.26s cubic-bezier(0.16, 1, 0.3, 1), height 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.chat-window-new.is-expanded {
+  width: 840px;
+  height: 760px;
+}
+
+@keyframes chatbot-open {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.chat-header-new {
+  position: relative;
+  height: 76px;
+  min-height: 76px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: radial-gradient(circle at 90% 100%, rgba(45, 76, 115, 0.55), transparent 38%), linear-gradient(135deg, #061426 0%, #0a1d34 60%, #071426 100%);
+  color: #ffffff;
+}
+
+.chat-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.chat-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.chat-logo img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.chat-brand-text strong {
+  display: block;
+  margin: 0 0 3px;
+  color: #ffffff;
+  font-size: 16.5px;
+  line-height: 1.1;
+  font-weight: 700;
+}
+
+.chat-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 11px;
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
+
+/* The mark that opens the line. Gold, and the same glyph the launcher already uses. */
+.chat-status-mark {
+  color: #d4af37;
+  font-size: 10px;
+  line-height: 1;
+}
+
+.chat-status-role {
+  color: rgba(255, 255, 255, 0.82);
+  font-weight: 600;
+}
+
+/*
+ * Sits immediately before the word it qualifies. No pulse: a status light that breathes
+ * reads as something needing attention, and this one is only ever reporting good news.
+ */
+.online-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #7cb342;
+  box-shadow: 0 0 0 2px rgba(124, 179, 66, 0.18);
+}
+
+.status-separator {
+  opacity: 0.3;
+}
+
+.chat-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chat-action-button {
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: rgba(255, 255, 255, 0.09);
+  color: rgba(255, 255, 255, 0.85);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease, transform 0.15s ease;
+}
+
+.chat-action-button:hover {
+  background: rgba(255, 255, 255, 0.20);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.chat-close-button {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  cursor: pointer;
+  opacity: 0.85;
+  transition: opacity 0.2s ease, transform 0.15s ease;
+}
+
+.chat-close-button:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.chat-messages-new {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scroll-behavior: auto !important;
+  overscroll-behavior: contain;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  padding: 16px;
+  background: #f6f6f4;
+}
+
+.chat-scroll-bottom-btn {
+  position: absolute;
+  bottom: 84px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: #0b1a2e;
+  color: #f8fafc;
+  border: 1px solid rgba(199, 151, 56, 0.45);
+  border-radius: 9999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  z-index: 30;
+  animation: fade-in-up 0.18s ease-out;
+  transition: all 0.18s ease;
+}
+
+.chat-scroll-bottom-btn svg {
+  color: #d4af37;
+}
+
+.chat-scroll-bottom-btn:hover {
+  background: #142842;
+  border-color: #d4af37;
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.32);
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.welcome-screen {
+  display: flex;
+  flex-direction: column;
+}
+
+.welcome-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 16px 20px;
+  border: 1px solid rgba(7, 20, 38, 0.05);
+  box-shadow: 0 4px 16px rgba(7, 20, 38, 0.03);
+  margin-bottom: 20px;
+}
+
+.welcome-card p {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: #0c1e38;
+  font-weight: 500;
+}
+
+.welcome-card .welcome-title {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #071426;
+}
+
+.welcome-card .welcome-lede {
+  margin-top: 6px;
+  color: #56657a;
+  font-weight: 500;
+}
+
+.message-new {
+  display: flex;
+  margin-bottom: 14px;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+/*
+ * A question and its answer are one exchange, so they sit closer to each other than to
+ * the next exchange. That is the whole of the vertical-rhythm fix: 14px between turns,
+ * 8px inside one.
+ */
+.message-new.user + .message-new.bot {
+  margin-top: -6px;
+}
+
+.message-new:last-child {
+  margin-bottom: 0;
+}
+
+.message-new.bot {
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.message-new.user {
+  justify-content: flex-end;
+}
+
+.user-message-bubble {
+  background: #b5852d;
+  color: #ffffff;
+  font-weight: 500;
+  padding: 11px 16px;
+  /* Softer, with the corner nearest its own side drawn in: the standard cue for "mine". */
+  border-radius: 18px 18px 6px 18px;
+  max-width: 85%;
+  font-size: 13.5px;
+  line-height: 1.5;
+  /* A pasted ticker or URL must not push the bubble past the panel. */
+  overflow-wrap: anywhere;
+  box-shadow: 0 1px 2px rgba(181, 133, 45, 0.18), 0 6px 16px rgba(181, 133, 45, 0.14);
+}
+
+.bot-message-wrapper {
+  width: 100%;
+}
+
+.bot-answer {
+  width: 100%;
+  padding: 15px 17px;
+  border-radius: 18px 18px 18px 6px;
+  background: #ffffff;
+  border: 1px solid rgba(7, 20, 38, 0.08);
+  box-shadow: 0 1px 3px rgba(7, 20, 38, 0.04), 0 6px 18px rgba(7, 20, 38, 0.04);
+  color: #16283f;
+  font-size: 13.5px;
+  line-height: 1.62;
+  overflow-wrap: anywhere;
+}
+
+.bot-answer-actions {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(7, 20, 38, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.bot-action-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.bot-action-copy:hover {
+  background: #edf2f7;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+.mining-chart-container,
+.recharts-wrapper,
+.recharts-surface,
+.recharts-surface text,
+.recharts-legend-wrapper {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.message-sources {
+  margin-top: 14px;
+  padding-top: 11px;
+  border-top: 1px solid rgba(7, 20, 38, 0.07);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.source-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 5px 10px;
+  background: #faf7f0;
+  border: 1px solid #e6d6b6;
+  border-radius: 7px;
+  color: #a4762a;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+/* A long publication name shortens rather than widening the row past the card. */
+.source-link-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.source-link-icon {
+  width: 11px;
+  height: 11px;
+  flex: 0 0 auto;
+  opacity: 0.6;
+}
+
+.source-link:hover {
+  background: #f6efe0;
+  border-color: #c79738;
+  color: #8f6620;
+}
+
+.source-link:hover .source-link-icon {
+  opacity: 1;
+}
+
+.suggestions-container {
+  margin-top: 4px;
+}
+
+.suggestions-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #071426;
+  margin-bottom: 14px;
+}
+
+.suggestions-title .sparkle-icon {
+  color: #d4af37;
+  font-size: 15px;
+}
+
+.suggestion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.suggestion-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+.suggestion-card:hover {
+  border-color: #d4af37;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(212, 175, 55, 0.15);
+}
+
+.suggestion-icon {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.suggestion-icon.gold {
+  background: #faf4e6;
+  color: #c99832;
+}
+
+/* Navy, not the blue this was: it was the one colour on the panel from outside the
+   Mining Discovery palette. */
+.suggestion-icon.company {
+  background: #eef1f5;
+  color: #24405f;
+}
+
+.suggestion-icon.news {
+  background: #faf4e6;
+  color: #c99832;
+}
+
+.suggestion-text {
+  flex: 1;
+}
+
+.suggestion-text strong {
+  display: block;
+  font-size: 13.5px;
+  color: #071426;
+  font-weight: 700;
+}
+
+.suggestion-text span {
+  display: block;
+  font-size: 11.5px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.suggestion-arrow {
+  color: #d4af37;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.chat-input-new {
+  padding: 14px 16px 18px;
+  background: #ffffff;
+  border-top: 1px solid #f1f5f9;
+}
+
+.chat-input-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1.5px solid #dcbf85;
+  border-radius: 9999px;
+  padding: 4px 6px 4px 18px;
+  box-shadow: 0 1px 3px rgba(7, 20, 38, 0.04);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+/* The gold only comes fully up when the field is actually being used. */
+.chat-input-inner:focus-within {
+  border-color: #c79738;
+  box-shadow: 0 0 0 3px rgba(199, 151, 56, 0.14);
+}
+
+.chat-input-inner textarea {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  resize: none;
+  font-size: 13.5px;
+  color: #071426;
+  padding-top: 6px;
+}
+
+.chat-input-inner textarea::placeholder {
+  color: #94a3b8;
+}
+
+.send-button {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border: none;
+  border-radius: 50%;
+  background: #c79738;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.send-button:hover:not(:disabled) {
+  background: #d4af37;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(199, 151, 56, 0.3);
+}
+
+.send-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.send-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/*
+ * The searching state. Same loading branch, dressed as a status line rather than as three
+ * full stops: the mark, what it is doing, and three dots that fill in turn.
+ *
+ * It is a card like the answer it becomes, so the reply does not appear to jump out of a
+ * bare line. The surface stays put and only its contents change.
+ */
+.searching-animation {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 15px;
+  border-radius: 18px 18px 18px 6px;
+  background: #ffffff;
+  border: 1px solid rgba(7, 20, 38, 0.07);
+  box-shadow: 0 1px 2px rgba(7, 20, 38, 0.04);
+  color: #56657a;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.searching-mark {
+  color: #d4af37;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.searching-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.searching-dots i {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #c79738;
+  opacity: 0.28;
+  animation: searching-dot 1.25s ease-in-out infinite;
+}
+
+.searching-dots i:nth-child(2) {
+  animation-delay: 0.16s;
+}
+
+.searching-dots i:nth-child(3) {
+  animation-delay: 0.32s;
+}
+
+/* Opacity only. Nothing moves, nothing grows, nothing glows. */
+@keyframes searching-dot {
+  0%,
+  70%,
+  100% {
+    opacity: 0.28;
+  }
+  35% {
+    opacity: 1;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Assistant answer typography.
+
+   The answer is markdown rendered by marked, dropped into the page as HTML — and
+   Tailwind's preflight had stripped every margin, bullet and list indent off it. So a
+   reply with a lead-in, two bullets and a closing line rendered as five identical
+   unspaced lines with no bullets at all: correct content, unreadable shape. Nothing
+   below touches how that HTML is produced; it only gives the tags marked emits somewhere
+   to stand.
+------------------------------------------------------------------ */
+
+.bot-answer-content > *:first-child {
+  margin-top: 0;
+}
+
+.bot-answer-content > *:last-child {
+  margin-bottom: 0;
+}
+
+.bot-answer-content p {
+  margin: 0 0 11px;
+  line-height: 1.6;
+  font-size: 13.5px;
+  color: #1e293b;
+}
+
+.bot-answer-content strong {
+  font-weight: 700;
+  color: #071426;
+}
+
+/* Restated rather than inherited: preflight sets list-style to none on every list. */
+.bot-answer-content ul,
+.bot-answer-content ol {
+  margin: 0 0 11px;
+  padding-left: 18px;
+}
+
+.bot-answer-content ul {
+  list-style: disc outside;
+}
+
+.bot-answer-content ol {
+  list-style: decimal outside;
+}
+
+.bot-answer-content li {
+  margin-bottom: 5px;
+  line-height: 1.55;
+}
+
+.bot-answer-content li::marker {
+  color: #c79738;
+}
+
+.bot-answer-content h1 {
+  margin: 18px 0 10px;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: #061528;
+  border-bottom: 2px solid rgba(199, 151, 56, 0.4);
+  padding-bottom: 5px;
+}
+
+.bot-answer-content h2 {
+  margin: 16px 0 8px;
+  font-size: 15.5px;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  color: #0a1d34;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-bottom: 1.5px solid #e2e8f0;
+  padding-bottom: 4px;
+}
+
+.bot-answer-content h3 {
+  margin: 16px 0 8px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  color: #0b1f3a;
+  padding-bottom: 3px;
+  border-bottom: 1.5px solid rgba(199, 151, 56, 0.25);
+}
+
+.bot-answer-content h4 {
+  margin: 12px 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.bot-answer-content a {
+  color: #b5852d;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+
+.bot-answer-content code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: #f1f5f9;
+  font-size: 12px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* Wide output scrolls inside its own block; the panel itself never scrolls sideways. */
+.bot-answer-content pre {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  overflow-x: auto;
+}
+
+.bot-answer-content pre code {
+  padding: 0;
+  background: none;
+}
+
+.bot-answer-content blockquote {
+  margin: 12px 0;
+  padding: 10px 14px;
+  border-left: 3.5px solid #c79738;
+  background: #faf7f0;
+  border-radius: 0 8px 8px 0;
+  color: #334155;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.bot-answer-content hr {
+  margin: 14px 0;
+  border: 0;
+  border-top: 1px solid rgba(7, 20, 38, 0.10);
+}
+
+/* ------------------------------------------------------------------
+   High-contrast, executive tables & responsive scroll wrapper
+------------------------------------------------------------------ */
+.mining-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 12px 0 16px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  box-shadow: 0 2px 5px rgba(15, 23, 42, 0.04);
+}
+
+.mining-table-wrapper table,
+.bot-answer-content table {
+  width: 100%;
+  min-width: 580px;
+  margin: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: none;
+  font-size: 12px;
+  line-height: 1.5;
+  background: #ffffff;
+}
+
+.bot-answer-content table:not(.mining-table-wrapper table) {
+  margin: 12px 0 14px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #cbd5e1;
+}
+
+.mining-table-wrapper th,
+.bot-answer-content th {
+  position: sticky;
+  top: 0;
+  background: #091728;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.035em;
+  padding: 9px 12px;
+  border-bottom: 2px solid #c79738;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.mining-table-wrapper th:last-child,
+.bot-answer-content th:last-child {
+  border-right: none;
+}
+
+.mining-table-wrapper td,
+.bot-answer-content td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #edf2f7;
+  border-right: 1px solid #edf2f7;
+  color: #1e293b;
+  font-variant-numeric: tabular-nums;
+  vertical-align: top;
+  font-size: 12px;
+}
+
+.mining-table-wrapper td:last-child,
+.bot-answer-content td:last-child {
+  border-right: none;
+}
+
+.mining-table-wrapper tr:nth-child(even) td,
+.bot-answer-content tr:nth-child(even) td {
+  background: #f8fafc;
+}
+
+.mining-table-wrapper tr:last-child td,
+.bot-answer-content tr:last-child td {
+  border-bottom: none;
+}
+
+.mining-table-wrapper tr:hover td,
+.bot-answer-content tr:hover td {
+  background: #f1f5f9;
+}
+
+.mining-table-wrapper::-webkit-scrollbar {
+  height: 6px;
+}
+.mining-table-wrapper::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+.mining-table-wrapper::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+.mining-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ------------------------------------------------------------------
+   Message entrance. A short fade and a 4px rise, once, on arrival — enough that a reply
+   reads as having arrived rather than having always been there. No bounce, no scale.
+------------------------------------------------------------------ */
+
+.message-new {
+  animation: chat-message-in 0.26s ease-out both;
+}
+
+@keyframes chat-message-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/*
+ * Everything that moves in this panel is optional. Under reduced motion the searching
+ * dots hold at full strength — still three dots, still legible as "working", just not
+ * animated — and messages appear without the rise.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .chat-window-new,
+  .message-new {
+    animation: none;
+  }
+
+  .searching-dots i {
+    animation: none;
+    opacity: 0.85;
+  }
+
+  .send-button:hover:not(:disabled),
+  .suggestion-card:hover,
+  .chat-button-new:hover {
+    transform: none;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Responsive. Both queries below fire ONLY at sizes where the fixed 390x600 panel is
+   actually clipped by the viewport; every larger size keeps today's geometry exactly.
+
+   Measured before the fix, with the panel at right:24px / bottom:24px:
+     430x932   left  16   fits
+     412x915   left  -2   clipped
+     375x812   left -39   clipped
+     320x568   left -94 and top -56: the header, the logo and the close button were all
+               off-screen, so the panel could not even be dismissed.
+------------------------------------------------------------------ */
+
+/* ------------------------------------------------------------------
+   Smooth Mobile Responsive Chatbot Styles (phones and small tablets <= 640px)
+------------------------------------------------------------------ */
+@media (max-width: 640px) {
+  /* Full viewport native terminal experience on mobile */
+  .chat-window-new,
+  .chat-window-new.is-expanded {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    max-width: 100vw !important;
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    z-index: 99999 !important;
+    animation: chatbot-open-mobile 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+
+  @keyframes chatbot-open-mobile {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Header with safe-area-inset for notches / status bars */
+  .chat-header-new {
+    padding: max(12px, env(safe-area-inset-top)) 14px 12px !important;
+    height: auto !important;
+    min-height: calc(56px + env(safe-area-inset-top, 0px)) !important;
+    border-radius: 0 !important;
+  }
+
+  .chat-brand,
+  .chat-brand-text {
+    min-width: 0;
+  }
+
+  .chat-logo {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+  }
+
+  .chat-logo img {
+    width: 30px;
+    height: 30px;
+  }
+
+  .chat-brand-text strong {
+    font-size: 15px;
+    line-height: 1.15;
+  }
+
+  .chat-status {
+    gap: 4px;
+    font-size: 10px;
+  }
+
+  .chat-status-role {
+    white-space: nowrap;
+  }
+
+  /* Hide expand/collapse toggle on mobile full-screen */
+  .chat-action-button-expand {
+    display: none !important;
+  }
+
+  .chat-action-button {
+    width: 34px;
+    height: 34px;
+  }
+
+  .chat-close-button {
+    width: 36px;
+    height: 36px;
+    font-size: 26px;
+    line-height: 1;
+    opacity: 0.95;
+  }
+
+  /* Smooth message scrolling with momentum and containment */
+  .chat-messages-new {
+    padding: 12px 14px !important;
+    scroll-behavior: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+  }
+
+  /* Mobile Welcome & Suggestion Cards */
+  .welcome-card {
+    padding: 13px 15px;
+    margin-bottom: 12px;
+    border-radius: 14px;
+  }
+
+  .welcome-card .welcome-title {
+    font-size: 13.5px;
+  }
+
+  .welcome-card .welcome-lede {
+    font-size: 12px;
+    line-height: 1.45;
+    margin-top: 4px;
+  }
+
+  .suggestions-title {
+    font-size: 12.5px;
+    margin-bottom: 8px;
+  }
+
+  .suggestion-list {
+    gap: 8px;
+  }
+
+  .suggestion-card {
+    padding: 10px 12px;
+    border-radius: 12px;
+    gap: 10px;
+  }
+
+  .suggestion-icon {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+  }
+
+  .suggestion-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .suggestion-text strong {
+    font-size: 12.5px;
+    line-height: 1.3;
+  }
+
+  .suggestion-text span {
+    font-size: 11px;
+    line-height: 1.35;
+    margin-top: 2px;
+  }
+
+  .suggestion-arrow {
+    font-size: 14px;
+  }
+
+  /* Messages & Content on Mobile */
+  .user-message-bubble {
+    max-width: 88%;
+    padding: 9px 13px;
+    font-size: 13px;
+    line-height: 1.45;
+    border-radius: 16px 16px 4px 16px;
+  }
+
+  .bot-answer {
+    padding: 12px 14px;
+    font-size: 13px;
+    line-height: 1.55;
+    border-radius: 16px 16px 16px 4px;
+  }
+
+  .bot-answer-content p {
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+
+  .bot-answer-content h1 {
+    font-size: 15px;
+    margin: 14px 0 8px;
+  }
+
+  .bot-answer-content h2 {
+    font-size: 14px;
+    margin: 12px 0 6px;
+  }
+
+  .bot-answer-content h3 {
+    font-size: 13px;
+    margin: 12px 0 6px;
+  }
+
+  .bot-action-copy {
+    padding: 5px 9px;
+    font-size: 11px;
+    min-height: 28px;
+  }
+
+  /* Mobile Tables */
+  .mining-table-wrapper {
+    margin: 10px 0 12px;
+    border-radius: 8px;
+  }
+
+  .mining-table-wrapper table {
+    min-width: 480px;
+    font-size: 11.5px;
+  }
+
+  .mining-table-wrapper th,
+  .mining-table-wrapper td {
+    padding: 7px 10px;
+    font-size: 11px;
+  }
+
+  /* Chat Input on Mobile with Safe Area & 16px font to prevent iOS zoom */
+  .chat-input-new {
+    padding: 8px 12px max(10px, env(safe-area-inset-bottom)) !important;
+  }
+
+  .chat-input-inner {
+    padding: 3px 5px 3px 14px !important;
+    min-height: 44px;
+  }
+
+  /* 16px font-size prevents iOS Safari from auto-zooming the viewport upon focus */
+  .chat-input-inner textarea {
+    font-size: 16px !important;
+    line-height: 1.35;
+    padding-top: 8px;
+  }
+
+  .send-button {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+  }
+
+  /* Floating Launcher & Speech Bubble on Mobile */
+  .chat-button-new {
+    width: 54px;
+    height: 54px;
+    right: 0;
+    bottom: 0;
+  }
+
+  .chat-speech-bubble {
+    max-width: calc(100vw - 32px);
+    padding: 7px 12px;
+    margin-bottom: 8px;
+  }
+
+  .chat-bubble-text-white,
+  .chat-bubble-text-gold {
+    font-size: 13px;
+  }
+}
+
+/* Extra small screens <= 380px (e.g. iPhone SE 1st gen) */
+@media (max-width: 380px) {
+  .suggestion-text span {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .chat-speech-bubble {
+    padding: 6px 10px;
+    gap: 6px;
+  }
+
+  .chat-bubble-text-white,
+  .chat-bubble-text-gold {
+    font-size: 12px;
+  }
+}
+
+/* Short landscape handsets */
+@media (max-height: 520px) and (orientation: landscape) {
+  .chat-window-new {
+    position: fixed !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 100dvh !important;
+    width: 100vw !important;
+  }
+
+  .chat-header-new {
+    min-height: 48px !important;
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+  }
+}

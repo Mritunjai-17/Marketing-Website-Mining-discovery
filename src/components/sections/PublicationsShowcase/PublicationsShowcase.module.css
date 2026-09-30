@@ -1,0 +1,729 @@
+/* ==========================================================================
+   PUBLICATIONS SHOWCASE — LUXURY EDITORIAL NEWSSTAND
+   Directly connected beneath the 4 Major Investment Events
+   ========================================================================== */
+
+.publicationsSection {
+  position: relative;
+  width: 100%;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: clamp(3.5rem, 6vh, 5.5rem) clamp(1.5rem, 4vw, 3.5rem) clamp(4rem, 7vh, 6rem);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(2.5rem, 4.5vh, 3.75rem);
+  z-index: 10;
+}
+
+/* ==========================================================================
+   HEADER BLOCK
+   ========================================================================== */
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 860px;
+  width: 100%;
+}
+
+.eyebrowRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.5rem, 1.4vw, 1.1rem);
+  margin-bottom: clamp(0.5rem, 1.2vh, 0.85rem);
+  width: 100%;
+}
+
+.eyebrowRule {
+  width: clamp(20px, 3vw, 45px);
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent, rgba(138, 104, 32, 0.75));
+}
+
+.eyebrowRule:last-child {
+  background: linear-gradient(90deg, rgba(138, 104, 32, 0.75), transparent);
+}
+
+.eyebrowText {
+  font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
+  font-size: clamp(0.68rem, 0.78vw, 0.8rem);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #7A5E22;
+  white-space: nowrap;
+}
+
+.mainTitle {
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
+  font-size: clamp(1.85rem, 3.2vw, 3rem);
+  font-weight: 600;
+  color: #111622;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin: 0 0 clamp(0.75rem, 1.4vh, 1.1rem) 0;
+  text-transform: uppercase;
+}
+
+.titleAccent {
+  font-style: italic;
+  font-family: var(--font-editorial-serif), "Cormorant Garamond", Georgia, serif;
+  font-weight: 400;
+  color: #8C651A;
+}
+
+.description {
+  font-family: var(--font-inter), "Inter", sans-serif;
+  font-size: clamp(0.9rem, 1vw, 1.02rem);
+  font-weight: 400;
+  line-height: 1.65;
+  color: #4A4A48;
+  max-width: 760px;
+  margin: 0;
+}
+
+/* ==========================================================================
+   4-COLUMN PUBLICATIONS GRID
+   ========================================================================== */
+
+.publicationsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(1.2rem, 2vw, 1.85rem);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Individual Publication Card */
+.pubCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(0, 0, 0, 0.09);
+  border-radius: 18px;
+  overflow: hidden;
+  box-sizing: border-box;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.3s ease;
+  user-select: none;
+}
+
+.pubCard:hover {
+  transform: translateY(-6px);
+  border-color: rgba(200, 154, 50, 0.55);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(200, 154, 50, 0.15);
+}
+
+/* Card Visual Cover / Image Box */
+.pubCoverWrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: #14100D;
+}
+
+.pubCoverImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s ease;
+}
+
+.pubCard:hover .pubCoverImg {
+  transform: scale(1.05);
+}
+
+.pubCoverOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.38) 100%);
+  pointer-events: none;
+}
+
+.pubBadge {
+  position: absolute;
+  top: 0.85rem;
+  left: 0.85rem;
+  z-index: 2;
+  font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  background: rgba(17, 22, 34, 0.82);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 0.25rem 0.55rem;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Card Content Body */
+.pubBody {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: clamp(1.2rem, 1.8vw, 1.45rem);
+  flex: 1;
+  gap: 0.85rem;
+  box-sizing: border-box;
+}
+
+.pubTopMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.pubCategory {
+  font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8C651A;
+}
+
+.pubTitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.pubTitle {
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
+  font-size: clamp(1.15rem, 1.35vw, 1.35rem);
+  font-weight: 700;
+  color: #111622;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.pubArrowPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #111622;
+  color: #FAF7F2;
+  transition: transform 0.3s ease, background 0.3s ease, color 0.3s ease;
+  flex-shrink: 0;
+}
+
+.pubCard:hover .pubArrowPill {
+  transform: translate(2px, -2px);
+  background: #9A7224;
+  color: #FFFFFF;
+}
+
+.pubDescription {
+  font-family: var(--font-inter), "Inter", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #57534E;
+  margin: 0;
+}
+
+.pubFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.pubActionTag {
+  font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7A5E22;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: color 0.2s ease;
+}
+
+.pubCard:hover .pubActionTag {
+  color: #111622;
+}
+
+/* ==========================================================================
+   RESPONSIVE LAYOUT
+   ========================================================================== */
+
+@media (max-width: 1080px) {
+  .publicationsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.4rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    width: 100%;
+    max-width: 100%;
+    padding: 0 0.5rem;
+    box-sizing: border-box;
+  }
+
+  .eyebrowRow {
+    gap: 0.35rem;
+    margin-bottom: 0.5rem;
+    width: 100%;
+  }
+
+  .eyebrowRule {
+    display: none;
+  }
+
+  .eyebrowText {
+    white-space: normal;
+    text-align: center;
+    font-size: clamp(0.62rem, 2.2vw, 0.72rem);
+    letter-spacing: 0.08em;
+    line-height: 1.35;
+    max-width: 100%;
+  }
+
+  .mainTitle {
+    font-size: clamp(1.4rem, 5.2vw, 2.2rem);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 0.75rem;
+  }
+
+  .description {
+    font-size: clamp(0.82rem, 2.6vw, 0.94rem);
+    line-height: 1.5;
+    padding: 0 0.25rem;
+    max-width: 100%;
+  }
+
+  .publicationsSection {
+    padding: 3rem 0.85rem 4rem;
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 580px) {
+  .header {
+    padding: 0 0.25rem;
+  }
+
+  .eyebrowText {
+    font-size: 0.6rem;
+    letter-spacing: 0.06em;
+  }
+
+  .mainTitle {
+    font-size: clamp(1.18rem, 5.8vw, 1.52rem);
+    line-height: 1.22;
+  }
+
+  .description {
+    font-size: 0.8rem;
+    line-height: 1.48;
+  }
+
+  .publicationsGrid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .publicationsSection {
+    padding: 2.5rem 0.75rem 3.5rem;
+  }
+}
+
+/* ==========================================================================
+   CATALOG MODAL: LATEST ISSUE HERO + SCROLLABLE ARCHIVE
+   ========================================================================== */
+
+.catalogModalOverlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9980;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  background-color: rgba(9, 11, 15, 0.96);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  animation: overlayFadeIn 0.25s ease-out forwards;
+}
+
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.catalogModalContent {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.5rem, 3vh, 2.5rem);
+  box-sizing: border-box;
+  padding: clamp(1.5rem, 3vh, 2.5rem) clamp(1rem, 3vw, 2.5rem);
+  animation: panelSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes panelSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Modal Header */
+.catalogModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(247, 244, 237, 0.12);
+  box-sizing: border-box;
+}
+
+.modalHeaderLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.modalEyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #D6A84F;
+}
+
+.modalEyebrowRule {
+  width: 25px;
+  height: 1px;
+  background: #D6A84F;
+}
+
+.modalTitle {
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
+  font-size: clamp(1.4rem, 2.4vw, 2.1rem);
+  font-weight: 600;
+  color: #F7F4ED;
+  margin: 0;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.modalCloseBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 1rem;
+  border: 1px solid rgba(247, 244, 237, 0.25);
+  border-radius: 999px;
+  background: rgba(247, 244, 237, 0.05);
+  color: #F7F4ED;
+  font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.modalCloseBtn:hover {
+  background: rgba(214, 168, 79, 0.2);
+  border-color: rgba(214, 168, 79, 0.6);
+  color: #D6A84F;
+}
+
+/* Featured Latest Issue Spotlight Box */
+.featuredLatestCard {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: clamp(1.5rem, 3.5vw, 3rem);
+  background: linear-gradient(135deg, rgba(26, 20, 16, 0.95) 0%, rgba(17, 22, 34, 0.9) 100%);
+  border: 1px solid rgba(214, 168, 79, 0.4);
+  border-radius: 20px;
+  padding: clamp(1.25rem, 2.5vw, 2rem);
+  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.45);
+  box-sizing: border-box;
+}
+
+.featuredCoverBox {
+  position: relative;
+  width: clamp(140px, 18vw, 220px);
+  aspect-ratio: 3 / 4;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.65);
+  flex-shrink: 0;
+  background: #14100D;
+}
+
+.featuredCoverImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
+.featuredCoverBadge {
+  position: absolute;
+  top: 0.65rem;
+  left: 0.65rem;
+  font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #111622;
+  background: #D6A84F;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.featuredDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  flex: 1;
+}
+
+.featuredSubKicker {
+  font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #D6A84F;
+}
+
+.featuredHeadline {
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
+  font-size: clamp(1.4rem, 2.2vw, 1.95rem);
+  font-weight: 700;
+  color: #F7F4ED;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.featuredText {
+  font-family: var(--font-inter), "Inter", sans-serif;
+  font-size: clamp(0.85rem, 0.95vw, 0.95rem);
+  line-height: 1.6;
+  color: #AEB7BD;
+  margin: 0;
+  max-width: 680px;
+}
+
+.featuredReadBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  align-self: flex-start;
+  padding: 0.75rem 1.6rem;
+  background: #D6A84F;
+  color: #111622;
+  border-radius: 999px;
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: 0 4px 18px rgba(214, 168, 79, 0.35);
+  margin-top: 0.35rem;
+}
+
+.featuredReadBtn:hover {
+  transform: translateY(-2px);
+  background: #F1EEE6;
+  box-shadow: 0 8px 25px rgba(214, 168, 79, 0.5);
+}
+
+/* Scrollable Archive Library Section */
+.archiveSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.archiveHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.archiveSectionTitle {
+  font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
+  font-size: clamp(0.78rem, 0.9vw, 0.88rem);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #D6A84F;
+  margin: 0;
+}
+
+.archiveScrollHint {
+  font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
+  font-size: 0.68rem;
+  color: #AEB7BD;
+  letter-spacing: 0.08em;
+}
+
+/* Archive Grid */
+.archiveGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: clamp(1rem, 1.8vw, 1.5rem);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.archiveCard {
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+  box-sizing: border-box;
+}
+
+.archiveCard:hover {
+  transform: translateY(-5px);
+  border-color: rgba(214, 168, 79, 0.55);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.archiveCoverBox {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: #14100D;
+}
+
+.archiveCoverImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+  transition: transform 0.5s ease;
+}
+
+.archiveCard:hover .archiveCoverImg {
+  transform: scale(1.05);
+}
+
+.archiveMeta {
+  display: flex;
+  flex-direction: column;
+  padding: 0.85rem;
+  gap: 0.35rem;
+  box-sizing: border-box;
+}
+
+.archiveItemTitle {
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #F7F4ED;
+  margin: 0;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.archiveItemSubtitle {
+  font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
+  font-size: 0.66rem;
+  color: #AEB7BD;
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+
+.archiveItemAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #D6A84F;
+  margin-top: 0.4rem;
+}
+
+@media (max-width: 768px) {
+  .featuredLatestCard {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .featuredCoverBox {
+    width: 160px;
+  }
+
+  .archiveGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
