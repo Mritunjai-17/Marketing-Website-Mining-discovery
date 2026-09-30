@@ -21,48 +21,52 @@ export interface FocusCard {
 
 export const FOCUS_CARDS: FocusCard[] = [
   {
-    id: "alliance-1",
-    badge: "01 — CONFERENCE & POLICY",
-    category: "STRATEGIC ALLIANCE",
-    title: "Leading Mining Associations",
-    description: "Knowledge sharing, policy alignment, and keynote conference partnerships.",
-    image: "/images/cards/card_01_alliances.jpg",
-    locationTag: "[ 01 · CONFERENCE & POLICY ]",
-    ctaText: "Explore Alliance",
-    ctaHref: "/contact",
+    id: "mining-investment-north",
+    badge: "01 — OFFICIAL MEDIA PARTNER",
+    category: "QUEBEC CITY, CANADA",
+    title: "The Mining Investment Event of the North",
+    description:
+      "Canada’s premier tier-1 invitation-only mining conference. It connects institutional funds and c-suite executives to evaluate development-stage projects and arrange financings.",
+    image: "/images/events/the_mining_investment_event_logo.png",
+    locationTag: "[ QUEBEC CITY · FAIRMONT LE CHÂTEAU FRONTENAC ]",
+    ctaText: "View Event Coverage",
+    ctaHref: "/work",
   },
   {
-    id: "alliance-2",
-    badge: "02 — TECH & PLATFORMS",
-    category: "INTEGRATED INFRASTRUCTURE",
-    title: "Service & Technology Providers",
-    description: "Co-branded digital campaigns, software integration, and investor showcase events.",
-    image: "/images/cards/card_02_technology.jpg",
-    locationTag: "[ 02 · TECH & PLATFORMS ]",
-    ctaText: "Explore Alliance",
-    ctaHref: "/contact",
+    id: "pdac-convention",
+    badge: "02 — WORLD'S LARGEST MINING CONVENTION",
+    category: "TORONTO, CANADA",
+    title: "PDAC Convention",
+    description:
+      "The world’s premier mineral exploration gathering, bringing over 30,000 attendees from 130 countries to Toronto each year for dealmaking and exploration capital.",
+    image: "/images/events/pdac_logo.png",
+    locationTag: "[ TORONTO · METRO TORONTO CONVENTION CENTRE ]",
+    ctaText: "View Event Coverage",
+    ctaHref: "/work",
   },
   {
-    id: "alliance-3",
-    badge: "03 — GROWTH & CAPITAL",
-    category: "CORPORATE EXPANSION",
-    title: "Corporate Growth Partners",
-    description: "Digital transformation in marketing, corporate re-branding, and liquidity acceleration.",
-    image: "/images/cards/card_03_growth.jpg",
-    locationTag: "[ 03 · GROWTH & CAPITAL ]",
-    ctaText: "Explore Alliance",
-    ctaHref: "/contact",
+    id: "mines-and-money",
+    badge: "03 — EUROPE & GLOBAL CAPITAL",
+    category: "LONDON, UNITED KINGDOM",
+    title: "Mines and Money",
+    description:
+      "Europe’s flagship mining investment forum, linking active exploration companies with London City asset managers, private equity funds, and family offices.",
+    image: "/images/events/mines_and_money_logo.png",
+    locationTag: "[ LONDON · BUSINESS DESIGN CENTRE ]",
+    ctaText: "View Event Coverage",
+    ctaHref: "/work",
   },
   {
-    id: "alliance-4",
-    badge: "04 — ESG & GOVERNANCE",
-    category: "MARKET INTEGRITY",
-    title: "Regulatory & Transparency Bodies",
-    description: "Promoting ESG reporting standards, investor trust, and verified market intelligence.",
-    image: "/images/cards/card_04_governance.jpg",
-    locationTag: "[ 04 · ESG & GOVERNANCE ]",
-    ctaText: "Explore Alliance",
-    ctaHref: "/contact",
+    id: "mining-indaba",
+    badge: "04 — AFRICAN & EMERGING MARKETS",
+    category: "CAPE TOWN, SOUTH AFRICA",
+    title: "Investing in African Mining Indaba",
+    description:
+      "Africa’s largest mining investment summit, bringing together sovereign wealth funds, major producers, and global financiers to fund major resource projects.",
+    image: "/images/events/mining_indaba_logo.png",
+    locationTag: "[ CAPE TOWN · CTICC ]",
+    ctaText: "View Event Coverage",
+    ctaHref: "/work",
   },
 ];
 
@@ -1824,18 +1828,18 @@ export const MiningDiscoveryShowcase: React.FC = () => {
               <div className="zoomContentWrap">
                 <div className="zoomHeadlineCol">
                   <h2 ref={zoomTitleRef} className="zoomTitle">
-                    <span className="zoomTitlePrimary">SUSTAINABLE</span>
+                    <span className="zoomTitlePrimary">MAJOR MINING</span>
                     <span className="zoomTitleSecondary">
-                      MINING
+                      INVESTMENT EVENTS
                       <span className="zoomTitleDot" />
                     </span>
                   </h2>
                 </div>
 
                 <div ref={zoomInfoColRef} className="zoomInfoCol">
-                  <span className="zoomInfoEyebrow">OUR FOCUS AREAS</span>
+                  <span className="zoomInfoEyebrow">GLOBAL EVENT COVERAGE</span>
                   <p className="zoomInfoText">
-                    We connect industry leaders, foster strategic global collaboration, and unlock capital opportunities for a stronger, more resilient and sustainable mining future across critical mineral supply chains worldwide.
+                    Where mining companies meet institutional capital. We cover the world&apos;s most influential mining conferences on the ground, putting junior explorers and mid-tier producers directly in front of active investors.
                   </p>
                 </div>
               </div>
@@ -1845,7 +1849,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
             <div
               ref={horizontalStageRef}
               className="horizontalCardsStage"
-              aria-label="Our Focus Areas"
+              aria-label="Major Mining Investment Events"
             >
               {/* Full-Screen Sand Finale Slide with Closing Quote & 3D Client Logos */}
               <div

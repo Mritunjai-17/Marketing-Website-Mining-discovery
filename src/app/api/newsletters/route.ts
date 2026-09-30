@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
 import { INITIAL_NEWSLETTERS, type PublicationItem } from "@/data/publications";
 
-export const revalidate = 1800; // Cache for 30 minutes
+export const revalidate = 60; // Revalidate every minute for timely updates
 
 export async function GET() {
   try {
+    // Fetch dynamically from Strapi with descending sort by createdAt
     const res = await fetch(
-      "https://admins.miningdiscovery.com/api/post-newsletters?pagination[pageSize]=100&populate=*",
-      { next: { revalidate: 1800 } }
+      "https://admins.miningdiscovery.com/api/post-newsletters?pagination[pageSize]=200&sort[0]=createdAt:desc&sort[1]=id:desc&populate=*",
+      { next: { revalidate: 60 } }
     );
 
     if (!res.ok) {
@@ -26,8 +27,14 @@ export async function GET() {
           n.coverImage?.url ||
           "/cards/bg_card_1.webp",
         pdf: `/api/pdf-proxy?url=${encodeURIComponent(n.pdfFile.url)}`,
-        date: n.publishedAt || n.createdAt || "",
-      }));
+        date: n.createdAt || n.publishedAt || "",
+      }))
+      .sort((a: PublicationItem, b: PublicationItem) => {
+        const timeA = new Date(a.date || 0).getTime();
+        const timeB = new Date(b.date || 0).getTime();
+        if (timeB !== timeA) return timeB - timeA;
+        return Number(b.id) - Number(a.id);
+      });
 
     return NextResponse.json({
       success: true,
@@ -37,3 +44,4 @@ export async function GET() {
     return NextResponse.json({ success: true, data: INITIAL_NEWSLETTERS });
   }
 }
+

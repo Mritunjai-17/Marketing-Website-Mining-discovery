@@ -28,63 +28,63 @@ interface GrowthPillar {
 const GROWTH_PILLARS: GrowthPillar[] = [
   {
     id: "campaigns",
-    badge: "MILESTONE-DRIVEN CAMPAIGNS",
-    targetAudience: "FOR DISCOVERY MINERS & PROJECT GENERATORS",
-    title: "Translating Drill Hole Assays into Market Narrative",
+    badge: "FOR MINING COMPANIES",
+    targetAudience: "FOR EXPLORATION & JUNIOR RESOURCE MINERS",
+    title: "Turn Your Drill Results Into Market Liquidity & Higher Share Value",
     description:
-      "A 50-meter intercept of high-grade copper or gold doesn't create market conviction on its own. We structure continuous editorial and video dispatches that explain the geological continuity, jurisdictional leverage, and exploration upside to qualified global buyers.",
+      "Finding copper, gold, or critical minerals is only half the battle. If trading volume goes quiet between drill seasons, your share price suffers. We broadcast your assays and exploration milestones to thousands of active institutional funds and retail buyers across TSX, ASX, and OTC markets.",
     bullets: [
-      "Technical assay teardowns translated for institutional capital",
-      "Executive video dispatches filmed on-site at active rigs",
-      "Multi-bourse editorial syndication across TSX, ASX, and OTC",
+      "Global exposure through digital magazines, weekly dispatches, and CEO spotlights",
+      "Sustained trading volume and market liquidity between assay announcements",
+      "Direct connection with qualified funds and family offices looking to finance drill programs",
     ],
     image: "/services/02-drill.webp",
-    alt: "High-grade geological drill core assays and rock samples arranged in core boxes",
+    alt: "Geological drill rig and high-grade mineral core samples in the field",
     align: "left-card",
   },
   {
     id: "syndication",
-    badge: "INSTITUTIONAL SYNDICATION",
-    targetAudience: "FOR FAMILY OFFICES, FUNDS & RESOURCE INVESTORS",
-    title: "Direct Access to Pre-Discovery & Growth-Stage Drill Programs",
+    badge: "FOR RESOURCE INVESTORS",
+    targetAudience: "FOR FUNDS, FAMILY OFFICES & PRIVATE INVESTORS",
+    title: "Find Early-Stage Discoveries Before the Broader Market Catches On",
     description:
-      "Institutional and high-net-worth resource investors receive curated, data-rich intelligence dispatches. We highlight tier-one geological jurisdictions, experienced management teams, and near-term catalysts before generalist retail markets catch on.",
+      "Mineral exploration offers explosive upside, but sorting high-grade discoveries from empty market hype is tough. We provide verified geological teardowns, simplify technical assay data, and introduce you directly to leadership teams before major price runs.",
     bullets: [
-      "Curated discovery intelligence before headline press releases",
-      "Direct introductions to C-suite and lead geological teams",
-      "Strict due diligence on jurisdiction, permits, and balance sheets",
+      "Vetted discovery reports focused on real drill intercepts, safe jurisdictions, and strong balance sheets",
+      "Direct access and interviews with C-suite executives and chief geologists",
+      "First-mover intelligence delivered weekly so you can position ahead of the crowd",
     ],
     image: "/services/03-assay.webp",
-    alt: "Institutional financial trading floor with analysts reviewing technical geological data",
+    alt: "Institutional mining analysts and investors evaluating exploration data",
     align: "right-card",
   },
   {
     id: "liquidity",
-    badge: "MULTI-BOURSE LIQUIDITY",
-    targetAudience: "FOR PUBLIC JUNIOR & MID-TIER MINERS",
-    title: "Stabilizing Trading Volume & Expanding Cross-Border Bourses",
+    badge: "FOR TRADERS & READERS",
+    targetAudience: "FOR DAILY READERS, COMMODITY TRADERS & MARKET ENTHUSIASTS",
+    title: "Clear, Unbiased Mining News and Research You Can Actually Use",
     description:
-      "Market caps erode when trading volume goes dormant between drill seasons. Our sustained communication strategy keeps global trading desks active across Canadian, Australian, US, and European capital markets throughout 12-month exploration cycles.",
+      "Mining news is often packed with dense geological jargon. Mining Discovery breaks down complex drill cores, commodity cycles, and market swings into easy-to-read, actionable intelligence so you can trade and follow the sector with clarity.",
     bullets: [
-      "Continuous trading desk visibility between assay news releases",
-      "Cross-border investor expansion (TSX-V, CSE, OTCQX, Frankfurt)",
-      "Warrant acceleration support and liquidity depth stabilization",
+      "100% free access to digital magazines, weekly newspapers, and technical PDFs",
+      "Plain-English translations of high-grade drill results and resource estimates",
+      "Up-to-date tracking of upcoming drill assays, permit decisions, and buyout rumors",
     ],
     image: "/services/01-survey.webp",
-    alt: "High-level board meeting analyzing mining valuation models and cross-border liquidity",
+    alt: "Market analysis and commodity trading charts for resource equities",
     align: "left-card",
   },
   {
     id: "partnerships",
-    badge: "TIER-1 STRATEGIC JVS",
-    targetAudience: "FOR SENIOR MINERS & STRATEGIC ALLIANCES",
-    title: "Positioning Premier Deposits for Major Producer Buyouts",
+    badge: "FOR TIER-1 STRATEGIC JVS",
+    targetAudience: "FOR SENIOR PRODUCERS & CORPORATE DEVELOPMENT",
+    title: "Spot Premier Deposits for Joint Ventures, Farm-Ins & Buyouts",
     description:
-      "The ultimate validation of a junior explorer is a farm-in agreement or joint venture with a Tier-1 major. We position your land package, technical data room, and ESG track record directly in front of M&A desks looking to replace reserves.",
+      "Major producers need to replace depleting reserves with long-life deposits. We highlight top-tier junior discoveries and QP-verified projects with genuine scale, making deal-flow accessible for corporate development and M&A desks.",
     bullets: [
-      "Strategic showcase targeting senior producer corporate development",
-      "Technical credibility verified through independent QP data",
-      "High-profile exposure at The Mining Investment Event of the North",
+      "Curated pipeline of high-potential assets ready for partnership or acquisition",
+      "Verified geological continuity backed by independent technical reporting",
+      "High-level networking access at premier mining investment conferences",
     ],
     image: "/services/04-pit.webp",
     alt: "Large-scale modern mining processing facility and open pit production infrastructure",
@@ -263,27 +263,26 @@ export const ClientInvestorGrowth: React.FC<ClientInvestorGrowthProps> = ({
             >
               <div className={styles.eyebrowRow}>
                 <span className={styles.eyebrowRule} />
-                <span className={styles.eyebrowText}>THE VALUE BRIDGE • DISCOVERY TO CAPITAL</span>
+                <span className={styles.eyebrowText}>FOR MINERS • INVESTORS • TRADERS</span>
                 <span className={styles.eyebrowRule} />
               </div>
 
               <h2 className={styles.mainTitle}>
                 <span className={styles.maskWrapper}>
                   <span className={`${styles.maskedLine} ${styles.line1}`}>
-                    TURNING GEOLOGY INTO
+                    BUILDING VALUE FOR
                   </span>
                 </span>
                 <span className={styles.maskWrapper}>
                   <span className={`${styles.maskedLine} ${styles.line2}`}>
-                    <em className={styles.shimmerText}>ENTERPRISE VALUE</em>
+                    <em className={styles.shimmerText}>EVERY STAKEHOLDER</em>
                   </span>
                 </span>
               </h2>
 
               <p className={styles.subtitle}>
-                Exploration unearths the mineral deposit. Mining Discovery ensures global
-                institutional capital recognizes, values, and finances it. We bridge physical
-                exploration milestones with multi-bourse liquidity and sustained investor conviction.
+                Whether you run a mining company, manage an investment portfolio, or track commodity
+                markets, Mining Discovery gives you the reach, data, and access to grow.
               </p>
             </header>
 
@@ -357,44 +356,44 @@ export const ClientInvestorGrowth: React.FC<ClientInvestorGrowthProps> = ({
             >
               <div className={styles.metricItem}>
                 <AnimatedMetric
-                  value="$2.4B+"
+                  value="$3.5B+"
                   inView={metricsInView}
                   className={styles.metricValue}
                 />
-                <span className={styles.metricLabel}>Institutional Capital Network</span>
+                <span className={styles.metricLabel}>Client Capital Reach</span>
               </div>
 
               <div className={styles.metricDivider} />
 
               <div className={styles.metricItem}>
                 <AnimatedMetric
-                  value="140,000+"
+                  value="50,000+"
                   inView={metricsInView}
                   className={styles.metricValue}
                 />
-                <span className={styles.metricLabel}>C-Suite &amp; Fund Decision-Makers</span>
+                <span className={styles.metricLabel}>Accredited Investors &amp; Funds</span>
               </div>
 
               <div className={styles.metricDivider} />
 
               <div className={styles.metricItem}>
                 <AnimatedMetric
-                  value="48+"
+                  value="250,000+"
+                  inView={metricsInView}
+                  className={styles.metricValue}
+                />
+                <span className={styles.metricLabel}>Global Readers &amp; Traders</span>
+              </div>
+
+              <div className={styles.metricDivider} />
+
+              <div className={styles.metricItem}>
+                <AnimatedMetric
+                  value="60+"
                   inView={metricsInView}
                   className={styles.metricValue}
                 />
                 <span className={styles.metricLabel}>Mining Jurisdictions Covered</span>
-              </div>
-
-              <div className={styles.metricDivider} />
-
-              <div className={styles.metricItem}>
-                <AnimatedMetric
-                  value="100%"
-                  inView={metricsInView}
-                  className={styles.metricValue}
-                />
-                <span className={styles.metricLabel}>Verified Geological Teardowns</span>
               </div>
             </div>
           </div>

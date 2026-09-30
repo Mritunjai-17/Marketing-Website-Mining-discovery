@@ -4,6 +4,7 @@ import React, { useRef, useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { AnimatedMetric } from "@/components/ui/AnimatedMetric";
+import { PublicationsShowcase } from "@/components/sections/PublicationsShowcase";
 import styles from "./FeaturedWorkShowcase.module.css";
 
 export interface FeaturedWorkShowcaseProps {
@@ -24,6 +25,8 @@ interface ChapterData {
   titleLine2: string;
   coordinates: string;
   bgImage: string;
+  bgType?: "image" | "logo";
+  logoImage?: string;
   clientName: string;
   storyLead: string;
   storyDetail: string;
@@ -37,84 +40,130 @@ interface ChapterData {
 
 const CHAPTERS: ChapterData[] = [
   {
-    id: "pan-global",
-    chapterNumber: "CHAPTER 01",
-    category: "SPAIN // COPPER & GOLD DISCOVERY",
-    ticker: "TSX-V: PGZ • OTCQB: PGZFF",
-    titleLine1: "DELINEATING SPAIN'S",
-    titleLine2: "PREMIER MINERAL DISTRICT",
-    coordinates: "LAT 37°31'N / LON 6°19'W // ESCACENA DRILL CORRIDOR",
-    bgImage: "/images/chapters/chapter_01_spain.jpg",
-    clientName: "Pan Global Resources Inc.",
+    id: "the-mining-investment-event-north",
+    chapterNumber: "EVENT 01",
+    category: "QUEBEC CITY // TIER-1 INSTITUTIONAL SUMMIT",
+    ticker: "OFFICIAL MEDIA PARTNER • INVITATION ONLY",
+    titleLine1: "THE MINING INVESTMENT",
+    titleLine2: "EVENT OF THE NORTH",
+    coordinates: "LAT 46°48'N / LON 71°12'W // CHÂTEAU FRONTENAC",
+    bgImage: "/images/events/the_mining_investment_event_watermark.png",
+    bgType: "logo",
+    logoImage: "/images/events/the_mining_investment_event_logo.png",
+    clientName: "The Mining Investment Event of the North",
     storyLead:
-      "Translated Escacena’s copper-gold assays into institutional dispatches and European syndication, engaging 45,000+ qualified resource investors.",
+      "Canada’s premier tier-1 invitation-only mining conference, connecting c-suite executives directly with senior institutional funds, Bay Street desks, and major producers.",
     storyDetail: "",
-    metric1Val: "C$1.15M",
-    metric1Lbl: "Warrant Financing Closed",
-    metric2Val: "+185%",
-    metric2Lbl: "Institutional Inquiries Lift",
-    deliverables: "Executive Video Series • Technical Dispatches • Global Investor Syndication",
+    metric1Val: "2-Year",
+    metric1Lbl: "Official Media Partner",
+    metric2Val: "Tier-1",
+    metric2Lbl: "Institutional Mining Summit",
+    deliverables: "Executive Video Series • On-Site Broadcasts • Institutional Syndication",
     align: "heading-left",
   },
   {
-    id: "phenom-resources",
-    chapterNumber: "CHAPTER 02",
-    category: "NEVADA // CARLIN GOLD & TIER-1 JV",
-    ticker: "TSX-V: PHNM • OTCQX: PHNMF",
-    titleLine1: "FROM CARLIN TARGETS TO",
-    titleLine2: "TIER-1 PRODUCER VALIDATION",
-    coordinates: "LAT 40°47'N / LON 116°15'W // CARLIN STRATIGRAPHY",
-    bgImage: "/images/chapters/chapter_02_nevada.jpg",
-    clientName: "Phenom Resources Corp.",
+    id: "pdac-convention",
+    chapterNumber: "EVENT 02",
+    category: "TORONTO // GLOBAL EXPLORATION HUB",
+    ticker: "THE WORLD'S PREMIER MINERAL CONVENTION",
+    titleLine1: "PDAC GLOBAL EXPLORATION",
+    titleLine2: "& INVESTMENT CONVENTION",
+    coordinates: "LAT 43°38'N / LON 79°23'W // METRO TORONTO CONVENTION CENTRE",
+    bgImage: "/images/events/pdac_watermark.png",
+    bgType: "logo",
+    logoImage: "/images/events/pdac_logo.png",
+    clientName: "Prospectors & Developers Association of Canada",
     storyLead:
-      "Positioned deep Carlin-trend geophysics through strategic visual storytelling, accelerating capital placement and securing an SSR Mining Tier-1 JV.",
+      "The world’s leading mineral exploration gathering, bringing together 30,000+ delegates and junior explorers across 130 countries for dealmaking and exploration capital.",
     storyDetail: "",
-    metric1Val: "$1.275M",
-    metric1Lbl: "Private Placement Closed",
-    metric2Val: "SSR Mining JV",
-    metric2Lbl: "Strategic Partner Agreement",
-    deliverables: "Geological Visual Storytelling • Private Placement Blitz • Editorial Feature",
+    metric1Val: "30,000+",
+    metric1Lbl: "Global Mining Delegates",
+    metric2Val: "130+",
+    metric2Lbl: "Participating Countries",
+    deliverables: "Discovery Stage Coverage • Junior Miner Spotlights • Investor Briefs",
     align: "heading-left",
   },
   {
-    id: "arizona-gold-silver",
-    chapterNumber: "CHAPTER 03",
-    category: "ARIZONA // HIGH-GRADE DRILL ASSAYS",
-    ticker: "TSX-V: AZS • OTCQB: AZASF",
-    titleLine1: "TRANSLATING DRILL CORE ASSAYS",
-    titleLine2: "INTO MARKET CONVICTION",
-    coordinates: "LAT 35°05'N / LON 114°21'W // PHILADELPHIA VEIN SYSTEM",
-    bgImage: "/images/chapters/chapter_03_arizona.jpg",
-    clientName: "Arizona Gold & Silver Inc.",
+    id: "mines-and-money",
+    chapterNumber: "EVENT 03",
+    category: "LONDON // EUROPEAN CAPITAL FORUM",
+    ticker: "LONDON CITY • CAPITAL MATCHMAKING",
+    titleLine1: "MINES AND MONEY &",
+    titleLine2: "RESOURCING TOMORROW",
+    coordinates: "LAT 51°32'N / LON 0°06'W // BUSINESS DESIGN CENTRE",
+    bgImage: "/images/events/mines_and_money_watermark.png",
+    bgType: "logo",
+    logoImage: "/images/events/mines_and_money_logo.png",
+    clientName: "Mines and Money / Resourcing Tomorrow",
     storyLead:
-      "Mapped Philadelphia's bonanza drill intercepts into interactive 3D assays, proving vein continuity and expanding North American desk liquidity.",
+      "Europe’s flagship natural resource investment summit, linking active miners with London City asset managers, private equity funds, and European family offices.",
     storyDetail: "",
-    metric1Val: "+320%",
-    metric1Lbl: "Investor Engagement Lift",
-    metric2Val: "High-Grade",
-    metric2Lbl: "Vein Continuity Proved",
-    deliverables: "3D Drill Hole Mapping • Interactive Assays • Mobile Investor Briefs",
+    metric1Val: "2,500+",
+    metric1Lbl: "Active Resource Investors",
+    metric2Val: "500+",
+    metric2Lbl: "Mining Corporates & Desks",
+    deliverables: "European Capital Matchmaking • C-Suite Interviews • Bourse Visibility",
     align: "heading-left",
   },
   {
-    id: "astra-exploration",
-    chapterNumber: "CHAPTER 04",
-    category: "CHILE & QUEBEC // BONANZA TO NATIONAL STAGE",
-    ticker: "TSX-V: ASTR • OFFICIAL MEDIA ALLIANCE",
-    titleLine1: "BRIDGING GRASSROOTS DISCOVERY",
-    titleLine2: "WITH BAY STREET TITANS",
-    coordinates: "LAT 25°28'S / LON 69°55'W // ATACAMA TO BAY STREET",
-    bgImage: "/images/chapters/chapter_04_chile.jpg",
-    clientName: "Astra Exploration & National Mining Event",
+    id: "mining-indaba",
+    chapterNumber: "EVENT 04",
+    category: "CAPE TOWN // AFRICAN & GLOBAL M&A",
+    ticker: "PAN-AFRICAN & GLOBAL PROJECT FINANCING",
+    titleLine1: "INVESTING IN AFRICAN",
+    titleLine2: "MINING INDABA",
+    coordinates: "LAT 33°55'S / LON 18°25'E // CTICC CAPE TOWN",
+    bgImage: "/images/events/mining_indaba_watermark.png",
+    bgType: "logo",
+    logoImage: "/images/events/mining_indaba_logo.png",
+    clientName: "Investing in African Mining Indaba",
     storyLead:
-      "Expanded discovery reach across Tier-1 institutions through an exclusive multi-year alliance with The Mining Investment Event of the North.",
+      "Africa’s largest mining investment summit, uniting sovereign wealth funds, major global producers, and international banks to finance major resource assets.",
     storyDetail: "",
-    metric1Val: "13.7M+",
-    metric1Lbl: "Network Campaign Reach",
-    metric2Val: "2-Year Partner",
-    metric2Lbl: "Premier Canadian Mining Summit",
-    deliverables: "National Summit Coverage • C-Suite Interviews • Institutional Networking",
+    metric1Val: "9,000+",
+    metric1Lbl: "Mining Leaders & Investors",
+    metric2Val: "100+",
+    metric2Lbl: "Sovereign & Corporate Delegations",
+    deliverables: "Sovereign Project Spotlights • M&A Coverage • Global Syndication",
     align: "heading-left",
+  },
+];
+
+interface StatSet {
+  category: string;
+  stats: {
+    value: string;
+    label: string;
+  }[];
+}
+
+const STAT_SETS: StatSet[] = [
+  {
+    category: "Global Scale",
+    stats: [
+      { value: "45,000+", label: "Annual Summit Delegates" },
+      { value: "130+", label: "Countries Represented" },
+      { value: "$3.5T+", label: "Combined Market Cap" },
+      { value: "350+", label: "C-Suite Broadcasts" },
+    ],
+  },
+  {
+    category: "Media Partnerships",
+    stats: [
+      { value: "4 Major", label: "Tier-1 Mining Summits" },
+      { value: "12,000+", label: "Institutional Funds Reached" },
+      { value: "60+", label: "Resource Jurisdictions" },
+      { value: "100%", label: "On-Site Executive Coverage" },
+    ],
+  },
+  {
+    category: "Audience & Dealmaking",
+    stats: [
+      { value: "50,000+", label: "Global Mining Leaders" },
+      { value: "1,500+", label: "Fund Managers & Desks" },
+      { value: "130+", label: "Sovereign Delegations" },
+      { value: "250+", label: "Executive Deep-Dives" },
+    ],
   },
 ];
 
@@ -134,12 +183,23 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
   const [headerInView, setHeaderInView] = useState(false);
   const [revealedChapters, setRevealedChapters] = useState<boolean[]>([true, true, true, true]);
   const [activeChapterIndex, setActiveChapterIndex] = useState<number>(0);
+  const [activeStatSet, setActiveStatSet] = useState<number>(0);
+  const [isStatsHovered, setIsStatsHovered] = useState<boolean>(false);
   const activeChapterRef = useRef<number>(0);
   const currentProgressRef = useRef<number>(0);
   const targetProgressRef = useRef<number>(0);
   const isManualClickRef = useRef<boolean>(false);
   const manualTimerRef = useRef<NodeJS.Timeout | null>(null);
   const lastDeckHeightIdx = useRef<number>(-1);
+
+  // Auto-cycle stats set every 5.5s unless hovered
+  useEffect(() => {
+    if (isStatsHovered) return;
+    const interval = setInterval(() => {
+      setActiveStatSet((prev) => (prev + 1) % STAT_SETS.length);
+    }, 5500);
+    return () => clearInterval(interval);
+  }, [isStatsHovered]);
 
   // Tab click handler with smooth continuous glide
   const handleTabClick = (idx: number) => {
@@ -354,7 +414,7 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
         <div className={styles.eyebrowRow}>
           <span className={styles.eyebrowRule} />
           <span className={styles.eyebrowText}>
-            THE METHODOLOGY IN ACTION // FIELDWORK TO VALUATION
+            GLOBAL EVENT COVERAGE // INSTITUTIONAL REACH
           </span>
           <span className={styles.eyebrowRule} />
         </div>
@@ -362,58 +422,56 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
         <h2 className={styles.mainTitle}>
           <span className={styles.maskWrapper}>
             <span className={`${styles.maskedLine} ${styles.line1}`}>
-              WHERE HIGH-GRADE EXPLORATION
+              THE 4 MAJOR MINING
             </span>
           </span>
           <span className={styles.maskWrapper}>
             <span className={`${styles.maskedLine} ${styles.line2}`}>
-              MEETS <em className={styles.shimmerText}>REAL CAPITAL.</em>
+              INVESTMENT EVENTS <em className={styles.shimmerText}>IN THE WORLD.</em>
             </span>
           </span>
         </h2>
 
         <p className={styles.description}>
-          Junior miners rarely struggle because their rocks lack metal—they struggle when the
-          market fails to grasp the scale of what they’ve uncovered. Here is how our capital bridge
-          turns drill core assays into institutional conviction, active liquidity, and Tier-1 joint ventures.
+          Where mining companies meet institutional capital. We cover the world&apos;s most influential mining conferences on the ground, putting junior explorers and mid-tier producers directly in front of active investors.
         </p>
 
-        {/* Minimal Editorial KPI Strip with Animated Count-Ups and Laser Dividers */}
-        <div className={styles.editorialMetricsStrip}>
-          <div className={styles.editorialMetric}>
-            <AnimatedMetric
-              value="13.7M+"
-              inView={headerInView}
-              className={styles.metricBigVal}
-            />
-            <span className={styles.metricSubLbl}>Targeted Investor Views</span>
+        {/* Minimal Editorial KPI Strip with Animated Count-Ups and Category Switcher */}
+        <div
+          className={styles.metricsStripContainer}
+          onMouseEnter={() => setIsStatsHovered(true)}
+          onMouseLeave={() => setIsStatsHovered(false)}
+        >
+          <div className={styles.statsPillRow} role="tablist" aria-label="Summit Statistics Dimensions">
+            {STAT_SETS.map((set, sIdx) => (
+              <button
+                key={set.category}
+                type="button"
+                role="tab"
+                aria-selected={activeStatSet === sIdx}
+                onClick={() => setActiveStatSet(sIdx)}
+                className={`${styles.statPillBtn} ${activeStatSet === sIdx ? styles.statPillActive : ""}`}
+              >
+                <span className={styles.statPillDot} />
+                <span>{set.category}</span>
+              </button>
+            ))}
           </div>
-          <div className={styles.metricSeparator} />
-          <div className={styles.editorialMetric}>
-            <AnimatedMetric
-              value="+120%"
-              inView={headerInView}
-              className={styles.metricBigVal}
-            />
-            <span className={styles.metricSubLbl}>Lead Generation Surge</span>
-          </div>
-          <div className={styles.metricSeparator} />
-          <div className={styles.editorialMetric}>
-            <AnimatedMetric
-              value="13,780"
-              inView={headerInView}
-              className={styles.metricBigVal}
-            />
-            <span className={styles.metricSubLbl}>Watch Hours Logged</span>
-          </div>
-          <div className={styles.metricSeparator} />
-          <div className={styles.editorialMetric}>
-            <AnimatedMetric
-              value="500K+"
-              inView={headerInView}
-              className={styles.metricBigVal}
-            />
-            <span className={styles.metricSubLbl}>Global Mining Network</span>
+
+          <div className={styles.editorialMetricsStrip}>
+            {STAT_SETS[activeStatSet].stats.map((stat, stIdx) => (
+              <React.Fragment key={`${activeStatSet}-${stat.label}`}>
+                {stIdx > 0 && <div className={styles.metricSeparator} />}
+                <div className={styles.editorialMetric}>
+                  <AnimatedMetric
+                    value={stat.value}
+                    inView={headerInView}
+                    className={styles.metricBigVal}
+                  />
+                  <span className={styles.metricSubLbl}>{stat.label}</span>
+                </div>
+              </React.Fragment>
+            ))}
           </div>
         </div>
       </header>
@@ -449,46 +507,74 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
                     <span className={styles.notchDot} />
                   </div>
 
-                  {/* Dedicated Chapter Background Image strictly contained within its row */}
-                  <div className={styles.chapterBgWrap} aria-hidden="true">
-                    <img
-                      src={chapter.bgImage}
-                      alt=""
-                      className={styles.chapterBgImg}
-                      loading="lazy"
-                    />
-                    <div className={styles.chapterBgOverlay} />
-                  </div>
-
-                  {/* Subtle Atmospheric Coordinate Watermark */}
-                  <div className={styles.geoWatermark} aria-hidden="true">
-                    {chapter.coordinates}
+                  {/* Dedicated Chapter Background Image or Partner Logo */}
+                  <div
+                    className={`${styles.chapterBgWrap} ${
+                      chapter.bgType === "logo" ? styles.chapterBgLogoWrap : ""
+                    }`}
+                    aria-hidden="true"
+                  >
+                    {chapter.bgType === "logo" ? (
+                      <div className={styles.logoBgContainer}>
+                        <div className={styles.logoAmbientGlow} />
+                        <img
+                          src={chapter.bgImage}
+                          alt=""
+                          className={styles.chapterLogoBgImg}
+                          loading="lazy"
+                        />
+                        <div className={styles.logoVignetteOverlay} />
+                      </div>
+                    ) : (
+                      <>
+                        <img
+                          src={chapter.bgImage}
+                          alt=""
+                          className={styles.chapterBgImg}
+                          loading="lazy"
+                        />
+                        <div className={styles.chapterBgOverlay} />
+                      </>
+                    )}
                   </div>
 
                   {/* Heading Block */}
                   <div className={styles.headingColumn}>
-                    <div className={styles.metaRow}>
-                      <span className={styles.chapterNum}>{chapter.chapterNumber}</span>
-                      <span className={styles.metaDivider}>/</span>
-                      <span className={styles.categoryTag}>{chapter.category}</span>
+                    <div className={styles.headingTopGroup}>
+                      <div className={styles.metaRow}>
+                        <span className={styles.chapterNum}>{chapter.chapterNumber}</span>
+                        <span className={styles.metaDivider}>/</span>
+                        <span className={styles.categoryTag}>{chapter.category}</span>
+                      </div>
+
+                      <h3 className={styles.chapterTitle}>
+                        <span className={styles.maskWrapper}>
+                          <span className={`${styles.maskedLine} ${styles.line1}`}>
+                            {chapter.titleLine1}
+                          </span>
+                        </span>
+                        <span className={styles.maskWrapper}>
+                          <span className={`${styles.maskedLine} ${styles.line2}`}>
+                            {chapter.titleLine2}
+                          </span>
+                        </span>
+                      </h3>
                     </div>
 
-                    <h3 className={styles.chapterTitle}>
-                      <span className={styles.maskWrapper}>
-                        <span className={`${styles.maskedLine} ${styles.line1}`}>
-                          {chapter.titleLine1}
-                        </span>
-                      </span>
-                      <span className={styles.maskWrapper}>
-                        <span className={`${styles.maskedLine} ${styles.line2}`}>
-                          {chapter.titleLine2}
-                        </span>
-                      </span>
-                    </h3>
-
                     <div className={styles.clientDetails}>
-                      <span className={styles.clientName}>{chapter.clientName}</span>
-                      <span className={styles.tickerText}>{chapter.ticker}</span>
+                      {chapter.logoImage && (
+                        <div className={styles.clientLogoWrap}>
+                          <img
+                            src={chapter.logoImage}
+                            alt={chapter.clientName}
+                            className={styles.clientLogoBadge}
+                          />
+                        </div>
+                      )}
+                      <div className={styles.clientTextWrap}>
+                        <span className={styles.clientName}>{chapter.clientName}</span>
+                        <span className={styles.tickerText}>{chapter.ticker}</span>
+                      </div>
                     </div>
                   </div>
 
@@ -526,7 +612,7 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
                     </div>
 
                     <Link href="/work" className={styles.readStoryLink}>
-                      <span>Read case narrative</span>
+                      <span>Explore event coverage</span>
                       <ArrowUpRight size={15} />
                     </Link>
                   </div>
@@ -549,6 +635,9 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
         </div>
         <div className={styles.footerRule} />
       </footer>
+
+      {/* EXPLORE OUR PUBLICATIONS: 4 CARDS (MAGAZINE, NEWSLETTER, ARTICLES, CEO PROFILE) */}
+      <PublicationsShowcase />
     </>
   );
 
@@ -556,7 +645,7 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
     return (
       <section
         className={styles.featuredWorkSection}
-        aria-label="Client Case Studies & Market Performance"
+        aria-label="The 4 Major Mining Investment Events in the World"
       >
         {/* Subtle Architectural Coordinate Grid on Deep Mineral Blue */}
         <div className={styles.gridOverlay} aria-hidden="true">
@@ -576,7 +665,7 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
       ref={containerRef}
       className={styles.showcaseContainer}
       style={{
-        backgroundColor: "#1A1512",
+        backgroundColor: "#D9D6CE",
         opacity: clampedOpacity.toFixed(3),
         visibility: isVisible ? "visible" : "hidden",
         pointerEvents: pointerEvents as "auto" | "none",

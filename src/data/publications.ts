@@ -353,7 +353,13 @@ export const INITIAL_NEWSLETTERS: PublicationItem[] = [
     "pdf": "https://acceptable-desire-0cca5bb827.media.strapiapp.com/May_1_to_15_10e9743a6d.pdf",
     "date": "2026-06-16T06:57:16.712Z"
   }
-];
+].sort((a, b) => {
+  const timeA = new Date(a.date || 0).getTime();
+  const timeB = new Date(b.date || 0).getTime();
+  if (timeB !== timeA) return timeB - timeA;
+  return Number(b.id) - Number(a.id);
+});
+
 
 export const INITIAL_ARTICLES: PublicationItem[] = [
   {
