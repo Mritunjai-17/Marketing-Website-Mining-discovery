@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { SectionReveal, RevealItem } from "@/components/ui/SectionReveal";
 import { motion, AnimatePresence } from "framer-motion";
+import styles from "./FaqSection.module.css";
 
 /*
  * FAQ Section — Mining Discovery Marketing Site
@@ -63,28 +64,36 @@ export const FaqSection: React.FC = () => {
     <section className="w-full border-t border-[#E5E3DC] bg-[#FAF7F2]">
       <SectionReveal className="container-editorial py-14 sm:py-20 md:py-28">
 
-        {/* ── Header ─────────────────────────────────────────────────── */}
+        {/* ── Header (Luxury Editorial Style Matching Publications) ── */}
         <RevealItem className="mb-10 sm:mb-14">
-          <div className="h-0.5 w-10 bg-[#B8860B]" />
-          <span className="mt-5 block font-mono text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-[#B8860B]">
-            Frequently Asked Questions
-          </span>
-          <div className="mt-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-            <h2 className="max-w-[22ch] font-geist text-[clamp(1.6rem,3.8vw,3rem)] font-semibold leading-[1.08] tracking-[-0.03em] text-[#0B1F3A]">
-              Everything you need to know about Mining Discovery.
+          <header className={styles.header}>
+            {/* Editorial Eyebrow with gold gradient rules */}
+            <div className={styles.eyebrowRow}>
+              <div className={styles.eyebrowRule} aria-hidden="true" />
+              <span className={styles.eyebrowPip}>✦</span>
+              <span className={styles.eyebrowText}>
+                FREQUENTLY ASKED QUESTIONS // DIRECT ANSWERS &amp; GUIDANCE
+              </span>
+              <span className={styles.eyebrowPip}>✦</span>
+              <div className={styles.eyebrowRuleRight} aria-hidden="true" />
+            </div>
+
+            {/* Section Headline */}
+            <h2 className={styles.mainTitle}>
+              <span className={styles.wordSpan}>FREQUENTLY ASKED</span>
+              <span className={styles.goldWordSpan}>QUESTIONS</span>
             </h2>
-            <p className="max-w-[40ch] text-sm sm:text-base font-normal leading-relaxed text-[#57595E] lg:text-right">
-              Can&apos;t find what you&apos;re looking for?{" "}
+
+            <p className={styles.description}>
+              Everything you need to know about Mining Discovery. Can&apos;t find what you&apos;re looking for?{" "}
               <a
-                href="https://www.miningdiscovery.com/contact"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-medium text-[#B8860B] underline-offset-4 transition-colors duration-200 hover:text-[#D4AF37] hover:underline"
+                href="/contact"
+                className={styles.contactLink}
               >
                 Contact us directly.
               </a>
             </p>
-          </div>
+          </header>
         </RevealItem>
 
         {/* ── Accordion ──────────────────────────────────────────────── */}
@@ -101,16 +110,14 @@ export const FaqSection: React.FC = () => {
                   >
                     <div className="flex items-start gap-5">
                       <span
-                        className={`mt-1 hidden shrink-0 font-mono text-[0.68rem] tabular-nums transition-colors duration-300 sm:block ${
-                          isOpen ? "text-[#B8860B]" : "text-[#B8860B]/35"
-                        }`}
+                        className={`mt-1 hidden shrink-0 font-mono text-[0.68rem] tabular-nums transition-colors duration-300 sm:block ${isOpen ? "text-[#B8860B]" : "text-[#B8860B]/35"
+                          }`}
                       >
                         {String(index + 1).padStart(2, "0")}
                       </span>
                       <span
-                        className={`font-geist text-base font-semibold leading-snug tracking-[-0.01em] transition-colors duration-300 sm:text-lg md:text-xl ${
-                          isOpen ? "text-[#0B1F3A]" : "text-[#0B1F3A]/75 group-hover:text-[#0B1F3A]"
-                        }`}
+                        className={`font-geist text-base font-semibold leading-snug tracking-[-0.01em] transition-colors duration-300 sm:text-lg md:text-xl ${isOpen ? "text-[#0B1F3A]" : "text-[#0B1F3A]/75 group-hover:text-[#0B1F3A]"
+                          }`}
                       >
                         {faq.q}
                       </span>
@@ -119,11 +126,10 @@ export const FaqSection: React.FC = () => {
                     {/* Plus / Minus icon */}
                     <span
                       aria-hidden="true"
-                      className={`relative mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition-all duration-300 ${
-                        isOpen
-                          ? "border-[#B8860B] bg-[#B8860B] text-white"
-                          : "border-[#D5D2CB] bg-transparent text-[#57595E] group-hover:border-[#B8860B]/50 group-hover:text-[#B8860B]"
-                      }`}
+                      className={`relative mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition-all duration-300 ${isOpen
+                        ? "border-[#B8860B] bg-[#B8860B] text-white"
+                        : "border-[#D5D2CB] bg-transparent text-[#57595E] group-hover:border-[#B8860B]/50 group-hover:text-[#B8860B]"
+                        }`}
                     >
                       <svg
                         viewBox="0 0 16 16"
@@ -185,9 +191,7 @@ export const FaqSection: React.FC = () => {
               Ready to get your mining story in front of the right audience?
             </p>
             <a
-              href="https://www.miningdiscovery.com/contact"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/contact"
               className="group inline-flex shrink-0 items-center gap-2 rounded-md bg-[#B8860B] px-5 py-2.5 font-sans text-sm font-semibold tracking-wide text-white shadow-[0_0_18px_rgba(184,134,11,0.28)] transition-all duration-300 hover:bg-[#D4AF37] hover:shadow-[0_0_26px_rgba(212,175,55,0.45)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B8860B] focus-visible:ring-offset-2"
             >
               Get In Touch

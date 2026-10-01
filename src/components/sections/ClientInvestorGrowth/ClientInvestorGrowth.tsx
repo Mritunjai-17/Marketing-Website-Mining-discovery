@@ -240,7 +240,7 @@ export const ClientInvestorGrowth = React.memo<ClientInvestorGrowthProps>(functi
       ref={containerRef}
       className={styles.bridgeContainer}
       style={{
-        zIndex: 35,
+        zIndex: isVisible ? 45 : 10,
         opacity: clampedOpacity.toFixed(3),
         visibility: isVisible ? "visible" : "hidden",
         pointerEvents: pointerEvents as "auto" | "none",

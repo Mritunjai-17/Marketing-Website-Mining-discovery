@@ -102,6 +102,28 @@ export const PublicationsShowcase: React.FC = () => {
   useEffect(() => {
     setIsMounted(true);
 
+    // Preload PDF engine in background for zero-latency flipbook & report rendering
+    if (typeof window !== "undefined") {
+      const preloadPdfJs = () => {
+        if (!(window as any).pdfjsLib && !document.querySelector('script[src="/pdf.min.js"]')) {
+          const script = document.createElement("script");
+          script.src = "/pdf.min.js";
+          script.async = true;
+          script.onload = () => {
+            if ((window as any).pdfjsLib) {
+              (window as any).pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
+            }
+          };
+          document.head.appendChild(script);
+        }
+      };
+      if ("requestIdleCallback" in window) {
+        (window as any).requestIdleCallback(preloadPdfJs);
+      } else {
+        setTimeout(preloadPdfJs, 1000);
+      }
+    }
+
     fetch("/api/magazines")
       .then((r) => r.json())
       .then((res) => {

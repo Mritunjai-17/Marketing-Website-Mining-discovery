@@ -1,0 +1,178 @@
+/* ==========================================================================
+   FAQ SECTION HEADER — LUXURY EDITORIAL STYLE MATCHING PUBLICATIONS
+   ========================================================================== */
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 860px;
+  width: 100%;
+  margin: 0 auto clamp(2.5rem, 5vh, 4rem);
+}
+
+.eyebrowRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.5rem, 1.4vw, 1.1rem);
+  margin-bottom: clamp(0.5rem, 1.2vh, 0.85rem);
+  width: 100%;
+}
+
+.eyebrowRule {
+  width: clamp(20px, 3vw, 45px);
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.75));
+}
+
+.eyebrowRuleRight {
+  width: clamp(20px, 3vw, 45px);
+  height: 1.5px;
+  background: linear-gradient(90deg, rgba(212, 175, 55, 0.75), transparent);
+}
+
+.eyebrowPip {
+  display: inline-block;
+  color: #D4AF37;
+  font-size: 0.85em;
+  margin: 0 0.35em;
+  text-shadow: 0 0 8px rgba(212, 175, 55, 0.6);
+  vertical-align: middle;
+}
+
+.eyebrowText {
+  font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
+  font-size: clamp(0.68rem, 0.78vw, 0.8rem);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #7A5E22;
+  white-space: nowrap;
+}
+
+.mainTitle {
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
+  font-size: clamp(1.85rem, 3.2vw, 3rem);
+  font-weight: 700;
+  color: #0F172A;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  margin: 0 0 clamp(0.75rem, 1.4vh, 1.1rem) 0;
+  text-transform: uppercase;
+}
+
+.wordSpan {
+  display: inline-block;
+  margin-right: 0.28em;
+  color: #0F172A;
+}
+
+.goldWordSpan {
+  display: inline-block;
+  margin-right: 0.28em;
+  font-style: italic;
+  font-weight: 600;
+  background: linear-gradient(
+    135deg,
+    #FCE8A6 0%,
+    #D4AF37 25%,
+    #FFF2B2 45%,
+    #AA771C 70%,
+    #D4AF37 88%,
+    #FCE8A6 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: metallicGoldFlow 6s ease-in-out infinite;
+}
+
+@keyframes metallicGoldFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.description {
+  font-family: var(--font-inter), "Inter", sans-serif;
+  font-size: clamp(0.9rem, 1vw, 1.02rem);
+  font-weight: 400;
+  line-height: 1.65;
+  color: #57595E;
+  max-width: 680px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.contactLink {
+  color: #B8860B;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  transition: color 0.2s ease;
+}
+
+.contactLink:hover {
+  color: #D4AF37;
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN (TABLETS, PHONES, COMPACT SCREENS)
+   ========================================================================== */
+
+@media (max-width: 640px) {
+  .header {
+    margin-bottom: 2rem;
+    padding: 0 0.5rem;
+  }
+
+  .eyebrowRow {
+    gap: 0.4rem;
+  }
+
+  .eyebrowRule,
+  .eyebrowRuleRight {
+    width: 20px;
+    flex-shrink: 1;
+  }
+
+  .eyebrowText {
+    font-size: clamp(0.56rem, 2.2vw, 0.68rem);
+    letter-spacing: 0.08em;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .mainTitle {
+    font-size: clamp(1.4rem, 6vw, 2rem);
+    line-height: 1.2;
+    margin-bottom: 0.75rem;
+  }
+
+  .description {
+    font-size: 0.84rem;
+    line-height: 1.5;
+    padding: 0 0.25rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .eyebrowRule,
+  .eyebrowRuleRight {
+    display: none;
+  }
+
+  .eyebrowText {
+    font-size: 0.58rem;
+    letter-spacing: 0.06em;
+  }
+}
+

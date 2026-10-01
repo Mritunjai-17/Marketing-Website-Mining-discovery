@@ -139,11 +139,11 @@ export const GlobeHero: React.FC = () => {
     }
 
     // 2. Value Bridge: Client & Investor Growth Section ("Building Value for Every Stakeholder")
-    // Generously paced scroll runway so each pillar card can be comfortably read
+    // Generously paced scroll runway so each pillar card & publication can be comfortably read & clicked
     const BRIDGE_START = 0.18;
     const BRIDGE_FADE_IN_END = 0.21;
-    const BRIDGE_SCROLL_END = 0.60;
-    const BRIDGE_END = 0.64;
+    const BRIDGE_SCROLL_END = 0.63;
+    const BRIDGE_END = 0.67;
 
     let bOpacity = 0;
     if (t < BRIDGE_START || t > BRIDGE_END) {
@@ -171,7 +171,7 @@ export const GlobeHero: React.FC = () => {
 
     // 3. Services Section (8 Interactive Cards):
     // Takes over seamlessly after the Value Bridge section finishes
-    const SERVICES_START = 0.62;
+    const SERVICES_START = 0.65;
     const SERVICES_END = 0.98;
 
     let servicesP = 0;
@@ -196,23 +196,23 @@ export const GlobeHero: React.FC = () => {
       setTransitionState(nextState);
     }
 
-    // Services section active state
-    const shouldJourneyBeActive = t >= 0.61;
+    // Services section active state: only activate when bridge has completed transition
+    const shouldJourneyBeActive = t >= 0.65;
     if (shouldJourneyBeActive !== journeyActiveRef.current) {
       journeyActiveRef.current = shouldJourneyBeActive;
       setJourneyActive(shouldJourneyBeActive);
     }
 
     if (journeyBox) {
-      if (t < 0.61) {
+      if (t < 0.65) {
         journeyBox.style.opacity = "0";
         journeyBox.style.visibility = "hidden";
         journeyBox.style.pointerEvents = "none";
       } else {
-        const fade = clamp((t - 0.61) / (0.64 - 0.61), 0, 1);
+        const fade = clamp((t - 0.65) / (0.69 - 0.65), 0, 1);
         journeyBox.style.opacity = fade.toFixed(3);
         journeyBox.style.visibility = "visible";
-        journeyBox.style.pointerEvents = "auto";
+        journeyBox.style.pointerEvents = fade > 0.6 ? "auto" : "none";
       }
     }
 
