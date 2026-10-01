@@ -7,7 +7,7 @@ import { MagazineSpread } from "@/components/sections/MagazineShowcase/MagazineS
 import {
   INITIAL_MAGAZINES,
   type MagazineApiItem,
-} from "@/app/api/magazines/route";
+} from "@/data/magazinesApiData";
 import {
   INITIAL_NEWSLETTERS,
   INITIAL_ARTICLES,
@@ -93,8 +93,36 @@ const INITIAL_CEO_PROFILES: CeoProfileItem[] = [
   },
 ];
 
+const PUBLICATIONS_SUBTITLE_WORDS = [
+  "We",
+  "deliver",
+  "continuous",
+  "market",
+  "visibility",
+  "for",
+  "natural",
+  "resource",
+  "companies",
+  "through",
+  "monthly",
+  "magazines,",
+  "weekly",
+  "newspaper",
+  "dispatches,",
+  "technical",
+  "research",
+  "articles,",
+  "and",
+  "executive",
+  "CEO",
+  "profiles.",
+];
+
 export const PublicationsShowcase: React.FC = () => {
   const overlayRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
+  const headingWordRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const subheadingWordRefs = useRef<(HTMLSpanElement | null)[]>([]);
 
   const [activeCategoryModal, setActiveCategoryModal] = useState<
     "magazines" | "newsletter" | "articles" | "ceo-profile" | null
@@ -231,6 +259,71 @@ export const PublicationsShowcase: React.FC = () => {
     };
   }, [activeCategoryModal, readerState, handleCloseReader]);
 
+  // Scroll-tied word-by-word reveal for Publications Heading & Subheading
+  useEffect(() => {
+    let rafId: number | null = null;
+    let isTicking = false;
+
+    const updateWords = () => {
+      if (!headerRef.current) return;
+      const clientH = window.innerHeight || 800;
+      const hRect = headerRef.current.getBoundingClientRect();
+      const revealProgress = Math.max(0, Math.min(1, (clientH * 0.88 - hRect.top) / (clientH * 0.88 - clientH * 0.38)));
+
+      // Heading words: reveal from 0.00 to 0.45
+      const hProg = Math.max(0, Math.min(1, revealProgress / 0.45));
+      headingWordRefs.current.forEach((el, idx) => {
+        if (!el) return;
+        const start = (idx / 3) * 0.65;
+        const end = start + 0.35;
+        const wProg = Math.max(0, Math.min(1, (hProg - start) / (end - start)));
+        el.style.opacity = (0.20 + 0.80 * wProg).toFixed(3);
+        el.style.transform = `translate3d(0, ${((1 - wProg) * 5).toFixed(1)}px, 0)`;
+        el.style.filter = wProg >= 0.99 ? "none" : `blur(${((1 - wProg) * 1.2).toFixed(1)}px)`;
+      });
+
+      // Subheading words: reveal from 0.28 to 1.00
+      const subProg = Math.max(0, Math.min(1, (revealProgress - 0.28) / 0.72));
+      const subCount = PUBLICATIONS_SUBTITLE_WORDS.length;
+      subheadingWordRefs.current.forEach((el, idx) => {
+        if (!el) return;
+        const start = (idx / subCount) * 0.75;
+        const end = start + 0.25;
+        const wProg = Math.max(0, Math.min(1, (subProg - start) / (end - start)));
+        el.style.opacity = (0.20 + 0.80 * wProg).toFixed(3);
+        el.style.transform = `translate3d(0, ${((1 - wProg) * 4).toFixed(1)}px, 0)`;
+        el.style.filter = wProg >= 0.99 ? "none" : `blur(${((1 - wProg) * 1.0).toFixed(1)}px)`;
+      });
+    };
+
+    const tick = () => {
+      updateWords();
+      isTicking = false;
+    };
+
+    const requestTick = () => {
+      if (!isTicking) {
+        isTicking = true;
+        rafId = requestAnimationFrame(tick);
+      }
+    };
+
+    requestTick();
+
+    window.addEventListener("scroll", requestTick, { passive: true });
+    window.addEventListener("resize", requestTick);
+    window.addEventListener("wheel", requestTick, { passive: true });
+    window.addEventListener("touchmove", requestTick, { passive: true });
+
+    return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      window.removeEventListener("scroll", requestTick);
+      window.removeEventListener("resize", requestTick);
+      window.removeEventListener("wheel", requestTick);
+      window.removeEventListener("touchmove", requestTick);
+    };
+  }, []);
+
   const allMagazines: MagazineApiItem[] = magazines;
   const latestMag = allMagazines[0];
   const allCeos = ceoProfiles;
@@ -288,21 +381,54 @@ export const PublicationsShowcase: React.FC = () => {
   return (
     <section className={styles.publicationsSection} aria-label="Explore Our Publications">
       {/* Editorial Header */}
-      <header className={styles.header}>
+      <header ref={headerRef} className={styles.header}>
         <div className={styles.eyebrowRow}>
           <span className={styles.eyebrowRule} aria-hidden="true" />
           <span className={styles.eyebrowText}>
-            GLOBAL MEDIA DISTRIBUTION // MULTI-PLATFORM REACH
+            <span className={styles.eyebrowPip}>✦</span> GLOBAL MEDIA DISTRIBUTION // MULTI-PLATFORM REACH <span className={styles.eyebrowPip}>✦</span>
           </span>
           <span className={styles.eyebrowRule} aria-hidden="true" />
         </div>
 
         <h2 className={styles.mainTitle}>
-          EXPLORE OUR <span className={styles.titleAccent}>PUBLICATIONS</span>
+          <span
+            ref={(el) => {
+              headingWordRefs.current[0] = el;
+            }}
+            className={styles.wordSpan}
+          >
+            EXPLORE
+          </span>{" "}
+          <span
+            ref={(el) => {
+              headingWordRefs.current[1] = el;
+            }}
+            className={styles.wordSpan}
+          >
+            OUR
+          </span>{" "}
+          <span
+            ref={(el) => {
+              headingWordRefs.current[2] = el;
+            }}
+            className={styles.goldWordSpan}
+          >
+            PUBLICATIONS
+          </span>
         </h2>
 
         <p className={styles.description}>
-          We deliver continuous market visibility for natural resource companies through monthly magazines, weekly newspaper dispatches, technical research articles, and executive CEO profiles.
+          {PUBLICATIONS_SUBTITLE_WORDS.map((word, idx) => (
+            <span
+              key={idx}
+              ref={(el) => {
+                subheadingWordRefs.current[idx] = el;
+              }}
+              className={styles.subWordSpan}
+            >
+              {word}{" "}
+            </span>
+          ))}
         </p>
       </header>
 

@@ -92,10 +92,10 @@ const GROWTH_PILLARS: GrowthPillar[] = [
   },
 ];
 
-export const ClientInvestorGrowth: React.FC<ClientInvestorGrowthProps> = ({
+export const ClientInvestorGrowth = React.memo<ClientInvestorGrowthProps>(function ClientInvestorGrowth({
   scrollProgress = 0,
   opacity = 1,
-}) => {
+}) {
   const trackRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLElement>(null);
@@ -125,7 +125,7 @@ export const ClientInvestorGrowth: React.FC<ClientInvestorGrowthProps> = ({
   // Overall section visibility and opacity
   const clampedOpacity = Math.max(0, Math.min(1, opacity));
   const isVisible = clampedOpacity > 0.01;
-  const pointerEvents = clampedOpacity > 0.6 ? "auto" : "none";
+  const pointerEvents = clampedOpacity > 0.05 ? "auto" : "none";
 
   // Measure static layout metrics once on mount/resize (zero DOM reads during scroll)
   const measureLayout = () => {
@@ -235,6 +235,7 @@ export const ClientInvestorGrowth: React.FC<ClientInvestorGrowthProps> = ({
     if (!metricsInView && scrollY + clientH * 0.92 > metricsTop) {
       setMetricsInView(true);
     }
+
   }, [scrollProgress, headerInView, metricsInView]);
 
   return (
@@ -256,27 +257,23 @@ export const ClientInvestorGrowth: React.FC<ClientInvestorGrowthProps> = ({
             ============================================================== */}
         <section className={styles.valueBridgeSection}>
           <div className={styles.sectionInner}>
-            {/* Top Header & Overview Description with Masked Line Reveals */}
+            {/* Top Header & Overview Description */}
             <header
               ref={headerRef}
               className={`${styles.header} ${headerInView ? styles.inView : ""}`}
             >
               <div className={styles.eyebrowRow}>
                 <span className={styles.eyebrowRule} />
-                <span className={styles.eyebrowText}>FOR MINERS • INVESTORS • TRADERS</span>
+                <span className={styles.eyebrowText}>
+                  <span className={styles.eyebrowPip}>✦</span> FOR MINERS • INVESTORS • TRADERS <span className={styles.eyebrowPip}>✦</span>
+                </span>
                 <span className={styles.eyebrowRule} />
               </div>
 
               <h2 className={styles.mainTitle}>
-                <span className={styles.maskWrapper}>
-                  <span className={`${styles.maskedLine} ${styles.line1}`}>
-                    BUILDING VALUE FOR
-                  </span>
-                </span>
-                <span className={styles.maskWrapper}>
-                  <span className={`${styles.maskedLine} ${styles.line2}`}>
-                    <em className={styles.shimmerText}>EVERY STAKEHOLDER</em>
-                  </span>
+                <span className={styles.titleLine}>BUILDING VALUE FOR</span>
+                <span className={styles.titleLine}>
+                  <em className={styles.shimmerText}>EVERY STAKEHOLDER</em>
                 </span>
               </h2>
 
@@ -408,6 +405,6 @@ export const ClientInvestorGrowth: React.FC<ClientInvestorGrowthProps> = ({
       </div>
     </div>
   );
-};
+});
 
 export default ClientInvestorGrowth;

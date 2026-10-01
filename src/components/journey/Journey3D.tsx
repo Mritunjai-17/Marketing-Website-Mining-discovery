@@ -23,7 +23,7 @@ export interface Journey3DProps {
  * combined with the narrative storytelling chapters, service groups,
  * and live progress tracking that connect the whole website.
  */
-export const Journey3D: React.FC<Journey3DProps> = ({ progress, active }) => {
+export const Journey3D = React.memo<Journey3DProps>(function Journey3D({ progress, active }) {
   const sceneRef = useRef<SceneState>({
     progress: 0,
     truckWorldX: 0,
@@ -78,6 +78,6 @@ export const Journey3D: React.FC<Journey3DProps> = ({ progress, active }) => {
       </div>
     </JourneySceneContext.Provider>
   );
-};
+});
 
 export default Journey3D;

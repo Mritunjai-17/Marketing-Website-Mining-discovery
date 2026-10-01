@@ -17,14 +17,15 @@ export type TransitionState =
   | "SIDE_VIEW_LOCKED"
   | "JOURNEY_ACTIVE";
 
-/** Total viewport heights for the continuous story (Hero -> Client & Investor Bridge -> Our Services 8 Cards) */
-const TOTAL_SCROLL_VH = 4600;
+/** Viewport heights for the continuous story (Hero -> Client & Investor Bridge -> Our Services 8 Cards) */
+const DESKTOP_SCROLL_VH = 2200;
+const MOBILE_SCROLL_VH = 1600;
 
 /**
  * How the sampled progress follows the true scroll position.
- * Critically damped Euler spring for smooth, responsive scroll-scrubbing.
+ * Responsive, critically damped spring for instant, silky scroll-scrubbing.
  */
-const PROGRESS_SPRING = { stiffness: 90, damping: 20 };
+const PROGRESS_SPRING = { stiffness: 180, damping: 26 };
 const RESUME_GAP = 0.8;
 
 interface SpringState {
@@ -82,13 +83,27 @@ export const GlobeHero: React.FC = () => {
   const bridgeOpacityRef = useRef(0);
   const bridgeScrollRef = useRef(0);
 
+  const [totalScrollVh, setTotalScrollVh] = useState(DESKTOP_SCROLL_VH);
+
+  useEffect(() => {
+    const updateHeight = () => {
+      const isMobile =
+        window.innerWidth < 900 ||
+        window.matchMedia("(pointer: coarse)").matches;
+      setTotalScrollVh(isMobile ? MOBILE_SCROLL_VH : DESKTOP_SCROLL_VH);
+    };
+    updateHeight();
+    window.addEventListener("resize", updateHeight);
+    return () => window.removeEventListener("resize", updateHeight);
+  }, []);
+
   /**
    * Writes the sequence state for the current scroll progress.
    * Only transform and opacity are touched — zero layout triggers.
    */
   const applyStage = useCallback(() => {
     const journeyBox = journeyBoxRef.current;
-    if (reduceMotionRef.current) return;
+    if (reduceMotionRef.current) return true;
 
     // --- Sample and damp scroll progress ---------------------------------------------
     const { top, travel } = rangeMetricsRef.current;
@@ -127,8 +142,8 @@ export const GlobeHero: React.FC = () => {
     // Generously paced scroll runway so each pillar card can be comfortably read
     const BRIDGE_START = 0.18;
     const BRIDGE_FADE_IN_END = 0.21;
-    const BRIDGE_SCROLL_END = 0.54;
-    const BRIDGE_END = 0.57;
+    const BRIDGE_SCROLL_END = 0.60;
+    const BRIDGE_END = 0.64;
 
     let bOpacity = 0;
     if (t < BRIDGE_START || t > BRIDGE_END) {
@@ -156,7 +171,7 @@ export const GlobeHero: React.FC = () => {
 
     // 3. Services Section (8 Interactive Cards):
     // Takes over seamlessly after the Value Bridge section finishes
-    const SERVICES_START = 0.55;
+    const SERVICES_START = 0.62;
     const SERVICES_END = 0.98;
 
     let servicesP = 0;
@@ -182,24 +197,29 @@ export const GlobeHero: React.FC = () => {
     }
 
     // Services section active state
-    const shouldJourneyBeActive = t >= 0.53;
+    const shouldJourneyBeActive = t >= 0.61;
     if (shouldJourneyBeActive !== journeyActiveRef.current) {
       journeyActiveRef.current = shouldJourneyBeActive;
       setJourneyActive(shouldJourneyBeActive);
     }
 
     if (journeyBox) {
-      if (t < 0.53) {
+      if (t < 0.61) {
         journeyBox.style.opacity = "0";
         journeyBox.style.visibility = "hidden";
         journeyBox.style.pointerEvents = "none";
       } else {
-        const fade = clamp((t - 0.53) / (0.57 - 0.53), 0, 1);
+        const fade = clamp((t - 0.61) / (0.64 - 0.61), 0, 1);
         journeyBox.style.opacity = fade.toFixed(3);
         journeyBox.style.visibility = "visible";
         journeyBox.style.pointerEvents = "auto";
       }
     }
+
+    const isSettled = isTouch
+      ? true
+      : Math.abs(target - progress.value) < 1e-4 && Math.abs(progress.velocity) < 1e-3;
+    return isSettled;
   }, [journeyProgress]);
 
   useEffect(() => {
@@ -219,33 +239,50 @@ export const GlobeHero: React.FC = () => {
       };
     };
 
-    measureRange();
-    applyStage();
+    let animId: number | null = null;
+    let isTicking = false;
 
-    let animId: number;
-    const loop = () => {
-      applyStage();
-      animId = requestAnimationFrame(loop);
+    const tick = () => {
+      const isSettled = applyStage();
+      if (!isSettled) {
+        animId = requestAnimationFrame(tick);
+      } else {
+        isTicking = false;
+        animId = null;
+      }
     };
-    animId = requestAnimationFrame(loop);
+
+    const requestTick = () => {
+      if (!isTicking) {
+        isTicking = true;
+        animId = requestAnimationFrame(tick);
+      }
+    };
+
+    measureRange();
+    requestTick();
 
     const observer = new ResizeObserver(() => {
       measureRange();
-      applyStage();
+      requestTick();
     });
     observer.observe(range);
 
-    // The requestAnimationFrame loop samples window.scrollY continuously on every display frame
-    // onScroll does not need to duplicate applyStage(), avoiding dual-execution timing jitter
-    const onScroll = () => { };
+    const onScroll = () => {
+      requestTick();
+    };
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", measureRange);
+    const onResize = () => {
+      measureRange();
+      requestTick();
+    };
+    window.addEventListener("resize", onResize);
 
     return () => {
-      cancelAnimationFrame(animId);
+      if (animId !== null) cancelAnimationFrame(animId);
       observer.disconnect();
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", measureRange);
+      window.removeEventListener("resize", onResize);
     };
   }, [applyStage]);
 
@@ -255,7 +292,7 @@ export const GlobeHero: React.FC = () => {
       <div
         ref={rangeRef}
         className="relative w-full"
-        style={{ height: reduceMotion ? "100vh" : `${TOTAL_SCROLL_VH}vh` }}
+        style={{ height: reduceMotion ? "100vh" : `${totalScrollVh}vh` }}
       >
         <div
           ref={cardRef}
@@ -273,12 +310,12 @@ export const GlobeHero: React.FC = () => {
 
             {/* Services Section (All 8 Interactive Cards) */}
             <div
-              className="absolute inset-0 h-full w-full"
+              className="absolute inset-0 h-full w-full pointer-events-none"
               style={{ zIndex: 40 }}
             >
               <div
                 ref={journeyBoxRef}
-                className="h-full w-full"
+                className="h-full w-full pointer-events-none"
                 style={{
                   opacity: 0,
                 }}

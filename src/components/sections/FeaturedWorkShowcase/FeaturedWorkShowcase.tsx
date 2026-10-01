@@ -47,9 +47,9 @@ const CHAPTERS: ChapterData[] = [
     titleLine1: "THE MINING INVESTMENT",
     titleLine2: "EVENT OF THE NORTH",
     coordinates: "LAT 46°48'N / LON 71°12'W // CHÂTEAU FRONTENAC",
-    bgImage: "/images/events/the_mining_investment_event_watermark.png",
+    bgImage: "/images/events/the_mining_investment_event_watermark.webp",
     bgType: "logo",
-    logoImage: "/images/events/the_mining_investment_event_logo.png",
+    logoImage: "/images/events/the_mining_investment_event_logo.webp",
     clientName: "The Mining Investment Event of the North",
     storyLead:
       "Canada’s premier tier-1 invitation-only mining conference, connecting c-suite executives directly with senior institutional funds, Bay Street desks, and major producers.",
@@ -69,9 +69,9 @@ const CHAPTERS: ChapterData[] = [
     titleLine1: "PDAC GLOBAL EXPLORATION",
     titleLine2: "& INVESTMENT CONVENTION",
     coordinates: "LAT 43°38'N / LON 79°23'W // METRO TORONTO CONVENTION CENTRE",
-    bgImage: "/images/events/pdac_watermark.png",
+    bgImage: "/images/events/pdac_watermark.webp",
     bgType: "logo",
-    logoImage: "/images/events/pdac_logo.png",
+    logoImage: "/images/events/pdac_logo.webp",
     clientName: "Prospectors & Developers Association of Canada",
     storyLead:
       "The world’s leading mineral exploration gathering, bringing together 30,000+ delegates and junior explorers across 130 countries for dealmaking and exploration capital.",
@@ -88,12 +88,12 @@ const CHAPTERS: ChapterData[] = [
     chapterNumber: "EVENT 03",
     category: "LONDON // EUROPEAN CAPITAL FORUM",
     ticker: "LONDON CITY • CAPITAL MATCHMAKING",
-    titleLine1: "MINES AND MONEY &",
-    titleLine2: "RESOURCING TOMORROW",
+    titleLine1: "MINES AND MONEY",
+    titleLine2: "& RESOURCING TOMORROW",
     coordinates: "LAT 51°32'N / LON 0°06'W // BUSINESS DESIGN CENTRE",
-    bgImage: "/images/events/mines_and_money_watermark.png",
+    bgImage: "/images/events/mines_and_money_watermark.webp",
     bgType: "logo",
-    logoImage: "/images/events/mines_and_money_logo.png",
+    logoImage: "/images/events/mines_and_money_logo.webp",
     clientName: "Mines and Money / Resourcing Tomorrow",
     storyLead:
       "Europe’s flagship natural resource investment summit, linking active miners with London City asset managers, private equity funds, and European family offices.",
@@ -113,9 +113,9 @@ const CHAPTERS: ChapterData[] = [
     titleLine1: "INVESTING IN AFRICAN",
     titleLine2: "MINING INDABA",
     coordinates: "LAT 33°55'S / LON 18°25'E // CTICC CAPE TOWN",
-    bgImage: "/images/events/mining_indaba_watermark.png",
+    bgImage: "/images/events/mining_indaba_watermark.webp",
     bgType: "logo",
-    logoImage: "/images/events/mining_indaba_logo.png",
+    logoImage: "/images/events/mining_indaba_logo.webp",
     clientName: "Investing in African Mining Indaba",
     storyLead:
       "Africa’s largest mining investment summit, uniting sovereign wealth funds, major global producers, and international banks to finance major resource assets.",
@@ -175,6 +175,7 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
   const trackRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLElement>(null);
+  const headingWordRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const chapterRefs = useRef<(HTMLElement | null)[]>([]);
   const stackOuterRef = useRef<HTMLDivElement>(null);
   const stackStickyRef = useRef<HTMLDivElement>(null);
@@ -237,7 +238,7 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
   // Overall section visibility and opacity
   const clampedOpacity = Math.max(0, Math.min(1, opacity));
   const isVisible = clampedOpacity > 0.01;
-  const pointerEvents = clampedOpacity > 0.6 ? "auto" : "none";
+  const pointerEvents = clampedOpacity > 0.05 ? "auto" : "none";
 
   // Translate the alternating chapters track smoothly when in standalone mode
   useEffect(() => {
@@ -254,12 +255,22 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
     const updateTransforms = () => {
       const clientH = window.innerHeight || 800;
 
-      // Check header in-view once
-      if (!headerInView && headerRef.current) {
+      // Check header in-view and scrub word-by-word reveal tied to scroll
+      if (headerRef.current) {
         const hRect = headerRef.current.getBoundingClientRect();
-        if (hRect.top < clientH * 0.88 && hRect.bottom > 0) {
+        if (!headerInView && hRect.top < clientH * 0.88 && hRect.bottom > 0) {
           setHeaderInView(true);
         }
+        const hProgress = Math.max(0, Math.min(1, (clientH * 0.88 - hRect.top) / (clientH * 0.88 - clientH * 0.35)));
+        headingWordRefs.current.forEach((el, idx) => {
+          if (!el) return;
+          const start = (idx / 9) * 0.70;
+          const end = start + 0.30;
+          const wProg = Math.max(0, Math.min(1, (hProgress - start) / (end - start)));
+          el.style.opacity = (0.20 + 0.80 * wProg).toFixed(3);
+          el.style.transform = `translate3d(0, ${((1 - wProg) * 5).toFixed(1)}px, 0)`;
+          el.style.filter = wProg >= 0.99 ? "none" : `blur(${((1 - wProg) * 1.2).toFixed(1)}px)`;
+        });
       }
 
       // Check card deck dynamic height only when active index changes (eliminates layout thrashing)
@@ -281,8 +292,8 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
         const stickyEl = stackStickyRef.current;
         const stickyH = stickyEl.offsetHeight || 620;
 
-        // Position where the card deck pins comfortably below navbar & KPI strip
-        const pinTop = Math.max(70, Math.min(130, (clientH - stickyH) / 2));
+        // Position where the card deck pins comfortably below navbar & KPI strip, centered
+        const pinTop = Math.max(40, Math.min(130, (clientH - stickyH) / 2));
         const maxTravel = Math.max(0, outerRect.height - stickyH);
 
         // Distance scrolled past pinTop
@@ -367,36 +378,53 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
         el.style.zIndex = `${zIndex}`;
         el.style.pointerEvents = delta < -0.5 ? "none" : "auto";
       });
+
+      return Math.abs(diff) > 0.0002;
     };
 
-    updateTransforms();
-    let rafId: number;
-    const loop = () => {
-      updateTransforms();
-      rafId = requestAnimationFrame(loop);
+    let rafId: number | null = null;
+    let isTicking = false;
+
+    const tick = () => {
+      const isStillAnimating = updateTransforms();
+      if (isStillAnimating) {
+        rafId = requestAnimationFrame(tick);
+      } else {
+        isTicking = false;
+        rafId = null;
+      }
     };
-    rafId = requestAnimationFrame(loop);
+
+    const requestTick = () => {
+      if (!isTicking) {
+        isTicking = true;
+        rafId = requestAnimationFrame(tick);
+      }
+    };
+
+    requestTick();
 
     const handleUserInteraction = () => {
       if (isManualClickRef.current) {
         isManualClickRef.current = false;
         if (manualTimerRef.current) clearTimeout(manualTimerRef.current);
       }
+      requestTick();
     };
 
     const handleResize = () => {
       lastDeckHeightIdx.current = -1;
-      updateTransforms();
+      requestTick();
     };
 
-    window.addEventListener("scroll", updateTransforms, { passive: true });
+    window.addEventListener("scroll", requestTick, { passive: true });
     window.addEventListener("resize", handleResize);
     window.addEventListener("wheel", handleUserInteraction, { passive: true });
     window.addEventListener("touchmove", handleUserInteraction, { passive: true });
 
     return () => {
-      cancelAnimationFrame(rafId);
-      window.removeEventListener("scroll", updateTransforms);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      window.removeEventListener("scroll", requestTick);
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("wheel", handleUserInteraction);
       window.removeEventListener("touchmove", handleUserInteraction);
@@ -414,21 +442,48 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
         <div className={styles.eyebrowRow}>
           <span className={styles.eyebrowRule} />
           <span className={styles.eyebrowText}>
-            GLOBAL EVENT COVERAGE // INSTITUTIONAL REACH
+            <span className={styles.eyebrowPip}>✦</span> GLOBAL EVENT COVERAGE // INSTITUTIONAL REACH <span className={styles.eyebrowPip}>✦</span>
           </span>
           <span className={styles.eyebrowRule} />
         </div>
 
         <h2 className={styles.mainTitle}>
-          <span className={styles.maskWrapper}>
-            <span className={`${styles.maskedLine} ${styles.line1}`}>
-              THE 4 MAJOR MINING
-            </span>
+          <span className={styles.titleLine}>
+            {["THE", "4", "MAJOR", "MINING"].map((word, idx) => (
+              <span
+                key={idx}
+                ref={(el) => {
+                  headingWordRefs.current[idx] = el;
+                }}
+                className={styles.wordSpan}
+              >
+                {word}{" "}
+              </span>
+            ))}
           </span>
-          <span className={styles.maskWrapper}>
-            <span className={`${styles.maskedLine} ${styles.line2}`}>
-              INVESTMENT EVENTS <em className={styles.shimmerText}>IN THE WORLD.</em>
-            </span>
+          <span className={styles.titleLine}>
+            {["INVESTMENT", "EVENTS"].map((word, idx) => (
+              <span
+                key={idx + 4}
+                ref={(el) => {
+                  headingWordRefs.current[idx + 4] = el;
+                }}
+                className={styles.wordSpan}
+              >
+                {word}{" "}
+              </span>
+            ))}
+            {["IN", "THE", "WORLD."].map((word, idx) => (
+              <span
+                key={idx + 6}
+                ref={(el) => {
+                  headingWordRefs.current[idx + 6] = el;
+                }}
+                className={styles.goldWordSpan}
+              >
+                {word}{" "}
+              </span>
+            ))}
           </span>
         </h2>
 
@@ -548,16 +603,8 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
                       </div>
 
                       <h3 className={styles.chapterTitle}>
-                        <span className={styles.maskWrapper}>
-                          <span className={`${styles.maskedLine} ${styles.line1}`}>
-                            {chapter.titleLine1}
-                          </span>
-                        </span>
-                        <span className={styles.maskWrapper}>
-                          <span className={`${styles.maskedLine} ${styles.line2}`}>
-                            {chapter.titleLine2}
-                          </span>
-                        </span>
+                        <span className={styles.titleLine}>{chapter.titleLine1}</span>
+                        <span className={styles.titleLine}>{chapter.titleLine2}</span>
                       </h3>
                     </div>
 

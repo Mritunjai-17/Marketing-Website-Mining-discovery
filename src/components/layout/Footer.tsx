@@ -56,27 +56,19 @@ const COLUMNS: Array<{ heading: string; links: Array<{ name: string; href: strin
   {
     heading: "Content",
     links: [
-      { name: "Services", href: "/#services" },
-      { name: "Submit News", href: "/#submit-news" },
-      { name: "Newsletter", href: "#" },
-      { name: "Magazine", href: "#" },
-      { name: "News", href: "#" },
+      { name: "Services", href: "#services" },
+      { name: "Newsletters", href: "#" },
+      { name: "Magazines", href: "#" },
+      { name: "Articles", href: "#" },
     ],
   },
   {
     heading: "Profiles",
-    links: [
-      { name: "CEO Profiles", href: "#" },
-      { name: "Company Profiles", href: "#" },
-    ],
+    links: [{ name: "CEO Profiles", href: "#" }],
   },
   {
     heading: "Company",
-    links: [
-      { name: "About Us", href: "/about" },
-      { name: "Management", href: "#" },
-      { name: "Contact", href: "/#contact" },
-    ],
+    links: [{ name: "About Us", href: "/about" }, { name: "Work", href: "/work" }],
   },
 ];
 
@@ -94,16 +86,16 @@ export const Footer: React.FC = () => {
         bar. Nothing here needs state, so this file stays a server component - the two
         wrappers below are the only client code involved.
       */}
-      <SectionReveal className="container-editorial py-8 md:py-10 lg:py-12">
+      <SectionReveal className="container-editorial py-12 md:py-16 lg:py-20">
         {/*
           Twelve columns rather than five. The brand block needs roughly a third to keep
           its description from wrapping into a narrow ribbon, and 4 + 2 + 2 + 2 + 2 gives
           it that while leaving the four link columns exactly equal — which is what
           repeat(4, 1fr) would have done had the brand not been in the same row.
         */}
-        <div className="grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-12">
+        <div className="grid grid-cols-1 gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-12">
           {/* Brand */}
-          <RevealItem className="lg:col-span-4">
+          <RevealItem className="sm:col-span-2 lg:col-span-4">
             <Link
               href="/"
               className="inline-flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B1F3A]"
@@ -114,11 +106,11 @@ export const Footer: React.FC = () => {
                 alt="Mining Discovery Logo"
                 width={220}
                 height={85}
-                className="h-11 w-auto object-contain sm:h-12"
+                className="h-16 w-auto object-contain sm:h-18"
               />
             </Link>
 
-            <p className="mt-5 max-w-sm text-sm font-normal leading-relaxed text-[#F0F4F8]/70">
+            <p className="mt-6 max-w-xs text-sm font-normal leading-relaxed text-[#F0F4F8]/60">
               Mining Discovery is your trusted source for in-depth mining news, executive
               profiles, company insights, and industry analysis — connecting the global
               mining community with the stories that matter.
@@ -129,10 +121,10 @@ export const Footer: React.FC = () => {
           {COLUMNS.map((column) => (
             <RevealItem key={column.heading} className="lg:col-span-2">
               <nav aria-label={column.heading}>
-                <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-[#D4AF37]">
+                <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D4AF37]">
                   {column.heading}
                 </h2>
-                <ul className="mt-5 space-y-4">
+                <ul className="mt-6 space-y-[1.1rem]">
                   {column.links.map((link) => (
                     <li key={link.name}>
                       <Link
@@ -150,10 +142,10 @@ export const Footer: React.FC = () => {
 
           {/* Social */}
           <RevealItem className="lg:col-span-2">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-[#D4AF37]">
+            <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D4AF37]">
               Follow Us
             </h2>
-            <ul className="mt-5 flex flex-wrap gap-3">
+            <ul className="mt-6 grid grid-cols-3 gap-x-3 gap-y-3">
               {SOCIALS.map((social) => (
                 <li key={social.name}>
                   <a
@@ -161,11 +153,11 @@ export const Footer: React.FC = () => {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={social.name}
-                    className="group flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/15 text-[#F0F4F8]/70 transition-colors duration-200 hover:border-[#D4AF37]/60 hover:text-[#D4AF37] focus:outline-none focus-visible:border-[#D4AF37] focus-visible:text-[#D4AF37]"
+                    className="group flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/15 text-[#F0F4F8]/60 transition-colors duration-200 hover:border-[#D4AF37]/60 hover:text-[#D4AF37] focus:outline-none focus-visible:border-[#D4AF37] focus-visible:text-[#D4AF37]"
                   >
                     <svg
                       viewBox="0 0 24 24"
-                      className="h-[18px] w-[18px]"
+                      className="h-[17px] w-[17px]"
                       fill="currentColor"
                       aria-hidden="true"
                       focusable="false"
@@ -180,20 +172,20 @@ export const Footer: React.FC = () => {
         </div>
 
         {/* Bottom bar */}
-        <RevealItem className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 sm:flex-row lg:mt-10">
-          <p className="text-xs font-normal text-[#F0F4F8]/65">
+        <RevealItem className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-7 sm:flex-row lg:mt-14">
+          <p className="text-xs font-normal text-[#F0F4F8]/50">
             © {new Date().getFullYear()} Mining Discovery. All Rights Reserved.
           </p>
           <div className="flex items-center gap-6">
             <Link
               href="#"
-              className="text-xs font-normal text-[#F0F4F8]/65 underline-offset-4 transition-colors duration-200 hover:text-[#D4AF37] hover:underline"
+              className="text-xs font-normal text-[#F0F4F8]/50 underline-offset-4 transition-colors duration-200 hover:text-[#D4AF37] hover:underline"
             >
               Privacy Policy
             </Link>
             <Link
               href="#"
-              className="text-xs font-normal text-[#F0F4F8]/65 underline-offset-4 transition-colors duration-200 hover:text-[#D4AF37] hover:underline"
+              className="text-xs font-normal text-[#F0F4F8]/50 underline-offset-4 transition-colors duration-200 hover:text-[#D4AF37] hover:underline"
             >
               Terms of Use
             </Link>

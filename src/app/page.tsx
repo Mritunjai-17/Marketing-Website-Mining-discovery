@@ -1,7 +1,6 @@
 "use client";
 
-import { GlobeHero } from "@/components/sections/GlobeHero";
-import MiningDiscoveryShowcase from "@/components/MiningDiscoveryShowcase";
+import { GlobeHero, MiningDiscoveryShowcase, FaqSection } from "@/components/sections";
 
 export default function Home() {
   return (
@@ -11,6 +10,9 @@ export default function Home() {
 
       {/* MINING DISCOVERY INTERACTIVE SHOWCASE (QUOTE -> ZOOM -> HORIZONTAL CARDS) */}
       <MiningDiscoveryShowcase />
+
+      {/* FAQ SECTION — pre-footer trust builder */}
+      <FaqSection />
     </div>
   );
 }

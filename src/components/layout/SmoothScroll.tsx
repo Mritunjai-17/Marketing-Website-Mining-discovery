@@ -45,14 +45,14 @@ export const SmoothScroll: React.FC<SmoothScrollProps> = ({ children }) => {
      * to track the wheel more tightly.
      */
     const lenis = new Lenis({
-      lerp: 0.045,
+      lerp: 0.095,
       smoothWheel: true,
-      wheelMultiplier: 0.35,
+      wheelMultiplier: 1.0,
       // Touch is left on the platform's own momentum. Lenis only synthesises touch
       // scrolling when syncTouch is on, and a synthesised curve competes with iOS's
       // native rubber-banding rather than replacing it — reliably worse than leaving it.
       syncTouch: false,
-      touchMultiplier: 0.85,
+      touchMultiplier: 1.0,
     });
 
     lenisRef.current = lenis;
@@ -68,7 +68,8 @@ export const SmoothScroll: React.FC<SmoothScrollProps> = ({ children }) => {
     };
 
     gsap.ticker.add(updateGSAP);
-    gsap.ticker.lagSmoothing(0);
+    // Standard lag smoothing prevents stutter/jumps on dropped frames across mobile & desktop
+    gsap.ticker.lagSmoothing(500, 33);
 
     return () => {
       gsap.ticker.remove(updateGSAP);

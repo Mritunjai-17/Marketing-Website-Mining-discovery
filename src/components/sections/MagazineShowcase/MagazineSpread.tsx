@@ -52,7 +52,11 @@ export const MagazineSpread: React.FC<MagazineSpreadProps> = ({
   const isAnimatingRef = useRef(false);
   const safetyTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Spread Index: 0 = First inside spread (PDF page 2 = Pages 2-3)
+  // Document layout mode: "spread" for pre-stitched 2-page magazines, "pages" for portrait docs (newsletters, articles, CEO profiles)
+  const [docMode, setDocMode] = useState<"spread" | "pages">("spread");
+  const [totalPages, setTotalPages] = useState<number>(1);
+
+  // Spread Index
   const [currentSpreadIndex, setCurrentSpreadIndex] = useState(0);
   const [totalSpreads, setTotalSpreads] = useState(1);
   const [cachedImg, setCachedImg] = useState<string | null>(null);
@@ -73,21 +77,38 @@ export const MagazineSpread: React.FC<MagazineSpreadProps> = ({
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Compute page numbers
-  const leftPageNum = currentSpreadIndex * 2 + 2;
-  const rightPageNum = currentSpreadIndex * 2 + 3;
-
-  // Notify parent of current label
+  // Compute page numbers and notify parent
   useEffect(() => {
-    if (onSpreadChange) {
+    if (!onSpreadChange) return;
+
+    if (docMode === "spread") {
+      const leftPageNum = currentSpreadIndex * 2 + 2;
+      const rightPageNum = currentSpreadIndex * 2 + 3;
       if (isMobile) {
         const singlePage = mobileSide === "left" ? leftPageNum : rightPageNum;
         onSpreadChange(`PAGE ${singlePage}`);
       } else {
         onSpreadChange(`PAGES ${leftPageNum}–${rightPageNum}`);
       }
+    } else {
+      const leftPageNum = currentSpreadIndex * 2 + 1;
+      const rightPageNum = currentSpreadIndex * 2 + 2;
+      const docTotal = totalPages || 1;
+
+      if (docTotal === 1) {
+        onSpreadChange("PAGE 1 OF 1");
+      } else if (isMobile) {
+        const singlePage = mobileSide === "left" ? leftPageNum : Math.min(rightPageNum, docTotal);
+        onSpreadChange(`PAGE ${singlePage} OF ${docTotal}`);
+      } else {
+        if (rightPageNum <= docTotal) {
+          onSpreadChange(`PAGES ${leftPageNum}–${rightPageNum} OF ${docTotal}`);
+        } else {
+          onSpreadChange(`PAGE ${leftPageNum} OF ${docTotal}`);
+        }
+      }
     }
-  }, [currentSpreadIndex, mobileSide, isMobile, leftPageNum, rightPageNum, onSpreadChange]);
+  }, [currentSpreadIndex, mobileSide, isMobile, docMode, totalPages, onSpreadChange]);
 
   // Clean up timer on unmount
   useEffect(() => {
@@ -96,7 +117,7 @@ export const MagazineSpread: React.FC<MagazineSpreadProps> = ({
     };
   }, []);
 
-  // Reset spread index when magazine changes
+  // Reset state when publication changes
   useEffect(() => {
     setCurrentSpreadIndex(0);
     setCachedImg(null);
@@ -104,15 +125,20 @@ export const MagazineSpread: React.FC<MagazineSpreadProps> = ({
     setIsAnimating(false);
     isAnimatingRef.current = false;
     setMobileSide("left");
+    setHasError(false);
+    setIsLoading(true);
     if (safetyTimerRef.current) clearTimeout(safetyTimerRef.current);
   }, [pdfUrl]);
 
-  // Load PDF document and discover spread count
+  // Load PDF document and discover spread count & layout
   useEffect(() => {
     let isCancelled = false;
 
     async function initPdf() {
       try {
+        setIsLoading(true);
+        setHasError(false);
+
         const pdfjsLib = await loadPdfJs();
         if (isCancelled) return;
 
@@ -120,14 +146,41 @@ export const MagazineSpread: React.FC<MagazineSpreadProps> = ({
         if (isCancelled) return;
 
         pdfDocRef.current = doc;
+        setTotalPages(doc.numPages);
 
-        // Spread pages start at PDF page 2.
-        // If last page is a back cover (single page), spreads = doc.numPages - 1
-        const availableSpreads = Math.max(1, doc.numPages - 1);
-        setTotalSpreads(availableSpreads);
+        // Probe page dimensions to see if it's already a 2-page horizontal spread (width > height * 1.15)
+        let isPrestitched = false;
+        try {
+          const p1 = await doc.getPage(1);
+          const vp1 = p1.getViewport({ scale: 1 });
+          if (vp1.width > vp1.height * 1.15) {
+            isPrestitched = true;
+          } else if (doc.numPages >= 2) {
+            const p2 = await doc.getPage(2);
+            const vp2 = p2.getViewport({ scale: 1 });
+            if (vp2.width > vp2.height * 1.15) {
+              isPrestitched = true;
+            }
+          }
+        } catch (probeErr) {
+          console.warn("Spread dimension check:", probeErr);
+        }
+
+        if (isPrestitched) {
+          setDocMode("spread");
+          const availableSpreads = Math.max(1, doc.numPages - 1);
+          setTotalSpreads(availableSpreads);
+        } else {
+          setDocMode("pages");
+          const availableSpreads = Math.max(1, Math.ceil(doc.numPages / 2));
+          setTotalSpreads(availableSpreads);
+        }
       } catch (err) {
         console.error("Failed to load PDF document:", err);
-        if (!isCancelled) setHasError(true);
+        if (!isCancelled) {
+          setHasError(true);
+          setIsLoading(false);
+        }
       }
     }
 
@@ -153,7 +206,7 @@ export const MagazineSpread: React.FC<MagazineSpreadProps> = ({
   const renderSpreadImage = useCallback(
     async (spreadIdx: number): Promise<string | null> => {
       if (spreadIdx < 0 || spreadIdx >= totalSpreads) return null;
-      const cacheKey = `${pdfUrl}_spread_${spreadIdx}`;
+      const cacheKey = `${pdfUrl}_spread_${spreadIdx}_${docMode}`;
       if (spreadCache.has(cacheKey)) {
         return spreadCache.get(cacheKey)!;
       }
@@ -171,31 +224,111 @@ export const MagazineSpread: React.FC<MagazineSpreadProps> = ({
       if (!doc) return null;
 
       try {
-        const pdfPageNum = Math.min(spreadIdx + 2, doc.numPages);
-        if (pdfPageNum > doc.numPages) return null;
+        if (docMode === "spread") {
+          // Pre-stitched 2-page spread (e.g. Magazines in /public/Magazines/)
+          const pdfPageNum = Math.min(spreadIdx + 2, doc.numPages);
+          if (pdfPageNum > doc.numPages) return null;
 
-        const page = await doc.getPage(pdfPageNum);
-        const unscaledViewport = page.getViewport({ scale: 1 });
-        const targetWidth = unscaledViewport.width > unscaledViewport.height * 1.2 ? 2448 : 1224;
-        const scale = targetWidth / unscaledViewport.width;
-        const viewport = page.getViewport({ scale });
+          const page = await doc.getPage(pdfPageNum);
+          const unscaledViewport = page.getViewport({ scale: 1 });
+          const targetWidth = unscaledViewport.width > unscaledViewport.height * 1.2 ? 2448 : 1224;
+          const scale = targetWidth / unscaledViewport.width;
+          const viewport = page.getViewport({ scale });
 
-        const offscreenCanvas = document.createElement("canvas");
-        offscreenCanvas.width = viewport.width;
-        offscreenCanvas.height = viewport.height;
-        const ctx = offscreenCanvas.getContext("2d", { alpha: false });
-        if (!ctx) return null;
+          const offscreenCanvas = document.createElement("canvas");
+          offscreenCanvas.width = viewport.width;
+          offscreenCanvas.height = viewport.height;
+          const ctx = offscreenCanvas.getContext("2d", { alpha: false });
+          if (!ctx) return null;
 
-        await page.render({ canvasContext: ctx, viewport }).promise;
-        const dataUrl = offscreenCanvas.toDataURL("image/webp", 0.92);
-        spreadCache.set(cacheKey, dataUrl);
-        return dataUrl;
+          await page.render({ canvasContext: ctx, viewport }).promise;
+          const dataUrl = offscreenCanvas.toDataURL("image/webp", 0.92);
+          spreadCache.set(cacheKey, dataUrl);
+          return dataUrl;
+        } else {
+          // Individual portrait pages (Newsletters, Articles, CEO Profiles)
+          // Stitch left page (spreadIdx * 2 + 1) and right page (spreadIdx * 2 + 2) into one 2-page spread
+          const leftPageNum = spreadIdx * 2 + 1;
+          const rightPageNum = spreadIdx * 2 + 2;
+
+          const pageL = await doc.getPage(leftPageNum);
+          const vpL_raw = pageL.getViewport({ scale: 1 });
+          const targetHeight = 1584; // 2K crisp resolution
+          const scaleL = targetHeight / vpL_raw.height;
+          const vpL = pageL.getViewport({ scale: scaleL });
+
+          let pageR: any = null;
+          let vpR: any = null;
+          if (rightPageNum <= doc.numPages) {
+            pageR = await doc.getPage(rightPageNum);
+            const vpR_raw = pageR.getViewport({ scale: 1 });
+            const scaleR = targetHeight / vpR_raw.height;
+            vpR = pageR.getViewport({ scale: scaleR });
+          }
+
+          const leftW = Math.round(vpL.width);
+          const rightW = vpR ? Math.round(vpR.width) : leftW;
+          const totalW = leftW + rightW;
+
+          const offscreenCanvas = document.createElement("canvas");
+          offscreenCanvas.width = totalW;
+          offscreenCanvas.height = targetHeight;
+          const ctx = offscreenCanvas.getContext("2d", { alpha: false });
+          if (!ctx) return null;
+
+          // Fill clean dark parchment background
+          ctx.fillStyle = "#0c0f16";
+          ctx.fillRect(0, 0, totalW, targetHeight);
+
+          if (doc.numPages === 1) {
+            // Single-page document: render centered
+            const tempCanvas = document.createElement("canvas");
+            tempCanvas.width = leftW;
+            tempCanvas.height = targetHeight;
+            const tempCtx = tempCanvas.getContext("2d", { alpha: false });
+            if (tempCtx) {
+              await pageL.render({ canvasContext: tempCtx, viewport: vpL }).promise;
+              const centeredX = Math.round((totalW - leftW) / 2);
+              ctx.drawImage(tempCanvas, centeredX, 0);
+            }
+          } else {
+            // Render Left Page
+            const tempCanvasL = document.createElement("canvas");
+            tempCanvasL.width = leftW;
+            tempCanvasL.height = targetHeight;
+            const tempCtxL = tempCanvasL.getContext("2d", { alpha: false });
+            if (tempCtxL) {
+              await pageL.render({ canvasContext: tempCtxL, viewport: vpL }).promise;
+              ctx.drawImage(tempCanvasL, 0, 0);
+            }
+
+            // Render Right Page (if exists)
+            if (pageR && vpR) {
+              const tempCanvasR = document.createElement("canvas");
+              tempCanvasR.width = rightW;
+              tempCanvasR.height = targetHeight;
+              const tempCtxR = tempCanvasR.getContext("2d", { alpha: false });
+              if (tempCtxR) {
+                await pageR.render({ canvasContext: tempCtxR, viewport: vpR }).promise;
+                ctx.drawImage(tempCanvasR, leftW, 0);
+              }
+            } else {
+              // Odd last page: clean dark background with subtle elegant border
+              ctx.fillStyle = "#10131a";
+              ctx.fillRect(leftW, 0, rightW, targetHeight);
+            }
+          }
+
+          const dataUrl = offscreenCanvas.toDataURL("image/webp", 0.92);
+          spreadCache.set(cacheKey, dataUrl);
+          return dataUrl;
+        }
       } catch (err) {
         console.error("Failed to render spread:", err);
         return null;
       }
     },
-    [pdfUrl, totalSpreads]
+    [pdfUrl, totalSpreads, docMode]
   );
 
   const preloadSpread = useCallback(
@@ -208,7 +341,7 @@ export const MagazineSpread: React.FC<MagazineSpreadProps> = ({
   // Render current spread on load or spread index change
   useEffect(() => {
     let isCancelled = false;
-    const cacheKey = `${pdfUrl}_spread_${currentSpreadIndex}`;
+    const cacheKey = `${pdfUrl}_spread_${currentSpreadIndex}_${docMode}`;
 
     if (spreadCache.has(cacheKey)) {
       setCachedImg(spreadCache.get(cacheKey)!);
@@ -248,11 +381,15 @@ export const MagazineSpread: React.FC<MagazineSpreadProps> = ({
     return () => {
       isCancelled = true;
     };
-  }, [pdfUrl, currentSpreadIndex, renderSpreadImage, preloadSpread]);
+  }, [pdfUrl, currentSpreadIndex, docMode, renderSpreadImage, preloadSpread]);
+
+  const hasRightPage =
+    docMode === "spread" ||
+    currentSpreadIndex * 2 + 2 <= (totalPages || 999);
 
   // Navigation Handlers
   const hasNext = isMobile
-    ? mobileSide === "left" || currentSpreadIndex < totalSpreads - 1
+    ? (mobileSide === "left" && hasRightPage) || currentSpreadIndex < totalSpreads - 1
     : currentSpreadIndex < totalSpreads - 1;
 
   const hasPrev = isMobile
@@ -288,7 +425,7 @@ export const MagazineSpread: React.FC<MagazineSpreadProps> = ({
     let targetMobileSide: "left" | "right" = mobileSide;
 
     if (isMobile) {
-      if (mobileSide === "left") {
+      if (mobileSide === "left" && hasRightPage) {
         targetMobileSide = "right";
       } else if (currentSpreadIndex < totalSpreads - 1) {
         targetSpreadIdx = currentSpreadIndex + 1;
@@ -336,6 +473,7 @@ export const MagazineSpread: React.FC<MagazineSpreadProps> = ({
     isAnimating,
     isLoading,
     hasNext,
+    hasRightPage,
     cachedImg,
     currentSpreadIndex,
     totalSpreads,
@@ -357,7 +495,10 @@ export const MagazineSpread: React.FC<MagazineSpreadProps> = ({
         targetMobileSide = "left";
       } else if (currentSpreadIndex > 0) {
         targetSpreadIdx = currentSpreadIndex - 1;
-        targetMobileSide = "right";
+        const prevHasRight =
+          docMode === "spread" ||
+          (currentSpreadIndex - 1) * 2 + 2 <= (totalPages || 999);
+        targetMobileSide = prevHasRight ? "right" : "left";
       }
     } else {
       if (currentSpreadIndex > 0) {
@@ -402,6 +543,8 @@ export const MagazineSpread: React.FC<MagazineSpreadProps> = ({
     hasPrev,
     cachedImg,
     currentSpreadIndex,
+    docMode,
+    totalPages,
     isMobile,
     mobileSide,
     renderSpreadImage,
@@ -516,7 +659,9 @@ export const MagazineSpread: React.FC<MagazineSpreadProps> = ({
             src={cachedImg}
             alt={`${title} Spread ${currentSpreadIndex + 1}`}
             className={`${styles.spreadImage} ${
-              isMobile
+              totalPages === 1
+                ? styles.singlePageImage
+                : isMobile
                 ? mobileSide === "left"
                   ? styles.mobileShowLeft
                   : styles.mobileShowRight
@@ -527,7 +672,9 @@ export const MagazineSpread: React.FC<MagazineSpreadProps> = ({
           <canvas
             ref={canvasRef}
             className={`${styles.spreadCanvas} ${isLoading ? styles.canvasHidden : ""} ${
-              isMobile
+              totalPages === 1
+                ? styles.singlePageImage
+                : isMobile
                 ? mobileSide === "left"
                   ? styles.mobileShowLeft
                   : styles.mobileShowRight
@@ -538,7 +685,7 @@ export const MagazineSpread: React.FC<MagazineSpreadProps> = ({
         )}
 
         {/* Tactile Center Spine Shadow (Desktop/Tablet) */}
-        <div aria-hidden="true" className={styles.spreadSpine} />
+        {totalPages > 1 && <div aria-hidden="true" className={styles.spreadSpine} />}
 
         {/* Outer binding edge shadows */}
         <div aria-hidden="true" className={styles.spreadEdgeLeft} />

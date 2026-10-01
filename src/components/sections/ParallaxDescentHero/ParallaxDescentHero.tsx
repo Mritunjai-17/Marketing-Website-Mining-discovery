@@ -14,7 +14,7 @@ export interface ParallaxDescentHeroProps {
 }
 
 const LAYERS = [
-  { id: "L_sky", f: 0.05, y0: -0.25, src: "/images/parallax-descent/L_sky.jpg", alt: "Alpine Sky" },
+  { id: "L_sky", f: 0.05, y0: -0.25, src: "/images/parallax-descent/L_sky.webp", alt: "Alpine Sky" },
   { id: "L_peaks", f: 0.20, y0: 0.0, src: "/images/parallax-descent/L_peaks.webp", alt: "Mountain Peaks" },
   { id: "L_mid", f: 0.35, y0: 0.0, src: "/images/parallax-descent/L_mid.webp", alt: "Mid Range Ridge" },
   { id: "L_camp", f: 0.50, y0: 0.0, src: "/images/parallax-descent/L_camp.webp", alt: "Exploration Camp" },

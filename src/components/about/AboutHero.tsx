@@ -109,7 +109,7 @@ export const AboutHero: React.FC = () => {
 
         <p
           ref={quoteRef}
-          className="mt-8 max-w-3xl font-serif text-3xl font-normal leading-[1.15] tracking-[-0.015em] text-[#0B1F3A] sm:text-4xl lg:text-[44px]"
+          className="mt-8 max-w-3xl font-serif text-2xl font-normal leading-[1.2] tracking-[-0.015em] text-[#0B1F3A] sm:text-3xl lg:text-[clamp(1.9rem,3.5vw,2.5rem)]"
         >
           <MaskedWords text={QUOTE} />
         </p>

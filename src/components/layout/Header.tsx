@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { Calendar, Menu, X, ArrowRight } from "lucide-react";
+import { Menu, X, ArrowRight } from "lucide-react";
 
 /*
  * Primary Navigation Architecture for Mining Discovery
@@ -14,7 +14,6 @@ import { Calendar, Menu, X, ArrowRight } from "lucide-react";
 const navLinks = [
   { name: "Home", href: "/" },
   { name: "About", href: "/about" },
-  { name: "Services", href: "/services" },
   { name: "Work", href: "/work" },
   { name: "Contact", href: "/contact" },
 ];
@@ -159,27 +158,15 @@ export const Header: React.FC = () => {
             })}
           </nav>
 
-          {/* Right: Circular Icon Button + Golden Amber Pill CTA */}
+          {/* Right: Golden Amber Pill CTA + Mobile Menu Trigger */}
           <div className="flex items-center gap-2.5 sm:gap-3.5 shrink-0">
-            {/* Circular Action Button */}
-            <Link
-              href="/contact"
-              className={`w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full border transition-all duration-300 backdrop-blur-md cursor-pointer group flex items-center justify-center ${isDarkNav
-                ? "border-white/15 hover:border-[#D6A84F]/60 text-white/85 hover:text-[#D6A84F] bg-white/[0.04] hover:bg-white/[0.09] hover:shadow-[0_0_18px_rgba(214,168,79,0.25)]"
-                : "border-[#0B1F3A]/20 hover:border-[#B8860B] text-[#0B1F3A]/85 hover:text-[#B8860B] bg-[#0B1F3A]/5 hover:bg-[#0B1F3A]/10"
-                }`}
-              aria-label="Schedule Consultation"
-            >
-              <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-300 group-hover:scale-110" />
-            </Link>
-
             {/* Golden Amber Pill CTA Button */}
             <Link
               href="/contact"
               className="inline-flex items-center justify-center px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 rounded-full bg-gradient-to-r from-[#D6A84F] via-[#F3DC96] to-[#C89A32] text-[#0C141E] font-sans font-bold text-[10px] sm:text-xs uppercase tracking-[0.16em] hover:brightness-110 hover:shadow-[0_0_24px_rgba(214,168,79,0.55)] transition-all duration-300 hover:scale-[1.03] shrink-0 active:scale-[0.98]"
             >
-              <span className="hidden sm:inline">SCHEDULE BRIEFING</span>
-              <span className="sm:hidden">BRIEFING</span>
+              <span className="hidden sm:inline">GET IN TOUCH</span>
+              <span className="sm:hidden">CONTACT</span>
             </Link>
 
             {/* Mobile Menu Trigger (Hamburger icon) */}
@@ -265,7 +252,7 @@ export const Header: React.FC = () => {
               onClick={() => setMenuOpen(false)}
               className="w-full py-3 rounded-full bg-gradient-to-r from-[#E5A93C] to-[#D49525] text-[#111713] font-bold text-center text-xs uppercase tracking-[0.18em] shadow-[0_4px_20px_rgba(229,169,60,0.35)]"
             >
-              SCHEDULE BRIEFING
+              GET IN TOUCH
             </Link>
 
             <div className="flex items-center justify-center gap-5 pt-2 text-white/60">

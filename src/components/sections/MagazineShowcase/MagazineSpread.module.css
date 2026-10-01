@@ -56,6 +56,13 @@
   opacity: 0;
 }
 
+.singlePageImage {
+  width: 100% !important;
+  max-width: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
+}
+
 .spreadCrossfade {
   opacity: 0.85;
   transition: opacity 0.18s ease;

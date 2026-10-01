@@ -142,7 +142,7 @@
 .dust {
   position: absolute;
   inset: -40% 0 0 0;
-  background: url("/images/parallax-descent/dust_fine.png") repeat;
+  background: url("/images/parallax-descent/dust_fine.webp") repeat;
   background-size: 520px 520px;
   opacity: 0;
   pointer-events: none;
@@ -151,7 +151,7 @@
 }
 
 .dustCoarse {
-  background-image: url("/images/parallax-descent/dust_coarse.png");
+  background-image: url("/images/parallax-descent/dust_coarse.webp");
   background-size: 900px 900px;
   animation-duration: 90s;
   animation-direction: reverse;
@@ -174,7 +174,7 @@
 .grain {
   position: absolute;
   inset: 0;
-  background: url("/images/parallax-descent/film_grain.png") repeat;
+  background: url("/images/parallax-descent/film_grain.webp") repeat;
   background-size: 192px 192px;
   opacity: 0.06;
   pointer-events: none;

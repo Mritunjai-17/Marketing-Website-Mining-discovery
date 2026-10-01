@@ -206,7 +206,7 @@ export const MiningApproachSequence: React.FC<MiningApproachSequenceProps> = ({ 
           <div
             className={styles.macroBg}
             style={{
-              backgroundImage: "url('/images/approach_drill_core.jpg')",
+              backgroundImage: "url('/images/approach_drill_core.webp')",
               transform: `scale(${bgScale.toFixed(3)}) translateY(${bgY.toFixed(1)}px)`,
             }}
           />

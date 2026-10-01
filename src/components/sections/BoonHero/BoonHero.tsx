@@ -32,10 +32,11 @@ function getFrameUrl(index: number): string {
   return `/frames/hero-sequence/frame_${padded}.webp`;
 }
 
-export const BoonHero = forwardRef<BoonHeroHandle, BoonHeroProps>(function BoonHero(
-  { progress = 0, onExploreClick },
-  ref,
-) {
+export const BoonHero = React.memo(
+  forwardRef<BoonHeroHandle, BoonHeroProps>(function BoonHero(
+    { progress = 0, onExploreClick },
+    ref,
+  ) {
   // Damped scrubbed progress strictly bounded in [0, 1]
   const p = Math.max(0, Math.min(1, progress));
 
@@ -449,9 +450,8 @@ export const BoonHero = forwardRef<BoonHeroHandle, BoonHeroProps>(function BoonH
           </button>
         </div>
       </div>
-
     </section>
   );
-});
+}));
 
 export default BoonHero;

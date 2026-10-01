@@ -85,6 +85,15 @@
   transform: scaleX(1);
 }
 
+.eyebrowPip {
+  display: inline-block;
+  color: #D4AF37;
+  font-size: 0.85em;
+  margin: 0 0.35em;
+  text-shadow: 0 0 8px rgba(212, 175, 55, 0.6);
+  vertical-align: middle;
+}
+
 .eyebrowText {
   font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
   font-size: clamp(0.64rem, 0.78vw, 0.76rem);
@@ -97,68 +106,47 @@
 .mainTitle {
   font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
   font-size: clamp(1.75rem, 3.4vw, 3.4rem);
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  font-weight: 700;
+  letter-spacing: -0.025em;
   line-height: 1.12;
-  color: #111622;
+  color: #0F172A;
   margin: 0 0 clamp(0.65rem, 1.4vh, 1rem);
   text-transform: uppercase;
-  max-width: 860px;
+  max-width: 880px;
 }
 
-/* Kinetic Mask Wrappers for Staggered Slide-Up Text Reveals */
-.maskWrapper {
+.titleLine {
   display: block;
-  overflow: hidden;
-  padding-bottom: 0.12em;
-  margin-bottom: -0.12em;
 }
 
-.maskedLine {
-  display: block;
-  transform: translateY(115%);
-  opacity: 0;
-  transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.75s ease;
-  will-change: transform, opacity;
-}
-
-.inView .maskedLine {
-  transform: translateY(0);
-  opacity: 1;
-}
-
-.line1 {
-  transition-delay: 0.05s;
-}
-
-.line2 {
-  transition-delay: 0.18s;
-}
-
-/* Gold Specular Shimmer Sweep on Accent Word */
 .shimmerText {
   font-style: italic;
-  font-weight: 400;
+  font-weight: 600;
   background: linear-gradient(
-    115deg,
-    #8B6820 0%,
-    #B8860B 35%,
-    #C89A32 50%,
-    #7A5E22 100%
+    135deg,
+    #FCE8A6 0%,
+    #D4AF37 25%,
+    #FFF2B2 45%,
+    #AA771C 70%,
+    #D4AF37 88%,
+    #FCE8A6 100%
   );
-  background-size: 220% 100%;
+  background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  animation: metallicGoldFlow 6s ease-in-out infinite;
   display: inline-block;
-  animation: stoneGoldShimmer 5s ease-in-out infinite;
 }
 
-@keyframes stoneGoldShimmer {
-  0%, 15% {
-    background-position: 180% 0;
+@keyframes metallicGoldFlow {
+  0% {
+    background-position: 0% 50%;
   }
-  65%, 100% {
-    background-position: -180% 0;
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
   }
 }
 
@@ -166,18 +154,10 @@
   font-family: var(--font-inter), "Inter", sans-serif;
   font-size: clamp(0.88rem, 1.05vw, 1.05rem);
   line-height: 1.62;
-  color: #374151;
+  color: #334155;
   margin: 0;
   max-width: 820px;
   padding: 0 clamp(0.25rem, 1vw, 1rem);
-  opacity: 0.45;
-  transform: translateY(8px);
-  transition: opacity 0.75s ease 0.15s, transform 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.15s;
-}
-
-.inView .subtitle {
-  opacity: 1;
-  transform: translateY(0);
 }
 
 /* ==========================================================================
