@@ -290,10 +290,12 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
       if (stackOuterRef.current && stackStickyRef.current) {
         const outerRect = stackOuterRef.current.getBoundingClientRect();
         const stickyEl = stackStickyRef.current;
-        const stickyH = stickyEl.offsetHeight || 620;
+        const stickyH = stickyEl.offsetHeight || 520;
 
-        // Position where the card deck pins comfortably below navbar & KPI strip, centered
-        const pinTop = Math.max(40, Math.min(130, (clientH - stickyH) / 2));
+        // Position where the card deck pins comfortably below fixed navbar (header is ~80px)
+        const NAV_BUFFER = 92;
+        const availableH = Math.max(320, clientH - NAV_BUFFER);
+        const pinTop = Math.max(NAV_BUFFER, Math.min(136, Math.round(NAV_BUFFER + (availableH - stickyH) / 2)));
         const maxTravel = Math.max(0, outerRect.height - stickyH);
 
         // Distance scrolled past pinTop
@@ -303,10 +305,10 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
         // Pin smoothly inside stackOuter
         stickyEl.style.transform = `translate3d(0, ${clampedOffset.toFixed(1)}px, 0)`;
 
-        // Scroll scrub continuously drives targetProgress (0.0 to 3.0)
+        // Scroll scrub drives targetProgress (0.0 to 3.0), reaching final card with ample comfortable reading runway
         if (!isManualClickRef.current && maxTravel > 0) {
-          const progressRatio = Math.max(0, Math.min(1, clampedOffset / maxTravel));
-          targetProgressRef.current = progressRatio * 3.0;
+          const progressRatio = Math.max(0, Math.min(1, clampedOffset / (maxTravel * 0.82)));
+          targetProgressRef.current = Math.min(3.0, progressRatio * 3.0);
         }
       }
 

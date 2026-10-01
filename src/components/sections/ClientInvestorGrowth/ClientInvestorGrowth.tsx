@@ -134,7 +134,7 @@ export const ClientInvestorGrowth = React.memo<ClientInvestorGrowthProps>(functi
     const trackRect = track.getBoundingClientRect();
     const clientH = window.innerHeight || 800;
     const contentH = track.offsetHeight || 5500;
-    const maxScroll = Math.max(0, contentH - clientH + 180);
+    const maxScroll = Math.max(0, contentH - clientH);
 
     // Exact relative coordinate: distance from track top to element is invariant to CSS transform
     const headerTop = headerRef.current
