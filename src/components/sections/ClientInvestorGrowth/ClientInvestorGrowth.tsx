@@ -132,23 +132,20 @@ export const ClientInvestorGrowth = React.memo<ClientInvestorGrowthProps>(functi
     if (!trackRef.current) return;
     const track = trackRef.current;
     const trackRect = track.getBoundingClientRect();
-    const currentTransformY = -parseFloat(
-      track.style.transform.replace(/[^0-9.-]/g, "") || "0"
-    );
-    const trackTop = trackRect.top - currentTransformY;
     const clientH = window.innerHeight || 800;
     const contentH = track.offsetHeight || 5500;
     const maxScroll = Math.max(0, contentH - clientH + 180);
 
+    // Exact relative coordinate: distance from track top to element is invariant to CSS transform
     const headerTop = headerRef.current
-      ? headerRef.current.getBoundingClientRect().top - trackTop - currentTransformY
+      ? headerRef.current.getBoundingClientRect().top - trackRect.top
       : 100;
 
     const rowCenters: number[] = [];
     rowRefs.current.forEach((el) => {
       if (el) {
         const r = el.getBoundingClientRect();
-        const topRelativeToTrack = r.top - trackTop - currentTransformY;
+        const topRelativeToTrack = r.top - trackRect.top;
         rowCenters.push(topRelativeToTrack + r.height * 0.5);
       } else {
         rowCenters.push(0);
@@ -156,7 +153,7 @@ export const ClientInvestorGrowth = React.memo<ClientInvestorGrowthProps>(functi
     });
 
     const metricsTop = metricsRef.current
-      ? metricsRef.current.getBoundingClientRect().top - trackTop - currentTransformY
+      ? metricsRef.current.getBoundingClientRect().top - trackRect.top
       : 2600;
 
     layoutMetricsRef.current = {

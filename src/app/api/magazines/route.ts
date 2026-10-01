@@ -28,18 +28,18 @@ export async function GET() {
           m.coverImage?.url ||
           "";
 
+        const dateObj = m.publishDate
+          ? new Date(m.publishDate)
+          : new Date(m.createdAt || Date.now());
+        const month = dateObj.toLocaleString("en-US", { month: "long" });
+        const year = dateObj.getFullYear();
+
         const localMatch = INITIAL_MAGAZINES.find(
           (init) =>
             init.month?.toLowerCase() === month.toLowerCase() &&
             Number(init.year) === Number(year)
         );
         const pdfUrl = localMatch?.pdf || `/api/pdf-proxy?url=${encodeURIComponent(m.pdf.url)}`;
-
-        const dateObj = m.publishDate
-          ? new Date(m.publishDate)
-          : new Date(m.createdAt || Date.now());
-        const month = dateObj.toLocaleString("en-US", { month: "long" });
-        const year = dateObj.getFullYear();
 
         return {
           id: String(m.id),

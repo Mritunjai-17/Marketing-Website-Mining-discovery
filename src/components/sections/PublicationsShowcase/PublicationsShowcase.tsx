@@ -11,7 +11,9 @@ import {
 import {
   INITIAL_NEWSLETTERS,
   INITIAL_ARTICLES,
+  INITIAL_CEO_PROFILES,
   PublicationItem,
+  CeoProfileItem,
   getProxiedPdfUrl,
 } from "@/data/publications";
 import styles from "./PublicationsShowcase.module.css";
@@ -26,72 +28,6 @@ interface PublicationCardConfig {
   badge: string;
   ctaText: string;
 }
-
-export interface CeoProfileItem {
-  id: string;
-  name: string;
-  title: string;
-  designation: string;
-  description: string;
-  cover: string;
-  ceoImage?: string;
-  pdf: string;
-  rawPdf?: string;
-  date?: string;
-}
-
-const INITIAL_CEO_PROFILES: CeoProfileItem[] = [
-  {
-    id: "ceo-us-gold",
-    name: "George Bee",
-    title: "George Bee — President & CEO, U.S. Gold Corp",
-    designation: "President & CEO, U.S. Gold Corp",
-    cover: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/medium_U_S_Gold_Corp_converted_2d59b49b01.webp",
-    pdf: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/U_S_Gold_f6e29f9ef2.pdf",
-    description: "Executive interview on advancing the CK Gold Project in Wyoming toward commercial production.",
-    date: "2026-06-26",
-  },
-  {
-    id: "ceo-pan-global",
-    name: "Tim Barry",
-    title: "Tim Barry — President & CEO, Pan Global Resources",
-    designation: "President & CEO, Pan Global Resources",
-    cover: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/medium_Pan_Global_Resources_Inc_1b6b03beef.png",
-    pdf: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/Pan_Global_Resources_developing_copper_scale_in_Spain_after_maiden_1_3c491a5783.pdf",
-    description: "Delineating copper-gold scale in Spain's premier Iberian Pyrite Belt corridor.",
-    date: "2026-05-04",
-  },
-  {
-    id: "ceo-harfang",
-    name: "Ian Campbell",
-    title: "Ian Campbell — President & CEO, Harfang Exploration",
-    designation: "President & CEO, Harfang Exploration",
-    cover: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/medium_Harfang_Exploration_bebcb4e815.png",
-    pdf: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/Harfang_Article_e3f275e038.pdf",
-    description: "High-grade gold discoveries and strategic land packages across James Bay & Ontario.",
-    date: "2026-08-03",
-  },
-  {
-    id: "ceo-auro-metals",
-    name: "Auro Metals",
-    title: "Auro Metals Executive Leadership Spotlight",
-    designation: "Executive Leadership Team",
-    cover: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/medium_Auro_Metals_Inc_1_converted_d0d6dc9838.webp",
-    pdf: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/Auro_Metals_PDF_183fecd67f.pdf",
-    description: "Strategic expansion into critical metals and polymetallic exploration corridors.",
-    date: "2026-06-26",
-  },
-  {
-    id: "ceo-silver-wolf",
-    name: "Silver Wolf Exploration",
-    title: "Silver Wolf Exploration — Executive Feature",
-    designation: "Executive Leadership Team",
-    cover: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/medium_43_2ce336b06b.png",
-    pdf: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/Silver_Wolf_Exploration_4_cda5afab3e.pdf",
-    description: "Targeting high-grade epithermal silver-gold systems in Durango, Mexico.",
-    date: "2026-04-30",
-  },
-];
 
 const PUBLICATIONS_SUBTITLE_WORDS = [
   "We",

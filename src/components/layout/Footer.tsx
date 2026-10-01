@@ -52,19 +52,19 @@ const SOCIALS: Array<{ name: string; href: string; path: string }> = [
  * have a destination already point at the header's own anchors, so they are correct now
  * and the rest are one edit each when the pages exist.
  */
-const COLUMNS: Array<{ heading: string; links: Array<{ name: string; href: string }> }> = [
+const COLUMNS: Array<{ heading: string; links: Array<{ name: string; href: string; external?: boolean }> }> = [
   {
     heading: "Content",
     links: [
-      { name: "Services", href: "#services" },
-      { name: "Newsletters", href: "#" },
-      { name: "Magazines", href: "#" },
-      { name: "Articles", href: "#" },
+      { name: "Services", href: "/#services" },
+      { name: "Newsletters", href: "https://www.miningdiscovery.com/daily-newsletter", external: true },
+      { name: "Magazines", href: "https://www.miningdiscovery.com/magazines", external: true },
+      { name: "Articles", href: "https://www.miningdiscovery.com/all-news", external: true },
     ],
   },
   {
     heading: "Profiles",
-    links: [{ name: "CEO Profiles", href: "#" }],
+    links: [{ name: "CEO Profiles", href: "https://www.miningdiscovery.com/ceo-profile", external: true }],
   },
   {
     heading: "Company",
@@ -127,12 +127,23 @@ export const Footer: React.FC = () => {
                 <ul className="mt-6 space-y-[1.1rem]">
                   {column.links.map((link) => (
                     <li key={link.name}>
-                      <Link
-                        href={link.href}
-                        className="text-sm font-normal text-[#F0F4F8]/70 underline-offset-4 transition-colors duration-200 hover:text-[#D4AF37] hover:underline focus:outline-none focus-visible:text-[#D4AF37] focus-visible:underline"
-                      >
-                        {link.name}
-                      </Link>
+                      {link.external ? (
+                        <a
+                          href={link.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm font-normal text-[#F0F4F8]/70 underline-offset-4 transition-colors duration-200 hover:text-[#D4AF37] hover:underline focus:outline-none focus-visible:text-[#D4AF37] focus-visible:underline"
+                        >
+                          {link.name}
+                        </a>
+                      ) : (
+                        <Link
+                          href={link.href}
+                          className="text-sm font-normal text-[#F0F4F8]/70 underline-offset-4 transition-colors duration-200 hover:text-[#D4AF37] hover:underline focus:outline-none focus-visible:text-[#D4AF37] focus-visible:underline"
+                        >
+                          {link.name}
+                        </Link>
+                      )}
                     </li>
                   ))}
                 </ul>

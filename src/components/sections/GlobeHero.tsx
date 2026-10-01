@@ -296,7 +296,7 @@ export const GlobeHero: React.FC = () => {
       >
         <div
           ref={cardRef}
-          className="sticky top-0 h-screen w-full overflow-hidden bg-[#030509]"
+          className="sticky top-0 h-screen supports-[height:100dvh]:h-[100dvh] w-full overflow-hidden bg-[#030509]"
         >
           <div ref={slotRef} className="relative h-full w-full">
             {/* Boon-Inspired Dark Hero Overlay */}

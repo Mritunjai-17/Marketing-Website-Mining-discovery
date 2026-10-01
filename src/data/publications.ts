@@ -435,3 +435,115 @@ export const INITIAL_ARTICLES: PublicationItem[] = [
     "date": "2026-09-18T10:37:23.544Z"
   }
 ];
+
+export interface CeoProfileItem {
+  id: string;
+  name: string;
+  title: string;
+  designation: string;
+  description: string;
+  cover: string;
+  ceoImage: string;
+  pdf: string;
+  rawPdf?: string;
+  date?: string;
+}
+
+export const INITIAL_CEO_PROFILES: CeoProfileItem[] = [
+  {
+    id: "45",
+    name: "George Bee",
+    title: "George Bee — President and CEO of U.S. Gold Corp",
+    designation: "President and CEO of U.S. Gold Corp",
+    description: "George Bee, CEO and Director of U.S. Gold Corp., brings decades of mining leadership and project development expertise to the company's growth strategy. Advancing world-class gold projects toward commercial production.",
+    cover: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/medium_George_Bee_Us_Gold_95e4a52982.png",
+    ceoImage: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/thumbnail_Group_126_f09e05ef14.png",
+    pdf: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/George_Bee_Us_Gold_1_403dc7dfbe.pdf",
+    rawPdf: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/George_Bee_Us_Gold_1_403dc7dfbe.pdf",
+    date: "2025-10-08T05:46:07.137Z"
+  },
+  {
+    id: "46",
+    name: "James Anderson",
+    title: "James Anderson — Chairman & CEO of Guanajuato Silver",
+    designation: "Chairman & CEO of Guanajuato Silver",
+    description: "James Anderson is leading Guanajuato Silver into a transformative era of growth and innovation, positioning the company among Mexico's fastest-growing silver and gold producers.",
+    cover: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/medium_Guanjuato_Gold_Ceo_Profile_d89cce09f6.png",
+    ceoImage: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/thumbnail_Photo_from_Chanda_Angral_3c11f5da28.png",
+    pdf: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/Guanjuato_Gold_Ceo_Profile_e4f49474c1.pdf",
+    rawPdf: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/Guanjuato_Gold_Ceo_Profile_e4f49474c1.pdf",
+    date: "2025-10-08T05:46:19.664Z"
+  },
+  {
+    id: "44",
+    name: "Zayn Kalyan",
+    title: "Zayn Kalyan — CEO and Director of Scorpio Gold Corporation",
+    designation: "CEO and Director of Scorpio Gold Corporation",
+    description: "Zayn Kalyan is driving strategic growth with innovation and capital markets leadership, unlocking value through responsible exploration and sustainable mining practices.",
+    cover: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/medium_Copy_of_Zayn_Kalyan_Scorpio_Gold_Corp_5545608abf.png",
+    ceoImage: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/thumbnail_Zayn_Kalyan_9696ee96f8.png",
+    pdf: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/Zayn_Kalyan_Scorpio_Gold_Corp_1_06143343bd.pdf",
+    rawPdf: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/Zayn_Kalyan_Scorpio_Gold_Corp_1_06143343bd.pdf",
+    date: "2025-10-08T05:45:52.623Z"
+  },
+  {
+    id: "47",
+    name: "Mati Talikka",
+    title: "Mati Talikka — CEO of Aurion Resources",
+    designation: "CEO of Aurion Resources",
+    description: "Mati Talikka leads Aurion Resources with a geologist's precision and visionary drive, uncovering new opportunities across Finland's mineral-rich north in Scandinavia.",
+    cover: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/medium_Mati_Talika_Aurion_Resources_7574bc0273.png",
+    ceoImage: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/thumbnail_Mati_Talikka_33222b080d.png",
+    pdf: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/Mati_Talika_Aurion_Resources_1993021c8c.pdf",
+    rawPdf: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/Mati_Talika_Aurion_Resources_1993021c8c.pdf",
+    date: "2025-10-08T05:46:30.065Z"
+  },
+  {
+    id: "48",
+    name: "Michel Amar",
+    title: "Michel Amar — CEO of DigiPower X",
+    designation: "CEO of DigiPower X",
+    description: "Guiding DigiPower X through high-growth technological transformation and artificial intelligence pivot for next-generation mining resource infrastructure.",
+    cover: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/medium_Michel_Amar_Digipower_X_370a65e1d1.png",
+    ceoImage: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/thumbnail_Group_127_43ff1709da.png",
+    pdf: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/Michel_Amar_Digipower_X_b047992f71.pdf",
+    rawPdf: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/Michel_Amar_Digipower_X_b047992f71.pdf",
+    date: "2025-10-08T05:46:42.423Z"
+  },
+  {
+    id: "49",
+    name: "Mike Stark",
+    title: "Mike Stark — CEO of Arizona Gold & Silver Inc.",
+    designation: "CEO of Arizona Gold & Silver Inc.",
+    description: "Seasoned veteran focused on architecting the next significant gold discovery and unlocking Arizona's vast geological potential.",
+    cover: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/medium_Mike_Stark_Arizona_5a277cdd9f.png",
+    ceoImage: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/thumbnail_Mike_Stark_e36daaed64.png",
+    pdf: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/Mike_Stark_Arizona_e9bc5f6165.pdf",
+    rawPdf: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/Mike_Stark_Arizona_e9bc5f6165.pdf",
+    date: "2025-10-08T05:46:54.498Z"
+  },
+  {
+    id: "50",
+    name: "Paul Cowley",
+    title: "Paul Cowley — CEO and Director of Phenom Resources",
+    designation: "CEO and Director of Phenom Resources",
+    description: "Distinguished exploration geologist leading high-grade vanadium and gold discoveries in the Carlin Gold Trend of Nevada.",
+    cover: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/medium_Paul_Crowly_e92bf1ce45.png",
+    ceoImage: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/thumbnail_Paul_Cowley_e901460ea8.png",
+    pdf: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/Paul_Cowley_Phenom_Resources_4eeb8fb4a8.pdf",
+    rawPdf: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/Paul_Cowley_Phenom_Resources_4eeb8fb4a8.pdf",
+    date: "2025-10-08T05:47:06.505Z"
+  },
+  {
+    id: "51",
+    name: "Brian Miller",
+    title: "Brian Miller — CEO and Director of Astra Exploration Inc.",
+    designation: "CEO and Director of Astra Exploration Inc.",
+    description: "Driving premier epithermal gold-silver exploration in Chile's world-class Paleocene metallogenic belt.",
+    cover: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/medium_Brian_Miller_1_64ef6db002.png",
+    ceoImage: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/thumbnail_Brian_Miller_f75bc9b532.png",
+    pdf: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/Brian_Miller_Astra_Exploration_df07a0c109.pdf",
+    rawPdf: "https://acceptable-desire-0cca5bb827.media.strapiapp.com/Brian_Miller_Astra_Exploration_df07a0c109.pdf",
+    date: "2025-10-08T05:47:19.349Z"
+  }
+];

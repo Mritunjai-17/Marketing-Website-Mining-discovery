@@ -61,19 +61,19 @@ export const FaqSection: React.FC = () => {
 
   return (
     <section className="w-full border-t border-[#E5E3DC] bg-[#FAF7F2]">
-      <SectionReveal className="container-editorial py-20 md:py-28">
+      <SectionReveal className="container-editorial py-14 sm:py-20 md:py-28">
 
         {/* ── Header ─────────────────────────────────────────────────── */}
-        <RevealItem className="mb-14">
+        <RevealItem className="mb-10 sm:mb-14">
           <div className="h-0.5 w-10 bg-[#B8860B]" />
-          <span className="mt-6 block font-mono text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-[#B8860B]">
+          <span className="mt-5 block font-mono text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-[#B8860B]">
             Frequently Asked Questions
           </span>
-          <div className="mt-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <h2 className="max-w-[22ch] font-geist text-[clamp(1.75rem,3.8vw,3rem)] font-semibold leading-[1.08] tracking-[-0.03em] text-[#0B1F3A]">
+          <div className="mt-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+            <h2 className="max-w-[22ch] font-geist text-[clamp(1.6rem,3.8vw,3rem)] font-semibold leading-[1.08] tracking-[-0.03em] text-[#0B1F3A]">
               Everything you need to know about Mining Discovery.
             </h2>
-            <p className="max-w-[40ch] text-base font-normal leading-relaxed text-[#57595E] lg:text-right">
+            <p className="max-w-[40ch] text-sm sm:text-base font-normal leading-relaxed text-[#57595E] lg:text-right">
               Can&apos;t find what you&apos;re looking for?{" "}
               <a
                 href="https://www.miningdiscovery.com/contact"
@@ -97,7 +97,7 @@ export const FaqSection: React.FC = () => {
                   <button
                     onClick={() => toggle(index)}
                     aria-expanded={isOpen}
-                    className="flex w-full items-start justify-between gap-6 py-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B8860B] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF7F2] md:py-7"
+                    className="flex w-full items-start justify-between gap-4 py-5 sm:gap-6 sm:py-6 md:py-7 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B8860B] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF7F2]"
                   >
                     <div className="flex items-start gap-5">
                       <span

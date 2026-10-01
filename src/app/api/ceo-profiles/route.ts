@@ -1,19 +1,7 @@
 import { NextResponse } from "next/server";
+import { INITIAL_CEO_PROFILES, type CeoProfileItem } from "@/data/publications";
 
 export const revalidate = 1800; // Cache for 30 minutes
-
-export interface CeoProfileItem {
-  id: string;
-  name: string;
-  title: string;
-  designation: string;
-  description: string;
-  cover: string;
-  ceoImage: string;
-  pdf: string;
-  rawPdf?: string;
-  date?: string;
-}
 
 export async function GET() {
   try {
@@ -23,7 +11,10 @@ export async function GET() {
     );
 
     if (!res.ok) {
-      throw new Error(`Failed to fetch ceo profiles: ${res.status}`);
+      return NextResponse.json({
+        success: true,
+        data: INITIAL_CEO_PROFILES,
+      });
     }
 
     const json = await res.json();
@@ -65,10 +56,10 @@ export async function GET() {
 
     return NextResponse.json({
       success: true,
-      data: cleanProfiles,
+      data: cleanProfiles.length > 0 ? cleanProfiles : INITIAL_CEO_PROFILES,
     });
   } catch (error) {
     console.error("CEO Profiles API error:", error);
-    return NextResponse.json({ success: false, data: [] }, { status: 500 });
+    return NextResponse.json({ success: true, data: INITIAL_CEO_PROFILES });
   }
 }

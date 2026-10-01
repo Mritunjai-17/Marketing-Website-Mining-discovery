@@ -466,7 +466,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
         const centerOffset = (winW - cardWidth) / 2;
 
         const startX = winW + 40;
-        const centerCard4X = centerOffset - (FOCUS_CARDS.length - 1) * stride;
+        const centerLastCardX = centerOffset - (FOCUS_CARDS.length - 1) * stride;
         const exitX = -((FOCUS_CARDS.length - 1) * stride + cardWidth + 50);
         const totalDistance = startX - exitX;
 
@@ -486,13 +486,10 @@ export const MiningDiscoveryShowcase: React.FC = () => {
           const currentX = startX - scrollP * totalDistance;
           horizontalTrackRef.current.style.transform = `translate3d(${currentX.toFixed(1)}px, 0, 0)`;
 
-          if (currentX > centerCard4X) {
-            // Moving across cards 1 -> 4
-            let activeIndex = 1;
-            if (currentX <= centerOffset - stride * 2.5) activeIndex = 4;
-            else if (currentX <= centerOffset - stride * 1.5) activeIndex = 3;
-            else if (currentX <= centerOffset - stride * 0.5) activeIndex = 2;
-            else activeIndex = 1;
+          if (currentX > centerLastCardX) {
+            // Moving across cards 1 -> FOCUS_CARDS.length
+            const rawIndex = Math.round((centerOffset - currentX) / stride) + 1;
+            const activeIndex = Math.min(FOCUS_CARDS.length, Math.max(1, rawIndex));
 
             if (horizontalCounterRef.current) {
               horizontalCounterRef.current.textContent = `0${activeIndex} / 0${FOCUS_CARDS.length}`;
@@ -502,15 +499,15 @@ export const MiningDiscoveryShowcase: React.FC = () => {
               finaleSlideRef.current.style.transform = `translate3d(${winW + 20}px, 0, 0)`;
             }
           } else {
-            // As Card 4 exits to left, finale slide glides in from right
-            const exitP = Math.min(1, Math.max(0, (currentX - centerCard4X) / (exitX - centerCard4X)));
+            // As last card exits to left, finale slide glides in from right
+            const exitP = Math.min(1, Math.max(0, (currentX - centerLastCardX) / (exitX - centerLastCardX)));
             const slideX = (1 - exitP) * winW;
 
             if (finaleSlideRef.current) {
               finaleSlideRef.current.style.transform = `translate3d(${slideX.toFixed(1)}px, 0, 0)`;
             }
             if (horizontalCounterRef.current) {
-              horizontalCounterRef.current.textContent = `04 / 0${FOCUS_CARDS.length}`;
+              horizontalCounterRef.current.textContent = `0${FOCUS_CARDS.length} / 0${FOCUS_CARDS.length}`;
               horizontalCounterRef.current.style.opacity = Math.max(0, 1 - exitP * 1.5).toFixed(2);
             }
           }
@@ -619,6 +616,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   top: 0;
   width: 100%;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   background-color: #FAF7F2;
 }
@@ -667,7 +665,9 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   z-index: 10;
   width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
   height: 100vh;
+  height: 100dvh;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -836,6 +836,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   z-index: 20;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -1051,6 +1052,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   inset: 0;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   pointer-events: none;
   z-index: 50;
   overflow: hidden;
@@ -1106,6 +1108,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   inset: 0;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   z-index: 60;
   pointer-events: none;
   overflow: hidden;
@@ -1129,6 +1132,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   position: relative;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   display: flex;
   align-items: center;
   overflow: visible;
@@ -1386,7 +1390,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 @media (max-width: 768px) {
   .horizontalCardItem {
     width: 86vw;
-    height: min(72vh, 560px);
+    height: min(68dvh, 520px);
     border-radius: 22px;
     padding: 12px;
   }
@@ -1425,7 +1429,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
     font-size: 0.68rem;
   }
   .horizontalCardsFooter {
-    bottom: max(1rem, env(safe-area-inset-bottom, 1rem));
+    bottom: max(1.2rem, env(safe-area-inset-bottom, 1.2rem));
     padding: 0 clamp(1.2rem, 4vw, 2.5rem);
   }
 }
@@ -1433,7 +1437,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 @media (max-width: 480px) {
   .horizontalCardItem {
     width: 88vw;
-    height: min(74vh, 510px);
+    height: min(65dvh, 460px);
     border-radius: 18px;
     padding: 10px;
   }
@@ -1446,7 +1450,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
     padding: 0.75rem 0.6rem 0;
   }
   .horizontalCardTitle {
-    font-size: 1.2rem;
+    font-size: 1.15rem;
   }
   .horizontalCardDesc {
     font-size: 0.76rem;
@@ -1471,6 +1475,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   inset: 0;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   z-index: 55;
   pointer-events: auto;
   overflow: hidden;
@@ -1488,6 +1493,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   inset: 0;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   object-fit: cover;
   object-position: center center;
   display: block;
@@ -1804,7 +1810,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
               top: 0,
               left: 0,
               width: "100%",
-              height: "100vh",
+              height: "100%",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -1830,7 +1836,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
               top: 0,
               left: 0,
               width: "100%",
-              height: "100vh",
+              height: "100%",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",

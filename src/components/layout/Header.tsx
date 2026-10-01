@@ -46,15 +46,19 @@ export const Header: React.FC = () => {
     };
   }, []);
 
-  // Lock body scroll when mobile menu is open
+  // Lock body scroll and pause Lenis when mobile menu is open
   useEffect(() => {
+    const lenis = typeof window !== "undefined" ? (window as any).lenis : null;
     if (menuOpen) {
       document.body.style.overflow = "hidden";
+      if (lenis) lenis.stop();
     } else {
       document.body.style.overflow = "";
+      if (lenis) lenis.start();
     }
     return () => {
       document.body.style.overflow = "";
+      if (lenis) lenis.start();
     };
   }, [menuOpen]);
 
@@ -199,7 +203,7 @@ export const Header: React.FC = () => {
 
         {/* Drawer Content */}
         <div
-          className={`absolute top-0 right-0 w-[85%] max-w-sm h-full bg-[#06080d] border-l border-white/10 shadow-2xl p-6 sm:p-8 flex flex-col justify-between transition-transform duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${menuOpen ? "translate-x-0" : "translate-x-full"
+          className={`absolute top-0 right-0 w-[85%] max-w-sm h-full h-[100dvh] bg-[#06080d] border-l border-white/10 shadow-2xl p-6 sm:p-8 pt-[max(1.5rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))] flex flex-col justify-between transition-transform duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${menuOpen ? "translate-x-0" : "translate-x-full"
             }`}
         >
           {/* Drawer Header */}

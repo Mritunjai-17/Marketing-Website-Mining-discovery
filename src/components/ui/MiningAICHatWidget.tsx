@@ -64,6 +64,24 @@ export default function MiningAICHatWidget() {
     }
   }, [messages, sending]);
 
+  // Lock background scroll on mobile handsets when chatbot is open in full-screen mode
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const isMobile = window.innerWidth <= 640;
+    const lenis = (window as any).lenis;
+    if (chatOpen && isMobile) {
+      document.body.style.overflow = "hidden";
+      if (lenis) lenis.stop();
+    } else {
+      document.body.style.overflow = "";
+      if (lenis) lenis.start();
+    }
+    return () => {
+      document.body.style.overflow = "";
+      if (lenis) lenis.start();
+    };
+  }, [chatOpen]);
+
   async function handleCopy(id: string, text: string) {
     let success = false;
 
