@@ -50,7 +50,7 @@ const GROWTH_PILLARS: GrowthPillar[] = [
     description:
       "Mineral exploration offers explosive upside, but sorting high-grade discoveries from empty market hype is tough. We provide verified geological teardowns, simplify technical assay data, and introduce you directly to leadership teams before major price runs.",
     bullets: [
-      "Vetted discovery reports focused on real drill intercepts, safe jurisdictions, and strong balance sheets",
+      "Vetted discovery reports on real drill intercepts and safe jurisdictions",
       "Direct access and interviews with C-suite executives and chief geologists",
       "First-mover intelligence delivered weekly so you can position ahead of the crowd",
     ],

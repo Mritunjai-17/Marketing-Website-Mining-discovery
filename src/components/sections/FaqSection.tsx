@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { SectionReveal, RevealItem } from "@/components/ui/SectionReveal";
 import { motion, AnimatePresence } from "framer-motion";
 import styles from "./FaqSection.module.css";
@@ -116,7 +117,7 @@ export const FaqSection: React.FC = () => {
                         {String(index + 1).padStart(2, "0")}
                       </span>
                       <span
-                        className={`font-geist text-base font-semibold leading-snug tracking-[-0.01em] transition-colors duration-300 sm:text-lg md:text-xl ${isOpen ? "text-[#0B1F3A]" : "text-[#0B1F3A]/75 group-hover:text-[#0B1F3A]"
+                        className={`font-space-grotesk text-base font-bold leading-snug tracking-[-0.01em] transition-colors duration-300 sm:text-lg md:text-xl ${isOpen ? "text-[#0B1F3A]" : "text-[#0B1F3A]/75 group-hover:text-[#0B1F3A]"
                           }`}
                       >
                         {faq.q}
@@ -187,26 +188,26 @@ export const FaqSection: React.FC = () => {
         {/* ── Bottom CTA strip ───────────────────────────────────────── */}
         <RevealItem>
           <div className="mt-14 flex flex-col items-start gap-5 border-t border-[#E5E3DC] pt-10 sm:flex-row sm:items-center sm:justify-between">
-            <p className="font-geist text-base font-semibold text-[#0B1F3A] sm:text-lg">
+            <p className="font-space-grotesk text-base font-bold text-[#0B1F3A] sm:text-lg">
               Ready to get your mining story in front of the right audience?
             </p>
-            <a
+            <Link
               href="/contact"
-              className="group inline-flex shrink-0 items-center gap-2 rounded-md bg-[#B8860B] px-5 py-2.5 font-sans text-sm font-semibold tracking-wide text-white shadow-[0_0_18px_rgba(184,134,11,0.28)] transition-all duration-300 hover:bg-[#D4AF37] hover:shadow-[0_0_26px_rgba(212,175,55,0.45)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B8860B] focus-visible:ring-offset-2"
+              className="group inline-flex shrink-0 items-center justify-center gap-2.5 rounded-full bg-gradient-to-r from-[#D6A84F] via-[#F3DC96] to-[#C89A32] px-6 py-2.5 sm:py-3 font-sans text-[13.5px] sm:text-[14px] font-bold uppercase tracking-[0.16em] text-[#0C141E] shadow-[0_4px_20px_rgba(214,168,79,0.35)] transition-all duration-300 hover:brightness-110 hover:shadow-[0_0_28px_rgba(214,168,79,0.55)] hover:scale-[1.03] active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D6A84F] focus-visible:ring-offset-2"
             >
-              Get In Touch
+              <span>GET IN TOUCH</span>
               <svg
-                className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5"
+                className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
-                strokeWidth={2}
+                strokeWidth={2.4}
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
                 <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
-            </a>
+            </Link>
           </div>
         </RevealItem>
 

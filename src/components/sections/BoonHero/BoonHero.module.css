@@ -137,7 +137,7 @@
 }
 
 .badgeText {
-  font-family: var(--font-mono, monospace);
+  font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.22em;
@@ -217,9 +217,9 @@
 }
 
 .actHeadline {
-  font-family: var(--font-editorial-serif), var(--font-display-custom), "Cormorant Garamond", Georgia, serif;
+  font-family: var(--font-editorial-serif), var(--font-display-custom), "Cormorant Garamond", "Playfair Display", Georgia, serif;
   font-size: clamp(2.8rem, 5.5vw, 5rem);
-  font-weight: 350;
+  font-weight: 700;
   letter-spacing: -0.015em;
   text-transform: uppercase;
   color: #FAF8F5;

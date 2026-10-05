@@ -72,8 +72,8 @@
 .goldWordSpan {
   display: inline-block;
   margin-right: 0.28em;
-  font-style: italic;
-  font-weight: 600;
+  font-style: normal;
+  font-weight: 700;
   background: linear-gradient(
     135deg,
     #FCE8A6 0%,

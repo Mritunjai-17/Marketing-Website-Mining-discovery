@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { ArrowUpRight, ArrowRight, X, BookOpen } from "lucide-react";
+import { ArrowUpRight, ArrowRight, X, BookOpen, MapPin } from "lucide-react";
 import { MagazineSpread } from "@/components/sections/MagazineShowcase/MagazineSpread";
 import {
   INITIAL_MAGAZINES,
@@ -22,11 +22,22 @@ import magStyles from "@/components/sections/MagazineShowcase/MagazineShowcase.m
 interface PublicationCardConfig {
   id: "magazines" | "newsletter" | "articles" | "ceo-profile";
   category: string;
+  location: string;
   title: string;
   description: string;
   image: string;
   badge: string;
   ctaText: string;
+  stats: {
+    label1: string;
+    value1: string;
+    label2: string;
+    value2: string;
+    label3: string;
+    value3: string;
+  };
+  priceLabel: string;
+  priceValue: string;
 }
 
 const PUBLICATIONS_SUBTITLE_WORDS = [
@@ -293,17 +304,29 @@ export const PublicationsShowcase: React.FC = () => {
     {
       id: "magazines",
       category: "MONTHLY PRINT & DIGITAL",
-      title: "MAGAZINE",
+      location: "Global Mining & Exploration",
+      title: "Magazine",
       description:
         "Official published editions featuring in-depth mineral asset teardowns, full-color drill layouts, and c-suite market interviews.",
       image: latestMag?.cover || INITIAL_MAGAZINES[0].cover,
       badge: `${allMagazines.length} EDITIONS`,
       ctaText: `BROWSE ALL ${allMagazines.length} EDITIONS`,
+      stats: {
+        label1: "Editions",
+        value1: `${allMagazines.length} Vol`,
+        label2: "Cadence",
+        value2: "Monthly",
+        label3: "Reach",
+        value3: "45K+",
+      },
+      priceLabel: "Total Access",
+      priceValue: "Free Read",
     },
     {
       id: "newsletter",
       category: "WEEKLY NEWSPAPER DISPATCH",
-      title: "NEWSLETTER",
+      location: "Global Commodity Desks",
+      title: "Newsletter",
       description:
         "High-frequency weekly discovery dispatches distributed directly to institutional desks, commodity desks, and family offices.",
       image:
@@ -311,11 +334,22 @@ export const PublicationsShowcase: React.FC = () => {
         "https://acceptable-desire-0cca5bb827.media.strapiapp.com/medium_17_NOV_converted_25e305b198.webp",
       badge: `${newsletters.length} ISSUES`,
       ctaText: `BROWSE ALL ${newsletters.length} ISSUES`,
+      stats: {
+        label1: "Issues",
+        value1: `${newsletters.length} Ed`,
+        label2: "Cadence",
+        value2: "Weekly",
+        label3: "Reach",
+        value3: "28K+",
+      },
+      priceLabel: "Total Access",
+      priceValue: "Free Read",
     },
     {
       id: "articles",
       category: "TECHNICAL RESEARCH",
-      title: "ARTICLES",
+      location: "Verified QP Technical Research",
+      title: "Articles",
       description:
         "Geological assay breakdowns, maiden mineral resource evaluations, and verified QP project discovery reports.",
       image:
@@ -323,16 +357,37 @@ export const PublicationsShowcase: React.FC = () => {
         "https://acceptable-desire-0cca5bb827.media.strapiapp.com/medium_Pan_Global_Resources_Inc_1b6b03beef.png",
       badge: `${articles.length} REPORTS`,
       ctaText: `BROWSE ALL ${articles.length} REPORTS`,
+      stats: {
+        label1: "Reports",
+        value1: `${articles.length} Tech`,
+        label2: "Standard",
+        value2: "QP-Assayed",
+        label3: "Reach",
+        value3: "Global",
+      },
+      priceLabel: "Total Access",
+      priceValue: "Free Read",
     },
     {
       id: "ceo-profile",
       category: "EXECUTIVE INTERVIEWS",
-      title: "CEO PROFILE",
+      location: "Global C-Suite Leadership",
+      title: "CEO Profile",
       description:
         "One-on-one leadership interviews, project vision features, and strategic broadcasts with mining executives across the globe.",
       image: latestCeo?.cover || latestCeo?.ceoImage || "/cards/bg_card_2.webp",
       badge: `${allCeos.length} PROFILES`,
       ctaText: `BROWSE ALL ${allCeos.length} PROFILES`,
+      stats: {
+        label1: "Profiles",
+        value1: `${allCeos.length} Exec`,
+        label2: "Access",
+        value2: "C-Suite",
+        label3: "Reach",
+        value3: "Tier-1",
+      },
+      priceLabel: "Total Access",
+      priceValue: "Free Read",
     },
   ];
 
@@ -415,27 +470,50 @@ export const PublicationsShowcase: React.FC = () => {
                 loading="lazy"
               />
               <div className={styles.pubCoverOverlay} aria-hidden="true" />
-              <span className={styles.pubBadge}>{card.badge}</span>
             </div>
 
             {/* Card Content Body */}
             <div className={styles.pubBody}>
-              <div className={styles.pubTopMeta}>
-                <span className={styles.pubCategory}>{card.category}</span>
-                <div className={styles.pubTitleRow}>
-                  <h3 className={styles.pubTitle}>{card.title}</h3>
-                  <div className={styles.pubArrowPill} aria-hidden="true">
-                    <ArrowUpRight size={16} />
-                  </div>
+              {/* Title & Location Row */}
+              <div className={styles.pubHeader}>
+                <h3 className={styles.pubTitle}>{card.title}</h3>
+                <div className={styles.pubLocationRow}>
+                  <MapPin size={13} className={styles.pubLocationIcon} />
+                  <span className={styles.pubLocationText}>{card.location}</span>
                 </div>
+              </div>
+
+              {/* Explicit Description Section */}
+              <div className={styles.pubDescriptionSection}>
+                <h4 className={styles.pubDescriptionHeading}>Description</h4>
                 <p className={styles.pubDescription}>{card.description}</p>
               </div>
 
+              {/* 3-Column Stats Row */}
+              <div className={styles.pubStatsRow}>
+                <div className={styles.pubStatCol}>
+                  <span className={styles.pubStatLabel}>{card.stats.label1}</span>
+                  <span className={styles.pubStatValue}>{card.stats.value1}</span>
+                </div>
+                <div className={styles.pubStatCol}>
+                  <span className={styles.pubStatLabel}>{card.stats.label2}</span>
+                  <span className={styles.pubStatValue}>{card.stats.value2}</span>
+                </div>
+                <div className={styles.pubStatCol}>
+                  <span className={styles.pubStatLabel}>{card.stats.label3}</span>
+                  <span className={styles.pubStatValue}>{card.stats.value3}</span>
+                </div>
+              </div>
+
+              {/* Bottom Price & Circular Action Button */}
               <div className={styles.pubFooter}>
-                <span className={styles.pubActionTag}>
-                  <span>{card.ctaText}</span>
-                  <span>↗</span>
-                </span>
+                <div className={styles.pubPriceCol}>
+                  <span className={styles.pubPriceLabel}>{card.priceLabel}</span>
+                  <span className={styles.pubPriceValue}>{card.priceValue}</span>
+                </div>
+                <div className={styles.pubActionCircle} aria-label={`Open ${card.title}`}>
+                  <ArrowUpRight size={19} strokeWidth={2.4} />
+                </div>
               </div>
             </div>
           </article>

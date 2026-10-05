@@ -12,6 +12,7 @@ import {
   revealBlocks,
   useAboutMotion,
 } from "./reveal";
+import { AboutEyebrow } from "./AboutEyebrow";
 
 /*
  * Section 02 — Our Origin.
@@ -92,48 +93,33 @@ export const AboutOrigin: React.FC = () => {
     <section ref={sectionRef} className="border-b border-[#E5E4DE] bg-white">
       <div className="container-editorial py-20 md:py-28">
         {/* --- Header: the year, and what it was --------------------------------- */}
-        <div ref={headerRef} className="grid grid-cols-1 gap-x-16 gap-y-10 lg:grid-cols-12">
-          <div className="lg:col-span-4">
-            <div data-about-rule-x className={`h-0.5 w-12 bg-[#B8860B] ${HIDDEN_RULE_X}`} />
-            <span
-              data-about-reveal
-              className={`mt-6 block text-xs font-semibold uppercase tracking-[0.15em] text-[#B8860B] ${HIDDEN_RISE}`}
-            >
-              Our Origin
-            </span>
+        <div ref={headerRef} className="flex flex-col items-center text-center max-w-3xl mx-auto">
+          <AboutEyebrow text="Our Origin" className="justify-center" />
 
-            {/*
-              The year at display scale. tabular-nums so the four digits sit on an even
-              rhythm rather than on the font's proportional widths, which is what makes a
-              date read as a date rather than as a word.
-            */}
-            <p
-              data-about-reveal
-              className={`mt-8 font-geist text-[clamp(4rem,10vw,7.5rem)] font-semibold leading-[0.9] tracking-[-0.05em] tabular-nums text-[#0B1F3A] ${HIDDEN_RISE}`}
-            >
-              2022
-            </p>
-          </div>
+          <h2 className="mt-6 font-space-grotesk text-[clamp(2.25rem,4.5vw,3.5rem)] font-bold uppercase leading-[1.1] tracking-[-0.025em] text-[#0B1F3A]">
+            <MaskedWords text="A shared vision." goldWords={["vision"]} />
+          </h2>
 
-          <div className="lg:col-span-8 lg:border-l lg:border-[#E5E4DE] lg:pl-12">
-            <h2 className="max-w-[18ch] font-serif text-[clamp(2rem,4.2vw,3.25rem)] font-normal leading-[1.1] tracking-[-0.02em] text-[#0B1F3A]">
-              <MaskedWords text="A shared vision." />
-            </h2>
+          <p
+            data-about-reveal
+            className={`mt-6 text-lg font-normal leading-relaxed text-[#3A3D42] sm:text-xl ${HIDDEN_RISE}`}
+          >
+            Mining Discovery began with a shared vision: to bring clarity and depth to a
+            mining sector often clouded by noise and half-truths. We recognised the
+            industry lacked a strong, trustworthy voice dedicated to the stories that
+            actually matter.
+          </p>
 
-            <p
-              data-about-reveal
-              className={`mt-8 text-xl font-normal leading-relaxed text-[#3A3D42] sm:text-2xl ${HIDDEN_RISE}`}
-            >
-              Mining Discovery began with a shared vision: to bring clarity and depth to a
-              mining sector often clouded by noise and half-truths. We recognised the
-              industry lacked a strong, trustworthy voice dedicated to the stories that
-              actually matter.
-            </p>
-          </div>
+          <p
+            data-about-reveal
+            className={`mt-6 font-geist text-[clamp(3.5rem,8vw,5.5rem)] font-semibold leading-none tracking-[-0.05em] tabular-nums text-[#B8860B] ${HIDDEN_RISE}`}
+          >
+            2022
+          </p>
         </div>
 
         {/* --- The convergence ---------------------------------------------------- */}
-        <div ref={diagramRef} className="mt-20 flex flex-col items-center md:mt-24">
+        <div ref={diagramRef} className="mt-16 flex flex-col items-center md:mt-20">
           {CONVERGENCE.map((row, rowIndex) => (
             <React.Fragment key={row.label}>
               <div
@@ -148,7 +134,7 @@ export const AboutOrigin: React.FC = () => {
                     {nodeIndex > 0 && (
                       <span
                         aria-hidden="true"
-                        className="shrink-0 self-center font-serif text-xl leading-none text-[#B8860B] sm:text-2xl"
+                        className="shrink-0 self-center font-mono text-xl font-bold leading-none text-[#B8860B] sm:text-2xl"
                       >
                         +
                       </span>
@@ -164,7 +150,7 @@ export const AboutOrigin: React.FC = () => {
                           : "border-[#E5E4DE] bg-[#FBFBFA]"
                       }`}
                     >
-                      <p className="font-serif text-xl font-normal tracking-[-0.01em] text-[#0B1F3A] sm:text-2xl">
+                      <p className="font-space-grotesk text-xl font-bold tracking-[-0.01em] text-[#0B1F3A] sm:text-2xl">
                         {node.title}
                       </p>
                       {node.meta && (

@@ -300,10 +300,10 @@ export const OurServicesSection: React.FC<OurServicesSectionProps> = ({
               aria-hidden="true"
             />
             <h2
-              className="font-editorial-serif text-[2.2rem] sm:text-[3.2rem] md:text-[3.8rem] font-bold tracking-tight text-[#0c2038] uppercase"
+              className="font-space-grotesk text-[2.2rem] sm:text-[3.2rem] md:text-[3.8rem] font-bold tracking-tight text-[#0c2038] uppercase"
               style={{
                 fontFamily:
-                  'var(--font-editorial-serif), "Cormorant Garamond", Georgia, serif',
+                  'var(--font-space-grotesk), "Space Grotesk", sans-serif',
                 letterSpacing: "-0.015em",
                 lineHeight: 1.05,
               }}
@@ -315,7 +315,7 @@ export const OurServicesSection: React.FC<OurServicesSectionProps> = ({
               aria-hidden="true"
             />
           </div>
-          <p className="font-sans text-xs sm:text-sm tracking-[0.25em] text-[#64748B] uppercase font-semibold">
+          <p className="font-mono text-xs sm:text-sm tracking-[0.22em] text-[#7A5E22] uppercase font-bold">
             Institutional Mineral Marketing &amp; Global Capital Dispatches
           </p>
         </div>
@@ -341,7 +341,7 @@ export const OurServicesSection: React.FC<OurServicesSectionProps> = ({
                     {item.num}
                   </span>
                   <span className="text-black/30 font-light text-xs">/</span>
-                  <span className="font-mono text-[0.72rem] sm:text-[0.78rem] font-semibold text-[#475569] tracking-[0.18em] uppercase">
+                  <span className="font-mono text-[0.72rem] sm:text-[0.78rem] font-bold text-[#475569] tracking-[0.18em] uppercase">
                     {item.category}
                   </span>
                 </div>
@@ -471,7 +471,7 @@ export const OurServicesSection: React.FC<OurServicesSectionProps> = ({
                 <span className="font-mono text-xs uppercase tracking-[0.2em] text-[#997A3D] font-bold">
                   MONTHLY MAGAZINE LIBRARY
                 </span>
-                <h3 className="font-editorial-serif text-2xl sm:text-3xl font-bold text-[#0c2038] mt-1">
+                <h3 className="font-space-grotesk text-2xl sm:text-3xl font-bold uppercase text-[#0c2038] mt-1">
                   All Published Editions ({allMagazines.length})
                 </h3>
               </div>
@@ -502,7 +502,7 @@ export const OurServicesSection: React.FC<OurServicesSectionProps> = ({
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <h4 className="mt-3 font-editorial-serif font-bold text-sm sm:text-base text-[#0c2038] group-hover:text-[#997A3D] transition-colors line-clamp-1">
+                  <h4 className="mt-3 font-space-grotesk font-bold text-sm sm:text-base text-[#0c2038] group-hover:text-[#997A3D] transition-colors line-clamp-1">
                     {edition.title}
                   </h4>
                   <span className="font-mono text-[0.7rem] text-[#64748B] uppercase">
@@ -533,7 +533,7 @@ export const OurServicesSection: React.FC<OurServicesSectionProps> = ({
                 <span className="font-mono text-xs uppercase tracking-[0.2em] text-[#997A3D] font-bold">
                   WEEKLY DISPATCH ARCHIVE
                 </span>
-                <h3 className="font-editorial-serif text-2xl sm:text-3xl font-bold text-[#0c2038] mt-1">
+                <h3 className="font-space-grotesk text-2xl sm:text-3xl font-bold uppercase text-[#0c2038] mt-1">
                   Weekly Newspaper Editions ({newsletters.length})
                 </h3>
               </div>
@@ -568,7 +568,7 @@ export const OurServicesSection: React.FC<OurServicesSectionProps> = ({
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <h4 className="mt-3 font-editorial-serif font-bold text-sm sm:text-base text-[#0c2038] group-hover:text-[#997A3D] transition-colors line-clamp-1">
+                  <h4 className="mt-3 font-space-grotesk font-bold text-sm sm:text-base text-[#0c2038] group-hover:text-[#997A3D] transition-colors line-clamp-1">
                     {item.title}
                   </h4>
                   <span className="font-sans text-[0.72rem] text-[#64748B] flex items-center gap-1 mt-0.5">
@@ -600,7 +600,7 @@ export const OurServicesSection: React.FC<OurServicesSectionProps> = ({
                 <span className="font-mono text-xs uppercase tracking-[0.2em] text-[#997A3D] font-bold">
                   TECHNICAL RESEARCH &amp; EDITORIAL
                 </span>
-                <h3 className="font-editorial-serif text-2xl sm:text-3xl font-bold text-[#0c2038] mt-1">
+                <h3 className="font-space-grotesk text-2xl sm:text-3xl font-bold uppercase text-[#0c2038] mt-1">
                   Published Technical Articles ({articles.length})
                 </h3>
               </div>
@@ -635,7 +635,7 @@ export const OurServicesSection: React.FC<OurServicesSectionProps> = ({
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <h4 className="mt-3 font-editorial-serif font-bold text-sm sm:text-base text-[#0c2038] group-hover:text-[#997A3D] transition-colors line-clamp-1">
+                  <h4 className="mt-3 font-space-grotesk font-bold text-sm sm:text-base text-[#0c2038] group-hover:text-[#997A3D] transition-colors line-clamp-1">
                     {item.title}
                   </h4>
                   <span className="font-sans text-[0.72rem] text-[#64748B] flex items-center gap-1 mt-0.5">

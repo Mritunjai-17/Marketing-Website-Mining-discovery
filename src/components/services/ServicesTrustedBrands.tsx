@@ -209,12 +209,12 @@ export const ServicesTrustedBrands: React.FC = () => {
 
           <span
             data-about-reveal
-            className={`mt-6 block text-xs font-semibold uppercase tracking-[0.15em] text-[#B8860B] ${HIDDEN_RISE}`}
+            className={`mt-6 block font-mono text-xs font-bold uppercase tracking-[0.16em] text-[#B8860B] ${HIDDEN_RISE}`}
           >
             Trusted by the Industry
           </span>
 
-          <h2 className="mt-8 text-balance font-geist text-[clamp(1.875rem,4.2vw,3.5rem)] font-bold uppercase leading-[1.02] tracking-[-0.03em] text-[#0B1F3A]">
+          <h2 className="mt-8 text-balance font-space-grotesk text-[clamp(1.875rem,4.2vw,3.5rem)] font-bold uppercase leading-[1.02] tracking-[-0.03em] text-[#0B1F3A]">
             {HEADING_LINES.map((line) => (
               <span key={line} className="block">
                 <MaskedWords text={line} />

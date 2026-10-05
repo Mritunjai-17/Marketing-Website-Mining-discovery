@@ -242,7 +242,7 @@ export const ServicesFinalCTA: React.FC = () => {
         />
 
         {/* Stage 3: Editorial Headline */}
-        <h2 className="mt-8 font-serif font-normal text-4xl leading-[1.08] tracking-[-0.025em] text-[#F7F5EF] sm:text-6xl md:text-7xl lg:text-[84px] xl:text-[92px]">
+        <h2 className="mt-8 font-space-grotesk font-bold uppercase text-4xl leading-[1.08] tracking-[-0.025em] text-[#F7F5EF] sm:text-6xl md:text-7xl lg:text-[84px] xl:text-[92px]">
           <span className="block">
             <MaskedWords text="YOUR NEXT" />
           </span>
@@ -269,17 +269,11 @@ export const ServicesFinalCTA: React.FC = () => {
         {/* Stage 5: Primary Call to Action */}
         <div data-about-reveal className={`mt-10 md:mt-14 ${HIDDEN_RISE}`}>
           <Link
-            href="/#contact"
-            className="group relative inline-flex items-center gap-3 font-sans text-sm font-semibold tracking-[0.18em] uppercase text-[#F7F5EF] transition-colors duration-300 hover:text-[#D4AF37] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B8860B] focus-visible:ring-offset-4 focus-visible:ring-offset-[#0B1F3A] sm:text-base"
+            href="/contact"
+            className="group inline-flex items-center justify-center gap-3 rounded-full bg-gradient-to-r from-[#D6A84F] via-[#F3DC96] to-[#C89A32] px-7 py-3.5 sm:px-8 sm:py-4 font-sans text-sm sm:text-base font-bold uppercase tracking-[0.16em] text-[#0C141E] shadow-[0_4px_20px_rgba(214,168,79,0.35)] transition-all duration-300 hover:brightness-110 hover:shadow-[0_0_32px_rgba(214,168,79,0.6)] hover:scale-[1.03] active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D6A84F] focus-visible:ring-offset-4 focus-visible:ring-offset-[#0B1F3A]"
           >
             <span>START A CONVERSATION</span>
-            <ArrowRight className="h-5 w-5 text-[#B8860B] transition-transform duration-300 group-hover:translate-x-1.5 group-hover:text-[#D4AF37]" />
-
-            {/* Expanding Gold Underline on Hover */}
-            <span
-              aria-hidden="true"
-              className="absolute -bottom-1 left-0 h-[2px] w-full origin-left scale-x-0 bg-[#B8860B] transition-transform duration-300 group-hover:scale-x-100 group-hover:bg-[#D4AF37]"
-            />
+            <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1.5" />
           </Link>
         </div>
       </div>

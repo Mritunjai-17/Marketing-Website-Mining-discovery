@@ -1861,3 +1861,36 @@ nextjs-portal,
     padding-bottom: 6px !important;
   }
 }
+
+/* ==========================================================================
+   METALLIC GOLD FLOW UTILITY — Matching Homepage Heading Pattern
+   ========================================================================== */
+@keyframes metallicGoldFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.metallic-gold-text {
+  font-style: normal !important;
+  font-weight: 700 !important;
+  background: linear-gradient(
+    135deg,
+    #FCE8A6 0%,
+    #D4AF37 25%,
+    #FFF2B2 45%,
+    #AA771C 70%,
+    #D4AF37 88%,
+    #FCE8A6 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: metallicGoldFlow 6s ease-in-out infinite;
+}

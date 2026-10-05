@@ -148,28 +148,18 @@ export const ServicesHero: React.FC = () => {
         <span
           data-hero-eyebrow
           data-about-reveal
-          className={`mt-6 block text-xs font-semibold uppercase tracking-[0.15em] text-[#B8860B] ${HIDDEN_RISE}`}
+          className={`mt-6 block font-mono text-xs font-bold uppercase tracking-[0.16em] text-[#B8860B] ${HIDDEN_RISE}`}
         >
           Our Services
         </span>
 
         {/*
-          The dominant element, and sized to say so: Geist Black, uppercase, leading below 1
-          so the three lines read as one block of type rather than three sentences. The same
-          display register TrustedBy uses on the homepage, which is where this site already
-          keeps its loud voice.
+          The dominant element, and sized to say so: Space Grotesk Bold, uppercase, leading below 1
+          so the three lines read as one block of type rather than three sentences.
         */}
         <h1
           ref={headlineRef}
-          /*
-            text-balance so that when an authored line is too wide for the screen and has to
-            wrap, it splits into even halves instead of stranding one word: on a phone
-            "impossible to ignore." breaks as IMPOSSIBLE / TO IGNORE. rather than
-            IMPOSSIBLE TO / IGNORE. It is inert at any width where the line already fits, so
-            the desktop composition is untouched, and browsers without it simply wrap the
-            way they did before.
-          */
-          className="mt-8 text-balance font-geist text-[clamp(2.5rem,5.6vw,4.5rem)] font-black uppercase leading-[0.94] tracking-[-0.035em] text-[#0B1F3A]"
+          className="mt-8 text-balance font-space-grotesk text-[clamp(2.5rem,5.6vw,4.5rem)] font-bold uppercase leading-[0.94] tracking-[-0.035em] text-[#0B1F3A]"
         >
           {HEADLINE_LINES.map((line) => (
             <span key={line} className="block">

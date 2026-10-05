@@ -346,9 +346,9 @@
 .editionTitle {
   margin: 0;
   color: #F7F4ED;
-  font-family: var(--font-serif, Georgia, serif);
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
   font-size: clamp(1.15rem, 2vw, 1.45rem);
-  font-weight: 400;
+  font-weight: 700;
   line-height: 1.15;
   letter-spacing: -0.01em;
   text-transform: uppercase;
@@ -644,10 +644,10 @@
 }
 
 .archiveTitle {
-  font-family: var(--font-serif, "Cinzel", Georgia, serif);
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
   font-size: clamp(1.35rem, 2.4vw, 1.85rem);
-  font-weight: 500;
-  letter-spacing: 0.04em;
+  font-weight: 700;
+  letter-spacing: -0.015em;
   color: #f7f4ed;
   margin: 0 0 0.5rem 0;
   text-transform: uppercase;
@@ -828,10 +828,10 @@
 }
 
 .cardMonthYear {
-  font-family: var(--font-serif, "Cinzel", Georgia, serif);
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
   font-size: clamp(0.8125rem, 1.1vw, 0.9375rem);
-  font-weight: 500;
-  letter-spacing: 0.02em;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   color: #f7f4ed;
   margin: 0;
   transition: color 0.25s ease;

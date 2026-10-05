@@ -73,23 +73,40 @@ export const WORD_SELECTOR = ".about-mask__word";
  * horizontal 0.08em gives the last glyph the room that negative tracking would otherwise
  * clip. Both are cancelled by their negative margins.
  */
-export const MaskedWords: React.FC<{ text: string }> = ({ text }) => {
+export const MaskedWords: React.FC<{ text: string; goldWords?: string[] }> = ({
+  text,
+  goldWords = [],
+}) => {
   const words = text.split(" ");
+  const goldSet = new Set(
+    goldWords.map((w) => w.toUpperCase().replace(/[.,!?:;“”—"']/g, ""))
+  );
 
   return (
     <>
-      {words.map((word, index) => (
-        <React.Fragment key={`${word}-${index}`}>
-          <span className="about-mask inline-flex overflow-hidden px-[0.08em] -mx-[0.08em] pb-[0.2em] -mb-[0.2em]">
-            <span className="about-mask__word about-mask__word--hidden inline-block opacity-0 [transform:translateY(120%)] motion-reduce:opacity-100 motion-reduce:[transform:none]">
-              {word}
+      {words.map((word, index) => {
+        const cleanWord = word.toUpperCase().replace(/[.,!?:;“”—"']/g, "");
+        const isGold = goldSet.has(cleanWord);
+
+        return (
+          <React.Fragment key={`${word}-${index}`}>
+            <span className="about-mask inline-flex overflow-hidden px-[0.08em] -mx-[0.08em] pb-[0.2em] -mb-[0.2em]">
+              <span
+                className={`about-mask__word about-mask__word--hidden inline-block opacity-0 [transform:translateY(120%)] motion-reduce:opacity-100 motion-reduce:[transform:none] ${
+                  isGold
+                    ? "metallic-gold-text font-bold not-italic [text-shadow:0_0_12px_rgba(212,175,55,0.35)]"
+                    : ""
+                }`}
+              >
+                {word}
+              </span>
             </span>
-          </span>
-          {/* A plain space between masks, so the line still wraps exactly where it wrapped
-              when this was one uninterrupted text node. */}
-          {index < words.length - 1 ? " " : null}
-        </React.Fragment>
-      ))}
+            {/* A plain space between masks, so the line still wraps exactly where it wrapped
+                when this was one uninterrupted text node. */}
+            {index < words.length - 1 ? " " : null}
+          </React.Fragment>
+        );
+      })}
     </>
   );
 };

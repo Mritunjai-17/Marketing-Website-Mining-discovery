@@ -438,16 +438,6 @@ export const BoonHero = React.memo(
           <p className={styles.actSubline}>
             Continuous miners cutting high-grade ore at depth. Ground truth engineered into unprecedented market valuation.
           </p>
-
-          <button
-            type="button"
-            className={styles.undergroundCtaButton}
-            onClick={handleScrollClick}
-            aria-label="Explore Showcase"
-          >
-            <span>ENTER CAPITAL SHOWCASE</span>
-            <span aria-hidden="true">→</span>
-          </button>
         </div>
       </div>
     </section>

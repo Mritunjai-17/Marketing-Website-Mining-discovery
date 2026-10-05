@@ -20,3 +20,4 @@ export * from "./AboutUnique";
 export * from "./AboutLookingAhead";
 export * from "./AboutTrustedBrands";
 export * from "./AboutClosing";
+export * from "./AboutEyebrow";

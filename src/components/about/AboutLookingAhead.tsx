@@ -9,6 +9,7 @@ import {
   revealBlocks,
   useAboutMotion,
 } from "./reveal";
+import { AboutEyebrow } from "./AboutEyebrow";
 
 /*
  * Section 08 — Looking Ahead.
@@ -72,26 +73,19 @@ export const AboutLookingAhead: React.FC = () => {
       {/* The same dot grain the hero carries, inverted for a dark ground. */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(#FFF_1px,transparent_1px)] opacity-[0.035] [background-size:16px_16px]" />
 
-      <div className="container-editorial relative py-24 md:py-32">
-        <div ref={headerRef}>
-          <div data-about-rule-x className={`h-0.5 w-12 bg-[#D4AF37] ${HIDDEN_RULE_X}`} />
-          <span
-            data-about-reveal
-            className={`mt-6 block text-xs font-semibold uppercase tracking-[0.15em] text-[#D4AF37] ${HIDDEN_RISE}`}
-          >
-            Looking Ahead
-          </span>
-
-          <h2 className="mt-6 max-w-[16ch] font-serif text-[clamp(2.25rem,5.4vw,4rem)] font-normal leading-[1.06] tracking-[-0.025em] text-white">
-            <MaskedWords text="A trusted global voice in mining." />
+      <div className="container-editorial relative py-20 md:py-28">
+        <div ref={headerRef} className="flex flex-col items-center text-center max-w-3xl mx-auto">
+          <AboutEyebrow text="Looking Ahead" theme="dark" className="justify-center" />
+          <h2 className="mt-6 font-space-grotesk text-[clamp(2.25rem,5.4vw,4rem)] font-bold uppercase leading-[1.06] tracking-[-0.025em] text-white">
+            <MaskedWords text="A trusted global voice in mining." goldWords={["voice", "in", "mining"]} />
           </h2>
         </div>
 
-        <div ref={bodyRef} className="mt-16 md:mt-24">
+        <div ref={bodyRef} className="mt-14 md:mt-20">
           {/* --- Where ------------------------------------------------------------ */}
           <span
             data-about-reveal
-            className={`block text-xs font-semibold uppercase tracking-[0.15em] text-[#F0F4F8]/50 ${HIDDEN_RISE}`}
+            className={`block font-mono text-xs font-bold uppercase tracking-[0.16em] text-[#F0F4F8]/50 ${HIDDEN_RISE}`}
           >
             Expanding coverage into
           </span>
@@ -104,10 +98,10 @@ export const AboutLookingAhead: React.FC = () => {
                   data-about-reveal
                   className={`flex items-baseline gap-4 ${HIDDEN_RISE}`}
                 >
-                  <span className="font-mono text-[11px] tabular-nums text-[#D4AF37]">
+                  <span className="font-mono text-[11px] font-bold tabular-nums text-[#D4AF37]">
                     {String(index + 1).padStart(2, "0")}
                   </span>
-                  <span className="font-serif text-[clamp(2rem,5.5vw,4rem)] font-normal leading-[1.05] tracking-[-0.03em] text-white">
+                  <span className="font-space-grotesk text-[clamp(2rem,5.5vw,4rem)] font-bold uppercase leading-[1.05] tracking-[-0.025em] text-white">
                     {region}
                   </span>
                 </li>
@@ -116,17 +110,17 @@ export const AboutLookingAhead: React.FC = () => {
           </div>
 
           {/* --- What ------------------------------------------------------------- */}
-          <div className="mt-20 grid grid-cols-1 gap-x-16 gap-y-10 border-t border-white/10 pt-12 md:mt-24 lg:grid-cols-12">
-            <div className="lg:col-span-4">
+          <div className="mt-16 grid grid-cols-1 gap-x-16 gap-y-10 border-t border-white/10 pt-12 md:mt-20 lg:grid-cols-12">
+            <div className="lg:col-span-5">
               <span
                 data-about-reveal
-                className={`block text-xs font-semibold uppercase tracking-[0.15em] text-[#F0F4F8]/50 ${HIDDEN_RISE}`}
+                className={`block font-mono text-xs font-bold uppercase tracking-[0.16em] text-[#F0F4F8]/50 ${HIDDEN_RISE}`}
               >
                 And building
               </span>
             </div>
 
-            <ul className="lg:col-span-8">
+            <ul className="lg:col-span-7 lg:border-l lg:border-white/10 lg:pl-12">
               {BUILDING.map((item) => (
                 <li
                   key={item}
@@ -147,8 +141,8 @@ export const AboutLookingAhead: React.FC = () => {
         </div>
 
         {/* --- The closing commitment -------------------------------------------- */}
-        <div ref={closerRef} className="mt-24 border-t border-white/10 pt-14 md:mt-32">
-          <p className="max-w-[24ch] font-serif text-[clamp(2rem,5vw,3.75rem)] font-normal leading-[1.08] tracking-[-0.025em] text-[#D4AF37]">
+        <div ref={closerRef} className="mt-16 border-t border-white/10 pt-12 md:mt-20">
+          <p className="max-w-[24ch] font-space-grotesk text-[clamp(2rem,5vw,3.75rem)] font-bold uppercase leading-[1.08] tracking-[-0.025em] text-[#D4AF37]">
             <MaskedWords text="Truth over noise." />
           </p>
         </div>

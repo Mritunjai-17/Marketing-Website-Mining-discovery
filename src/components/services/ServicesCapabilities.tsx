@@ -133,7 +133,7 @@ export const ServicesCapabilities: React.FC = () => {
 
           <span
             data-about-reveal
-            className={`mt-6 block text-xs font-semibold uppercase tracking-[0.15em] text-[#B8860B] ${HIDDEN_RISE}`}
+            className={`mt-6 block font-mono text-xs font-bold uppercase tracking-[0.16em] text-[#B8860B] ${HIDDEN_RISE}`}
           >
             Our Capabilities
           </span>
@@ -143,7 +143,7 @@ export const ServicesCapabilities: React.FC = () => {
             a section heading that matched it would leave the page with two openings and no
             hierarchy between them.
           */}
-          <h2 className="mt-8 text-balance font-geist text-[clamp(1.875rem,4.2vw,3.5rem)] font-bold uppercase leading-[1.02] tracking-[-0.03em] text-[#0B1F3A]">
+          <h2 className="mt-8 text-balance font-space-grotesk text-[clamp(1.875rem,4.2vw,3.5rem)] font-bold uppercase leading-[1.02] tracking-[-0.03em] text-[#0B1F3A]">
             {HEADING_LINES.map((line) => (
               <span key={line} className="block">
                 <MaskedWords text={line} />
@@ -190,7 +190,7 @@ export const ServicesCapabilities: React.FC = () => {
                         element would be overridden by it from then on.
                       */}
                       <span
-                        className={`font-geist text-[clamp(2.5rem,3.6vw,3.5rem)] font-black leading-none tabular-nums transition-colors duration-500 ${
+                        className={`font-space-grotesk text-[clamp(2.5rem,3.6vw,3.5rem)] font-bold leading-none tabular-nums transition-colors duration-500 ${
                           isActive ? "text-[#0B1F3A]" : "text-[#0B1F3A]/20"
                         }`}
                       >
@@ -242,18 +242,18 @@ export const ServicesCapabilities: React.FC = () => {
                         display:none at lg, so it is never announced twice. */}
                     <span
                       data-about-reveal
-                      className={`block font-geist text-3xl font-black leading-none tabular-nums text-[#B8860B] lg:hidden ${HIDDEN_RISE}`}
+                      className={`block font-space-grotesk text-3xl font-bold leading-none tabular-nums text-[#B8860B] lg:hidden ${HIDDEN_RISE}`}
                     >
                       {String(index + 1).padStart(2, "0")}
                     </span>
 
-                    <h3 className="mt-5 font-geist text-[clamp(2.5rem,5.5vw,4.5rem)] font-black uppercase leading-[0.95] tracking-[-0.035em] text-[#0B1F3A] lg:mt-0">
+                    <h3 className="mt-5 font-space-grotesk text-[clamp(2.5rem,5.5vw,4.5rem)] font-bold uppercase leading-[0.95] tracking-[-0.035em] text-[#0B1F3A] lg:mt-0">
                       <MaskedWords text={capability.name} />
                     </h3>
 
                     <p
                       data-about-reveal
-                      className={`mt-6 max-w-[22ch] text-balance font-serif text-[clamp(1.5rem,2.6vw,2.125rem)] font-normal leading-[1.15] tracking-[-0.015em] text-[#0B1F3A] ${HIDDEN_RISE}`}
+                      className={`mt-6 max-w-[22ch] text-balance font-space-grotesk text-[clamp(1.5rem,2.6vw,2.125rem)] font-bold uppercase leading-[1.15] tracking-[-0.015em] text-[#0B1F3A] ${HIDDEN_RISE}`}
                     >
                       {capability.statement}
                     </p>

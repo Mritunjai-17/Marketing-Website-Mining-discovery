@@ -23,7 +23,7 @@ export const FOCUS_CARDS: FocusCard[] = [
   {
     id: "service-1",
     badge: "01 — BUILD YOUR BRAND",
-    category: "BRAND & VISUAL IDENTITY",
+    category: "GLOBAL RECOGNITION",
     title: "Create a mining brand people remember.",
     description: "From logo and visual identity to digital branding and website development, we create a professional presence that clearly communicates your company, projects and value.",
     image: "/images/cards/card_01_alliances.webp",
@@ -34,7 +34,7 @@ export const FOCUS_CARDS: FocusCard[] = [
   {
     id: "service-2",
     badge: "02 — AMPLIFY YOUR STORY",
-    category: "MEDIA & PUBLIC RELATIONS",
+    category: "MEDIA AMPLIFICATION",
     title: "Turn company news into industry visibility.",
     description: "We transform project updates, announcements and milestones into compelling content through PR, media coverage, social media and industry-focused storytelling.",
     image: "/images/cards/card_02_technology.webp",
@@ -45,7 +45,7 @@ export const FOCUS_CARDS: FocusCard[] = [
   {
     id: "service-3",
     badge: "03 — REACH THE RIGHT AUDIENCE",
-    category: "DIGITAL CAMPAIGNS",
+    category: "PRECISION OUTREACH",
     title: "Put your story in front of the people who matter.",
     description: "Reach investors, mining professionals, industry leaders and decision-makers through targeted digital campaigns, Google Ads, LinkedIn, Meta and Mining Discovery's industry audience.",
     image: "/images/cards/card_03_growth.webp",
@@ -56,7 +56,7 @@ export const FOCUS_CARDS: FocusCard[] = [
   {
     id: "service-4",
     badge: "04 — BUILD INDUSTRY AUTHORITY",
-    category: "THOUGHT LEADERSHIP",
+    category: "EXECUTIVE INFLUENCE",
     title: "Make your company part of the mining conversation.",
     description: "Strengthen your reputation through executive visibility, interviews, webinars, events, publications and thought leadership that position your company within the global mining industry.",
     image: "/images/cards/card_04_governance.webp",
@@ -67,7 +67,7 @@ export const FOCUS_CARDS: FocusCard[] = [
   {
     id: "service-5",
     badge: "05 — TURN ATTENTION INTO GROWTH",
-    category: "INVESTOR & AUDIENCE GROWTH",
+    category: "CAPITAL ACTIVATION",
     title: "Connect visibility with measurable business outcomes.",
     description: "From increasing digital reach to generating investor interest and building long-term audience relationships, every campaign is designed to turn your mining story into meaningful market engagement.",
     image: "/images/cards/card_05_turn_attention.webp",
@@ -684,7 +684,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   max-width: clamp(320px, 46vw, 620px);
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   text-align: left;
   box-sizing: border-box;
   padding: 0 1rem;
@@ -707,43 +707,53 @@ export const MiningDiscoveryShowcase: React.FC = () => {
     padding: 0 1.25rem;
   }
   .quoteMarkChar {
-    font-size: 1.75rem;
-    margin-bottom: 0.65rem;
+    font-size: clamp(2.6rem, 7vw, 3.4rem);
+    margin-bottom: 0.25rem;
+    align-self: center;
+  }
+  .quoteClosingMark {
+    font-size: clamp(2.6rem, 7vw, 3.4rem);
+    margin-top: 2.15rem;
+    align-self: center;
   }
   .quoteBodyText {
     text-indent: 1.25rem;
     font-size: clamp(0.94rem, 3.8vw, 1.05rem);
     line-height: 1.65;
-    margin-bottom: 1rem;
+    margin-bottom: 0;
   }
 }
 
 .quoteMarkChar {
   font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
-  font-size: clamp(1.85rem, 2.4vw, 2.2rem);
+  font-size: clamp(3.2rem, 5vw, 4.6rem);
   font-weight: 400;
   color: #1A202C;
-  line-height: 1;
-  margin-bottom: clamp(0.9rem, 2vh, 1.4rem);
+  line-height: 0.8;
+  margin-bottom: clamp(0.2rem, 0.45vh, 0.35rem);
+  align-self: center;
+  text-align: center;
   user-select: none;
 }
 
 .quoteClosingMark {
-  display: inline-block;
+  display: block;
   font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
   font-style: normal;
   font-weight: 400;
-  font-size: clamp(1.85rem, 2.4vw, 2.2rem);
-  line-height: 0;
-  vertical-align: -0.22em;
-  margin-left: 0.15em;
+  font-size: clamp(3.2rem, 5vw, 4.6rem);
+  line-height: 0.8;
+  margin-top: clamp(2.5rem, 4.4vh, 3.25rem);
+  align-self: center;
+  text-align: center;
   color: #1A202C;
   user-select: none;
 }
 
 .quoteBodyText {
-  margin: 0 0 clamp(1.2rem, 2.2vh, 1.8rem) 0;
+  margin: 0;
   padding: 0;
+  width: 100%;
   font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
   font-size: clamp(1.02rem, 1.18vw, 1.22rem);
   font-style: normal;
@@ -923,7 +933,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 .zoomTitle {
   font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
   font-size: clamp(1.8rem, 3.4vw, 3.6rem);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: 0.03em;
   line-height: 1.15;
   margin: 0;
@@ -974,9 +984,9 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 }
 
 .zoomInfoEyebrow {
-  font-family: var(--font-sans, system-ui, sans-serif);
+  font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
   font-size: clamp(0.75rem, 0.9vw, 0.88rem);
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: #FFFFFF;
@@ -1239,22 +1249,77 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   pointer-events: auto;
 }
 
-/* Top bar with Learn More + matching Pic 2 upper-left */
+/* Top bar with Category on left and Learn More on right - perfectly balanced */
 .horizontalCardTopBar {
   position: relative;
   width: 100%;
-  padding: 0 clamp(1.2rem, 2.2vw, 2rem);
+  padding: 0 clamp(0.5rem, 1.2vw, 1.2rem);
   box-sizing: border-box;
   display: flex;
-  justify-content: flex-start;
-  margin-bottom: clamp(0.15rem, 0.3vh, 0.25rem);
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: clamp(0.45rem, 0.9vh, 0.8rem);
   pointer-events: auto;
 }
 
-/* Upper content with title and short description - zero box */
+.horizontalCardCategoryRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.horizontalCardCategoryPip {
+  color: #D4AF37;
+  font-size: 0.75rem;
+  text-shadow: 0 0 8px rgba(212, 175, 55, 0.7);
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.horizontalCardCategory {
+  font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
+  font-size: clamp(0.66rem, 0.74vw, 0.78rem);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #D4AF37;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95), 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+
+.horizontalCardAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
+  font-size: clamp(0.72rem, 0.8vw, 0.84rem);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  text-decoration: none;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
+  pointer-events: auto;
+  transition: transform 0.2s ease, opacity 0.2s ease, color 0.2s ease;
+}
+
+.horizontalCardAction:hover {
+  transform: translateY(-1px);
+  color: #FCE8A6;
+}
+
+.horizontalCardPlus {
+  color: #D4AF37;
+  font-weight: 700;
+  font-size: 0.9em;
+  line-height: 1;
+  text-shadow: 0 0 8px rgba(212, 175, 55, 0.6);
+}
+
+/* Upper content with title and short description */
 .horizontalCardTop {
   position: relative;
-  padding: 0 clamp(1.2rem, 2.2vw, 2rem);
+  padding: 0 clamp(0.6rem, 1.4vw, 1.5rem);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1265,67 +1330,28 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   background: transparent;
 }
 
-.horizontalCardCategory {
-  font-family: var(--font-sans, -apple-system, sans-serif);
-  font-size: clamp(0.64rem, 0.72vw, 0.76rem);
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: #F59E0B;
-  margin-bottom: 0.15rem;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95), 0 1px 3px rgba(0, 0, 0, 0.9);
-}
-
 .horizontalCardTitle {
   font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
-  font-size: clamp(1.4rem, 1.9vw, 2.1rem);
-  font-weight: 400;
+  font-size: clamp(1.35rem, 1.8vw, 1.95rem);
+  font-weight: 700;
   color: #FFFFFF;
-  line-height: 1.15;
+  line-height: 1.18;
   margin: 0;
-  letter-spacing: 0.02em;
-  text-transform: none;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
   text-align: center;
-  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.95), 0 1px 4px rgba(0, 0, 0, 0.95);
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.85), 0 1px 4px rgba(0, 0, 0, 0.95);
 }
 
 .horizontalCardDesc {
-  font-family: var(--font-sans, -apple-system, sans-serif);
-  font-size: clamp(0.8rem, 0.86vw, 0.9rem);
-  line-height: 1.45;
-  color: rgba(255, 255, 255, 0.96);
-  margin: clamp(0.2rem, 0.4vh, 0.35rem) auto 0;
-  max-width: 460px;
+  font-family: var(--font-inter), "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: clamp(0.82rem, 0.88vw, 0.92rem);
+  line-height: 1.58;
+  color: #D0D5DD;
+  margin: clamp(0.35rem, 0.7vh, 0.55rem) auto 0;
+  max-width: 480px;
   text-align: center;
   text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95), 0 1px 4px rgba(0, 0, 0, 0.9);
-}
-
-.horizontalCardAction {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  font-family: var(--font-sans, -apple-system, sans-serif);
-  font-size: clamp(0.82rem, 0.92vw, 0.94rem);
-  font-weight: 500;
-  letter-spacing: 0.03em;
-  color: #FFFFFF;
-  text-decoration: none;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
-  pointer-events: auto;
-  transition: transform 0.2s ease, opacity 0.2s ease;
-}
-
-.horizontalCardAction:hover {
-  transform: translateY(-1px);
-  color: #FFFFFF;
-}
-
-.horizontalCardPlus {
-  color: #F59E0B;
-  font-weight: 700;
-  font-size: 1.05em;
-  line-height: 1;
 }
 
 /* Bottom full-width coordinate tag matching Pic 2 */
@@ -1537,7 +1563,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 }
 
 .finaleBrandKicker {
-  font-family: var(--font-mono, monospace);
+  font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
   font-size: clamp(0.64rem, 0.74vw, 0.78rem);
   font-weight: 700;
   letter-spacing: 0.28em;
@@ -1822,8 +1848,10 @@ export const MiningDiscoveryShowcase: React.FC = () => {
               <div className="quoteMarkChar" aria-hidden="true">“</div>
 
               <blockquote className="quoteBodyText">
-                Mining companies need more than a strong project — they need a strong market presence. Mining Discovery helps mining companies build their brand, amplify their story, reach the right audiences, and connect with investors through integrated digital marketing and industry media.<span className="quoteClosingMark" aria-hidden="true">”</span>
+                Mining companies need more than a strong project — they need a strong market presence. Mining Discovery helps mining companies build their brand, amplify their story, reach the right audiences, and connect with investors through integrated digital marketing and industry media.
               </blockquote>
+
+              <div className="quoteClosingMark" aria-hidden="true">”</div>
             </div>
           </section>
 
@@ -1966,21 +1994,23 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 
                         <div className="horizontalCardUpper">
                           <div className="horizontalCardTopBar">
+                            {card.category && (
+                              <div className="horizontalCardCategoryRow">
+                                <span className="horizontalCardCategoryPip" aria-hidden="true">✦</span>
+                                <span className="horizontalCardCategory">{card.category}</span>
+                              </div>
+                            )}
+
                             <Link
                               href={card.ctaHref}
                               className="horizontalCardAction"
                             >
                               <span>{card.ctaText}</span>
-                              <span className="horizontalCardPlus">✦</span>
+                              <span className="horizontalCardPlus" aria-hidden="true">✦</span>
                             </Link>
                           </div>
 
                           <div className="horizontalCardTop">
-                            {card.category && (
-                              <span className="horizontalCardCategory">
-                                {card.category}
-                              </span>
-                            )}
                             <h3 className="horizontalCardTitle">
                               {card.title}
                             </h3>

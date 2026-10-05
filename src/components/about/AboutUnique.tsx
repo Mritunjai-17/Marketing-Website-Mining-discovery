@@ -10,6 +10,7 @@ import {
   revealBlocks,
   useAboutMotion,
 } from "./reveal";
+import { AboutEyebrow } from "./AboutEyebrow";
 
 /*
  * Section 07 — What Makes Us Unique.
@@ -104,45 +105,15 @@ export const AboutUnique: React.FC = () => {
   return (
     <section ref={sectionRef} className="border-b border-[#E5E4DE]">
       <div className="container-editorial py-20 md:py-28">
-        <div ref={headerRef}>
-          <div data-about-rule-x className={`h-0.5 w-12 bg-[#B8860B] ${HIDDEN_RULE_X}`} />
-          <span
-            data-about-reveal
-            className={`mt-6 block text-xs font-semibold uppercase tracking-[0.15em] text-[#B8860B] ${HIDDEN_RISE}`}
-          >
-            What Makes Us Unique
-          </span>
-          <h2 className="mt-6 max-w-[20ch] font-serif text-[clamp(2rem,4.2vw,3.25rem)] font-normal leading-[1.1] tracking-[-0.02em] text-[#0B1F3A]">
-            <MaskedWords text="Five things that set us apart." />
+        <div ref={headerRef} className="flex flex-col items-center text-center max-w-3xl mx-auto">
+          <AboutEyebrow text="What Makes Us Unique" className="justify-center" />
+          <h2 className="mt-6 font-space-grotesk text-[clamp(2.25rem,4.5vw,3.5rem)] font-bold uppercase leading-[1.1] tracking-[-0.025em] text-[#0B1F3A]">
+            <MaskedWords text="Five things that set us apart." goldWords={["set", "us", "apart"]} />
           </h2>
         </div>
 
         <div ref={listRef} className="relative mt-14 md:mt-20">
-          {/*
-            The rail lives OUTSIDE the <ol>, and that is not tidiness. An <ol> may only
-            contain <li>, and a stray <span> before the first item makes that item stop being
-            :first-child — which silently defeats the `first:border-t-0` on it and leaves a
-            hairline hanging above the list with nothing above it to separate.
-
-            The rail runs down the gutter the <ol>'s pl-16 opens up, so the list's hairlines
-            begin to the right of it rather than crossing it. 3px centres a 1px rail under a
-            7px mark; the marks reach back into the same gutter with -left-16, which is the
-            same 4rem. Those two numbers have to move together.
-          */}
-          <span
-            aria-hidden="true"
-            className="pointer-events-none absolute top-[6px] bottom-2 left-[3px] hidden w-px bg-[#E5E4DE] md:block"
-          />
-          <span
-            ref={fillRef}
-            aria-hidden="true"
-            data-about-rule-y
-            className="pointer-events-none absolute top-[6px] bottom-2 left-[3px] hidden w-px origin-top bg-[#B8860B] [transform:scaleY(0)] motion-reduce:[transform:none] md:block"
-          />
-
-          {/* Hidden below md, where a 4rem indent would cost more width than a phone has to
-              give — the numbers alone carry the sequence there. */}
-          <ol className="md:pl-16">
+          <ol>
             {DIFFERENTIATORS.map((item, index) => {
               const isReached = reached === null || index < reached;
 
@@ -154,43 +125,38 @@ export const AboutUnique: React.FC = () => {
                   }}
                   className="border-t border-[#E5E4DE] py-10 first:border-t-0 first:pt-0 md:py-14 md:first:pt-0"
                 >
-                  <div className="grid grid-cols-1 gap-x-16 gap-y-4 lg:grid-cols-12">
-                    <div className="relative lg:col-span-7">
-                      {/*
-                        The mark hangs off THIS block rather than off the <li>, so it stays
-                        level with the number no matter what vertical padding the row is
-                        carrying — and the first row carries none, which is exactly where an
-                        <li>-anchored mark drifted 56px away from its own number.
-                      */}
-                      <span
-                        aria-hidden="true"
-                        className={`absolute -left-16 top-[3px] hidden h-[7px] w-[7px] rounded-full border border-[#B8860B] transition-colors duration-500 md:block ${
-                          // Not-yet-reached marks are a hole punched in the rail, so this
-                          // fill has to BE the page ground — it tracks the wrapper's
-                          // #F7F5EF, not a colour of its own.
-                          isReached ? "bg-[#B8860B]" : "bg-[#F7F5EF]"
-                        }`}
-                      />
-                      <span
-                        data-about-reveal
-                        className={`font-mono text-[11px] tabular-nums transition-colors duration-500 ${
-                          isReached ? "text-[#B8860B]" : "text-[#B8860B]/40"
-                        } ${HIDDEN_RISE}`}
-                      >
-                        {String(index + 1).padStart(2, "0")}
-                      </span>
+                  <div className="grid grid-cols-1 gap-x-16 gap-y-6 lg:grid-cols-12">
+                    <div className="lg:col-span-5">
+                      <div className="flex items-center gap-3">
+                        <span
+                          aria-hidden="true"
+                          className={`h-[7px] w-[7px] shrink-0 rounded-full border border-[#B8860B] transition-colors duration-500 ${
+                            isReached ? "bg-[#B8860B]" : "bg-[#F7F5EF]"
+                          }`}
+                        />
+                        <span
+                          data-about-reveal
+                          className={`font-mono text-[11px] tabular-nums transition-colors duration-500 ${
+                            isReached ? "text-[#B8860B]" : "text-[#B8860B]/40"
+                          } ${HIDDEN_RISE}`}
+                        >
+                          {String(index + 1).padStart(2, "0")}
+                        </span>
+                      </div>
 
-                      <h3 className="mt-4 font-serif text-[clamp(1.6rem,3.2vw,2.5rem)] font-normal leading-[1.12] tracking-[-0.018em] text-[#0B1F3A]">
+                      <h3 className="mt-4 font-space-grotesk text-[clamp(1.6rem,3.2vw,2.5rem)] font-bold uppercase leading-[1.12] tracking-[-0.018em] text-[#0B1F3A]">
                         <MaskedWords text={item.title} />
                       </h3>
                     </div>
 
-                    <p
-                      data-about-reveal
-                      className={`max-w-[42ch] text-base font-normal leading-relaxed text-[#57595E] sm:text-lg lg:col-span-5 lg:pt-8 ${HIDDEN_RISE}`}
-                    >
-                      {item.description}
-                    </p>
+                    <div className="lg:col-span-7 lg:border-l lg:border-[#E5E4DE] lg:pl-12">
+                      <p
+                        data-about-reveal
+                        className={`max-w-[46ch] text-lg font-normal leading-relaxed text-[#57595E] sm:text-xl ${HIDDEN_RISE}`}
+                      >
+                        {item.description}
+                      </p>
+                    </div>
                   </div>
                 </li>
               );

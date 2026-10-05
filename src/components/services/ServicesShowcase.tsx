@@ -442,12 +442,12 @@ export const ServicesShowcase: React.FC = () => {
 
           <span
             data-about-reveal
-            className={`mt-6 block text-xs font-semibold uppercase tracking-[0.15em] text-[#D4AF37] ${HIDDEN_RISE}`}
+            className={`mt-6 block font-mono text-xs font-bold uppercase tracking-[0.16em] text-[#D4AF37] ${HIDDEN_RISE}`}
           >
             Our Expertise
           </span>
 
-          <h2 className="mt-8 text-balance font-geist text-[clamp(1.875rem,4.2vw,3.5rem)] font-bold uppercase leading-[1.02] tracking-[-0.03em] text-white">
+          <h2 className="mt-8 text-balance font-space-grotesk text-[clamp(1.875rem,4.2vw,3.5rem)] font-bold uppercase leading-[1.02] tracking-[-0.03em] text-white">
             {HEADING_LINES.map((line) => (
               <span key={line} className="block">
                 <MaskedWords text={line} />
@@ -583,14 +583,14 @@ export const ServicesShowcase: React.FC = () => {
                       </div>
 
                       <h3
-                        className={`font-geist font-black uppercase tracking-[0.12em] text-[#B8860B] ${
+                        className={`font-space-grotesk font-bold uppercase tracking-[0.12em] text-[#B8860B] ${
                           reduced ? "mt-6 text-sm" : "mt-6 text-sm lg:mt-0"
                         }`}
                       >
                         {group.name}
                       </h3>
 
-                      <p className="mt-5 font-serif text-[clamp(1.5rem,2.4vw,2rem)] font-normal leading-[1.15] tracking-[-0.015em] text-[#0B1F3A]">
+                      <p className="mt-5 font-space-grotesk text-[clamp(1.5rem,2.4vw,2rem)] font-bold uppercase leading-[1.15] tracking-[-0.015em] text-[#0B1F3A]">
                         {group.description}
                       </p>
                     </div>
@@ -626,7 +626,7 @@ export const ServicesShowcase: React.FC = () => {
                   : "lg:absolute lg:inset-0 lg:mt-0 lg:flex lg:flex-col lg:items-center lg:justify-center"
               }`}
             >
-              <p className="font-geist text-[clamp(1.75rem,4.6vw,4rem)] font-black uppercase leading-[0.98] tracking-[-0.035em] text-white">
+              <p className="font-space-grotesk text-[clamp(1.75rem,4.6vw,4rem)] font-bold uppercase leading-[0.98] tracking-[-0.035em] text-white">
                 {FINALE_LINES.map((line) => (
                   <span key={line} className="block">
                     <MaskedWords text={line} />
@@ -641,7 +641,7 @@ export const ServicesShowcase: React.FC = () => {
               */}
               <span
                 data-finale-line
-                className="mt-10 inline-flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#D4AF37]"
+                className="mt-10 inline-flex items-center gap-3 font-mono text-xs font-bold uppercase tracking-[0.18em] text-[#D4AF37]"
               >
                 Explore what we can build together
                 <ArrowRight aria-hidden="true" className="h-4 w-4" />

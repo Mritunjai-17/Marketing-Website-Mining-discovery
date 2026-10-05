@@ -490,14 +490,18 @@ export interface ServiceCardItem {
   }[];
   ctaText: string;
   ctaHref: string;
+  titleWhite?: string;
+  titleGold?: string;
 }
 
 export const SERVICE_CARDS: ServiceCardItem[] = [
   {
     id: "brand-visual-identity",
     num: "01",
-    category: "BRAND & VISUAL IDENTITY",
+    category: "STRATEGIC POSITIONING",
     title: "Brand & Visual Identity",
+    titleWhite: "BRAND &",
+    titleGold: "VISUAL IDENTITY",
     italicTitle: "Brand & Visual Identity",
     metaPrice: "DIGITAL BRANDING",
     metaSeason: "LOGO & VISUAL DESIGN",
@@ -505,7 +509,7 @@ export const SERVICE_CARDS: ServiceCardItem[] = [
     description:
       "Your brand's visibility is not enough; it should also be acknowledged. We create brand identities and visual assets designed to make mining and industrial enterprises recognized, trusted, and remembered across global capital and industrial markets.",
     image: "/images/services/service_03_brand_light.webp",
-    badge: "01 / BRAND & VISUAL IDENTITY",
+    badge: "01 / STRATEGIC POSITIONING",
     features: [
       {
         title: "DIGITAL BRANDING",
@@ -522,8 +526,10 @@ export const SERVICE_CARDS: ServiceCardItem[] = [
   {
     id: "social-media-marketing",
     num: "02",
-    category: "SOCIAL MEDIA MARKETING",
+    category: "AUDIENCE ENGAGEMENT",
     title: "Social Media Marketing",
+    titleWhite: "SOCIAL",
+    titleGold: "MEDIA MARKETING",
     italicTitle: "Social Media Marketing",
     metaPrice: "CAMPAIGN STRATEGY",
     metaSeason: "DATA-BACKED CONTENT",
@@ -531,7 +537,7 @@ export const SERVICE_CARDS: ServiceCardItem[] = [
     description:
       "Create debates that are significant for both you and your customers. Our team takes care of your social media by inventing campaigns, applying strategies backed with data, and producing the kind of content that will resonate with your audience and strengthen your brand's voice.",
     image: "/images/services/service_07_newspaper_light.webp",
-    badge: "02 / SOCIAL MEDIA MARKETING",
+    badge: "02 / AUDIENCE ENGAGEMENT",
     features: [
       {
         title: "DATA-BACKED CAMPAIGNS",
@@ -548,8 +554,10 @@ export const SERVICE_CARDS: ServiceCardItem[] = [
   {
     id: "paid-campaigns-ads",
     num: "03",
-    category: "PAID CAMPAIGNS & TARGETED ADS",
+    category: "PERFORMANCE MARKETING",
     title: "Google, LinkedIn & Meta Ads",
+    titleWhite: "GOOGLE, LINKEDIN &",
+    titleGold: "META ADS",
     italicTitle: "Google, LinkedIn & Meta Ads",
     metaPrice: "GOOGLE ADS",
     metaSeason: "LINKEDIN & META ADS",
@@ -557,7 +565,7 @@ export const SERVICE_CARDS: ServiceCardItem[] = [
     description:
       "Get to your customers where it is most effective. We create and manage targeted ad campaigns across Google, LinkedIn, and Meta that connect with professionals and large audiences to drive brand visibility, qualified leads, and measurable growth.",
     image: "/images/services/service_08_articles_light.webp",
-    badge: "03 / PAID CAMPAIGNS & TARGETED ADS",
+    badge: "03 / PERFORMANCE MARKETING",
     features: [
       {
         title: "GOOGLE ADS & PAID CAMPAIGNS",
@@ -574,8 +582,10 @@ export const SERVICE_CARDS: ServiceCardItem[] = [
   {
     id: "pr-events",
     num: "04",
-    category: "PUBLIC RELATIONS & EVENTS",
+    category: "INDUSTRY AUTHORITY",
     title: "Public Relations & Webinars",
+    titleWhite: "PUBLIC RELATIONS &",
+    titleGold: "WEBINARS",
     italicTitle: "Public Relations & Webinars",
     metaPrice: "PUBLIC RELATIONS (PR)",
     metaSeason: "WEBINARS & EVENTS",
@@ -583,7 +593,7 @@ export const SERVICE_CARDS: ServiceCardItem[] = [
     description:
       "We make sure that your company is in the limelight not by spending money but by gaining it. Through media contacts, press releases, thought leadership, and proficient webinars and events, we build industry authority and capture audience attention.",
     image: "/images/services/service_02_media_light.webp",
-    badge: "04 / PUBLIC RELATIONS & EVENTS",
+    badge: "04 / INDUSTRY AUTHORITY",
     features: [
       {
         title: "PUBLIC RELATIONS (PR)",
@@ -600,8 +610,10 @@ export const SERVICE_CARDS: ServiceCardItem[] = [
   {
     id: "web-app-development",
     num: "05",
-    category: "WEBSITE & APP DEVELOPMENT",
+    category: "DIGITAL INFRASTRUCTURE",
     title: "Website & App Development",
+    titleWhite: "WEBSITE &",
+    titleGold: "APP DEVELOPMENT",
     italicTitle: "Website & App Development",
     metaPrice: "WEBSITE DEVELOPMENT",
     metaSeason: "APP DEVELOPMENT",
@@ -609,7 +621,7 @@ export const SERVICE_CARDS: ServiceCardItem[] = [
     description:
       "Your website is the cornerstone of your online presence. We create quick, user-friendly, and good-looking websites paired with intelligent, easy-to-use mobile and web applications that improve interaction, make operations easier, and bring actual value to your company.",
     image: "/images/services/service_05_web_development.webp",
-    badge: "05 / WEBSITE & APP DEVELOPMENT",
+    badge: "05 / DIGITAL INFRASTRUCTURE",
     features: [
       {
         title: "WEBSITE DEVELOPMENT",
@@ -986,14 +998,28 @@ export const JourneyStory: React.FC = () => {
                       {/* Left Column: Heading (Category Badge, Main Title, Meta Tags) on Top */}
                       <div className={styles.fullScreenColLeft}>
                         <div className={styles.cardFlickHeaderRow}>
-                          <span className={styles.cardFlickBadge}>
-                            <span className={styles.cardFlickBadgeNum}>{card.num}</span>
-                            <span className={styles.cardFlickBadgeText}>{card.category}</span>
-                          </span>
+                          <div className={styles.cardFlickEyebrowRow}>
+                            <span className={styles.cardFlickEyebrowRule} aria-hidden="true" />
+                            <span className={styles.cardFlickEyebrowText}>
+                              <span className={styles.cardFlickEyebrowPip}>✦</span>
+                              <span className={styles.cardFlickEyebrowNum}>{card.num}</span>
+                              <span className={styles.cardFlickEyebrowDivider}>//</span>
+                              <span>{card.category}</span>
+                              <span className={styles.cardFlickEyebrowPip}>✦</span>
+                            </span>
+                            <span className={styles.cardFlickEyebrowRuleRight} aria-hidden="true" />
+                          </div>
                         </div>
 
                         <h3 className={styles.cardFlickTitle}>
-                          {card.title}
+                          {card.titleWhite ? (
+                            <>
+                              <span className={styles.titleWhiteSpan}>{card.titleWhite} </span>
+                              <span className={styles.titleGoldSpan}>{card.titleGold}</span>
+                            </>
+                          ) : (
+                            card.title
+                          )}
                         </h3>
 
                         <div className={styles.cardFlickMeta}>

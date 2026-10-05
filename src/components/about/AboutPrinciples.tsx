@@ -8,6 +8,7 @@ import {
   revealBlocks,
   useAboutMotion,
 } from "./reveal";
+import { AboutEyebrow } from "./AboutEyebrow";
 
 /*
  * Section 06 — Our Principles.
@@ -24,14 +25,26 @@ import {
  */
 
 const PRINCIPLES: Array<{ name: string; description: string }> = [
-  { name: "Integrity", description: "Truthful and verified reporting." },
-  { name: "Clarity", description: "Complex issues explained in clear, impactful language." },
-  { name: "Innovation", description: "New tools and formats that keep coverage relevant." },
+  {
+    name: "Integrity",
+    description: "Truthful and verified reporting across global mining markets.",
+  },
+  {
+    name: "Clarity",
+    description: "Complex issues explained in clear, impactful and accessible language.",
+  },
+  {
+    name: "Innovation",
+    description: "New tools and digital formats that keep industry coverage relevant.",
+  },
   {
     name: "Respect",
     description: "Consideration for communities, the environment, investors, and workers.",
   },
-  { name: "Partnership", description: "Collaboration with companies, experts, and institutions." },
+  {
+    name: "Partnership",
+    description: "Collaboration with mining companies, industry experts, and institutions.",
+  },
 ];
 
 export const AboutPrinciples: React.FC = () => {
@@ -52,16 +65,10 @@ export const AboutPrinciples: React.FC = () => {
   return (
     <section ref={sectionRef} className="border-b border-[#E5E4DE] bg-white">
       <div className="container-editorial py-20 md:py-28">
-        <div ref={headerRef}>
-          <div data-about-rule-x className={`h-0.5 w-12 bg-[#B8860B] ${HIDDEN_RULE_X}`} />
-          <span
-            data-about-reveal
-            className={`mt-6 block text-xs font-semibold uppercase tracking-[0.15em] text-[#B8860B] ${HIDDEN_RISE}`}
-          >
-            Our Principles
-          </span>
-          <h2 className="mt-6 max-w-[18ch] font-serif text-[clamp(2rem,4.2vw,3.25rem)] font-normal leading-[1.1] tracking-[-0.02em] text-[#0B1F3A]">
-            <MaskedWords text="What we hold to." />
+        <div ref={headerRef} className="flex flex-col items-center text-center max-w-3xl mx-auto">
+          <AboutEyebrow text="Our Principles" className="justify-center" />
+          <h2 className="mt-6 font-space-grotesk text-[clamp(2.25rem,4.5vw,3.5rem)] font-bold uppercase leading-[1.1] tracking-[-0.025em] text-[#0B1F3A]">
+            <MaskedWords text="What we hold to." goldWords={["hold", "to"]} />
           </h2>
         </div>
 
@@ -85,7 +92,7 @@ export const AboutPrinciples: React.FC = () => {
                 className="pointer-events-none absolute inset-x-0 -top-px h-px origin-left scale-x-0 bg-[#B8860B] transition-transform duration-500 ease-out group-hover:scale-x-100"
               />
 
-              <div className="grid grid-cols-1 items-baseline gap-x-16 gap-y-4 py-8 md:py-10 lg:grid-cols-12">
+              <div className="grid grid-cols-1 gap-x-16 gap-y-4 py-8 md:py-10 lg:grid-cols-12">
                 <div className="flex items-baseline gap-5 lg:col-span-5">
                   <span
                     data-about-reveal
@@ -94,17 +101,19 @@ export const AboutPrinciples: React.FC = () => {
                     {String(index + 1).padStart(2, "0")}
                   </span>
 
-                  <h3 className="font-serif text-[clamp(2rem,4.6vw,3.5rem)] font-normal leading-[1.05] tracking-[-0.025em] text-[#0B1F3A] transition-colors duration-500 group-hover:text-[#B8860B]">
+                  <h3 className="font-space-grotesk text-[clamp(2rem,4.6vw,3.5rem)] font-bold uppercase leading-[1.05] tracking-[-0.025em] text-[#0B1F3A] transition-colors duration-500 group-hover:text-[#B8860B]">
                     <MaskedWords text={principle.name} />
                   </h3>
                 </div>
 
-                <p
-                  data-about-reveal
-                  className={`max-w-[44ch] text-lg font-normal leading-relaxed text-[#57595E] transition-colors duration-500 group-hover:text-[#3A3D42] sm:text-xl lg:col-span-7 ${HIDDEN_RISE}`}
-                >
-                  {principle.description}
-                </p>
+                <div className="lg:col-span-7 lg:border-l lg:border-[#E5E4DE] lg:pl-12">
+                  <p
+                    data-about-reveal
+                    className={`max-w-[38ch] text-lg font-normal leading-relaxed text-[#57595E] transition-colors duration-500 group-hover:text-[#3A3D42] sm:text-xl ${HIDDEN_RISE}`}
+                  >
+                    {principle.description}
+                  </p>
+                </div>
               </div>
             </div>
           ))}

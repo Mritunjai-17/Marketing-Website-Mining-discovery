@@ -293,9 +293,12 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
         const stickyH = stickyEl.offsetHeight || 520;
 
         // Position where the card deck pins comfortably below fixed navbar (header is ~80px)
-        const NAV_BUFFER = 92;
+        const isMobile = clientH < 850 || (typeof window !== "undefined" && window.innerWidth <= 768);
+        const NAV_BUFFER = isMobile ? 74 : 92;
         const availableH = Math.max(320, clientH - NAV_BUFFER);
-        const pinTop = Math.max(NAV_BUFFER, Math.min(136, Math.round(NAV_BUFFER + (availableH - stickyH) / 2)));
+        const pinTop = isMobile
+          ? Math.max(NAV_BUFFER, Math.min(84, Math.round(NAV_BUFFER + 6)))
+          : Math.max(NAV_BUFFER, Math.min(136, Math.round(NAV_BUFFER + (availableH - stickyH) / 2)));
         const maxTravel = Math.max(0, outerRect.height - stickyH);
 
         // Distance scrolled past pinTop
@@ -359,7 +362,7 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
             const easedT = t * t * (3 - 2 * t);
             ty = (1 - easedT) * 108;
             scale = 1;
-            op = Math.min(1, t * 1.8);
+            op = 1;
             zIndex = 30 + idx;
           }
         } else {
@@ -367,7 +370,7 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
           const depth = delta;
           ty = -(depth * 16);
           scale = Math.max(0.92, 1 - depth * 0.02);
-          op = Math.max(0.45, 1 - depth * 0.15);
+          op = depth < 0.15 ? 1 : Math.max(0, 1 - (depth - 0.15) * 1.5);
           zIndex = depth < 0.5 ? 20 + idx : 10 + idx;
         }
 
@@ -378,7 +381,8 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
         el.style.transform = transformStr;
         el.style.opacity = op.toFixed(3);
         el.style.zIndex = `${zIndex}`;
-        el.style.pointerEvents = delta < -0.5 ? "none" : "auto";
+        el.style.pointerEvents = delta < -0.5 || op < 0.1 ? "none" : "auto";
+        el.style.visibility = op < 0.01 ? "hidden" : "visible";
       });
 
       return Math.abs(diff) > 0.0002;
@@ -559,11 +563,6 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
                     isActive ? styles.rowActive : ""
                   } ${isPreceding ? styles.rowPreceding : ""}`}
                 >
-                  {/* Subtle active notch / dot indicator at top-left matching user screenshot */}
-                  <div className={styles.cardHeaderNotch} aria-hidden="true">
-                    <span className={styles.notchDot} />
-                  </div>
-
                   {/* Dedicated Chapter Background Image or Partner Logo */}
                   <div
                     className={`${styles.chapterBgWrap} ${
@@ -599,6 +598,10 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
                   <div className={styles.headingColumn}>
                     <div className={styles.headingTopGroup}>
                       <div className={styles.metaRow}>
+                        {/* Active dot indicator perfectly aligned with heading */}
+                        <div className={styles.cardHeaderNotch} aria-hidden="true">
+                          <span className={styles.notchDot} />
+                        </div>
                         <span className={styles.chapterNum}>{chapter.chapterNumber}</span>
                         <span className={styles.metaDivider}>/</span>
                         <span className={styles.categoryTag}>{chapter.category}</span>

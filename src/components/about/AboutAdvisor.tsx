@@ -2,6 +2,7 @@
 
 import React, { useRef } from "react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
   HIDDEN_RISE,
   HIDDEN_RULE_X,
@@ -9,6 +10,11 @@ import {
   revealBlocks,
   useAboutMotion,
 } from "./reveal";
+import { AboutEyebrow } from "./AboutEyebrow";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 /*
  * Section 04 — Advisor.
@@ -66,17 +72,11 @@ export const AboutAdvisor: React.FC = () => {
     <section ref={sectionRef} className="relative border-b border-[#E5E4DE] bg-white">
       <div className="container-editorial py-20 md:py-28">
         {/* --- Who ---------------------------------------------------------------- */}
-        <div ref={headerRef}>
-          <div data-about-rule-x className={`h-0.5 w-12 bg-[#B8860B] ${HIDDEN_RULE_X}`} />
-          <span
-            data-about-reveal
-            className={`mt-6 block text-xs font-semibold uppercase tracking-[0.15em] text-[#B8860B] ${HIDDEN_RISE}`}
-          >
-            Advisor
-          </span>
+        <div ref={headerRef} className="flex flex-col items-center text-center max-w-3xl mx-auto">
+          <AboutEyebrow text="Advisor" className="justify-center" />
 
-          <h2 className="mt-6 font-serif text-[clamp(2.5rem,6vw,4.5rem)] font-normal leading-[1.05] tracking-[-0.025em] text-[#0B1F3A]">
-            <MaskedWords text="Laura Stein" />
+          <h2 className="mt-6 font-space-grotesk text-[clamp(2.5rem,6vw,4.5rem)] font-bold uppercase leading-[1.05] tracking-[-0.025em] text-[#0B1F3A]">
+            <MaskedWords text="Laura Stein" goldWords={["Stein"]} />
           </h2>
 
           <p
@@ -102,7 +102,7 @@ export const AboutAdvisor: React.FC = () => {
               </p>
               <p
                 data-about-reveal
-                className={`mt-6 max-w-[20ch] font-serif text-2xl font-normal leading-[1.2] tracking-[-0.015em] text-[#0B1F3A] sm:text-3xl ${HIDDEN_RISE}`}
+                className={`mt-6 max-w-[20ch] font-space-grotesk text-2xl font-bold leading-[1.2] tracking-[-0.015em] text-[#0B1F3A] sm:text-3xl ${HIDDEN_RISE}`}
               >
                 years of global mining industry experience
               </p>

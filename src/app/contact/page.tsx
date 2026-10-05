@@ -14,7 +14,7 @@ export const metadata: Metadata = {
  */
 export default function ContactPage() {
   return (
-    <div className="w-full min-h-screen bg-[#11110F] font-sans text-[#F5F1E8]">
+    <div className="w-full min-h-screen bg-[#D9D6CE] font-sans text-[#0F172A]">
       <ContactPanel />
     </div>
   );

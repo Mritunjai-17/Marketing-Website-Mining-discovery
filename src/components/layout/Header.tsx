@@ -167,7 +167,7 @@ export const Header: React.FC = () => {
             {/* Golden Amber Pill CTA Button */}
             <Link
               href="/contact"
-              className="inline-flex items-center justify-center px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 rounded-full bg-gradient-to-r from-[#D6A84F] via-[#F3DC96] to-[#C89A32] text-[#0C141E] font-sans font-bold text-[10px] sm:text-xs uppercase tracking-[0.16em] hover:brightness-110 hover:shadow-[0_0_24px_rgba(214,168,79,0.55)] transition-all duration-300 hover:scale-[1.03] shrink-0 active:scale-[0.98]"
+              className="inline-flex items-center justify-center px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 rounded-full bg-gradient-to-r from-[#D6A84F] via-[#F3DC96] to-[#C89A32] text-[#0C141E] font-sans font-bold text-[14px] uppercase tracking-[0.16em] hover:brightness-110 hover:shadow-[0_0_24px_rgba(214,168,79,0.55)] transition-all duration-300 hover:scale-[1.03] shrink-0 active:scale-[0.98]"
             >
               <span className="hidden sm:inline">GET IN TOUCH</span>
               <span className="sm:hidden">CONTACT</span>
@@ -254,7 +254,7 @@ export const Header: React.FC = () => {
             <Link
               href="/contact"
               onClick={() => setMenuOpen(false)}
-              className="w-full py-3 rounded-full bg-gradient-to-r from-[#E5A93C] to-[#D49525] text-[#111713] font-bold text-center text-xs uppercase tracking-[0.18em] shadow-[0_4px_20px_rgba(229,169,60,0.35)]"
+              className="w-full py-3 rounded-full bg-gradient-to-r from-[#D6A84F] via-[#F3DC96] to-[#C89A32] text-[#0C141E] font-bold text-center text-[14px] uppercase tracking-[0.16em] shadow-[0_4px_20px_rgba(214,168,79,0.35)] hover:brightness-110 hover:shadow-[0_0_24px_rgba(214,168,79,0.55)] transition-all duration-300 active:scale-[0.98]"
             >
               GET IN TOUCH
             </Link>

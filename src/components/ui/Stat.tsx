@@ -26,7 +26,7 @@ export const Stat: React.FC<StatProps> = ({
   return (
     <div className={`p-6 bg-white border border-[#E5E5E3] rounded-md ${className}`}>
       <div className="flex items-baseline justify-between">
-        <span className="font-serif text-3xl md:text-4xl font-bold text-[#0B1F3A]">
+        <span className="font-space-grotesk text-3xl md:text-4xl font-bold text-[#0B1F3A]">
           {value}
         </span>
         {trend && (
@@ -35,7 +35,7 @@ export const Stat: React.FC<StatProps> = ({
           </span>
         )}
       </div>
-      <p className="text-sm font-semibold tracking-wide text-[#1A1D21] mt-2 uppercase">
+      <p className="font-mono text-xs font-bold tracking-wider text-[#1A1D21] mt-2 uppercase">
         {label}
       </p>
       {description && (

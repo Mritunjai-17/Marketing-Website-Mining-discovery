@@ -12,8 +12,9 @@ import styles from "./ContactPanel.module.css";
 
 const CONTACT = {
   email: "info@miningdiscovery.com",
-  basedIn: "Chandigarh · India",
-  address: ["180 Layfatte street", "Passaic, New Jersey 07055"],
+  phone: "+1 (415) 555-2671",
+  address: "180 Lafayette St, Passaic, NJ 07055, USA",
+  basedIn: "Chandigarh, India · Global Mining Reach",
   focus: "Media · Branding · Investor Engagement",
 } as const;
 
@@ -49,8 +50,7 @@ const SENT_COPY =
 interface Fields {
   name: string;
   email: string;
-  company: string;
-  subject: string;
+  phone: string;
   message: string;
 }
 
@@ -60,11 +60,11 @@ const EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function validate(v: Fields): Errors {
   const errors: Errors = {};
-  if (!v.name.trim()) errors.name = "Please enter your name.";
+  if (!v.name.trim()) errors.name = "Please enter your full name.";
   if (!v.email.trim()) errors.email = "Please enter your email address.";
   else if (!EMAIL_SHAPE.test(v.email.trim()))
-    errors.email = "That doesn't look like an email address.";
-  if (!v.message.trim()) errors.message = "Please write a short message.";
+    errors.email = "That doesn't look like a valid email address.";
+  if (!v.message.trim()) errors.message = "Please write your message.";
   return errors;
 }
 
@@ -72,8 +72,7 @@ export const ContactPanel: React.FC = () => {
   const [values, setValues] = useState<Fields>({
     name: "",
     email: "",
-    company: "",
-    subject: "",
+    phone: "",
     message: "",
   });
   const [errors, setErrors] = useState<Errors>({});
@@ -90,11 +89,9 @@ export const ContactPanel: React.FC = () => {
 
   /** Composes the message and hands it to the visitor's mail client. */
   const handoff = (v: Fields) => {
-    const emailSubject = v.subject.trim()
-      ? `${v.subject.trim()} — ${v.name.trim()}`
-      : `Website enquiry from ${v.name.trim()}`;
-    const companyHeader = v.company.trim() ? `Company: ${v.company.trim()}\n\n` : "";
-    const body = `${companyHeader}${v.message.trim()}\n\n—\n${v.name.trim()}\n${v.email.trim()}`;
+    const emailSubject = `Website enquiry from ${v.name.trim()}`;
+    const phoneLine = v.phone.trim() ? `Phone: ${v.phone.trim()}\n\n` : "";
+    const body = `${phoneLine}${v.message.trim()}\n\n—\n${v.name.trim()}\n${v.email.trim()}`;
     window.location.href =
       `mailto:${CONTACT.email}?subject=${encodeURIComponent(emailSubject)}` +
       `&body=${encodeURIComponent(body)}`;
@@ -113,7 +110,7 @@ export const ContactPanel: React.FC = () => {
 
     handoff(values);
     setSent(true);
-    setValues({ name: "", email: "", company: "", subject: "", message: "" });
+    setValues({ name: "", email: "", phone: "", message: "" });
   };
 
   const described = (key: keyof Fields) => (errors[key] ? `c-${key}-error` : undefined);
@@ -123,122 +120,85 @@ export const ContactPanel: React.FC = () => {
       <div className={styles.contactGlow} aria-hidden="true" />
 
       <div className={styles.contentWrapper}>
-        {/* ------------------------------------------------- Top Introduction */}
-        <div className="max-w-3xl">
-          <div className={styles.eyebrowBadge}>
-            <span className={styles.eyebrowDot} />
-            GET IN TOUCH
-          </div>
-
-          <h1 className={styles.mainHeading}>
-            LET&apos;S START A<br />CONVERSATION.
-          </h1>
-
-          <p className={styles.supportingCopy}>
-            Have a mining project, brand or story ready to move further? Let&apos;s talk.
-          </p>
-        </div>
-
-        {/* ------------------------------------------------- Two-Column Editorial Grid */}
         <div className={styles.mainGrid}>
-          {/* ----------------------------------------------- LEFT: Mining Visual & Information */}
-          <div className={styles.infoCard}>
-            <div className={styles.visualContainer}>
-              <Image
-                src="/about/open-pit-golden-hour.webp"
-                alt="Mining Discovery Global Exploration and Operations"
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 40vw"
-                className="object-cover transition-transform duration-700 hover:scale-105"
-              />
-              <div className={styles.visualOverlay} />
-              <div className={styles.visualBadge}>
-                <Compass className="h-3 w-3 text-[#C49A3A]" />
-                GLOBAL REACH · MINING OPERATIONS
+          {/* ----------------------------------------------- LEFT COLUMN: Heading & Contact Info */}
+          <div className={styles.leftCol}>
+            <div className={styles.leftHeaderGroup}>
+              <div className={styles.eyebrowRow}>
+                <span className={styles.eyebrowRule} aria-hidden="true" />
+                <span className={styles.eyebrowText}>
+                  <span className={styles.eyebrowPip}>✦</span> GET IN TOUCH <span className={styles.eyebrowPip}>✦</span>
+                </span>
+                <span className={styles.eyebrowRule} aria-hidden="true" />
+              </div>
+
+              <h1 className={styles.mainHeading}>
+                <span className={styles.titleLine}>LET&apos;S START A</span>
+                <span className={styles.titleLine}>
+                  <em className={styles.shimmerText}>CONVERSATION.</em>
+                </span>
+              </h1>
+
+              <p className={styles.supportingCopy}>
+                Have a mining project, brand or story ready to move further? Feel free to reach out to our team for questions, projects and opportunities across the global mining industry.
+              </p>
+            </div>
+
+            {/* Contact details with icon badges matching reference layout */}
+            <div className={styles.contactInfoList}>
+              <a
+                href={`mailto:${CONTACT.email}`}
+                className={styles.contactInfoItem}
+              >
+                <div className={styles.contactIconBadge} aria-hidden="true">
+                  <Mail className="h-4 w-4 text-[#C49A3A]" />
+                </div>
+                <span className={styles.contactInfoText}>{CONTACT.email}</span>
+              </a>
+
+              <div className={styles.contactInfoItem}>
+                <div className={styles.contactIconBadge} aria-hidden="true">
+                  <MapPin className="h-4 w-4 text-[#C49A3A]" />
+                </div>
+                <span className={styles.contactInfoText}>{CONTACT.address}</span>
+              </div>
+
+              <div className={styles.contactInfoItem}>
+                <div className={styles.contactIconBadge} aria-hidden="true">
+                  <Globe className="h-4 w-4 text-[#C49A3A]" />
+                </div>
+                <span className={styles.contactInfoText}>{CONTACT.basedIn}</span>
               </div>
             </div>
 
-            <div className={styles.infoBody}>
-              <div>
-                <h2 className={styles.infoHeading}>LET&apos;S TALK MINING.</h2>
-                <p className={styles.infoDesc}>
-                  Whether you&apos;re looking to amplify a project, strengthen your digital
-                  presence, reach investors or put your company in front of the mining industry
-                  — let&apos;s start the conversation.
-                </p>
-              </div>
-
-              <dl className={styles.infoList}>
-                <div className={styles.infoItem}>
-                  <dt className={styles.infoLabel}>EMAIL</dt>
-                  <dd className="mt-0.5">
-                    <a
-                      href={`mailto:${CONTACT.email}`}
-                      className={`${styles.infoValue} ${styles.infoLink}`}
-                    >
-                      {CONTACT.email}
-                    </a>
-                  </dd>
-                </div>
-
-                <div className={styles.infoItem}>
-                  <dt className={styles.infoLabel}>BASED IN</dt>
-                  <dd className={`${styles.infoValue} mt-0.5`}>
-                    {CONTACT.basedIn}
-                  </dd>
-                </div>
-
-                <div className={styles.infoItem}>
-                  <dt className={styles.infoLabel}>REGISTERED OFFICE</dt>
-                  <dd className="mt-0.5">
-                    <address className="font-sans text-[14px] not-italic leading-[1.6] text-[#F5F1E8]">
-                      {CONTACT.address.map((line) => (
-                        <span key={line} className="block">
-                          {line}
-                        </span>
-                      ))}
-                    </address>
-                  </dd>
-                </div>
-
-                <div className={styles.infoItem}>
-                  <dt className={styles.infoLabel}>FOCUS</dt>
-                  <dd className={`${styles.infoValue} mt-0.5`}>
-                    {CONTACT.focus}
-                  </dd>
-                </div>
-              </dl>
-
-              {/* Social Links */}
-              <div className={styles.socialRow}>
-                {SOCIALS.map((social) => (
-                  <a
-                    key={social.name}
-                    href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={social.name}
-                    className={styles.socialBtn}
+            {/* Social Links */}
+            <div className={styles.socialRow}>
+              {SOCIALS.map((social) => (
+                <a
+                  key={social.name}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={social.name}
+                  className={styles.socialBtn}
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                    className="h-4 w-4 fill-current"
                   >
-                    <svg
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                      className="h-4 w-4 fill-current"
-                    >
-                      <path d={social.path} />
-                    </svg>
-                  </a>
-                ))}
-              </div>
+                    <path d={social.path} />
+                  </svg>
+                </a>
+              ))}
             </div>
           </div>
 
-          {/* ----------------------------------------------- RIGHT: Contact Form */}
+          {/* ----------------------------------------------- RIGHT COLUMN: The Form Card */}
           <div className={styles.formCard}>
             <form ref={formRef} onSubmit={onSubmit} noValidate>
-              {/* Row 1: Full Name & Email */}
-              <div className={styles.formRow2}>
+              <div className={styles.formFieldsStack}>
+                {/* Field 1: Full Name */}
                 <div className={styles.fieldGroup}>
                   <label htmlFor="c-name" className={styles.fieldLabel}>
                     Full Name <span className="text-[#C49A3A]">*</span>
@@ -248,7 +208,7 @@ export const ContactPanel: React.FC = () => {
                     name="name"
                     type="text"
                     autoComplete="name"
-                    placeholder="Enter your full name"
+                    placeholder="Enter Your Full Name"
                     value={values.name}
                     onChange={set("name")}
                     aria-invalid={Boolean(errors.name)}
@@ -262,6 +222,7 @@ export const ContactPanel: React.FC = () => {
                   )}
                 </div>
 
+                {/* Field 2: Email Address */}
                 <div className={styles.fieldGroup}>
                   <label htmlFor="c-email" className={styles.fieldLabel}>
                     Email Address <span className="text-[#C49A3A]">*</span>
@@ -271,7 +232,7 @@ export const ContactPanel: React.FC = () => {
                     name="email"
                     type="email"
                     autoComplete="email"
-                    placeholder="Enter your email"
+                    placeholder="Enter Your Email Address"
                     value={values.email}
                     onChange={set("email")}
                     aria-invalid={Boolean(errors.email)}
@@ -284,69 +245,57 @@ export const ContactPanel: React.FC = () => {
                     </p>
                   )}
                 </div>
-              </div>
 
-              {/* Row 2: Company & Subject */}
-              <div className={`${styles.formRow2} mt-8 sm:mt-10`}>
+                {/* Field 3: Phone Number */}
                 <div className={styles.fieldGroup}>
-                  <label htmlFor="c-company" className={styles.fieldLabel}>
-                    Company / Organization
+                  <label htmlFor="c-phone" className={styles.fieldLabel}>
+                    Phone Number
                   </label>
                   <input
-                    id="c-company"
-                    name="company"
-                    type="text"
-                    autoComplete="organization"
-                    placeholder="Mining company or project name"
-                    value={values.company}
-                    onChange={set("company")}
+                    id="c-phone"
+                    name="phone"
+                    type="tel"
+                    autoComplete="tel"
+                    placeholder="Enter Your Phone Number"
+                    value={values.phone}
+                    onChange={set("phone")}
                     className={styles.fieldInput}
                   />
                 </div>
 
+                {/* Field 4: Message */}
                 <div className={styles.fieldGroup}>
-                  <label htmlFor="c-subject" className={styles.fieldLabel}>
-                    Subject
+                  <label htmlFor="c-message" className={styles.fieldLabel}>
+                    Message <span className="text-[#C49A3A]">*</span>
                   </label>
-                  <input
-                    id="c-subject"
-                    name="subject"
-                    type="text"
-                    placeholder="Area of interest / enquiry"
-                    value={values.subject}
-                    onChange={set("subject")}
-                    className={styles.fieldInput}
+                  <textarea
+                    id="c-message"
+                    name="message"
+                    rows={5}
+                    placeholder="Write Your Message Here"
+                    value={values.message}
+                    onChange={set("message")}
+                    aria-invalid={Boolean(errors.message)}
+                    aria-describedby={described("message")}
+                    className={`${styles.fieldInput} resize-none ${
+                      errors.message ? styles.fieldInputBad : ""
+                    }`}
                   />
+                  {errors.message && (
+                    <p id="c-message-error" className={styles.fieldError}>
+                      {errors.message}
+                    </p>
+                  )}
                 </div>
-              </div>
-
-              {/* Row 3: Message */}
-              <div className={`${styles.fieldGroup} mt-8 sm:mt-10`}>
-                <label htmlFor="c-message" className={styles.fieldLabel}>
-                  Message <span className="text-[#C49A3A]">*</span>
-                </label>
-                <textarea
-                  id="c-message"
-                  name="message"
-                  rows={4}
-                  placeholder="Tell us about your project, objectives, or timeline..."
-                  value={values.message}
-                  onChange={set("message")}
-                  aria-invalid={Boolean(errors.message)}
-                  aria-describedby={described("message")}
-                  className={`${styles.fieldInput} resize-none ${
-                    errors.message ? styles.fieldInputBad : ""
-                  }`}
-                />
-                {errors.message && (
-                  <p id="c-message-error" className={styles.fieldError}>
-                    {errors.message}
-                  </p>
-                )}
               </div>
 
               {/* Submit Action Bar */}
               <div className={styles.submitBar}>
+                <button type="submit" className={styles.submitBtn}>
+                  <span>Send Message</span>
+                  <ArrowRight className={styles.submitArrow} />
+                </button>
+
                 <p
                   aria-live="polite"
                   className={`${styles.sentMessage} ${
@@ -355,11 +304,6 @@ export const ContactPanel: React.FC = () => {
                 >
                   {sent ? SENT_COPY : " "}
                 </p>
-
-                <button type="submit" className={styles.submitBtn}>
-                  Send Message
-                  <ArrowRight className={styles.submitArrow} />
-                </button>
               </div>
             </form>
           </div>

@@ -9,6 +9,7 @@ import {
   revealBlocks,
   useAboutMotion,
 } from "./reveal";
+import { AboutEyebrow } from "./AboutEyebrow";
 
 /*
  * Section 05 — Our Purpose.
@@ -44,13 +45,13 @@ const PURPOSES: Purpose[] = [
     title: "Insight into Action",
     description:
       "Interpreting mining news and information so that leaders and investors can make informed decisions.",
-    tags: [],
+    tags: ["Market Intelligence", "Strategic Analysis", "Executive Advisory", "Decision Support"],
   },
   {
     title: "Foster Transparency",
     description:
       "A clear view of company operations, risks, and community impact.",
-    tags: [],
+    tags: ["Company Operations", "Risk Governance", "Public Disclosure", "Community Impact"],
   },
   {
     title: "Build Bridges",
@@ -107,16 +108,10 @@ export const AboutPurpose: React.FC = () => {
           */}
           <div className="lg:col-span-5">
             <div className="lg:sticky lg:top-32" ref={headerRef}>
-              <div data-about-rule-x className={`h-0.5 w-12 bg-[#B8860B] ${HIDDEN_RULE_X}`} />
-              <span
-                data-about-reveal
-                className={`mt-6 block text-xs font-semibold uppercase tracking-[0.15em] text-[#B8860B] ${HIDDEN_RISE}`}
-              >
-                Our Purpose
-              </span>
+              <AboutEyebrow text="Our Purpose" />
 
-              <h2 className="mt-6 max-w-[16ch] font-serif text-[clamp(2rem,4.2vw,3.25rem)] font-normal leading-[1.1] tracking-[-0.02em] text-[#0B1F3A]">
-                <MaskedWords text="What the platform is for." />
+              <h2 className="mt-6 max-w-[16ch] font-space-grotesk text-[clamp(2.25rem,4.2vw,3.25rem)] font-bold uppercase leading-[1.1] tracking-[-0.025em] text-[#0B1F3A]">
+                <MaskedWords text="What the platform is for." goldWords={["the", "platform"]} />
               </h2>
 
               {/*
@@ -165,7 +160,7 @@ export const AboutPurpose: React.FC = () => {
           </div>
 
           {/* --- Panels ---------------------------------------------------------- */}
-          <div className="mt-14 lg:col-span-7 lg:mt-0">
+          <div className="mt-14 lg:col-span-7 lg:mt-0 lg:border-l lg:border-[#E5E4DE] lg:pl-12">
             {PURPOSES.map((purpose, index) => {
               const isActive = active === null || active === index;
 
@@ -194,7 +189,7 @@ export const AboutPurpose: React.FC = () => {
                       {String(index + 1).padStart(2, "0")}
                     </span>
 
-                    <h3 className="mt-5 font-serif text-[clamp(1.75rem,3.4vw,2.75rem)] font-normal leading-[1.12] tracking-[-0.018em] text-[#0B1F3A]">
+                    <h3 className="mt-5 font-space-grotesk text-[clamp(1.75rem,3.4vw,2.75rem)] font-bold uppercase leading-[1.12] tracking-[-0.02em] text-[#0B1F3A]">
                       <MaskedWords text={purpose.title} />
                     </h3>
 

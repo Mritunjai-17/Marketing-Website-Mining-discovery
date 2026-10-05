@@ -13,6 +13,7 @@ import {
   useAboutMotion,
   WORD_SELECTOR,
 } from "./reveal";
+import { AboutEyebrow } from "./AboutEyebrow";
 
 /*
  * Section 01 — the hero.
@@ -79,37 +80,33 @@ export const AboutHero: React.FC = () => {
   return (
     <section
       ref={sectionRef}
-      className="relative border-b border-[#E5E4DE]"
+      className="relative overflow-hidden border-b border-[#E5E4DE]"
     >
       {/* Same 16px dot grain the Stats section carries, at the same 2% opacity. */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(#000_1px,transparent_1px)] opacity-[0.02] [background-size:16px_16px]" />
 
       <div
         ref={contentRef}
-        className="container-editorial relative pt-32 pb-20 md:pt-40 md:pb-28"
+        className="container-editorial relative flex flex-col items-center text-center pt-32 pb-24 md:pt-44 md:pb-32"
       >
+        {/* Soft atmospheric golden ambient glow */}
         <div
-          data-about-rule-x
-          className={`h-0.5 w-12 bg-[#B8860B] ${HIDDEN_RULE_X}`}
+          aria-hidden="true"
+          className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[340px] w-[620px] max-w-full rounded-full bg-gradient-to-tr from-[#D4AF37]/12 via-[#B8860B]/05 to-transparent blur-[90px]"
         />
 
-        <span
-          data-about-reveal
-          className={`mt-6 block text-xs font-semibold uppercase tracking-[0.15em] text-[#B8860B] ${HIDDEN_RISE}`}
-        >
-          About Us
-        </span>
+        <AboutEyebrow text="About Us" className="justify-center" />
 
         <h1
           ref={headingRef}
-          className="mt-6 max-w-[16ch] font-geist text-[clamp(2.25rem,5vw,4rem)] font-semibold leading-[1.05] tracking-[-0.035em] text-[#0B1F3A]"
+          className="mt-6 max-w-4xl font-space-grotesk text-[clamp(2.5rem,5.6vw,4.5rem)] font-bold uppercase leading-[1.05] tracking-[-0.03em] text-[#0B1F3A]"
         >
-          <MaskedWords text={HEADING} />
+          <MaskedWords text={HEADING} goldWords={["Discovery"]} />
         </h1>
 
         <p
           ref={quoteRef}
-          className="mt-8 max-w-3xl font-serif text-2xl font-normal leading-[1.2] tracking-[-0.015em] text-[#0B1F3A] sm:text-3xl lg:text-[clamp(1.9rem,3.5vw,2.5rem)]"
+          className="mt-8 max-w-3xl font-space-grotesk text-xl font-medium leading-[1.3] tracking-[-0.015em] text-[#3A3D42] sm:text-2xl lg:text-[clamp(1.5rem,2.6vw,2.15rem)]"
         >
           <MaskedWords text={QUOTE} />
         </p>

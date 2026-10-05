@@ -120,8 +120,8 @@
 }
 
 .shimmerText {
-  font-style: italic;
-  font-weight: 600;
+  font-style: normal;
+  font-weight: 700;
   background: linear-gradient(
     135deg,
     #FCE8A6 0%,
@@ -167,7 +167,7 @@
 .cardsStack {
   display: flex;
   flex-direction: column;
-  gap: clamp(3rem, 6vh, 5.5rem);
+  gap: clamp(5rem, 9.5vh, 8.5rem);
   width: 100%;
 }
 
@@ -175,7 +175,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: clamp(2rem, 4.5vw, 4.75rem);
+  gap: clamp(2.5rem, 5vw, 5.5rem);
   width: 100%;
   opacity: 0.4;
   transition: opacity 0.35s ease-out;
@@ -220,12 +220,12 @@
 .imageCard {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 10;
-  border-radius: clamp(16px, 2vw, 24px);
+  aspect-ratio: 16 / 11;
+  border-radius: clamp(18px, 2.2vw, 26px);
   overflow: hidden;
   background: #0f172a;
   border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(138, 104, 32, 0.08);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(138, 104, 32, 0.1);
   transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.35s ease, box-shadow 0.35s ease;
   transform: translateZ(0);
   backface-visibility: hidden;
@@ -271,13 +271,13 @@
 
 .cardBadge {
   position: absolute;
-  top: clamp(0.75rem, 1.5vw, 1rem);
-  left: clamp(0.75rem, 1.5vw, 1rem);
+  top: clamp(0.85rem, 1.5vw, 1.15rem);
+  left: clamp(0.85rem, 1.5vw, 1.15rem);
   background: rgba(3, 8, 18, 0.85);
   border: 1px solid rgba(197, 160, 89, 0.4);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  padding: 0.35rem clamp(0.65rem, 1vw, 0.85rem);
+  padding: 0.38rem clamp(0.72rem, 1.1vw, 0.92rem);
   border-radius: 9999px;
   font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
   font-size: clamp(0.6rem, 0.7vw, 0.68rem);
@@ -293,7 +293,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: clamp(0.65rem, 1.2vh, 0.95rem);
+  gap: clamp(0.95rem, 1.6vh, 1.35rem);
   max-width: 580px;
   transform: translateY(40px) translateZ(0);
   opacity: 0;
@@ -314,10 +314,11 @@
   color: #725316;
   text-transform: uppercase;
   background: rgba(139, 104, 32, 0.12);
-  padding: 0.28rem clamp(0.65rem, 1vw, 0.85rem);
+  padding: 0.32rem clamp(0.72rem, 1.1vw, 0.92rem);
   border-radius: 6px;
   border: 1px solid rgba(139, 104, 32, 0.28);
   width: fit-content;
+  margin-bottom: 0.15rem;
   opacity: 0;
   transform: translateY(-10px);
   transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.18s, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.18s;
@@ -341,9 +342,9 @@
 .itemTitle {
   font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
   font-size: clamp(1.5rem, 2.25vw, 2.35rem);
-  font-weight: 600;
+  font-weight: 700;
   color: #0F172A;
-  line-height: 1.18;
+  line-height: 1.22;
   letter-spacing: -0.015em;
   margin: 0;
   transform: translateY(105%);
@@ -360,9 +361,9 @@
 .itemDescription {
   font-family: var(--font-inter), "Inter", sans-serif;
   font-size: clamp(0.88rem, 1vw, 1.02rem);
-  line-height: 1.6;
+  line-height: 1.68;
   color: #334155;
-  margin: 0;
+  margin: 0.15rem 0 0 0;
   opacity: 0;
   transform: translateY(12px);
   transition: opacity 0.5s ease-out 0.30s, transform 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.30s;
@@ -377,20 +378,20 @@
 .bulletList {
   list-style: none;
   padding: 0;
-  margin: clamp(0.35rem, 0.8vh, 0.6rem) 0 0;
+  margin: clamp(0.6rem, 1.2vh, 0.95rem) 0 0;
   display: flex;
   flex-direction: column;
-  gap: clamp(0.55rem, 1vh, 0.75rem);
+  gap: clamp(0.65rem, 1.2vh, 0.85rem);
   width: 100%;
 }
 
 .bulletItem {
   display: flex;
   align-items: flex-start;
-  gap: 0.75rem;
+  gap: 0.85rem;
   font-family: var(--font-inter), "Inter", sans-serif;
   font-size: clamp(0.82rem, 0.92vw, 0.92rem);
-  line-height: 1.5;
+  line-height: 1.55;
   color: #1E293B;
   opacity: 0;
   transform: translateX(-12px) scale(0.97);
@@ -407,7 +408,7 @@
 .bulletIcon {
   flex-shrink: 0;
   color: #B8860B;
-  margin-top: 0.15rem;
+  margin-top: 0.18rem;
   filter: drop-shadow(0 1px 2px rgba(184, 134, 11, 0.22));
 }
 
@@ -424,9 +425,9 @@
   border: 1px solid rgba(139, 104, 32, 0.25);
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
   border-radius: clamp(14px, 1.8vw, 18px);
-  padding: clamp(0.9rem, 1.5vw, 1.25rem) clamp(0.85rem, 2vw, 2.5rem);
+  padding: clamp(1.1rem, 1.8vw, 1.45rem) clamp(0.85rem, 2vw, 2.5rem);
   box-sizing: border-box;
-  margin-top: clamp(0.5rem, 1.2vh, 1rem);
+  margin-top: clamp(2rem, 4vh, 3.5rem);
 }
 
 .metricItem {
@@ -440,7 +441,7 @@
 .metricValue {
   font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
   font-size: clamp(1.4rem, 2vw, 2.2rem);
-  font-weight: 500;
+  font-weight: 700;
   color: #E5C378;
   line-height: 1;
 }

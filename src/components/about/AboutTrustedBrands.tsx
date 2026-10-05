@@ -11,6 +11,7 @@ import {
   revealBlocks,
   useAboutMotion,
 } from "./reveal";
+import { AboutEyebrow } from "./AboutEyebrow";
 
 /*
  * Section 09 — Trusted Brands.
@@ -139,16 +140,10 @@ export const AboutTrustedBrands: React.FC = () => {
   return (
     <section ref={sectionRef} className="overflow-hidden border-b border-[#E5E4DE] bg-white">
       <div className="container-editorial pt-20 md:pt-28">
-        <div ref={headerRef}>
-          <div data-about-rule-x className={`h-0.5 w-12 bg-[#B8860B] ${HIDDEN_RULE_X}`} />
-          <span
-            data-about-reveal
-            className={`mt-6 block text-xs font-semibold uppercase tracking-[0.15em] text-[#B8860B] ${HIDDEN_RISE}`}
-          >
-            Trusted Brands
-          </span>
-          <h2 className="mt-6 max-w-[20ch] font-serif text-[clamp(2rem,4.2vw,3.25rem)] font-normal leading-[1.1] tracking-[-0.02em] text-[#0B1F3A]">
-            <MaskedWords text="The companies we work with." />
+        <div ref={headerRef} className="flex flex-col items-center text-center max-w-3xl mx-auto">
+          <AboutEyebrow text="Trusted Brands" className="justify-center" />
+          <h2 className="mt-6 font-space-grotesk text-[clamp(2.25rem,4.5vw,3.5rem)] font-bold uppercase leading-[1.1] tracking-[-0.025em] text-[#0B1F3A]">
+            <MaskedWords text="The companies we work with." goldWords={["work", "with"]} />
           </h2>
         </div>
       </div>

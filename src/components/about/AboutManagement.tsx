@@ -8,6 +8,7 @@ import {
   revealBlocks,
   useAboutMotion,
 } from "./reveal";
+import { AboutEyebrow } from "./AboutEyebrow";
 
 /*
  * Section 03 — Management.
@@ -82,16 +83,10 @@ export const AboutManagement: React.FC = () => {
   return (
     <section ref={sectionRef} className="border-b border-[#E5E4DE]">
       <div className="container-editorial py-20 md:py-28">
-        <div ref={headerRef}>
-          <div data-about-rule-x className={`h-0.5 w-12 bg-[#B8860B] ${HIDDEN_RULE_X}`} />
-          <span
-            data-about-reveal
-            className={`mt-6 block text-xs font-semibold uppercase tracking-[0.15em] text-[#B8860B] ${HIDDEN_RISE}`}
-          >
-            Management
-          </span>
-          <h2 className="mt-6 max-w-[22ch] font-serif text-[clamp(2rem,4.2vw,3.25rem)] font-normal leading-[1.1] tracking-[-0.02em] text-[#0B1F3A]">
-            <MaskedWords text="The people behind the platform." />
+        <div ref={headerRef} className="flex flex-col items-center text-center max-w-3xl mx-auto">
+          <AboutEyebrow text="Management" className="justify-center" />
+          <h2 className="mt-6 font-space-grotesk text-[clamp(2.25rem,4.5vw,3.5rem)] font-bold uppercase leading-[1.1] tracking-[-0.025em] text-[#0B1F3A]">
+            <MaskedWords text="The people behind the platform." goldWords={["behind", "the", "platform"]} />
           </h2>
         </div>
 
@@ -118,7 +113,7 @@ export const AboutManagement: React.FC = () => {
                     <div
                       aria-hidden="true"
                       data-about-reveal
-                      className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-full border border-[#B8860B]/35 bg-[#FAF5E8] font-serif text-xl font-normal tracking-[0.02em] text-[#0B1F3A] transition-colors duration-300 group-hover/person:border-[#B8860B]/70 ${HIDDEN_RISE}`}
+                      className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-full border border-[#B8860B]/35 bg-[#FAF5E8] font-space-grotesk text-xl font-bold tracking-[0.02em] text-[#0B1F3A] transition-colors duration-300 group-hover/person:border-[#B8860B]/70 ${HIDDEN_RISE}`}
                     >
                       {person.initials}
                     </div>
@@ -131,7 +126,7 @@ export const AboutManagement: React.FC = () => {
                     </span>
                   </div>
 
-                  <h3 className="mt-7 font-serif text-[clamp(2rem,4vw,3rem)] font-normal leading-[1.08] tracking-[-0.02em] text-[#0B1F3A] transition-colors duration-300 group-hover/person:text-[#B8860B]">
+                  <h3 className="mt-7 font-space-grotesk text-[clamp(2rem,4vw,3rem)] font-bold uppercase leading-[1.08] tracking-[-0.02em] text-[#0B1F3A] transition-colors duration-300 group-hover/person:text-[#B8860B]">
                     <MaskedWords text={person.name} />
                   </h3>
 

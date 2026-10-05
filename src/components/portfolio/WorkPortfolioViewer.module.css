@@ -1,0 +1,103 @@
+/*
+ * WorkPortfolioViewer.module.css
+ * Styling matching the signature ClientInvestorGrowth luxury stone header aesthetic.
+ */
+
+.eyebrowRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.6rem, 1.6vw, 1.25rem);
+  margin-bottom: clamp(0.65rem, 1.4vh, 1.15rem);
+  width: 100%;
+}
+
+.eyebrowRule {
+  width: clamp(24px, 3.5vw, 50px);
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent, rgba(138, 104, 32, 0.75));
+}
+
+.eyebrowRuleRight {
+  width: clamp(24px, 3.5vw, 50px);
+  height: 1.5px;
+  background: linear-gradient(90deg, rgba(138, 104, 32, 0.75), transparent);
+}
+
+.eyebrowPip {
+  display: inline-block;
+  color: #D4AF37;
+  font-size: 0.85em;
+  margin: 0 0.35em;
+  text-shadow: 0 0 8px rgba(212, 175, 55, 0.6);
+  vertical-align: middle;
+}
+
+.eyebrowText {
+  font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
+  font-size: clamp(0.64rem, 0.78vw, 0.76rem);
+  font-weight: 700;
+  letter-spacing: clamp(0.14em, 0.22em, 0.24em);
+  color: #7A5E22;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+}
+
+.mainTitle {
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
+  font-size: clamp(1.85rem, 3.6vw, 3.6rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.12;
+  color: #0F172A;
+  margin: 0 auto clamp(0.75rem, 1.6vh, 1.25rem);
+  text-transform: uppercase;
+  max-width: 920px;
+}
+
+.titleLine {
+  display: block;
+}
+
+.shimmerText {
+  font-style: normal;
+  font-weight: 700;
+  background: linear-gradient(
+    135deg,
+    #FCE8A6 0%,
+    #D4AF37 25%,
+    #FFF2B2 45%,
+    #AA771C 70%,
+    #D4AF37 88%,
+    #FCE8A6 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: metallicGoldFlow 6s ease-in-out infinite;
+  display: inline-block;
+}
+
+@keyframes metallicGoldFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.subtitle {
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: clamp(0.92rem, 1.15vw, 1.12rem);
+  font-weight: 400;
+  line-height: 1.68;
+  color: #334155;
+  margin: 0 auto;
+  max-width: 740px;
+  padding: 0 1rem;
+}
