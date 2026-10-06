@@ -13,13 +13,17 @@ export interface ClientInvestorGrowthProps {
   opacity?: number;
 }
 
+interface GrowthBulletObj {
+  title: string;
+}
+
 interface GrowthPillar {
   id: string;
   badge: string;
   targetAudience: string;
   title: string;
   description: string;
-  bullets: string[];
+  bullets: Array<string | GrowthBulletObj>;
   image: string;
   alt: string;
   align: "left-card" | "right-card";
@@ -30,29 +34,29 @@ const GROWTH_PILLARS: GrowthPillar[] = [
     id: "campaigns",
     badge: "FOR MINING COMPANIES",
     targetAudience: "FOR EXPLORATION & JUNIOR RESOURCE MINERS",
-    title: "Turn Your Drill Results Into Market Liquidity & Higher Share Value",
+    title: "Turn Your Mining Milestones Into Market Visibility",
     description:
-      "Finding copper, gold, or critical minerals is only half the battle. If trading volume goes quiet between drill seasons, your share price suffers. We broadcast your assays and exploration milestones to thousands of active institutional funds and retail buyers across TSX, ASX, and OTC markets.",
+      "Great exploration results and project updates deserve more than a single announcement. Mining Discovery helps mining companies turn discoveries, milestones and company news into clear, engaging stories that reach investors and the wider mining community.",
     bullets: [
-      "Global exposure through digital magazines, weekly dispatches, and CEO spotlights",
-      "Sustained trading volume and market liquidity between assay announcements",
-      "Direct connection with qualified funds and family offices looking to finance drill programs",
+      "Put your company in front of the right audience",
+      "Give your project a stronger voice",
+      "Build visibility beyond the announcement",
     ],
     image: "/services/02-drill.webp",
-    alt: "Geological drill rig and high-grade mineral core samples in the field",
+    alt: "Mining company visual marketing presentation and executive media suite",
     align: "left-card",
   },
   {
     id: "syndication",
     badge: "FOR RESOURCE INVESTORS",
     targetAudience: "FOR FUNDS, FAMILY OFFICES & PRIVATE INVESTORS",
-    title: "Find Early-Stage Discoveries Before the Broader Market Catches On",
+    title: "Stay Close to the Mining Stories That Matter",
     description:
-      "Mineral exploration offers explosive upside, but sorting high-grade discoveries from empty market hype is tough. We provide verified geological teardowns, simplify technical assay data, and introduce you directly to leadership teams before major price runs.",
+      "Finding the right opportunities starts with knowing what is happening across the resource sector. Mining Discovery brings together company news, exploration updates, project developments and industry stories to help investors stay informed about the mining market.",
     bullets: [
-      "Vetted discovery reports on real drill intercepts and safe jurisdictions",
-      "Direct access and interviews with C-suite executives and chief geologists",
-      "First-mover intelligence delivered weekly so you can position ahead of the crowd",
+      "Follow emerging mining companies and projects",
+      "Hear directly from industry leaders",
+      "Keep up with a fast-moving industry",
     ],
     image: "/services/03-assay.webp",
     alt: "Institutional mining analysts and investors evaluating exploration data",
@@ -62,13 +66,13 @@ const GROWTH_PILLARS: GrowthPillar[] = [
     id: "liquidity",
     badge: "FOR TRADERS & READERS",
     targetAudience: "FOR DAILY READERS, COMMODITY TRADERS & MARKET ENTHUSIASTS",
-    title: "Clear, Unbiased Mining News and Research You Can Actually Use",
+    title: "Mining News Without the Noise",
     description:
-      "Mining news is often packed with dense geological jargon. Mining Discovery breaks down complex drill cores, commodity cycles, and market swings into easy-to-read, actionable intelligence so you can trade and follow the sector with clarity.",
+      "The mining industry moves quickly. We make it easier to follow by bringing together company news, exploration results, commodity developments and industry insights in one place — without unnecessary jargon.",
     bullets: [
-      "100% free access to digital magazines, weekly newspapers, and technical PDFs",
-      "Plain-English translations of high-grade drill results and resource estimates",
-      "Up-to-date tracking of upcoming drill assays, permit decisions, and buyout rumors",
+      "Follow the stories shaping mining",
+      "Understand the news more easily",
+      "Keep up with the market",
     ],
     image: "/services/01-survey.webp",
     alt: "Market analysis and commodity trading charts for resource equities",
@@ -78,13 +82,13 @@ const GROWTH_PILLARS: GrowthPillar[] = [
     id: "partnerships",
     badge: "FOR TIER-1 STRATEGIC JVS",
     targetAudience: "FOR SENIOR PRODUCERS & CORPORATE DEVELOPMENT",
-    title: "Spot Premier Deposits for Joint Ventures, Farm-Ins & Buyouts",
+    title: "Discover Projects, Companies & Opportunities Across Mining",
     description:
-      "Major producers need to replace depleting reserves with long-life deposits. We highlight top-tier junior discoveries and QP-verified projects with genuine scale, making deal-flow accessible for corporate development and M&A desks.",
+      "Established mining companies are always looking for new projects, emerging assets and potential partners. Mining Discovery keeps corporate and industry leaders connected to developments across the exploration and resource sector.",
     bullets: [
-      "Curated pipeline of high-potential assets ready for partnership or acquisition",
-      "Verified geological continuity backed by independent technical reporting",
-      "High-level networking access at premier mining investment conferences",
+      "Stay informed on emerging projects",
+      "Discover companies beyond your usual network",
+      "Stay connected to the industry",
     ],
     image: "/services/04-pit.webp",
     alt: "Large-scale modern mining processing facility and open pit production infrastructure",
@@ -293,11 +297,9 @@ export const ClientInvestorGrowth = React.memo<ClientInvestorGrowthProps>(functi
                     ref={(el) => {
                       rowRefs.current[idx] = el;
                     }}
-                    className={`${styles.alternatingRow} ${
-                      isLeftCard ? styles.rowLeftCard : styles.rowRightCard
-                    } ${isRevealed ? styles.rowRevealed : ""} ${
-                      isFocal ? styles.rowFocal : ""
-                    }`}
+                    className={`${styles.alternatingRow} ${isLeftCard ? styles.rowLeftCard : styles.rowRightCard
+                      } ${isRevealed ? styles.rowRevealed : ""} ${isFocal ? styles.rowFocal : ""
+                      }`}
                   >
                     {/* Visual Image Card */}
                     <div className={styles.cardVisualWrap}>
@@ -326,16 +328,25 @@ export const ClientInvestorGrowth = React.memo<ClientInvestorGrowthProps>(functi
                       <p className={styles.itemDescription}>{item.description}</p>
 
                       <ul className={styles.bulletList}>
-                        {item.bullets.map((bullet, bIdx) => (
-                          <li
-                            key={bIdx}
-                            className={styles.bulletItem}
-                            style={{ ["--b-idx" as string]: bIdx }}
-                          >
-                            <CheckCircle2 size={18} className={styles.bulletIcon} />
-                            <span>{bullet}</span>
-                          </li>
-                        ))}
+                        {item.bullets.map((bullet, bIdx) => {
+                          const isObj = typeof bullet === "object" && bullet !== null;
+                          return (
+                            <li
+                              key={bIdx}
+                              className={styles.bulletItem}
+                              style={{ ["--b-idx" as string]: bIdx }}
+                            >
+                              <CheckCircle2 size={18} className={styles.bulletIcon} />
+                              {isObj ? (
+                                <div className={styles.bulletContent}>
+                                  <strong className={styles.bulletTitle}>{bullet.title}</strong>
+                                </div>
+                              ) : (
+                                <span>{bullet}</span>
+                              )}
+                            </li>
+                          );
+                        })}
                       </ul>
                     </div>
                   </div>

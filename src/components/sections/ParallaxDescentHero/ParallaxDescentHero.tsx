@@ -618,16 +618,20 @@ const ParallaxDescentHeroComponent = React.forwardRef<
             Mining<br />Discovery
           </h1>
           <p className={styles.lede}>
-            From alpine geological exploration to high-valuation institutional capital.
+            We help mining companies turn discoveries, projects and milestones into stories that get noticed
           </p>
         </div>
 
         {/* Phase 02 Open Pit Haulage Tile */}
         <div ref={w2Ref} className={`${styles.wtext} ${styles.w2}`} style={{ visibility: "hidden", opacity: 0 }}>
           <p className={styles.kicker}>Phase 02: open pit haulage</p>
-          <h2 className={styles.headline2}>The scale of extraction</h2>
+          <h2 className={styles.headline2}>
+            <span>TURN MILESTONES</span>
+            <br />
+            <span>INTO ATTENTION</span>
+          </h2>
           <p className={styles.lede}>
-            Spiral haul roads connecting high-tonnage extraction zones directly to the primary underground portal.
+            From exploration results to corporate updates, we create content and campaigns built for the mining industry.
           </p>
         </div>
 
@@ -689,9 +693,13 @@ const ParallaxDescentHeroComponent = React.forwardRef<
           <div className={styles.copy}>
             <div ref={b3Ref} className={styles.blk}>
               <p className={styles.kicker}>Phase 03: underground stope</p>
-              <h2 className={styles.headline2}>Where value is unearthed</h2>
+              <h2 className={styles.headline2}>
+                <span>REACH THE PEOPLE</span>
+                <br />
+                <span>WHO MATTER</span>
+              </h2>
               <p className={styles.lede}>
-                Continuous miners cutting high-grade ore at depth. Ground truth engineered into unprecedented market valuation.
+                Connect your company with investors, industry professionals and decision-makers through mining media and digital marketing.
               </p>
               <a
                 ref={ctaRef}

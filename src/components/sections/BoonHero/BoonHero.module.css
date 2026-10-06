@@ -205,7 +205,7 @@
   left: clamp(3rem, 9vw, 9rem);
   margin: auto 0;
   height: fit-content;
-  max-width: 580px;
+  max-width: min(880px, 85vw);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -218,14 +218,19 @@
 
 .actHeadline {
   font-family: var(--font-editorial-serif), var(--font-display-custom), "Cormorant Garamond", "Playfair Display", Georgia, serif;
-  font-size: clamp(2.8rem, 5.5vw, 5rem);
+  font-size: clamp(2.4rem, 4.8vw, 4.6rem);
   font-weight: 700;
   letter-spacing: -0.015em;
   text-transform: uppercase;
   color: #FAF8F5;
-  line-height: 1.05;
+  line-height: 1.08;
   margin: 0 0 1.2rem 0;
   text-shadow: 0 4px 30px rgba(0, 0, 0, 0.95);
+}
+
+.actHeadline span {
+  display: block;
+  white-space: nowrap;
 }
 
 .actSubline {
@@ -236,7 +241,7 @@
   line-height: 1.6;
   margin: 0;
   text-shadow: 0 2px 16px rgba(0, 0, 0, 0.95);
-  max-width: 520px;
+  max-width: 580px;
 }
 
 /* ==========================================================================
@@ -250,7 +255,7 @@
   right: clamp(3rem, 9vw, 9rem);
   margin: auto 0;
   height: fit-content;
-  max-width: 580px;
+  max-width: min(840px, 85vw);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -265,31 +270,54 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
-  padding: 0.85rem 2.2rem;
-  margin-top: 1.5rem;
-  background: rgba(212, 175, 55, 0.2);
-  border: 1px solid rgba(255, 215, 0, 0.65);
+  gap: 0.65rem;
+  padding: 0.75rem 2rem;
+  margin-top: 1.6rem;
   border-radius: 9999px;
+  border: 1.5px solid rgba(200, 154, 50, 0.7);
+  background: rgba(200, 154, 50, 0.08);
   color: #FAF8F5;
-  font-family: var(--font-mono, monospace);
-  font-size: 0.82rem;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.86rem;
   font-weight: 700;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  text-decoration: none;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   cursor: pointer;
-  pointer-events: auto;
+  pointer-events: auto !important;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 0 30px rgba(212, 175, 55, 0.25);
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.3);
+  z-index: 20;
 }
 
 .undergroundCtaButton:hover {
-  background: rgba(255, 215, 0, 0.35);
-  border-color: #ffd700;
-  box-shadow: 0 0 45px rgba(255, 215, 0, 0.55);
-  transform: translateY(-2px);
+  background: linear-gradient(135deg, #D6A84F 0%, #F3DC96 50%, #C89A32 100%) !important;
+  color: #0C141E !important;
+  border-color: #D6A84F !important;
+  box-shadow: 0 0 28px rgba(214, 168, 79, 0.55), 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+  transform: scale(1.03);
+}
+
+.undergroundCtaButton:hover span {
+  color: #0C141E !important;
+}
+
+.undergroundCtaButton:active {
+  transform: scale(0.98);
+}
+
+.undergroundCtaButton svg {
+  width: 1rem;
+  height: 1rem;
+  transition: transform 0.3s ease, color 0.3s ease;
+  color: inherit;
+}
+
+.undergroundCtaButton:hover svg {
+  transform: translateX(4px);
+  color: #0C141E !important;
 }
 
 /* ==========================================================================
@@ -463,6 +491,10 @@
     line-height: 1.1;
     margin: 0 0 0.85rem 0;
     text-align: center;
+  }
+
+  .actHeadline span {
+    white-space: normal;
   }
 
   .actSubline {
