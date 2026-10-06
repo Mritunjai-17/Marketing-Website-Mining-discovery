@@ -77,23 +77,32 @@ export const Header: React.FC = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [menuOpen]);
 
-  // Determine theme: About hero is warm ivory (#F7F5EF), while Home/Services/Work/Contact are dark
-  // Determine theme: About hero is warm ivory (#F7F5EF), while Home/Services/Work/Contact are dark
-  const isLightHero = pathname?.startsWith("/about") ?? false;
-  const isDarkNav = !isLightHero;
+  // Determine theme: Home is dark hero; Work, Contact, and About have light stone/ivory backgrounds
+  const isLightPage =
+    pathname?.startsWith("/work") ||
+    pathname?.startsWith("/contact") ||
+    pathname?.startsWith("/about");
+
+  // Nav content always uses dark mode styles so the gold logo & white/gold typography pop
+  const isDarkNav = true;
+
+  // Header background reflects the page:
+  // - On Light pages (/work, /contact, /about): Luxury dark navy glass bar (#09111C) with subtle gold accent border,
+  //   guaranteeing the gold logo, nav links, and CTA have 100% contrast & visibility right from the top.
+  // - On Home page: Seamless transparent dark gradient at top for the 3D globe hero, transitioning to dark glass on scroll.
+  const headerBgClass = isLightPage
+    ? isScrolled
+      ? "bg-[#09111C]/96 backdrop-blur-xl border-b border-[#D6A84F]/30 shadow-[0_12px_32px_-8px_rgba(0,0,0,0.4)]"
+      : "bg-[#09111C]/92 backdrop-blur-xl border-b border-[#D6A84F]/20 shadow-[0_8px_24px_rgba(0,0,0,0.2)]"
+    : isScrolled
+      ? "bg-[#0b131c]/80 backdrop-blur-xl border-b border-white/[0.08] shadow-[0_12px_32px_-8px_rgba(0,0,0,0.5)]"
+      : "bg-gradient-to-b from-[#080d14]/85 via-[#080d14]/30 to-transparent";
 
   return (
     <>
       {/* Outer fixed positioning wrapper - full length across the screen with stylish transparency */}
       <header
-        className={`fixed top-0 left-0 right-0 w-full z-[110] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${isScrolled
-          ? isLightHero
-            ? "bg-[#F7F5EF]/85 backdrop-blur-xl shadow-[0_8px_24px_rgba(0,0,0,0.04)]"
-            : "bg-[#0b131c]/65 backdrop-blur-xl shadow-[0_12px_32px_-8px_rgba(0,0,0,0.5)]"
-          : isLightHero
-            ? "bg-transparent"
-            : "bg-gradient-to-b from-[#080d14]/80 via-[#080d14]/20 to-transparent"
-          }`}
+        className={`fixed top-0 left-0 right-0 w-full z-[110] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${headerBgClass}`}
       >
 
         {/* Full-length container with refined responsive padding */}

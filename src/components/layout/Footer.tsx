@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -47,24 +49,22 @@ const SOCIALS: Array<{ name: string; href: string; path: string }> = [
 ];
 
 /**
- * Link columns. Every href is a placeholder: the site is a single route today, so real
- * paths would 404 and in-page anchors only resolve on the home page. The two that DO
- * have a destination already point at the header's own anchors, so they are correct now
- * and the rest are one edit each when the pages exist.
+ * Link columns pointing directly to on-page showcase sections
+ * (Publications, Services) or dedicated pages.
  */
 const COLUMNS: Array<{ heading: string; links: Array<{ name: string; href: string; external?: boolean }> }> = [
   {
     heading: "Content",
     links: [
       { name: "Services", href: "/#services" },
-      { name: "Newsletters", href: "https://www.miningdiscovery.com/daily-newsletter", external: true },
-      { name: "Magazines", href: "https://www.miningdiscovery.com/magazines", external: true },
-      { name: "Articles", href: "https://www.miningdiscovery.com/all-news", external: true },
+      { name: "Newsletters", href: "/#publications" },
+      { name: "Magazines", href: "/#publications" },
+      { name: "Articles", href: "/#publications" },
     ],
   },
   {
     heading: "Profiles",
-    links: [{ name: "CEO Profiles", href: "https://www.miningdiscovery.com/ceo-profile", external: true }],
+    links: [{ name: "CEO Profiles", href: "/#publications" }],
   },
   {
     heading: "Company",
@@ -73,6 +73,24 @@ const COLUMNS: Array<{ heading: string; links: Array<{ name: string; href: strin
 ];
 
 export const Footer: React.FC = () => {
+  const handleAnchorClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (href.startsWith("/#") || href.startsWith("#")) {
+      const targetId = href.replace(/^\/?#/, "");
+      if (typeof window !== "undefined" && window.location.pathname === "/") {
+        const elem = document.getElementById(targetId);
+        if (elem) {
+          e.preventDefault();
+          const lenis = (window as any).lenis;
+          if (lenis) {
+            lenis.scrollTo(elem, { offset: -40, duration: 1.4 });
+          } else {
+            elem.scrollIntoView({ behavior: "smooth" });
+          }
+        }
+      }
+    }
+  };
+
   return (
     /*
      * Same #0B1F3A as the header, deliberately: the two dark bands are what close the
@@ -139,6 +157,7 @@ export const Footer: React.FC = () => {
                       ) : (
                         <Link
                           href={link.href}
+                          onClick={(e) => handleAnchorClick(e, link.href)}
                           className="text-sm font-normal text-[#F0F4F8]/70 underline-offset-4 transition-colors duration-200 hover:text-[#D4AF37] hover:underline focus:outline-none focus-visible:text-[#D4AF37] focus-visible:underline"
                         >
                           {link.name}

@@ -3553,21 +3553,35 @@
   font-style: normal;
   font-weight: 700;
   letter-spacing: 0.03em;
+  text-shadow: none;
   background: linear-gradient(
     135deg,
-    #FCE8A6 0%,
-    #D4AF37 25%,
-    #FFF2B2 45%,
-    #AA771C 70%,
-    #D4AF37 88%,
-    #FCE8A6 100%
+    #FFF4C6 0%,
+    #F6D068 18%,
+    #FFEA98 38%,
+    #DF9F28 62%,
+    #F8D36A 82%,
+    #FFF8DC 100%
   );
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: metallicGoldFlow 6s ease-in-out infinite;
-  filter: drop-shadow(0 2px 14px rgba(0, 0, 0, 0.85));
+  filter: drop-shadow(0 2px 14px rgba(223, 159, 40, 0.4)) drop-shadow(0 4px 18px rgba(0, 0, 0, 0.95));
 }
+
+@keyframes metallicGoldFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
 
 /* Footer - Clean Typography, No Box */
 .cardFlickFooter {

@@ -18,8 +18,8 @@ export type TransitionState =
   | "JOURNEY_ACTIVE";
 
 /** Viewport heights for the continuous story (Hero -> Client & Investor Bridge -> Our Services 8 Cards) */
-const DESKTOP_SCROLL_VH = 2200;
-const MOBILE_SCROLL_VH = 1600;
+const DESKTOP_SCROLL_VH = 2500;
+const MOBILE_SCROLL_VH = 1800;
 
 /**
  * How the sampled progress follows the true scroll position.
@@ -294,6 +294,13 @@ export const GlobeHero: React.FC = () => {
         className="relative w-full"
         style={{ height: reduceMotion ? "100vh" : `${totalScrollVh}vh` }}
       >
+        {/* Anchor point targeting the Brand & Visual Identity Services stage */}
+        <div
+          id="services"
+          className="absolute left-0 w-full pointer-events-none"
+          style={{ top: "70%" }}
+          aria-hidden="true"
+        />
         <div
           ref={cardRef}
           className="sticky top-0 h-screen supports-[height:100dvh]:h-[100dvh] w-full overflow-hidden bg-[#030509]"

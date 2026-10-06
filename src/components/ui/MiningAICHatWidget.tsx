@@ -385,97 +385,55 @@ export default function MiningAICHatWidget() {
 
   return (
     <>
-      {/* Floating Chat Launcher (Matching picture exactly) */}
+      {/* Floating Luxury Concierge Pill Launcher */}
       {!chatOpen && (
         <div className="chat-launcher-wrapper">
-          {showBubble && (
-            <div
-              className="chat-speech-bubble"
-              onClick={openChat}
-              role="button"
-              tabIndex={0}
-              aria-label="Ask Mining AI"
-            >
-              <span className="chat-bubble-wave">👋</span>
-              <span className="chat-bubble-text-white">Hi!</span>
-              <span className="chat-bubble-text-gold">Ask Mining AI</span>
-            </div>
-          )}
-
           <button
-            className="chat-button-new"
+            className="chat-luxury-pill"
             onClick={openChat}
-            aria-label="Open Mining Discovery AI"
+            aria-label="Ask Mining AI - Executive Intelligence"
           >
-            {/* Pickaxe with Diamond Icon */}
-            <svg
-              width="38"
-              height="38"
-              viewBox="0 0 44 44"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="chat-pickaxe-icon"
-              aria-hidden="true"
-            >
-              <g transform="rotate(40 22 22)">
-                {/* Solid Diamond Gem perched on head */}
-                <polygon
-                  points="16,2 28,2 33,8 22,17 11,8"
-                  fill="#FFC837"
-                  stroke="#FFC837"
-                  strokeWidth="0.5"
-                  strokeLinejoin="round"
-                />
-                <polygon
-                  points="16,2 28,2 22,8"
-                  fill="#FFE57F"
-                  opacity="0.9"
-                />
-
-                {/* Outline Pickaxe Head */}
+            {/* Handcrafted Geometric Emblem Badge with Live Status Dot */}
+            <span className="chat-pill-icon-wrap" aria-hidden="true">
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="chat-pill-sparkle-icon"
+              >
                 <path
-                  d="M 7 18 C 6.5 16 9 14.5 13 15 L 19.5 16 L 19.5 21.5 L 13 21 C 9 20.5 7.5 20 7 18 Z"
-                  fill="#0B1220"
-                  stroke="#FFC837"
-                  strokeWidth="1.8"
+                  d="M12 2L14.8 9.2L22 12L14.8 14.8L12 22L9.2 14.8L2 12L9.2 9.2L12 2Z"
+                  fill="url(#goldSparkGrad)"
+                  stroke="#D4AF37"
+                  strokeWidth="0.8"
                   strokeLinejoin="round"
                 />
-                <path
-                  d="M 24.5 16 L 29.5 16.5 C 33 17.5 34 20.5 33 24.5 L 31 29.5 C 30 30.5 28.5 29.5 29 27.5 L 30.5 23.5 C 31 21 29.5 20 24.5 21 Z"
-                  fill="#0B1220"
-                  stroke="#FFC837"
-                  strokeWidth="1.8"
-                  strokeLinejoin="round"
-                />
+                <circle cx="12" cy="12" r="2.2" fill="#FFEAA7" />
+                <defs>
+                  <linearGradient id="goldSparkGrad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#F5D061" />
+                    <stop offset="0.5" stopColor="#D4AF37" />
+                    <stop offset="1" stopColor="#A0721D" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <span className="chat-pill-live-dot" />
+            </span>
 
-                {/* Shaft / Handle (Outline Capsule) */}
-                <rect
-                  x="19.5"
-                  y="16.5"
-                  width="5"
-                  height="22"
-                  rx="2.5"
-                  fill="#0B1220"
-                  stroke="#FFC837"
-                  strokeWidth="2"
-                />
+            {/* Restrained, Bespoke Typography */}
+            <span className="chat-pill-text-group">
+              <span className="chat-pill-label-main">Ask Mining</span>
+              <span className="chat-pill-label-gold">AI</span>
+            </span>
 
-                {/* Collar band */}
-                <rect
-                  x="18"
-                  y="17.5"
-                  width="8"
-                  height="5"
-                  rx="1.5"
-                  fill="#0B1220"
-                  stroke="#FFC837"
-                  strokeWidth="1.8"
-                />
-              </g>
-            </svg>
-
-            {/* Green Online Status Dot */}
-            <span className="chat-status-dot" aria-hidden="true" />
+            {/* Minimal Gold Hairline Chevron Indicator */}
+            <span className="chat-pill-arrow" aria-hidden="true">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </span>
           </button>
         </div>
       )}

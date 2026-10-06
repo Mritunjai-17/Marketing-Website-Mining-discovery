@@ -45,9 +45,9 @@ export const SmoothScroll: React.FC<SmoothScrollProps> = ({ children }) => {
      * to track the wheel more tightly.
      */
     const lenis = new Lenis({
-      lerp: 0.095,
+      lerp: 0.08,
       smoothWheel: true,
-      wheelMultiplier: 1.0,
+      wheelMultiplier: 0.85,
       // Touch is left on the platform's own momentum. Lenis only synthesises touch
       // scrolling when syncTouch is on, and a synthesised curve competes with iOS's
       // native rubber-banding rather than replacing it — reliably worse than leaving it.

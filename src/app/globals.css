@@ -447,129 +447,119 @@ nextjs-portal,
    CHATBOT WIDGET STYLES (EXACT MATCH TO MINING_ASSISTENT DESIGN)
 ============================================================ */
 
+/* ==========================================================================
+   FLOATING LUXURY CONCIERGE LAUNCHER PILL (Handcrafted Studio Design)
+   ========================================================================== */
 .chat-launcher-wrapper {
   position: fixed;
   right: 28px;
   bottom: 28px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
   z-index: 1000;
   pointer-events: none;
 }
 
-.chat-speech-bubble {
-  position: relative;
-  background: #0B1220;
-  border: 1.5px solid #FFC837;
-  border-radius: 16px;
-  padding: 8px 15px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  user-select: none;
-  cursor: pointer;
-  margin-bottom: 10px;
-  margin-right: 0px;
+.chat-luxury-pill {
   pointer-events: auto;
-  transition: box-shadow 0.2s ease;
-  animation: chatbot-bubble-float 3s ease-in-out infinite;
-}
-
-.chat-speech-bubble:hover {
-  animation-play-state: paused;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
-}
-
-/* Speech bubble caret */
-.chat-speech-bubble::after {
-  content: '';
-  position: absolute;
-  bottom: -9px;
-  right: 22px;
-  width: 0;
-  height: 0;
-  border-left: 7px solid transparent;
-  border-right: 7px solid transparent;
-  border-top: 9px solid #FFC837;
-}
-
-.chat-speech-bubble::before {
-  content: '';
-  position: absolute;
-  bottom: -7px;
-  right: 23px;
-  width: 0;
-  height: 0;
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
-  border-top: 8px solid #0B1220;
-  z-index: 2;
-}
-
-.chat-bubble-wave {
-  font-size: 16px;
-  line-height: 1;
+  position: relative;
   display: inline-flex;
   align-items: center;
-  transform-origin: 70% 70%;
-  animation: wave-hand 2.2s infinite;
+  gap: 10px;
+  padding: 8px 16px 8px 10px;
+  background: rgba(8, 14, 23, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(214, 168, 79, 0.38);
+  border-radius: 9999px;
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.14),
+    0 8px 24px -4px rgba(0, 0, 0, 0.55),
+    0 2px 8px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
+  font-family: inherit;
 }
 
-.chat-bubble-text-white {
-  color: #FFFFFF;
-  font-weight: 700;
-  font-size: 14.5px;
-  line-height: 1;
-  letter-spacing: -0.01em;
+.chat-luxury-pill:hover {
+  transform: translateY(-2px);
+  background: rgba(11, 20, 32, 0.96);
+  border-color: rgba(214, 168, 79, 0.65);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.22),
+    0 14px 32px -4px rgba(0, 0, 0, 0.65),
+    0 0 20px rgba(212, 175, 55, 0.22);
 }
 
-.chat-bubble-text-gold {
-  color: #FFC837;
-  font-weight: 800;
-  font-size: 14.5px;
-  line-height: 1;
-  letter-spacing: -0.01em;
+.chat-luxury-pill:active {
+  transform: translateY(0) scale(0.98);
 }
 
-
-.chat-button-new {
+.chat-pill-icon-wrap {
   position: relative;
-  width: 58px;
-  height: 58px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  background: #0B1220;
-  border: 2px solid #FFC837;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+  background: linear-gradient(135deg, rgba(214, 168, 79, 0.24) 0%, rgba(214, 168, 79, 0.06) 100%);
+  border: 1px solid rgba(214, 168, 79, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  padding: 0;
-  pointer-events: auto;
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+  flex-shrink: 0;
 }
 
-.chat-button-new:hover {
-  transform: scale(1.06);
-  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.5), 0 0 18px rgba(255, 200, 55, 0.25);
-}
-
-.chat-pickaxe-icon {
+.chat-pill-sparkle-icon {
   display: block;
 }
 
-.chat-status-dot {
+.chat-pill-live-dot {
   position: absolute;
-  bottom: 2px;
-  right: 2px;
-  width: 10px;
-  height: 10px;
+  top: -1px;
+  right: -1px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: #10B981;
-  border: 2px solid #0B1220;
-  box-shadow: 0 0 6px rgba(16, 185, 129, 0.4);
+  border: 1.5px solid #080E17;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.7);
+}
+
+.chat-pill-text-group {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  line-height: 1;
+}
+
+.chat-pill-label-main {
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #FFFFFF;
+  white-space: nowrap;
+}
+
+.chat-pill-label-gold {
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
+  font-size: 13.5px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #D4AF37;
+  white-space: nowrap;
+}
+
+.chat-pill-arrow {
+  display: flex;
+  align-items: center;
+  color: #D4AF37;
+  transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  opacity: 0.85;
+}
+
+.chat-luxury-pill:hover .chat-pill-arrow {
+  transform: translateX(3px);
+  opacity: 1;
 }
 
 @keyframes chatbot-bubble-appear {
@@ -1803,23 +1793,25 @@ nextjs-portal,
     min-width: 38px;
   }
 
-  /* Floating Launcher & Speech Bubble on Mobile */
-  .chat-button-new {
-    width: 54px;
-    height: 54px;
-    right: 0;
-    bottom: 0;
+  /* Floating Luxury Concierge Pill on Mobile */
+  .chat-launcher-wrapper {
+    right: 16px;
+    bottom: 16px;
   }
 
-  .chat-speech-bubble {
-    max-width: calc(100vw - 32px);
-    padding: 7px 12px;
-    margin-bottom: 8px;
+  .chat-luxury-pill {
+    padding: 7px 13px 7px 8px;
+    gap: 8px;
   }
 
-  .chat-bubble-text-white,
-  .chat-bubble-text-gold {
-    font-size: 13px;
+  .chat-pill-icon-wrap {
+    width: 26px;
+    height: 26px;
+  }
+
+  .chat-pill-label-main,
+  .chat-pill-label-gold {
+    font-size: 12.5px;
   }
 }
 
@@ -1832,13 +1824,18 @@ nextjs-portal,
     overflow: hidden;
   }
 
-  .chat-speech-bubble {
-    padding: 6px 10px;
-    gap: 6px;
+  .chat-launcher-wrapper {
+    right: 12px;
+    bottom: 12px;
   }
 
-  .chat-bubble-text-white,
-  .chat-bubble-text-gold {
+  .chat-luxury-pill {
+    padding: 6px 11px 6px 7px;
+    gap: 7px;
+  }
+
+  .chat-pill-label-main,
+  .chat-pill-label-gold {
     font-size: 12px;
   }
 }

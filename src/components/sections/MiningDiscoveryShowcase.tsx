@@ -193,8 +193,8 @@ const ClientLogosFlipRow: React.FC = () => {
    ========================================================================== */
 
 /** Viewport heights for the continuous Mining Discovery Interactive Showcase */
-const DESKTOP_SCROLL_VH = 1300;
-const MOBILE_SCROLL_VH = 950;
+const DESKTOP_SCROLL_VH = 1450;
+const MOBILE_SCROLL_VH = 1050;
 
 /**
  * How the sampled progress follows the true scroll position.
@@ -1243,22 +1243,22 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   width: 100%;
   display: flex;
   flex-direction: column;
-  padding: clamp(0.9rem, 1.8vh, 1.35rem) clamp(1.4rem, 2.5vw, 2.2rem) 0;
+  padding: clamp(0.9rem, 1.8vh, 1.35rem) clamp(1rem, 1.8vw, 1.6rem) 0;
   box-sizing: border-box;
   background: transparent;
   pointer-events: auto;
 }
 
-/* Top bar with Category on left and Learn More on right - perfectly balanced */
+/* Top bar with Category on left and Learn More on right - corner anchored */
 .horizontalCardTopBar {
   position: relative;
   width: 100%;
-  padding: 0 clamp(0.5rem, 1.2vw, 1.2rem);
+  padding: 0;
   box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: clamp(0.45rem, 0.9vh, 0.8rem);
+  margin-bottom: clamp(0.5rem, 1vh, 0.9rem);
   pointer-events: auto;
 }
 
@@ -1426,10 +1426,10 @@ export const MiningDiscoveryShowcase: React.FC = () => {
     padding-right: 7vw;
   }
   .horizontalCardUpper {
-    padding: 0.9rem 0.9rem 0;
+    padding: 0.85rem 0.85rem 0;
   }
   .horizontalCardTopBar {
-    padding: 0 0.4rem;
+    padding: 0;
     margin-bottom: 0.2rem;
   }
   .horizontalCardTop {

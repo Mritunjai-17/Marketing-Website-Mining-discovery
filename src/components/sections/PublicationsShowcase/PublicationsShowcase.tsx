@@ -392,7 +392,7 @@ export const PublicationsShowcase: React.FC = () => {
   ];
 
   return (
-    <section className={styles.publicationsSection} aria-label="Explore Our Publications">
+    <section id="publications" className={styles.publicationsSection} aria-label="Explore Our Publications">
       {/* Editorial Header */}
       <header ref={headerRef} className={styles.header}>
         <div className={styles.eyebrowRow}>
