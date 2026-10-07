@@ -2,14 +2,24 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-const BACKEND_URL =
-  process.env.BACKEND_URL ||
-  process.env.NEXT_PUBLIC_BACKEND_URL ||
-  "http://localhost:5000";
+function getBackendOrigin(): string {
+  const raw =
+    process.env.BACKEND_URL ||
+    process.env.NEXT_PUBLIC_BACKEND_URL ||
+    "http://localhost:5000";
+
+  try {
+    const parsed = new URL(raw.startsWith("http") ? raw : `https://${raw}`);
+    return parsed.origin;
+  } catch {
+    return raw.replace(/\/+$/, "");
+  }
+}
 
 export async function GET(req: NextRequest) {
+  const backendOrigin = getBackendOrigin();
   try {
-    const backendEndpoint = `${BACKEND_URL.replace(/\/+$/, "")}/api/health`;
+    const backendEndpoint = `${backendOrigin}/api/health`;
     const res = await fetch(backendEndpoint, {
       cache: "no-store",
     });

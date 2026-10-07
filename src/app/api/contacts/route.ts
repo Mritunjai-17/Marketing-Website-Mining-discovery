@@ -2,10 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-const BACKEND_URL =
-  process.env.BACKEND_URL ||
-  process.env.NEXT_PUBLIC_BACKEND_URL ||
-  "http://localhost:5000";
+function getBackendEndpoint(path: string): string {
+  const raw =
+    process.env.BACKEND_URL ||
+    process.env.NEXT_PUBLIC_BACKEND_URL ||
+    "http://localhost:5000";
+
+  try {
+    const parsed = new URL(raw.startsWith("http") ? raw : `https://${raw}`);
+    return `${parsed.origin}${path.startsWith("/") ? path : `/${path}`}`;
+  } catch {
+    return `${raw.replace(/\/+$/, "")}${path.startsWith("/") ? path : `/${path}`}`;
+  }
+}
 
 export async function OPTIONS() {
   return new NextResponse(null, {
@@ -33,7 +42,7 @@ export async function POST(req: NextRequest) {
       "";
     const userAgent = req.headers.get("user-agent") || "";
 
-    const backendEndpoint = `${BACKEND_URL.replace(/\/+$/, "")}/api/contacts`;
+    const backendEndpoint = getBackendEndpoint("/api/contacts");
 
     const backendRes = await fetch(backendEndpoint, {
       method: "POST",
