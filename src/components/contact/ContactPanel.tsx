@@ -2,12 +2,13 @@
 
 import React, { useRef, useState } from "react";
 import Image from "next/image";
-import { ArrowRight, Mail, MapPin, Globe, Compass } from "lucide-react";
+import { ArrowRight, Mail, MapPin, Globe, Compass, CheckCircle2, AlertCircle } from "lucide-react";
 import styles from "./ContactPanel.module.css";
+import { submitContactInquiry } from "@/lib/api-client";
 
 /**
  * The /contact page: a premium, cinematic, editorial contact experience
- * designed in the Mining Discovery dark charcoal, warm cream, and gold accent visual language.
+ * connected directly to the Mining Discovery backend & operations portal.
  */
 
 const CONTACT = {
@@ -44,9 +45,6 @@ const SOCIALS: Array<{ name: string; href: string; path: string }> = [
   },
 ];
 
-const SENT_COPY =
-  "Thank you. Your email app should now be open with this message ready to send.";
-
 interface Fields {
   name: string;
   email: string;
@@ -60,11 +58,23 @@ const EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function validate(v: Fields): Errors {
   const errors: Errors = {};
-  if (!v.name.trim()) errors.name = "Please enter your full name.";
-  if (!v.email.trim()) errors.email = "Please enter your email address.";
-  else if (!EMAIL_SHAPE.test(v.email.trim()))
+  if (!v.name.trim()) {
+    errors.name = "Please enter your full name.";
+  } else if (v.name.trim().length < 2) {
+    errors.name = "Name must be at least 2 characters.";
+  }
+
+  if (!v.email.trim()) {
+    errors.email = "Please enter your email address.";
+  } else if (!EMAIL_SHAPE.test(v.email.trim())) {
     errors.email = "That doesn't look like a valid email address.";
-  if (!v.message.trim()) errors.message = "Please write your message.";
+  }
+
+  if (!v.message.trim()) {
+    errors.message = "Please write your message.";
+  } else if (v.message.trim().length < 5) {
+    errors.message = "Message must be at least 5 characters.";
+  }
   return errors;
 }
 
@@ -76,7 +86,12 @@ export const ContactPanel: React.FC = () => {
     message: "",
   });
   const [errors, setErrors] = useState<Errors>({});
+  const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
+  const [successMessage, setSuccessMessage] = useState(
+    "Thank you! Your message has been received. Our team will contact you shortly."
+  );
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
   const set =
@@ -85,22 +100,14 @@ export const ContactPanel: React.FC = () => {
       const next = event.target.value;
       setValues((prev) => ({ ...prev, [key]: next }));
       setErrors((prev) => (prev[key] ? { ...prev, [key]: undefined } : prev));
+      if (submitError) setSubmitError(null);
     };
 
-  /** Composes the message and hands it to the visitor's mail client. */
-  const handoff = (v: Fields) => {
-    const emailSubject = `Website enquiry from ${v.name.trim()}`;
-    const phoneLine = v.phone.trim() ? `Phone: ${v.phone.trim()}\n\n` : "";
-    const body = `${phoneLine}${v.message.trim()}\n\n—\n${v.name.trim()}\n${v.email.trim()}`;
-    window.location.href =
-      `mailto:${CONTACT.email}?subject=${encodeURIComponent(emailSubject)}` +
-      `&body=${encodeURIComponent(body)}`;
-  };
-
-  const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const found = validate(values);
     setErrors(found);
+    setSubmitError(null);
 
     if (Object.keys(found).length > 0) {
       const first = (["name", "email", "message"] as const).find((k) => found[k]);
@@ -108,8 +115,31 @@ export const ContactPanel: React.FC = () => {
       return;
     }
 
-    handoff(values);
-    setSent(true);
+    setSubmitting(true);
+    try {
+      const response = await submitContactInquiry(values);
+      if (response.success) {
+        setSent(true);
+        if (response.message) {
+          setSuccessMessage(response.message);
+        }
+        setValues({ name: "", email: "", phone: "", message: "" });
+      } else {
+        setSubmitError(response.message || "Failed to submit message. Please try again.");
+      }
+    } catch (err: any) {
+      setSubmitError(
+        err?.message || "Unable to send inquiry. Please check your connection or contact info@miningdiscovery.com directly."
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const resetForm = () => {
+    setSent(false);
+    setSubmitError(null);
+    setErrors({});
     setValues({ name: "", email: "", phone: "", message: "" });
   };
 
@@ -196,116 +226,148 @@ export const ContactPanel: React.FC = () => {
 
           {/* ----------------------------------------------- RIGHT COLUMN: The Form Card */}
           <div className={styles.formCard}>
-            <form ref={formRef} onSubmit={onSubmit} noValidate>
-              <div className={styles.formFieldsStack}>
-                {/* Field 1: Full Name */}
-                <div className={styles.fieldGroup}>
-                  <label htmlFor="c-name" className={styles.fieldLabel}>
-                    Full Name <span className="text-[#C49A3A]">*</span>
-                  </label>
-                  <input
-                    id="c-name"
-                    name="name"
-                    type="text"
-                    autoComplete="name"
-                    placeholder="Enter Your Full Name"
-                    value={values.name}
-                    onChange={set("name")}
-                    aria-invalid={Boolean(errors.name)}
-                    aria-describedby={described("name")}
-                    className={`${styles.fieldInput} ${errors.name ? styles.fieldInputBad : ""}`}
-                  />
-                  {errors.name && (
-                    <p id="c-name-error" className={styles.fieldError}>
-                      {errors.name}
-                    </p>
-                  )}
+            {sent ? (
+              <div className={styles.successCard} role="status">
+                <div className={styles.successIconWrap} aria-hidden="true">
+                  <CheckCircle2 className="w-8 h-8" />
                 </div>
-
-                {/* Field 2: Email Address */}
-                <div className={styles.fieldGroup}>
-                  <label htmlFor="c-email" className={styles.fieldLabel}>
-                    Email Address <span className="text-[#C49A3A]">*</span>
-                  </label>
-                  <input
-                    id="c-email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    placeholder="Enter Your Email Address"
-                    value={values.email}
-                    onChange={set("email")}
-                    aria-invalid={Boolean(errors.email)}
-                    aria-describedby={described("email")}
-                    className={`${styles.fieldInput} ${errors.email ? styles.fieldInputBad : ""}`}
-                  />
-                  {errors.email && (
-                    <p id="c-email-error" className={styles.fieldError}>
-                      {errors.email}
-                    </p>
-                  )}
-                </div>
-
-                {/* Field 3: Phone Number */}
-                <div className={styles.fieldGroup}>
-                  <label htmlFor="c-phone" className={styles.fieldLabel}>
-                    Phone Number
-                  </label>
-                  <input
-                    id="c-phone"
-                    name="phone"
-                    type="tel"
-                    autoComplete="tel"
-                    placeholder="Enter Your Phone Number"
-                    value={values.phone}
-                    onChange={set("phone")}
-                    className={styles.fieldInput}
-                  />
-                </div>
-
-                {/* Field 4: Message */}
-                <div className={styles.fieldGroup}>
-                  <label htmlFor="c-message" className={styles.fieldLabel}>
-                    Message <span className="text-[#C49A3A]">*</span>
-                  </label>
-                  <textarea
-                    id="c-message"
-                    name="message"
-                    rows={5}
-                    placeholder="Write Your Message Here"
-                    value={values.message}
-                    onChange={set("message")}
-                    aria-invalid={Boolean(errors.message)}
-                    aria-describedby={described("message")}
-                    className={`${styles.fieldInput} resize-none ${
-                      errors.message ? styles.fieldInputBad : ""
-                    }`}
-                  />
-                  {errors.message && (
-                    <p id="c-message-error" className={styles.fieldError}>
-                      {errors.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Submit Action Bar */}
-              <div className={styles.submitBar}>
-                <button type="submit" className={styles.submitBtn}>
-                  <span>Send Message</span>
-                  <ArrowRight className={styles.submitArrow} />
-                </button>
-
-                <p
-                  aria-live="polite"
-                  className={`${styles.sentMessage} ${
-                    sent ? "opacity-100" : "opacity-0 pointer-events-none"
-                  }`}
+                <h3 className={styles.successTitle}>Inquiry Transmitted</h3>
+                <p className={styles.successDesc}>{successMessage}</p>
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className={styles.resetBtn}
                 >
-                  {sent ? SENT_COPY : " "}
-                </p>
+                  Send Another Message
+                </button>
               </div>
-            </form>
+            ) : (
+              <form ref={formRef} onSubmit={onSubmit} noValidate>
+                {submitError && (
+                  <div className={styles.errorBanner} role="alert">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>{submitError}</span>
+                  </div>
+                )}
+
+                <div className={styles.formFieldsStack}>
+                  {/* Field 1: Full Name */}
+                  <div className={styles.fieldGroup}>
+                    <label htmlFor="c-name" className={styles.fieldLabel}>
+                      Full Name <span className="text-[#C49A3A]">*</span>
+                    </label>
+                    <input
+                      id="c-name"
+                      name="name"
+                      type="text"
+                      autoComplete="name"
+                      placeholder="Enter Your Full Name"
+                      value={values.name}
+                      onChange={set("name")}
+                      disabled={submitting}
+                      aria-invalid={Boolean(errors.name)}
+                      aria-describedby={described("name")}
+                      className={`${styles.fieldInput} ${errors.name ? styles.fieldInputBad : ""}`}
+                    />
+                    {errors.name && (
+                      <p id="c-name-error" className={styles.fieldError}>
+                        {errors.name}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Field 2: Email Address */}
+                  <div className={styles.fieldGroup}>
+                    <label htmlFor="c-email" className={styles.fieldLabel}>
+                      Email Address <span className="text-[#C49A3A]">*</span>
+                    </label>
+                    <input
+                      id="c-email"
+                      name="email"
+                      type="email"
+                      autoComplete="email"
+                      placeholder="Enter Your Email Address"
+                      value={values.email}
+                      onChange={set("email")}
+                      disabled={submitting}
+                      aria-invalid={Boolean(errors.email)}
+                      aria-describedby={described("email")}
+                      className={`${styles.fieldInput} ${errors.email ? styles.fieldInputBad : ""}`}
+                    />
+                    {errors.email && (
+                      <p id="c-email-error" className={styles.fieldError}>
+                        {errors.email}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Field 3: Phone Number */}
+                  <div className={styles.fieldGroup}>
+                    <label htmlFor="c-phone" className={styles.fieldLabel}>
+                      Phone Number
+                    </label>
+                    <input
+                      id="c-phone"
+                      name="phone"
+                      type="tel"
+                      autoComplete="tel"
+                      placeholder="Enter Your Phone Number"
+                      value={values.phone}
+                      onChange={set("phone")}
+                      disabled={submitting}
+                      className={styles.fieldInput}
+                    />
+                  </div>
+
+                  {/* Field 4: Message */}
+                  <div className={styles.fieldGroup}>
+                    <label htmlFor="c-message" className={styles.fieldLabel}>
+                      Message <span className="text-[#C49A3A]">*</span>
+                    </label>
+                    <textarea
+                      id="c-message"
+                      name="message"
+                      rows={5}
+                      placeholder="Write Your Message Here (at least 5 characters)"
+                      value={values.message}
+                      onChange={set("message")}
+                      disabled={submitting}
+                      aria-invalid={Boolean(errors.message)}
+                      aria-describedby={described("message")}
+                      className={`${styles.fieldInput} resize-none ${
+                        errors.message ? styles.fieldInputBad : ""
+                      }`}
+                    />
+                    {errors.message && (
+                      <p id="c-message-error" className={styles.fieldError}>
+                        {errors.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Submit Action Bar */}
+                <div className={styles.submitBar}>
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className={`${styles.submitBtn} ${submitting ? styles.submitBtnLoading : ""}`}
+                  >
+                    {submitting ? (
+                      <>
+                        <span className={styles.spinner} aria-hidden="true" />
+                        <span>Transmitting...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Send Message</span>
+                        <ArrowRight className={styles.submitArrow} />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       </div>

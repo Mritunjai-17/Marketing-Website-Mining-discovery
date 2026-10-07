@@ -364,8 +364,31 @@
   transform: scale(1.03);
 }
 
-.submitBtn:active {
-  transform: scale(0.98);
+.submitBtn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.submitBtnLoading {
+  opacity: 0.8;
+  cursor: wait;
+}
+
+.spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(11, 31, 58, 0.25);
+  border-top-color: #0B1F3A;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .submitArrow {
@@ -383,4 +406,92 @@
   line-height: 1.55;
   color: #334155;
   transition: opacity 0.4s ease;
+}
+
+.successCard {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1.5px solid rgba(196, 154, 58, 0.45);
+  border-radius: 1.25rem;
+  padding: 2.25rem 2rem;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  animation: fadeIn 0.4s ease;
+}
+
+.successIconWrap {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  background: rgba(196, 154, 58, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8A6820;
+}
+
+.successTitle {
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #0F172A;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.successDesc {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #475569;
+  margin: 0;
+  max-width: 420px;
+}
+
+.errorBanner {
+  background: rgba(220, 38, 38, 0.08);
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  color: #B91C1C;
+  border-radius: 0.75rem;
+  padding: 0.85rem 1rem;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 1.25rem;
+}
+
+.resetBtn {
+  margin-top: 0.5rem;
+  background: transparent;
+  border: 1.5px solid #C49A3A;
+  color: #0F172A;
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.6rem 1.4rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.resetBtn:hover {
+  background: #C49A3A;
+  color: #FFFFFF;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

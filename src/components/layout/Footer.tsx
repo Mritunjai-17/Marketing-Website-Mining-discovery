@@ -68,7 +68,11 @@ const COLUMNS: Array<{ heading: string; links: Array<{ name: string; href: strin
   },
   {
     heading: "Company",
-    links: [{ name: "About Us", href: "/about" }, { name: "Work", href: "/work" }],
+    links: [
+      { name: "About Us", href: "/about" },
+      { name: "Work", href: "/work" },
+      { name: "Contact", href: "/contact" },
+    ],
   },
 ];
 
