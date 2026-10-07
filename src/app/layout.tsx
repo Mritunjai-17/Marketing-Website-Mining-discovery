@@ -57,7 +57,7 @@ export default function RootLayout({
       <body className="min-h-screen flex flex-col bg-[#FAFAF9] text-[#1A1D21] antialiased selection:bg-[#B8860B]/20 selection:text-[#0B1F3A]">
         <SmoothScroll>
           <Header />
-          <main className="flex-1">{children}</main>
+          <main className="flex-1 overflow-x-clip">{children}</main>
           <Footer />
         </SmoothScroll>
         <MiningAICHatWidget />

@@ -60,6 +60,7 @@ export const GlobeHero: React.FC = () => {
   const rangeRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const slotRef = useRef<HTMLDivElement>(null);
+  const boonHeroBoxRef = useRef<HTMLDivElement>(null);
   const journeyBoxRef = useRef<HTMLDivElement>(null);
 
   const journeyProgress = useCreateJourneyProgress();
@@ -86,13 +87,20 @@ export const GlobeHero: React.FC = () => {
   const [totalScrollVh, setTotalScrollVh] = useState(DESKTOP_SCROLL_VH);
 
   useEffect(() => {
+    let lastWidth = window.innerWidth;
     const updateHeight = () => {
+      const currentWidth = window.innerWidth;
+      if (Math.abs(currentWidth - lastWidth) < 2) return;
+      lastWidth = currentWidth;
       const isMobile =
-        window.innerWidth < 900 ||
+        currentWidth < 900 ||
         window.matchMedia("(pointer: coarse)").matches;
       setTotalScrollVh(isMobile ? MOBILE_SCROLL_VH : DESKTOP_SCROLL_VH);
     };
-    updateHeight();
+    const isMobile =
+      window.innerWidth < 900 ||
+      window.matchMedia("(pointer: coarse)").matches;
+    setTotalScrollVh(isMobile ? MOBILE_SCROLL_VH : DESKTOP_SCROLL_VH);
     window.addEventListener("resize", updateHeight);
     return () => window.removeEventListener("resize", updateHeight);
   }, []);
@@ -102,6 +110,7 @@ export const GlobeHero: React.FC = () => {
    * Only transform and opacity are touched — zero layout triggers.
    */
   const applyStage = useCallback(() => {
+    const boonHeroBox = boonHeroBoxRef.current;
     const journeyBox = journeyBoxRef.current;
     if (reduceMotionRef.current) return true;
 
@@ -131,17 +140,38 @@ export const GlobeHero: React.FC = () => {
 
     // 1. Hardware-scrubbed Hero sequence:
     // Act 1 (Alpine summit) -> Act 2 (Open Pit) -> Act 3 (Cave Continuous Miner)
-    // Scrubbed gracefully from t = 0.00 to t = 0.18
+    // Scrubbed gracefully from t = 0.00 to t = 0.18, completely fades out by t = 0.22
     const HERO_END = 0.18;
+    const HERO_FADE_END = 0.22;
     const heroP = clamp(t / HERO_END, 0, 1);
     if (boonHeroRef.current) {
       boonHeroRef.current.scrub(heroP);
     }
 
+    if (boonHeroBox) {
+      if (t >= HERO_FADE_END) {
+        boonHeroBox.style.opacity = "0";
+        boonHeroBox.style.visibility = "hidden";
+        boonHeroBox.style.pointerEvents = "none";
+        boonHeroBox.style.zIndex = "10";
+      } else if (t >= HERO_END) {
+        const heroOpacity = 1.0 - (t - HERO_END) / (HERO_FADE_END - HERO_END);
+        boonHeroBox.style.opacity = heroOpacity.toFixed(3);
+        boonHeroBox.style.visibility = "visible";
+        boonHeroBox.style.pointerEvents = "none";
+        boonHeroBox.style.zIndex = "30";
+      } else {
+        boonHeroBox.style.opacity = "1";
+        boonHeroBox.style.visibility = "visible";
+        boonHeroBox.style.pointerEvents = "auto";
+        boonHeroBox.style.zIndex = "30";
+      }
+    }
+
     // 2. Value Bridge: Client & Investor Growth Section ("Building Value for Every Stakeholder")
     // Generously paced scroll runway so each pillar card & publication can be comfortably read & clicked
     const BRIDGE_START = 0.18;
-    const BRIDGE_FADE_IN_END = 0.21;
+    const BRIDGE_FADE_IN_END = 0.22;
     const BRIDGE_SCROLL_END = 0.63;
     const BRIDGE_END = 0.67;
 
@@ -172,6 +202,7 @@ export const GlobeHero: React.FC = () => {
     // 3. Services Section (8 Interactive Cards):
     // Takes over seamlessly after the Value Bridge section finishes
     const SERVICES_START = 0.65;
+    const SERVICES_FADE_IN_END = 0.69;
     const SERVICES_END = 0.98;
 
     let servicesP = 0;
@@ -197,22 +228,24 @@ export const GlobeHero: React.FC = () => {
     }
 
     // Services section active state: only activate when bridge has completed transition
-    const shouldJourneyBeActive = t >= 0.65;
+    const shouldJourneyBeActive = t >= 0.63 && t <= 1.0;
     if (shouldJourneyBeActive !== journeyActiveRef.current) {
       journeyActiveRef.current = shouldJourneyBeActive;
       setJourneyActive(shouldJourneyBeActive);
     }
 
     if (journeyBox) {
-      if (t < 0.65) {
+      if (t < SERVICES_START) {
         journeyBox.style.opacity = "0";
         journeyBox.style.visibility = "hidden";
         journeyBox.style.pointerEvents = "none";
+        journeyBox.style.zIndex = "10";
       } else {
-        const fade = clamp((t - 0.65) / (0.69 - 0.65), 0, 1);
+        const fade = clamp((t - SERVICES_START) / (SERVICES_FADE_IN_END - SERVICES_START), 0, 1);
         journeyBox.style.opacity = fade.toFixed(3);
         journeyBox.style.visibility = "visible";
-        journeyBox.style.pointerEvents = fade > 0.6 ? "auto" : "none";
+        journeyBox.style.pointerEvents = fade > 0.4 ? "auto" : "none";
+        journeyBox.style.zIndex = "40";
       }
     }
 
@@ -308,10 +341,13 @@ export const GlobeHero: React.FC = () => {
           <div ref={slotRef} className="relative h-full w-full">
             {/* Boon-Inspired Dark Hero Overlay */}
             <div
-              className="absolute inset-0 h-full w-full"
+              ref={boonHeroBoxRef}
+              className="absolute inset-0 h-full w-full transition-opacity duration-150"
               style={{
-                zIndex: bridgeOpacity < 0.5 ? 50 : 10,
-                pointerEvents: bridgeOpacity < 0.5 ? "auto" : "none",
+                zIndex: 30,
+                opacity: 1,
+                visibility: "visible",
+                pointerEvents: "auto",
               }}
             >
               <BoonHero ref={boonHeroRef} />
@@ -321,8 +357,10 @@ export const GlobeHero: React.FC = () => {
             <div
               className="absolute inset-0 h-full w-full"
               style={{
-                zIndex: bridgeOpacity >= 0.5 ? 50 : 10,
-                pointerEvents: bridgeOpacity >= 0.5 ? "auto" : "none",
+                zIndex: bridgeOpacity > 0 ? 35 : 10,
+                visibility: bridgeOpacity > 0 ? "visible" : "hidden",
+                pointerEvents: bridgeOpacity > 0.5 ? "auto" : "none",
+                opacity: bridgeOpacity,
               }}
             >
               <ClientInvestorGrowth
@@ -333,18 +371,16 @@ export const GlobeHero: React.FC = () => {
 
             {/* Services Section (All 8 Interactive Cards) */}
             <div
-              className="absolute inset-0 h-full w-full pointer-events-none"
-              style={{ zIndex: 40 }}
+              ref={journeyBoxRef}
+              className="absolute inset-0 h-full w-full"
+              style={{
+                zIndex: 40,
+                opacity: 0,
+                visibility: "hidden",
+                pointerEvents: "none",
+              }}
             >
-              <div
-                ref={journeyBoxRef}
-                className="h-full w-full pointer-events-none"
-                style={{
-                  opacity: 0,
-                }}
-              >
-                <Journey3D progress={journeyProgress} active={journeyActive} />
-              </div>
+              <Journey3D progress={journeyProgress} active={journeyActive} />
             </div>
           </div>
         </div>

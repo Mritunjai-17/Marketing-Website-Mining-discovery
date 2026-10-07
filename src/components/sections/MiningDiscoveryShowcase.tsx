@@ -255,13 +255,20 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   const [totalScrollVh, setTotalScrollVh] = useState(DESKTOP_SCROLL_VH);
 
   useEffect(() => {
+    let lastWidth = window.innerWidth;
     const updateHeight = () => {
+      const currentWidth = window.innerWidth;
+      if (Math.abs(currentWidth - lastWidth) < 2) return;
+      lastWidth = currentWidth;
       const isMobile =
-        window.innerWidth < 900 ||
+        currentWidth < 900 ||
         window.matchMedia("(pointer: coarse)").matches;
       setTotalScrollVh(isMobile ? MOBILE_SCROLL_VH : DESKTOP_SCROLL_VH);
     };
-    updateHeight();
+    const isMobile =
+      window.innerWidth < 900 ||
+      window.matchMedia("(pointer: coarse)").matches;
+    setTotalScrollVh(isMobile ? MOBILE_SCROLL_VH : DESKTOP_SCROLL_VH);
     window.addEventListener("resize", updateHeight);
     return () => window.removeEventListener("resize", updateHeight);
   }, []);

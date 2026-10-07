@@ -23,34 +23,27 @@ export const SmoothScroll: React.FC<SmoothScrollProps> = ({ children }) => {
 
     if (prefersReducedMotion) return;
 
+    // Mobile touch devices natively apply 120Hz/60Hz momentum scrolling.
+    // Bypassing Lenis on mobile avoids touch-event fighting, rubber-band clipping,
+    // and address bar height shift glitches that snap the scroll to top.
+    const isTouch =
+      window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 768;
+
+    if (isTouch) {
+      gsap.registerPlugin(ScrollTrigger);
+      return;
+    }
+
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+
     gsap.registerPlugin(ScrollTrigger);
 
-    /*
-     * lerp rather than duration + easing, and that swap is the whole change.
-     *
-     * With `duration`, every wheel event starts a NEW 1.2s tween from wherever the last
-     * one had reached. The old easing (expo-out) spends most of its distance in its first
-     * fraction, so a burst of events — which is what one continuous scroll gesture
-     * actually is — kept re-triggering that fast opening section. The result is a
-     * velocity that surges and eases repeatedly instead of holding steady, and that is
-     * what reads as choppy while scrolling rather than while stopping.
-     *
-     * `lerp` is a continuous exponential approach to the target instead of a restarting
-     * tween: continuous input gives continuous velocity, and Lenis normalises it for
-     * frame rate, so a 120Hz display and a 60Hz one settle at the same speed rather than
-     * the faster one arriving twice as quickly.
-     *
-     * 0.085 is a little below Lenis's 0.1 default — slightly longer glide, still short of
-     * the float the 1.2s tween had. Lower is smoother and heavier; raise it toward 0.12
-     * to track the wheel more tightly.
-     */
     const lenis = new Lenis({
       lerp: 0.08,
       smoothWheel: true,
       wheelMultiplier: 0.85,
-      // Touch is left on the platform's own momentum. Lenis only synthesises touch
-      // scrolling when syncTouch is on, and a synthesised curve competes with iOS's
-      // native rubber-banding rather than replacing it — reliably worse than leaving it.
       syncTouch: false,
       touchMultiplier: 1.0,
     });
@@ -68,8 +61,9 @@ export const SmoothScroll: React.FC<SmoothScrollProps> = ({ children }) => {
     };
 
     gsap.ticker.add(updateGSAP);
-    // Standard lag smoothing prevents stutter/jumps on dropped frames across mobile & desktop
-    gsap.ticker.lagSmoothing(500, 33);
+    // Disable GSAP lagSmoothing for Lenis (per official Lenis guidelines)
+    // This prevents sudden clock adjustments that cause Lenis to reset/jump scroll to top.
+    gsap.ticker.lagSmoothing(0);
 
     return () => {
       gsap.ticker.remove(updateGSAP);

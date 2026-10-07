@@ -101,11 +101,11 @@ html.lenis, html.lenis body {
 }
 
 html {
-  overflow-x: clip;
+  min-height: 100%;
 }
 
 body {
-  overflow-x: clip;
+  min-height: 100%;
   background-color: var(--bg-color);
   color: var(--text-color);
   font-family: var(--font-inter), "Inter", sans-serif;
