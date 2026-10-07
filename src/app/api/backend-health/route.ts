@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
         frontend: "UP",
         backendStatus: res.status,
         backendData: data,
-        backendUrl: BACKEND_URL,
+        backendUrl: backendOrigin,
       },
       { status: res.status }
     );
@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
         frontend: "UP",
         backendStatus: "DOWN",
         error: error instanceof Error ? error.message : "Backend unreachable",
-        backendUrl: BACKEND_URL,
+        backendUrl: backendOrigin,
       },
       { status: 503 }
     );
