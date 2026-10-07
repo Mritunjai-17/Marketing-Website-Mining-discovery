@@ -307,13 +307,29 @@ export const GlobeHero: React.FC = () => {
         >
           <div ref={slotRef} className="relative h-full w-full">
             {/* Boon-Inspired Dark Hero Overlay */}
-            <BoonHero ref={boonHeroRef} />
+            <div
+              className="absolute inset-0 h-full w-full"
+              style={{
+                zIndex: bridgeOpacity < 0.5 ? 50 : 10,
+                pointerEvents: bridgeOpacity < 0.5 ? "auto" : "none",
+              }}
+            >
+              <BoonHero ref={boonHeroRef} />
+            </div>
 
             {/* Value Bridge: How Mining Discovery Enhances Growth for Clients & Investors */}
-            <ClientInvestorGrowth
-              scrollProgress={bridgeScroll}
-              opacity={bridgeOpacity}
-            />
+            <div
+              className="absolute inset-0 h-full w-full"
+              style={{
+                zIndex: bridgeOpacity >= 0.5 ? 50 : 10,
+                pointerEvents: bridgeOpacity >= 0.5 ? "auto" : "none",
+              }}
+            >
+              <ClientInvestorGrowth
+                scrollProgress={bridgeScroll}
+                opacity={bridgeOpacity}
+              />
+            </div>
 
             {/* Services Section (All 8 Interactive Cards) */}
             <div

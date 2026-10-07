@@ -66,13 +66,13 @@ const GROWTH_PILLARS: GrowthPillar[] = [
     id: "liquidity",
     badge: "FOR TRADERS & READERS",
     targetAudience: "FOR DAILY READERS, COMMODITY TRADERS & MARKET ENTHUSIASTS",
-    title: "Mining News Without the Noise",
+    title: "Mining News & Market Intelligence Without the Noise",
     description:
-      "The mining industry moves quickly. We make it easier to follow by bringing together company news, exploration results, commodity developments and industry insights in one place — without unnecessary jargon.",
+      "The mining and resource market moves quickly across commodities and jurisdictions. We make it easier to follow by bringing together verified company news, assay discoveries, commodity developments and industry insights in one clear, concise feed.",
     bullets: [
-      "Follow the stories shaping mining",
-      "Understand the news more easily",
-      "Keep up with the market",
+      "Follow high-impact discoveries and project news",
+      "Understand commodity trends with clear insights",
+      "Stay ahead of fast-moving resource markets",
     ],
     image: "/services/01-survey.webp",
     alt: "Market analysis and commodity trading charts for resource equities",
@@ -82,13 +82,13 @@ const GROWTH_PILLARS: GrowthPillar[] = [
     id: "partnerships",
     badge: "FOR TIER-1 STRATEGIC JVS",
     targetAudience: "FOR SENIOR PRODUCERS & CORPORATE DEVELOPMENT",
-    title: "Discover Projects, Companies & Opportunities Across Mining",
+    title: "Discover Projects, Companies & Growth Opportunities",
     description:
-      "Established mining companies are always looking for new projects, emerging assets and potential partners. Mining Discovery keeps corporate and industry leaders connected to developments across the exploration and resource sector.",
+      "Established mining companies are always looking for new projects, emerging assets and strategic partners. Mining Discovery keeps corporate leaders and producers connected to developments across the exploration and resource sector.",
     bullets: [
-      "Stay informed on emerging projects",
-      "Discover companies beyond your usual network",
-      "Stay connected to the industry",
+      "Stay informed on emerging high-value projects",
+      "Discover exploration companies beyond your usual network",
+      "Accelerate strategic partnerships and joint ventures",
     ],
     image: "/services/04-pit.webp",
     alt: "Large-scale modern mining processing facility and open pit production infrastructure",
@@ -128,8 +128,8 @@ export const ClientInvestorGrowth = React.memo<ClientInvestorGrowthProps>(functi
 
   // Overall section visibility and opacity
   const clampedOpacity = Math.max(0, Math.min(1, opacity));
-  const isVisible = clampedOpacity > 0.01;
-  const pointerEvents = clampedOpacity > 0.05 ? "auto" : "none";
+  const isVisible = clampedOpacity > 0.05;
+  const pointerEvents = clampedOpacity > 0.4 ? "auto" : "none";
 
   // Measure static layout metrics once on mount/resize (zero DOM reads during scroll)
   const measureLayout = () => {
@@ -319,13 +319,15 @@ export const ClientInvestorGrowth = React.memo<ClientInvestorGrowthProps>(functi
 
                     {/* Text Content Block */}
                     <div className={styles.cardTextWrap}>
-                      <div className={styles.targetAudience}>{item.targetAudience}</div>
+                      <div className={styles.cardTextMain}>
+                        <div className={styles.targetAudience}>{item.targetAudience}</div>
 
-                      <div className={styles.itemTitleMask}>
-                        <h3 className={styles.itemTitle}>{item.title}</h3>
+                        <div className={styles.itemTitleMask}>
+                          <h3 className={styles.itemTitle}>{item.title}</h3>
+                        </div>
+
+                        <p className={styles.itemDescription}>{item.description}</p>
                       </div>
-
-                      <p className={styles.itemDescription}>{item.description}</p>
 
                       <ul className={styles.bulletList}>
                         {item.bullets.map((bullet, bIdx) => {

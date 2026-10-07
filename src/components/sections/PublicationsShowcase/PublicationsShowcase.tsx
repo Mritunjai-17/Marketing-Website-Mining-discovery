@@ -41,35 +41,52 @@ interface PublicationCardConfig {
 }
 
 const PUBLICATIONS_SUBTITLE_WORDS = [
-  "We",
-  "deliver",
-  "continuous",
-  "market",
-  "visibility",
-  "for",
-  "natural",
-  "resource",
-  "companies",
-  "through",
-  "monthly",
-  "magazines,",
-  "weekly",
-  "newspaper",
-  "dispatches,",
-  "technical",
-  "research",
-  "articles,",
+  "From",
+  "our",
+  "magazine",
   "and",
-  "executive",
+  "weekly",
+  "newsletter",
+  "to",
+  "industry",
+  "articles",
+  "and",
   "CEO",
-  "profiles.",
+  "profiles,",
+  "we",
+  "create",
+  "opportunities",
+  "for",
+  "mining",
+  "companies",
+  "and",
+  "leaders",
+  "to",
+  "share",
+  "their",
+  "stories",
+  "with",
+  "an",
+  "audience",
+  "that",
+  "follows",
+  "the",
+  "resource",
+  "sector.",
 ];
 
-export const PublicationsShowcase: React.FC = () => {
+export interface PublicationsShowcaseProps {
+  scrollProgress?: number;
+}
+
+export const PublicationsShowcase: React.FC<PublicationsShowcaseProps> = ({
+  scrollProgress = 0,
+}) => {
   const overlayRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLElement>(null);
   const headingWordRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const subheadingWordRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const [headerInView, setHeaderInView] = useState(false);
 
   const [activeCategoryModal, setActiveCategoryModal] = useState<
     "magazines" | "newsletter" | "articles" | "ceo-profile" | null
@@ -228,6 +245,22 @@ export const PublicationsShowcase: React.FC = () => {
     };
   }, [activeCategoryModal, readerState, handleCloseReader]);
 
+  // IntersectionObserver guarantee: trigger full reveal once header enters viewport
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setHeaderInView(true);
+        }
+      },
+      { threshold: 0.1, rootMargin: "0px 0px -30px 0px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   // Scroll-tied word-by-word reveal for Publications Heading & Subheading
   useEffect(() => {
     let rafId: number | null = null;
@@ -237,31 +270,43 @@ export const PublicationsShowcase: React.FC = () => {
       if (!headerRef.current) return;
       const clientH = window.innerHeight || 800;
       const hRect = headerRef.current.getBoundingClientRect();
-      const revealProgress = Math.max(0, Math.min(1, (clientH * 0.88 - hRect.top) / (clientH * 0.88 - clientH * 0.38)));
 
-      // Heading words: reveal from 0.00 to 0.45
-      const hProg = Math.max(0, Math.min(1, revealProgress / 0.45));
+      // Trigger full reveal as soon as header enters viewport
+      if (!headerInView && hRect.top < clientH * 0.90 && hRect.bottom > 0) {
+        setHeaderInView(true);
+      }
+
+      // Responsive scrub range: words reveal quickly and smoothly as section enters
+      const revealProgress = Math.max(0, Math.min(1, (clientH * 0.92 - hRect.top) / (clientH * 0.40)));
+
+      if (revealProgress >= 1 || hRect.top < clientH * 0.70) {
+        if (!headerInView) setHeaderInView(true);
+      }
+
+      // Heading words: reveal quickly across 0.00 to 0.40
+      const hProg = Math.max(0, Math.min(1, revealProgress / 0.40));
+      const headCount = headingWordRefs.current.length || 9;
       headingWordRefs.current.forEach((el, idx) => {
         if (!el) return;
-        const start = (idx / 3) * 0.65;
+        const start = (idx / headCount) * 0.50;
         const end = start + 0.35;
-        const wProg = Math.max(0, Math.min(1, (hProg - start) / (end - start)));
+        const wProg = headerInView ? 1 : Math.max(0, Math.min(1, (hProg - start) / (end - start)));
         el.style.opacity = (0.20 + 0.80 * wProg).toFixed(3);
         el.style.transform = `translate3d(0, ${((1 - wProg) * 5).toFixed(1)}px, 0)`;
-        el.style.filter = wProg >= 0.99 ? "none" : `blur(${((1 - wProg) * 1.2).toFixed(1)}px)`;
+        el.style.filter = wProg >= 0.98 ? "none" : `blur(${((1 - wProg) * 1.2).toFixed(1)}px)`;
       });
 
-      // Subheading words: reveal from 0.28 to 1.00
-      const subProg = Math.max(0, Math.min(1, (revealProgress - 0.28) / 0.72));
+      // Subheading words: reveal from 0.08 to 0.65
+      const subProg = Math.max(0, Math.min(1, (revealProgress - 0.08) / 0.60));
       const subCount = PUBLICATIONS_SUBTITLE_WORDS.length;
       subheadingWordRefs.current.forEach((el, idx) => {
         if (!el) return;
-        const start = (idx / subCount) * 0.75;
+        const start = (idx / subCount) * 0.60;
         const end = start + 0.25;
-        const wProg = Math.max(0, Math.min(1, (subProg - start) / (end - start)));
+        const wProg = headerInView ? 1 : Math.max(0, Math.min(1, (subProg - start) / (end - start)));
         el.style.opacity = (0.20 + 0.80 * wProg).toFixed(3);
         el.style.transform = `translate3d(0, ${((1 - wProg) * 4).toFixed(1)}px, 0)`;
-        el.style.filter = wProg >= 0.99 ? "none" : `blur(${((1 - wProg) * 1.0).toFixed(1)}px)`;
+        el.style.filter = wProg >= 0.98 ? "none" : `blur(${((1 - wProg) * 1.0).toFixed(1)}px)`;
       });
     };
 
@@ -291,7 +336,7 @@ export const PublicationsShowcase: React.FC = () => {
       window.removeEventListener("wheel", requestTick);
       window.removeEventListener("touchmove", requestTick);
     };
-  }, []);
+  }, [scrollProgress, headerInView]);
 
   const allMagazines: MagazineApiItem[] = magazines;
   const latestMag = allMagazines[0];
@@ -392,9 +437,9 @@ export const PublicationsShowcase: React.FC = () => {
   ];
 
   return (
-    <section id="publications" className={styles.publicationsSection} aria-label="Explore Our Publications">
+    <section id="publications" className={styles.publicationsSection} aria-label="Put Your Mining Story in Front of the Industry">
       {/* Editorial Header */}
-      <header ref={headerRef} className={styles.header}>
+      <header ref={headerRef} className={`${styles.header} ${headerInView ? styles.inView : ""}`}>
         <div className={styles.eyebrowRow}>
           <span className={styles.eyebrowRule} aria-hidden="true" />
           <span className={styles.eyebrowText}>
@@ -404,29 +449,42 @@ export const PublicationsShowcase: React.FC = () => {
         </div>
 
         <h2 className={styles.mainTitle}>
-          <span
-            ref={(el) => {
-              headingWordRefs.current[0] = el;
-            }}
-            className={styles.wordSpan}
-          >
-            EXPLORE
-          </span>{" "}
-          <span
-            ref={(el) => {
-              headingWordRefs.current[1] = el;
-            }}
-            className={styles.wordSpan}
-          >
-            OUR
-          </span>{" "}
-          <span
-            ref={(el) => {
-              headingWordRefs.current[2] = el;
-            }}
-            className={styles.goldWordSpan}
-          >
-            PUBLICATIONS
+          <span className={styles.titleLine}>
+            {["PUT", "YOUR", "MINING", "STORY"].map((word, idx) => (
+              <span
+                key={idx}
+                ref={(el) => {
+                  headingWordRefs.current[idx] = el;
+                }}
+                className={styles.wordSpan}
+              >
+                {word}{" "}
+              </span>
+            ))}
+          </span>
+          <span className={styles.titleLine}>
+            {["IN", "FRONT", "OF"].map((word, idx) => (
+              <span
+                key={idx + 4}
+                ref={(el) => {
+                  headingWordRefs.current[idx + 4] = el;
+                }}
+                className={styles.wordSpan}
+              >
+                {word}{" "}
+              </span>
+            ))}
+            {["THE", "INDUSTRY"].map((word, idx) => (
+              <span
+                key={idx + 7}
+                ref={(el) => {
+                  headingWordRefs.current[idx + 7] = el;
+                }}
+                className={styles.goldWordSpan}
+              >
+                {word}{" "}
+              </span>
+            ))}
           </span>
         </h2>
 

@@ -22,56 +22,56 @@ export interface FocusCard {
 export const FOCUS_CARDS: FocusCard[] = [
   {
     id: "service-1",
-    badge: "01 — BUILD YOUR BRAND",
-    category: "GLOBAL RECOGNITION",
-    title: "Create a mining brand people remember.",
-    description: "From logo and visual identity to digital branding and website development, we create a professional presence that clearly communicates your company, projects and value.",
+    badge: "01 — BRAND & DIGITAL PRESENCE",
+    category: "BRAND & DIGITAL PRESENCE",
+    title: "BUILD A MINING BRAND THAT FEELS CREDIBLE.",
+    description: "Your website and visual identity are often the first things people see. We help mining companies build a clear, professional presence that reflects their projects, people and ambitions.",
     image: "/images/cards/card_01_alliances.webp",
-    locationTag: "[ Digital Branding · Logo & Visual Design · Website Development ]",
+    locationTag: "[ Branding · Visual Identity · Website Design · Development ]",
     ctaText: "Learn More",
     ctaHref: "/contact",
   },
   {
     id: "service-2",
     badge: "02 — AMPLIFY YOUR STORY",
-    category: "MEDIA AMPLIFICATION",
-    title: "Turn company news into industry visibility.",
-    description: "We transform project updates, announcements and milestones into compelling content through PR, media coverage, social media and industry-focused storytelling.",
+    category: "CONTENT & MEDIA",
+    title: "TURN COMPANY NEWS INTO STORIES PEOPLE NOTICE.",
+    description: "Exploration results, project updates and company announcements deserve more than a press release. We turn them into clear, engaging content for the mining audience.",
     image: "/images/cards/card_02_technology.webp",
-    locationTag: "[ Public Relations · Social Media · Media Coverage · Content ]",
+    locationTag: "[ Content · PR · Media Coverage · Social Media ]",
     ctaText: "Learn More",
     ctaHref: "/contact",
   },
   {
     id: "service-3",
-    badge: "03 — REACH THE RIGHT AUDIENCE",
-    category: "PRECISION OUTREACH",
-    title: "Put your story in front of the people who matter.",
-    description: "Reach investors, mining professionals, industry leaders and decision-makers through targeted digital campaigns, Google Ads, LinkedIn, Meta and Mining Discovery's industry audience.",
+    badge: "03 — DIGITAL MARKETING",
+    category: "DIGITAL MARKETING",
+    title: "GIVE YOUR IMPORTANT UPDATES\nMORE REACH.",
+    description: "From exploration results and project updates to company announcements, we help you promote the news that matters through digital campaigns and social media.",
     image: "/images/cards/card_03_growth.webp",
-    locationTag: "[ Google Ads · LinkedIn & Meta Ads · Investor Campaigns · Industry Outreach ]",
+    locationTag: "[ Digital Marketing · Paid Campaigns · Social Media · Campaign Strategy ]",
     ctaText: "Learn More",
     ctaHref: "/contact",
   },
   {
     id: "service-4",
-    badge: "04 — BUILD INDUSTRY AUTHORITY",
+    badge: "04 — EXECUTIVE VISIBILITY",
     category: "EXECUTIVE INFLUENCE",
-    title: "Make your company part of the mining conversation.",
-    description: "Strengthen your reputation through executive visibility, interviews, webinars, events, publications and thought leadership that position your company within the global mining industry.",
+    title: "PUT THE PEOPLE BEHIND THE PROJECT\nIN THE SPOTLIGHT.",
+    description: "Strong companies have strong people behind them. We help mining leaders share their experience, ideas and vision through interviews, profiles and industry content.",
     image: "/images/cards/card_04_governance.webp",
-    locationTag: "[ PR · Executive Profiles · Webinars & Events · Publications ]",
+    locationTag: "[ CEO Profiles · Interviews · Thought Leadership · Video ]",
     ctaText: "Learn More",
     ctaHref: "/contact",
   },
   {
     id: "service-5",
-    badge: "05 — TURN ATTENTION INTO GROWTH",
-    category: "CAPITAL ACTIVATION",
-    title: "Connect visibility with measurable business outcomes.",
-    description: "From increasing digital reach to generating investor interest and building long-term audience relationships, every campaign is designed to turn your mining story into meaningful market engagement.",
+    badge: "05 — INDUSTRY & EVENT REACH",
+    category: "INDUSTRY & EVENT REACH",
+    title: "TAKE YOUR STORY BEYOND YOUR WEBSITE",
+    description: "Mining is built around relationships. We connect companies with industry conversations, events, publications and networks where important people come together.",
     image: "/images/cards/card_05_turn_attention.webp",
-    locationTag: "[ Audience Growth · Investor Reach · Lead Generation · Digital Growth ]",
+    locationTag: "[ Events · Media · Industry Networks · Partnerships ]",
     ctaText: "Learn More",
     ctaHref: "/contact",
   },
@@ -416,7 +416,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
         for (let i = 0; i < 6; i++) {
           if (columnStripRefs.current[i]) columnStripRefs.current[i]!.style.width = "0%";
         }
-      } else if (p < 0.64) {
+      } else if (p < 0.62) {
         // Pure image with 100% clarity, NO blur
         columnRevealRef.current.style.opacity = "1";
         columnRevealRef.current.style.filter = "none";
@@ -432,15 +432,15 @@ export const MiningDiscoveryShowcase: React.FC = () => {
           }
         }
       } else {
-        // p >= 0.64: As cards glide from right, apply normal soft blur (max 5.5px)
+        // p >= 0.62: As cards glide into view, apply smooth progressive blur (up to 10px) with NO white tint
         columnRevealRef.current.style.opacity = "1";
         for (let i = 0; i < 6; i++) {
           if (columnStripRefs.current[i]) columnStripRefs.current[i]!.style.width = "100%";
         }
         const isMobile = winW <= 768;
-        const cardEntryP = Math.min(1, Math.max(0, (p - 0.64) / 0.08));
-        const blurPx = (cardEntryP * 5.5).toFixed(1);
-        const scaleVal = (1 + cardEntryP * 0.02).toFixed(3);
+        const cardEntryP = Math.min(1, Math.max(0, (p - 0.62) / 0.08));
+        const blurPx = (cardEntryP * 10).toFixed(1);
+        const scaleVal = (1 + cardEntryP * 0.025).toFixed(3);
         columnRevealRef.current.style.filter = (isMobile || cardEntryP <= 0) ? "none" : `blur(${blurPx}px)`;
         columnRevealRef.current.style.transform = cardEntryP <= 0 ? "none" : `scale(${scaleVal})`;
       }
@@ -470,46 +470,34 @@ export const MiningDiscoveryShowcase: React.FC = () => {
         const exitX = -((FOCUS_CARDS.length - 1) * stride + cardWidth + 50);
         const totalDistance = startX - exitX;
 
-        if (p < 0.65) {
-          // Dedicated pure full-screen image window
-          horizontalTrackRef.current.style.transform = `translate3d(${startX.toFixed(1)}px, 0, 0)`;
+        // Cards glide continuously without dead gap, perfectly synchronized with progressive blur
+        const scrollP = Math.min(1, Math.max(0, (p - 0.62) / (1.00 - 0.62)));
+        const currentX = startX - scrollP * totalDistance;
+        horizontalTrackRef.current.style.transform = `translate3d(${currentX.toFixed(1)}px, 0, 0)`;
+
+        if (currentX > centerLastCardX) {
+          // Moving across cards 1 -> FOCUS_CARDS.length
+          const rawIndex = Math.round((centerOffset - currentX) / stride) + 1;
+          const activeIndex = Math.min(FOCUS_CARDS.length, Math.max(1, rawIndex));
+
           if (horizontalCounterRef.current) {
-            horizontalCounterRef.current.textContent = `01 / 0${FOCUS_CARDS.length}`;
+            horizontalCounterRef.current.textContent = `0${activeIndex} / 0${FOCUS_CARDS.length}`;
             horizontalCounterRef.current.style.opacity = "1";
           }
           if (finaleSlideRef.current) {
             finaleSlideRef.current.style.transform = `translate3d(${winW + 20}px, 0, 0)`;
           }
         } else {
-          // Cards continuously glide to the left
-          const scrollP = Math.min(1, Math.max(0, (p - 0.65) / (1.00 - 0.65)));
-          const currentX = startX - scrollP * totalDistance;
-          horizontalTrackRef.current.style.transform = `translate3d(${currentX.toFixed(1)}px, 0, 0)`;
+          // As last card exits to left, finale slide glides in from right
+          const exitP = Math.min(1, Math.max(0, (currentX - centerLastCardX) / (exitX - centerLastCardX)));
+          const slideX = (1 - exitP) * winW;
 
-          if (currentX > centerLastCardX) {
-            // Moving across cards 1 -> FOCUS_CARDS.length
-            const rawIndex = Math.round((centerOffset - currentX) / stride) + 1;
-            const activeIndex = Math.min(FOCUS_CARDS.length, Math.max(1, rawIndex));
-
-            if (horizontalCounterRef.current) {
-              horizontalCounterRef.current.textContent = `0${activeIndex} / 0${FOCUS_CARDS.length}`;
-              horizontalCounterRef.current.style.opacity = "1";
-            }
-            if (finaleSlideRef.current) {
-              finaleSlideRef.current.style.transform = `translate3d(${winW + 20}px, 0, 0)`;
-            }
-          } else {
-            // As last card exits to left, finale slide glides in from right
-            const exitP = Math.min(1, Math.max(0, (currentX - centerLastCardX) / (exitX - centerLastCardX)));
-            const slideX = (1 - exitP) * winW;
-
-            if (finaleSlideRef.current) {
-              finaleSlideRef.current.style.transform = `translate3d(${slideX.toFixed(1)}px, 0, 0)`;
-            }
-            if (horizontalCounterRef.current) {
-              horizontalCounterRef.current.textContent = `0${FOCUS_CARDS.length} / 0${FOCUS_CARDS.length}`;
-              horizontalCounterRef.current.style.opacity = Math.max(0, 1 - exitP * 1.5).toFixed(2);
-            }
+          if (finaleSlideRef.current) {
+            finaleSlideRef.current.style.transform = `translate3d(${slideX.toFixed(1)}px, 0, 0)`;
+          }
+          if (horizontalCounterRef.current) {
+            horizontalCounterRef.current.textContent = `0${FOCUS_CARDS.length} / 0${FOCUS_CARDS.length}`;
+            horizontalCounterRef.current.style.opacity = Math.max(0, 1 - exitP * 1.5).toFixed(2);
           }
         }
       }
@@ -595,7 +583,8 @@ export const MiningDiscoveryShowcase: React.FC = () => {
       style={{ height: reduceMotion ? "auto" : `${totalScrollVh}vh` }}
     >
       {/* Embedded Scoped Styles for Complete Standalone Portability */}
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
 /* BASE CONTAINER & SCROLL PIN */
 .mds-container {
   position: relative;
@@ -1131,10 +1120,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   opacity: 0;
   will-change: opacity;
   transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  /* When cards arrive, soften, brighten, and blur the background image for maximum card clarity */
-  background: rgba(248, 250, 252, 0.42);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: transparent;
 }
 
 /* Horizontal Track Viewport */
@@ -1319,12 +1305,13 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 /* Upper content with title and short description */
 .horizontalCardTop {
   position: relative;
-  padding: 0 clamp(0.6rem, 1.4vw, 1.5rem);
+  padding: 0 clamp(0.4rem, 1vw, 1.2rem);
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  max-width: 540px;
+  max-width: 580px;
+  width: 100%;
   margin: 0 auto;
   pointer-events: auto;
   background: transparent;
@@ -1332,14 +1319,15 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 
 .horizontalCardTitle {
   font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
-  font-size: clamp(1.35rem, 1.8vw, 1.95rem);
+  font-size: clamp(1.22rem, 1.68vw, 1.85rem);
   font-weight: 700;
   color: #FFFFFF;
-  line-height: 1.18;
+  line-height: 1.2;
   margin: 0;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   text-align: center;
+  white-space: pre-line;
   text-shadow: 0 4px 24px rgba(0, 0, 0, 0.85), 0 1px 4px rgba(0, 0, 0, 0.95);
 }
 
@@ -1922,16 +1910,16 @@ export const MiningDiscoveryShowcase: React.FC = () => {
               <div className="zoomContentWrap">
                 <div className="zoomHeadlineCol">
                   <h2 ref={zoomTitleRef} className="zoomTitle">
-                    <span className="zoomTitleLine">BUILDING VISIBILITY.</span>
-                    <span className="zoomTitleLine">CREATING INFLUENCE.</span>
-                    <span className="zoomTitleLine">DRIVING MINING GROWTH.</span>
+                    <span className="zoomTitleLine">BUILD YOUR PRESENCE.</span>
+                    <span className="zoomTitleLine">AMPLIFY YOUR STORY.</span>
+                    <span className="zoomTitleLine">REACH THE RIGHT AUDIENCE.</span>
                   </h2>
                 </div>
 
                 <div ref={zoomInfoColRef} className="zoomInfoCol">
                   <span className="zoomInfoEyebrow">OUR FOCUS AREAS</span>
                   <p className="zoomInfoText">
-                    Mining Discovery helps mining companies build their brand, amplify their story, reach the right audiences, and connect with investors — turning exploration into market conviction.
+                    Mining Discovery helps mining companies build a stronger presence, tell their stories clearly, and reach investors and industry audiences through media, content and digital marketing.
                   </p>
                 </div>
               </div>

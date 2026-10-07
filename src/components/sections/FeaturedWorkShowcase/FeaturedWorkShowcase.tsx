@@ -139,7 +139,7 @@ interface StatSet {
 
 const STAT_SETS: StatSet[] = [
   {
-    category: "Global Scale",
+    category: "Global Reach",
     stats: [
       { value: "45,000+", label: "Annual Summit Delegates" },
       { value: "130+", label: "Countries Represented" },
@@ -148,7 +148,7 @@ const STAT_SETS: StatSet[] = [
     ],
   },
   {
-    category: "Media Partnerships",
+    category: "Media & Industry Connections",
     stats: [
       { value: "4 Major", label: "Tier-1 Mining Summits" },
       { value: "12,000+", label: "Institutional Funds Reached" },
@@ -157,7 +157,7 @@ const STAT_SETS: StatSet[] = [
     ],
   },
   {
-    category: "Audience & Dealmaking",
+    category: "Audience & Network",
     stats: [
       { value: "50,000+", label: "Global Mining Leaders" },
       { value: "1,500+", label: "Fund Managers & Desks" },
@@ -455,7 +455,7 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
 
         <h2 className={styles.mainTitle}>
           <span className={styles.titleLine}>
-            {["THE", "4", "MAJOR", "MINING"].map((word, idx) => (
+            {["THE", "MAJOR", "MINING", "EVENTS"].map((word, idx) => (
               <span
                 key={idx}
                 ref={(el) => {
@@ -468,7 +468,7 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
             ))}
           </span>
           <span className={styles.titleLine}>
-            {["INVESTMENT", "EVENTS"].map((word, idx) => (
+            {["THAT", "BRING"].map((word, idx) => (
               <span
                 key={idx + 4}
                 ref={(el) => {
@@ -479,7 +479,7 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
                 {word}{" "}
               </span>
             ))}
-            {["IN", "THE", "WORLD."].map((word, idx) => (
+            {["THE", "INDUSTRY", "TOGETHER"].map((word, idx) => (
               <span
                 key={idx + 6}
                 ref={(el) => {
@@ -494,7 +494,7 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
         </h2>
 
         <p className={styles.description}>
-          Where mining companies meet institutional capital. We cover the world&apos;s most influential mining conferences on the ground, putting junior explorers and mid-tier producers directly in front of active investors.
+          We follow the major mining events where companies, investors and industry leaders come together. Our presence at these events helps us stay close to the people, ideas and opportunities shaping the mining industry.
         </p>
 
         {/* Minimal Editorial KPI Strip with Animated Count-Ups and Category Switcher */}
@@ -689,7 +689,7 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
       </footer>
 
       {/* EXPLORE OUR PUBLICATIONS: 4 CARDS (MAGAZINE, NEWSLETTER, ARTICLES, CEO PROFILE) */}
-      <PublicationsShowcase />
+      <PublicationsShowcase scrollProgress={scrollProgress} />
     </>
   );
 

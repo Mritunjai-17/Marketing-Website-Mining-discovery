@@ -34,14 +34,14 @@
 .sectionInner {
   position: relative;
   width: 100%;
-  max-width: 1360px;
+  max-width: 1240px;
   margin: 0 auto;
-  padding: clamp(5.5rem, 9vh, 7.5rem) clamp(1.25rem, 4vw, 3.5rem) clamp(4rem, 8vh, 6.5rem);
+  padding: clamp(4.5rem, 7.5vh, 6.5rem) clamp(1.25rem, 3.5vw, 2.5rem) clamp(3.5rem, 6vh, 5.5rem);
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(2.75rem, 5.5vh, 4.75rem);
+  gap: clamp(2.5rem, 4.5vh, 3.75rem);
   z-index: 5;
 }
 
@@ -167,15 +167,15 @@
 .cardsStack {
   display: flex;
   flex-direction: column;
-  gap: clamp(5rem, 9.5vh, 8.5rem);
+  gap: clamp(3rem, 5.5vh, 4.5rem);
   width: 100%;
 }
 
 .alternatingRow {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: clamp(2.5rem, 5vw, 5.5rem);
+  align-items: stretch;
+  justify-content: center;
+  gap: clamp(2rem, 3.5vw, 3.5rem);
   width: 100%;
   opacity: 0.4;
   transition: opacity 0.35s ease-out;
@@ -203,8 +203,10 @@
 /* Visual Image Card Wrap with Dual-Rail Rise */
 .cardVisualWrap {
   flex: 1 1 50%;
-  max-width: 580px;
+  max-width: 550px;
   width: 100%;
+  display: flex;
+  flex-direction: column;
   transform: translateY(60px) translateZ(0);
   opacity: 0;
   transition: transform 0.72s cubic-bezier(0.22, 1, 0.36, 1) 0s, opacity 0.55s ease-out 0s;
@@ -220,8 +222,10 @@
 .imageCard {
   position: relative;
   width: 100%;
+  height: 100%;
+  min-height: 380px;
   aspect-ratio: 16 / 11;
-  border-radius: clamp(18px, 2.2vw, 26px);
+  border-radius: clamp(18px, 2.2vw, 24px);
   overflow: hidden;
   background: #0f172a;
   border: 1px solid rgba(0, 0, 0, 0.08);
@@ -292,13 +296,23 @@
   flex: 1 1 50%;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   align-items: flex-start;
-  gap: clamp(0.75rem, 1.2vh, 1.05rem);
-  max-width: 580px;
+  max-width: 550px;
+  padding: 0.25rem 0;
+  box-sizing: border-box;
   transform: translateY(40px) translateZ(0);
   opacity: 0;
   transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.12s, opacity 0.55s ease-out 0.12s;
   will-change: transform, opacity;
+}
+
+.cardTextMain {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: clamp(0.65rem, 1vh, 0.95rem);
+  width: 100%;
 }
 
 .rowRevealed .cardTextWrap {
@@ -508,7 +522,7 @@
   .alternatingRow {
     flex-direction: column !important;
     gap: 1.75rem;
-    align-items: flex-start;
+    align-items: flex-start !important;
   }
 
   .cardVisualWrap,
@@ -518,8 +532,16 @@
     width: 100%;
   }
 
+  .imageCard {
+    min-height: unset;
+    height: auto;
+    aspect-ratio: 16 / 10;
+  }
+
   .cardTextWrap {
-    gap: 0.75rem;
+    justify-content: flex-start;
+    gap: 1rem;
+    padding: 0;
   }
 
   .metricsBar {

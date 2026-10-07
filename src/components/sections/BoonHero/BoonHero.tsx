@@ -256,8 +256,7 @@ export const BoonHero = React.memo(
       const act2Y = (1 - act2Enter) * 30 - Math.max(0, (p - 0.62) * 50);
 
       const act3Enter = Math.max(0, Math.min(1, (p - 0.68) / 0.12));
-      const act3Exit = Math.max(0, 1 - Math.max(0, (p - 0.88) / 0.12));
-      const act3Opacity = act3Enter * act3Exit;
+      const act3Opacity = act3Enter;
       const act3Y = (1 - act3Enter) * 30;
 
       const isMobile = typeof window !== "undefined" && (window.innerWidth < 900 || window.matchMedia("(pointer: coarse)").matches);
@@ -277,6 +276,7 @@ export const BoonHero = React.memo(
           undergroundLayerRef.current.style.opacity = act3Opacity.toFixed(3);
           undergroundLayerRef.current.style.transform = `translate3d(0, ${act3Y}px, 0)`;
           undergroundLayerRef.current.style.filter = "none";
+          undergroundLayerRef.current.style.pointerEvents = "auto";
         }
       } else {
         if (surfaceLayerRef.current) {
@@ -298,6 +298,7 @@ export const BoonHero = React.memo(
           });
         }
         if (undergroundLayerRef.current) {
+          undergroundLayerRef.current.style.pointerEvents = "auto";
           gsap.to(undergroundLayerRef.current, {
             opacity: act3Opacity,
             y: `${act3Y}px`,
@@ -308,13 +309,11 @@ export const BoonHero = React.memo(
         }
       }
 
-      // 3. Section Handover Opacity & Pointer Events
-      const heroOpacity = p >= 0.88 ? Math.max(0, 1 - (p - 0.88) / 0.12) : 1.0;
-      const isHidden = heroOpacity <= 0.005;
+      // 3. Keep hero container fully interactive
       if (containerRef.current) {
-        containerRef.current.style.opacity = heroOpacity.toFixed(3);
-        containerRef.current.style.visibility = isHidden ? "hidden" : "visible";
-        containerRef.current.style.pointerEvents = heroOpacity > 0.05 ? "auto" : "none";
+        containerRef.current.style.opacity = "1";
+        containerRef.current.style.visibility = "visible";
+        containerRef.current.style.pointerEvents = "auto";
       }
     }, [renderFrame]);
 
@@ -353,10 +352,9 @@ export const BoonHero = React.memo(
       return () => window.removeEventListener("mousemove", handleMouseMove);
     }, [p]);
 
-    // Handover to downstream scene at p >= 0.88
-    const heroOpacity = p >= 0.88 ? Math.max(0, 1 - (p - 0.88) / 0.12) : 1.0;
-    const isHidden = heroOpacity <= 0.005;
-    const pointerEvents = heroOpacity > 0.05 ? "auto" : "none";
+    const heroOpacity = 1.0;
+    const isHidden = false;
+    const pointerEvents = "auto";
 
     const handleScrollClick = () => {
       if (onExploreClick) {
@@ -417,12 +415,12 @@ export const BoonHero = React.memo(
             style={{ opacity: 0 }}
           >
             <h2 className={styles.actHeadline}>
-              <span>TURN MILESTONES</span>
-              <span>INTO ATTENTION</span>
+              <span>HAVE SOMETHING</span>
+              <span>IMPORTANT TO SHARE?</span>
             </h2>
 
             <p className={styles.actSubline}>
-              From exploration results to corporate updates, we create content and campaigns built for the mining industry.
+              From exploration results and project updates to company news, we help you get your story in front of the mining audience.
             </p>
           </div>
 
@@ -435,17 +433,29 @@ export const BoonHero = React.memo(
             style={{ opacity: 0 }}
           >
             <h2 className={styles.actHeadline}>
-              <span>REACH THE PEOPLE</span>
-              <span>WHO MATTER</span>
+              <span>PUT YOUR COMPANY</span>
+              <span>IN THE SPOTLIGHT.</span>
             </h2>
 
             <p className={styles.actSubline}>
-              Connect your company with investors, industry professionals and decision-makers through mining media and digital marketing.
+              Once you have a story worth sharing, we help bring it to the wider mining community through media coverage, company features, interviews and digital content.
             </p>
 
             <Link
               href="/contact"
               className={styles.undergroundCtaButton}
+              data-cursor="hover"
+              onClick={(e) => {
+                e.stopPropagation();
+                window.location.href = "/contact";
+              }}
+              onTouchEnd={(e) => {
+                e.stopPropagation();
+                window.location.href = "/contact";
+              }}
+              onPointerDown={(e) => {
+                e.stopPropagation();
+              }}
             >
               <span>GET FEATURED</span>
               <ArrowRight />

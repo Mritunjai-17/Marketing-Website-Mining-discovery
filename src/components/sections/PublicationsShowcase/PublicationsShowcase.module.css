@@ -79,6 +79,10 @@
   text-transform: uppercase;
 }
 
+.titleLine {
+  display: block;
+}
+
 .wordSpan {
   display: inline-block;
   margin-right: 0.28em;
@@ -87,6 +91,7 @@
   transform: translate3d(0, 5px, 0);
   filter: blur(1.2px);
   will-change: transform, opacity, filter;
+  transition: opacity 0.3s ease, filter 0.3s ease, transform 0.3s ease;
 }
 
 .goldWordSpan {
@@ -109,6 +114,7 @@
   transform: translate3d(0, 5px, 0);
   filter: blur(1.2px);
   will-change: transform, opacity, filter;
+  transition: opacity 0.3s ease, filter 0.3s ease, transform 0.3s ease;
 }
 
 @keyframes metallicGoldFlow {
@@ -131,7 +137,7 @@
   font-weight: 400;
   line-height: 1.65;
   color: #334155;
-  max-width: 760px;
+  max-width: 820px;
   margin: 0;
 }
 
@@ -143,6 +149,15 @@
   transform: translate3d(0, 4px, 0);
   filter: blur(1px);
   will-change: transform, opacity, filter;
+  transition: opacity 0.3s ease, filter 0.3s ease, transform 0.3s ease;
+}
+
+.header.inView .wordSpan,
+.header.inView .goldWordSpan,
+.header.inView .subWordSpan {
+  opacity: 1 !important;
+  transform: translate3d(0, 0, 0) !important;
+  filter: none !important;
 }
 
 /* ==========================================================================
