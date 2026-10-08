@@ -133,9 +133,9 @@ export const Footer: React.FC = () => {
             </Link>
 
             <p className="mt-6 max-w-xs text-sm font-normal leading-relaxed text-[#F0F4F8]/60">
-              Mining Discovery is your trusted source for in-depth mining news, executive
-              profiles, company insights, and industry analysis — connecting the global
-              mining community with the stories that matter.
+              Mining Discovery brings together mining news, company stories, industry insights and
+              conversations from across the resource sector. We help keep mining companies,
+              investors and industry professionals connected to what is happening in the industry.
             </p>
           </RevealItem>
 

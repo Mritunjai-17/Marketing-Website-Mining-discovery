@@ -327,6 +327,13 @@ export const GlobeHero: React.FC = () => {
         className="relative w-full"
         style={{ height: reduceMotion ? "100vh" : `${totalScrollVh}vh` }}
       >
+        {/* Anchor point targeting the Publications Showcase (Magazines, Newsletters, Articles, CEO Profiles) */}
+        <div
+          id="publications"
+          className="absolute left-0 w-full pointer-events-none"
+          style={{ top: "56%" }}
+          aria-hidden="true"
+        />
         {/* Anchor point targeting the Brand & Visual Identity Services stage */}
         <div
           id="services"

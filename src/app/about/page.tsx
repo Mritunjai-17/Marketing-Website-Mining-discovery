@@ -51,7 +51,7 @@ export const metadata: Metadata = {
  */
 export default function AboutPage() {
   return (
-    <div className="w-full overflow-x-hidden bg-[#F7F5EF] font-sans text-[#1A1D21]">
+    <div className="w-full overflow-x-clip bg-[#F7F5EF] font-sans text-[#1A1D21]">
       {/*
         Every section on this page hides its content in CSS before revealing it, so that the
         server-rendered HTML never flashes the finished layout before hydration. With no JS

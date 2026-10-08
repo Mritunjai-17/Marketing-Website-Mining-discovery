@@ -437,7 +437,7 @@ export const PublicationsShowcase: React.FC<PublicationsShowcaseProps> = ({
   ];
 
   return (
-    <section id="publications" className={styles.publicationsSection} aria-label="Put Your Mining Story in Front of the Industry">
+    <section id="publications-showcase" className={styles.publicationsSection} aria-label="Put Your Mining Story in Front of the Industry">
       {/* Editorial Header */}
       <header ref={headerRef} className={`${styles.header} ${headerInView ? styles.inView : ""}`}>
         <div className={styles.eyebrowRow}>
