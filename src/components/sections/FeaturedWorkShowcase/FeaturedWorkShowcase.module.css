@@ -142,29 +142,48 @@
 /* Small labels: Gold */
 .eyebrowText {
   font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
-  font-size: clamp(0.72rem, 0.85vw, 0.85rem);
+  font-size: clamp(0.66rem, 1.2vw, 0.85rem);
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: #7A5E22;
   white-space: nowrap;
+  text-align: center;
 }
 
 /* Main heading: Deep Obsidian Slate (#0F172A) on Warm Stone */
 .mainTitle {
   font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
-  font-size: clamp(1.85rem, 3.2vw, 3.2rem);
+  font-size: clamp(1.45rem, 3.2vw, 3.2rem);
   font-weight: 700;
   color: #0F172A;
-  line-height: 1.15;
+  line-height: 1.18;
   letter-spacing: -0.025em;
-  margin: 0 0 clamp(0.85rem, 1.5vh, 1.25rem) 0;
+  margin: 0 auto clamp(0.85rem, 1.5vh, 1.25rem) auto;
   text-transform: uppercase;
   max-width: 920px;
+  width: 100%;
+  text-align: center;
+  text-wrap: balance;
+  box-sizing: border-box;
 }
 
 .titleLine {
   display: block;
+  text-align: center;
+  width: 100%;
+}
+
+.subPhrase {
+  display: inline-block;
+  margin-right: 0.28em;
+  text-align: center;
+}
+
+.goldPhrase {
+  display: inline-block;
+  white-space: nowrap;
+  text-align: center;
 }
 
 .wordSpan {
@@ -1064,6 +1083,37 @@
     max-width: 100% !important;
   }
 
+  .eyebrowRow {
+    gap: 0.5rem !important;
+  }
+
+  .eyebrowText {
+    font-size: clamp(0.62rem, 1.8vw, 0.78rem) !important;
+  }
+
+  .mainTitle {
+    font-size: clamp(1.45rem, 4vw, 2.4rem) !important;
+    line-height: 1.2 !important;
+    padding: 0 0.5rem !important;
+  }
+
+  .titleLine {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+
+  .subPhrase {
+    display: inline-block !important;
+    margin-right: 0.28em !important;
+  }
+
+  .goldPhrase {
+    display: inline-block !important;
+    white-space: nowrap !important;
+  }
+
   .description {
     font-size: clamp(0.80rem, 2.2vw, 0.90rem) !important;
     line-height: 1.45 !important;
@@ -1530,5 +1580,59 @@
 
   .tabDivider {
     display: none;
+  }
+}
+
+@media (max-width: 540px) {
+  .eyebrowRow {
+    gap: 0.35rem !important;
+  }
+
+  .eyebrowText {
+    font-size: clamp(0.54rem, 2.7vw, 0.68rem) !important;
+    letter-spacing: 0.09em !important;
+  }
+
+  .eyebrowRule {
+    width: clamp(14px, 3.5vw, 28px) !important;
+  }
+
+  .mainTitle {
+    font-size: clamp(1.28rem, 5.8vw, 1.65rem) !important;
+    line-height: 1.25 !important;
+    padding: 0 0.25rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  /* On phone viewports: cleanly display 3 balanced lines:
+     1. THE MAJOR MINING EVENTS
+     2. THAT BRING
+     3. THE INDUSTRY TOGETHER (all in gold!) */
+  .titleLine:nth-of-type(2) {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.05em !important;
+  }
+
+  .subPhrase {
+    display: block !important;
+    margin-right: 0 !important;
+  }
+
+  .goldPhrase {
+    display: block !important;
+    white-space: nowrap !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .mainTitle {
+    font-size: 1.15rem !important;
+  }
+
+  .goldPhrase {
+    white-space: normal !important;
   }
 }

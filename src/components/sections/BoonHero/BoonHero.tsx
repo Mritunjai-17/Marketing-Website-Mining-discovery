@@ -261,22 +261,29 @@ export const BoonHero = React.memo(
 
       const isMobile = typeof window !== "undefined" && (window.innerWidth < 900 || window.matchMedia("(pointer: coarse)").matches);
 
+      const isAct3Active = act3Opacity > 0.4;
+      const isAct2Active = act2Opacity > 0.2;
+
       if (isMobile) {
         if (surfaceLayerRef.current) {
           surfaceLayerRef.current.style.opacity = act1Fade.toFixed(3);
           surfaceLayerRef.current.style.transform = `translate3d(0, ${act1Y}vh, 0)`;
           surfaceLayerRef.current.style.filter = "none";
+          surfaceLayerRef.current.style.pointerEvents = act1Fade > 0.1 ? "auto" : "none";
         }
         if (openPitLayerRef.current) {
           openPitLayerRef.current.style.opacity = act2Opacity.toFixed(3);
           openPitLayerRef.current.style.transform = `translate3d(0, ${act2Y}px, 0)`;
           openPitLayerRef.current.style.filter = "none";
+          openPitLayerRef.current.style.pointerEvents = isAct2Active ? "auto" : "none";
+          openPitLayerRef.current.style.visibility = isAct2Active ? "visible" : "hidden";
         }
         if (undergroundLayerRef.current) {
           undergroundLayerRef.current.style.opacity = act3Opacity.toFixed(3);
           undergroundLayerRef.current.style.transform = `translate3d(0, ${act3Y}px, 0)`;
           undergroundLayerRef.current.style.filter = "none";
-          undergroundLayerRef.current.style.pointerEvents = "auto";
+          undergroundLayerRef.current.style.pointerEvents = isAct3Active ? "auto" : "none";
+          undergroundLayerRef.current.style.visibility = isAct3Active ? "visible" : "hidden";
         }
       } else {
         if (surfaceLayerRef.current) {
@@ -289,6 +296,8 @@ export const BoonHero = React.memo(
           });
         }
         if (openPitLayerRef.current) {
+          openPitLayerRef.current.style.pointerEvents = isAct2Active ? "auto" : "none";
+          openPitLayerRef.current.style.visibility = isAct2Active ? "visible" : "hidden";
           gsap.to(openPitLayerRef.current, {
             opacity: act2Opacity,
             y: `${act2Y}px`,
@@ -298,7 +307,8 @@ export const BoonHero = React.memo(
           });
         }
         if (undergroundLayerRef.current) {
-          undergroundLayerRef.current.style.pointerEvents = "auto";
+          undergroundLayerRef.current.style.pointerEvents = isAct3Active ? "auto" : "none";
+          undergroundLayerRef.current.style.visibility = isAct3Active ? "visible" : "hidden";
           gsap.to(undergroundLayerRef.current, {
             opacity: act3Opacity,
             y: `${act3Y}px`,
@@ -445,17 +455,6 @@ export const BoonHero = React.memo(
               href="/contact"
               className={styles.undergroundCtaButton}
               data-cursor="hover"
-              onClick={(e) => {
-                e.stopPropagation();
-                window.location.href = "/contact";
-              }}
-              onTouchEnd={(e) => {
-                e.stopPropagation();
-                window.location.href = "/contact";
-              }}
-              onPointerDown={(e) => {
-                e.stopPropagation();
-              }}
             >
               <span>GET FEATURED</span>
               <ArrowRight />

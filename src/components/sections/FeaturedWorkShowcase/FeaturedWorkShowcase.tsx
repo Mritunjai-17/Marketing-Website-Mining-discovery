@@ -468,28 +468,32 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
             ))}
           </span>
           <span className={styles.titleLine}>
-            {["THAT", "BRING"].map((word, idx) => (
-              <span
-                key={idx + 4}
-                ref={(el) => {
-                  headingWordRefs.current[idx + 4] = el;
-                }}
-                className={styles.wordSpan}
-              >
-                {word}{" "}
-              </span>
-            ))}
-            {["THE", "INDUSTRY", "TOGETHER"].map((word, idx) => (
-              <span
-                key={idx + 6}
-                ref={(el) => {
-                  headingWordRefs.current[idx + 6] = el;
-                }}
-                className={styles.goldWordSpan}
-              >
-                {word}{" "}
-              </span>
-            ))}
+            <span className={styles.subPhrase}>
+              {["THAT", "BRING"].map((word, idx) => (
+                <span
+                  key={idx + 4}
+                  ref={(el) => {
+                    headingWordRefs.current[idx + 4] = el;
+                  }}
+                  className={styles.wordSpan}
+                >
+                  {word}{" "}
+                </span>
+              ))}
+            </span>
+            <span className={styles.goldPhrase}>
+              {["THE", "INDUSTRY", "TOGETHER"].map((word, idx) => (
+                <span
+                  key={idx + 6}
+                  ref={(el) => {
+                    headingWordRefs.current[idx + 6] = el;
+                  }}
+                  className={styles.goldWordSpan}
+                >
+                  {word}{" "}
+                </span>
+              ))}
+            </span>
           </span>
         </h2>
 
