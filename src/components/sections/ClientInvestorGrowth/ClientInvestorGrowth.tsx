@@ -42,8 +42,8 @@ const GROWTH_PILLARS: GrowthPillar[] = [
       "Give your project a stronger voice",
       "Build visibility beyond the announcement",
     ],
-    image: "/services/02-drill.webp",
-    alt: "Mining company visual marketing presentation and executive media suite",
+    image: "/services/mining-operations-control.webp",
+    alt: "Mining operations control center and market intelligence dashboard overlooking open-pit mine",
     align: "left-card",
   },
   {
@@ -58,8 +58,8 @@ const GROWTH_PILLARS: GrowthPillar[] = [
       "Hear directly from industry leaders",
       "Keep up with a fast-moving industry",
     ],
-    image: "/services/03-assay.webp",
-    alt: "Institutional mining analysts and investors evaluating exploration data",
+    image: "/services/mining-leader-interview.webp",
+    alt: "Mining executive on-site media interview in front of active open-pit mining operations",
     align: "right-card",
   },
   {
@@ -74,8 +74,8 @@ const GROWTH_PILLARS: GrowthPillar[] = [
       "Understand commodity trends with clear insights",
       "Stay ahead of fast-moving resource markets",
     ],
-    image: "/services/01-survey.webp",
-    alt: "Market analysis and commodity trading charts for resource equities",
+    image: "/services/mining-market-conference.webp",
+    alt: "Global mining conference executive panel discussing market intelligence and operations",
     align: "left-card",
   },
   {
@@ -90,8 +90,8 @@ const GROWTH_PILLARS: GrowthPillar[] = [
       "Discover exploration companies beyond your usual network",
       "Accelerate strategic partnerships and joint ventures",
     ],
-    image: "/services/04-pit.webp",
-    alt: "Large-scale modern mining processing facility and open pit production infrastructure",
+    image: "/services/mining-strategic-partnerships.webp",
+    alt: "Strategic mining joint venture handshake with project analytics and open-pit mine site view",
     align: "right-card",
   },
 ];

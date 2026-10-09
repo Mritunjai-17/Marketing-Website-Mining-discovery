@@ -25,6 +25,7 @@ interface ChapterData {
   titleLine2: string;
   coordinates: string;
   bgImage: string;
+  watermarkImage?: string;
   bgType?: "image" | "logo";
   logoImage?: string;
   clientName: string;
@@ -36,6 +37,7 @@ interface ChapterData {
   metric2Lbl: string;
   deliverables: string;
   align: "heading-left" | "heading-right";
+  eventUrl: string;
 }
 
 const CHAPTERS: ChapterData[] = [
@@ -47,19 +49,21 @@ const CHAPTERS: ChapterData[] = [
     titleLine1: "THE MINING INVESTMENT",
     titleLine2: "EVENT OF THE NORTH",
     coordinates: "LAT 46°48'N / LON 71°12'W // CHÂTEAU FRONTENAC",
-    bgImage: "/images/events/the_mining_investment_event_watermark.webp",
-    bgType: "logo",
+    bgImage: "/images/events/the_mining_investment_event_bg.webp",
+    watermarkImage: "/images/events/the_mining_investment_event_watermark.webp",
+    bgType: "image",
     logoImage: "/images/events/the_mining_investment_event_logo.webp",
     clientName: "The Mining Investment Event of the North",
     storyLead:
       "Canada’s premier tier-1 invitation-only mining conference, connecting c-suite executives directly with senior institutional funds, Bay Street desks, and major producers.",
     storyDetail: "",
-    metric1Val: "2-Year",
-    metric1Lbl: "Official Media Partner",
+    metric1Val: "100+",
+    metric1Lbl: "Participating Mining Companies",
     metric2Val: "Tier-1",
     metric2Lbl: "Institutional Mining Summit",
     deliverables: "Executive Video Series • On-Site Broadcasts • Institutional Syndication",
     align: "heading-left",
+    eventUrl: "https://www.themininginvestmentevent.com/",
   },
   {
     id: "pdac-convention",
@@ -69,8 +73,9 @@ const CHAPTERS: ChapterData[] = [
     titleLine1: "PDAC GLOBAL EXPLORATION",
     titleLine2: "& INVESTMENT CONVENTION",
     coordinates: "LAT 43°38'N / LON 79°23'W // METRO TORONTO CONVENTION CENTRE",
-    bgImage: "/images/events/pdac_watermark.webp",
-    bgType: "logo",
+    bgImage: "/images/events/pdac_bg.webp",
+    watermarkImage: "/images/events/pdac_watermark.webp",
+    bgType: "image",
     logoImage: "/images/events/pdac_logo.webp",
     clientName: "Prospectors & Developers Association of Canada",
     storyLead:
@@ -82,6 +87,7 @@ const CHAPTERS: ChapterData[] = [
     metric2Lbl: "Participating Countries",
     deliverables: "Discovery Stage Coverage • Junior Miner Spotlights • Investor Briefs",
     align: "heading-left",
+    eventUrl: "https://www.pdac.ca/convention",
   },
   {
     id: "mines-and-money",
@@ -91,8 +97,9 @@ const CHAPTERS: ChapterData[] = [
     titleLine1: "MINES AND MONEY",
     titleLine2: "& RESOURCING TOMORROW",
     coordinates: "LAT 51°32'N / LON 0°06'W // BUSINESS DESIGN CENTRE",
-    bgImage: "/images/events/mines_and_money_watermark.webp",
-    bgType: "logo",
+    bgImage: "/images/events/mines_and_money_bg.webp",
+    watermarkImage: "/images/events/mines_and_money_watermark.webp",
+    bgType: "image",
     logoImage: "/images/events/mines_and_money_logo.webp",
     clientName: "Mines and Money / Resourcing Tomorrow",
     storyLead:
@@ -104,6 +111,7 @@ const CHAPTERS: ChapterData[] = [
     metric2Lbl: "Mining Corporates & Desks",
     deliverables: "European Capital Matchmaking • C-Suite Interviews • Bourse Visibility",
     align: "heading-left",
+    eventUrl: "https://minesandmoney.com/",
   },
   {
     id: "mining-indaba",
@@ -113,8 +121,9 @@ const CHAPTERS: ChapterData[] = [
     titleLine1: "INVESTING IN AFRICAN",
     titleLine2: "MINING INDABA",
     coordinates: "LAT 33°55'S / LON 18°25'E // CTICC CAPE TOWN",
-    bgImage: "/images/events/mining_indaba_watermark.webp",
-    bgType: "logo",
+    bgImage: "/images/events/mining_indaba_bg.webp",
+    watermarkImage: "/images/events/mining_indaba_watermark.webp",
+    bgType: "image",
     logoImage: "/images/events/mining_indaba_logo.webp",
     clientName: "Investing in African Mining Indaba",
     storyLead:
@@ -126,6 +135,7 @@ const CHAPTERS: ChapterData[] = [
     metric2Lbl: "Sovereign & Corporate Delegations",
     deliverables: "Sovereign Project Spotlights • M&A Coverage • Global Syndication",
     align: "heading-left",
+    eventUrl: "https://miningindaba.com/",
   },
 ];
 
@@ -561,17 +571,14 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
                   onClick={() => {
                     if (isPreceding) handleTabClick(idx);
                   }}
-                  className={`${styles.alternatingRow} ${styles.stackCard} ${
-                    isHeadingLeft ? styles.rowHeadingLeft : styles.rowHeadingRight
-                  } ${isRevealed ? styles.rowRevealed : ""} ${
-                    isActive ? styles.rowActive : ""
-                  } ${isPreceding ? styles.rowPreceding : ""}`}
+                  className={`${styles.alternatingRow} ${styles.stackCard} ${isHeadingLeft ? styles.rowHeadingLeft : styles.rowHeadingRight
+                    } ${isRevealed ? styles.rowRevealed : ""} ${isActive ? styles.rowActive : ""
+                    } ${isPreceding ? styles.rowPreceding : ""}`}
                 >
                   {/* Dedicated Chapter Background Image or Partner Logo */}
                   <div
-                    className={`${styles.chapterBgWrap} ${
-                      chapter.bgType === "logo" ? styles.chapterBgLogoWrap : ""
-                    }`}
+                    className={`${styles.chapterBgWrap} ${chapter.bgType === "logo" ? styles.chapterBgLogoWrap : ""
+                      }`}
                     aria-hidden="true"
                   >
                     {chapter.bgType === "logo" ? (
@@ -594,6 +601,17 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
                           loading="lazy"
                         />
                         <div className={styles.chapterBgOverlay} />
+                        {chapter.watermarkImage && (
+                          <div className={styles.logoBgContainer}>
+                            <div className={styles.logoAmbientGlow} />
+                            <img
+                              src={chapter.watermarkImage}
+                              alt=""
+                              className={styles.chapterLogoBgImg}
+                              loading="lazy"
+                            />
+                          </div>
+                        )}
                       </>
                     )}
                   </div>
@@ -667,10 +685,15 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
                       <span className={styles.deliverablesContent}>{chapter.deliverables}</span>
                     </div>
 
-                    <Link href="/work" className={styles.readStoryLink}>
+                    <a
+                      href={chapter.eventUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.readStoryLink}
+                    >
                       <span>Explore event coverage</span>
                       <ArrowUpRight size={15} />
-                    </Link>
+                    </a>
                   </div>
                 </section>
               );
