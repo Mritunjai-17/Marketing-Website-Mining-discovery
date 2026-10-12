@@ -499,25 +499,25 @@ export const SERVICE_CARDS: ServiceCardItem[] = [
     id: "brand-visual-identity",
     num: "01",
     category: "STRATEGIC POSITIONING",
-    title: "Brand & Visual Identity",
-    titleWhite: "BRAND &",
-    titleGold: "VISUAL IDENTITY",
-    italicTitle: "Brand & Visual Identity",
-    metaPrice: "DIGITAL BRANDING",
-    metaSeason: "LOGO & VISUAL DESIGN",
-    summary: "YOUR BRAND'S VISIBILITY IS NOT ENOUGH; IT SHOULD ALSO BE ACKNOWLEDGED.",
+    title: "Brand Identity & Visual Design",
+    titleWhite: "BRAND IDENTITY\u00A0&",
+    titleGold: "VISUAL DESIGN",
+    italicTitle: "Brand Identity & Visual Design",
+    metaPrice: "BRAND STRATEGY",
+    metaSeason: "LOGO DESIGN",
+    summary: "BUILD A CLEAR, CONSISTENT BRAND IDENTITY THAT REFLECTS WHO YOU ARE.",
     description:
-      "Your brand's visibility is not enough; it should also be acknowledged. We create brand identities and visual assets designed to make mining and industrial enterprises recognized, trusted, and remembered across global capital and industrial markets.",
-    image: "/images/services/service_03_brand_light.webp",
+      "We help mining and industrial companies build a clear, consistent brand identity that reflects who they are, what they do, and what sets them apart.",
+    image: "/images/services/service_card_01_brand.webp",
     badge: "01 / STRATEGIC POSITIONING",
     features: [
       {
         title: "DIGITAL BRANDING",
-        text: "We create brand identities with layout, value, and recognition as their main characteristics, thus making the mining and industrial fields remember the company.",
+        text: "From your website to your digital materials, we create a consistent brand presence that helps people recognize and understand your business.",
       },
       {
         title: "LOGO & VISUAL DESIGN",
-        text: "The logo is the marketing element that brands use the most. Our team of designers will create visuals that define and portray your brand accurately and with much imagination and skill.",
+        text: "We design logos, color systems, and visual assets that give your company a distinctive, professional look across every platform.",
       },
     ],
     ctaText: "",
@@ -527,25 +527,25 @@ export const SERVICE_CARDS: ServiceCardItem[] = [
     id: "social-media-marketing",
     num: "02",
     category: "AUDIENCE ENGAGEMENT",
-    title: "Social Media Marketing",
-    titleWhite: "SOCIAL",
-    titleGold: "MEDIA MARKETING",
-    italicTitle: "Social Media Marketing",
-    metaPrice: "CAMPAIGN STRATEGY",
-    metaSeason: "DATA-BACKED CONTENT",
-    summary: "CREATE DEBATES THAT ARE SIGNIFICANT FOR BOTH YOU AND YOUR CUSTOMERS.",
+    title: "Social Media & Audience Reach",
+    titleWhite: "SOCIAL MEDIA\u00A0&",
+    titleGold: "AUDIENCE REACH",
+    italicTitle: "Social Media & Audience Reach",
+    metaPrice: "CONTENT STRATEGY",
+    metaSeason: "COMMUNITY ENGAGEMENT",
+    summary: "BUILD AN ACTIVE, CREDIBLE PRESENCE ACROSS SOCIAL PLATFORMS.",
     description:
-      "Create debates that are significant for both you and your customers. Our team takes care of your social media by inventing campaigns, applying strategies backed with data, and producing the kind of content that will resonate with your audience and strengthen your brand's voice.",
-    image: "/images/services/service_07_newspaper_light.webp",
+      "We help resource companies build an active, credible presence across social platforms to engage investors, industry leaders, and commercial partners.",
+    image: "/images/services/service_card_02_social.webp",
     badge: "02 / AUDIENCE ENGAGEMENT",
     features: [
       {
         title: "DATA-BACKED CAMPAIGNS",
-        text: "Inventing data-driven social campaigns that foster constructive dialogue and continuous audience interest across the mining sector.",
+        text: "We craft targeted, sector-specific campaigns that translate complex mining milestones into compelling narratives that drive sustained audience interest.",
       },
       {
-        title: "BRAND VOICE & REACH",
-        text: "Producing content that resonates with decision-makers, retail investors, and resource professionals worldwide.",
+        title: "BRAND VOICE & ENGAGEMENT",
+        text: "From executive thought leadership to daily community updates, we maintain an authentic, professional voice that strengthens trust in your brand.",
       },
     ],
     ctaText: "",
@@ -555,25 +555,25 @@ export const SERVICE_CARDS: ServiceCardItem[] = [
     id: "paid-campaigns-ads",
     num: "03",
     category: "PERFORMANCE MARKETING",
-    title: "Google, LinkedIn & Meta Ads",
-    titleWhite: "GOOGLE, LINKEDIN &",
-    titleGold: "META ADS",
-    italicTitle: "Google, LinkedIn & Meta Ads",
-    metaPrice: "GOOGLE ADS",
-    metaSeason: "LINKEDIN & META ADS",
-    summary: "GET TO YOUR CUSTOMERS WHERE IT IS MOST EFFECTIVE.",
+    title: "Targeted Ads & Performance Growth",
+    titleWhite: "TARGETED ADS\u00A0&",
+    titleGold: "PERFORMANCE GROWTH",
+    italicTitle: "Targeted Ads & Performance Growth",
+    metaPrice: "SEARCH & SOCIAL ADS",
+    metaSeason: "INVESTOR ACQUISITION",
+    summary: "CONNECT WITH QUALIFIED INVESTORS AND KEY INDUSTRY DECISION-MAKERS.",
     description:
-      "Get to your customers where it is most effective. We create and manage targeted ad campaigns across Google, LinkedIn, and Meta that connect with professionals and large audiences to drive brand visibility, qualified leads, and measurable growth.",
-    image: "/images/services/service_08_articles_light.webp",
+      "We manage high-performing paid campaigns across Google, LinkedIn, and Meta that connect your company with qualified investors and key industry decision-makers.",
+    image: "/images/services/service_card_03_ads.webp",
     badge: "03 / PERFORMANCE MARKETING",
     features: [
       {
-        title: "GOOGLE ADS & PAID CAMPAIGNS",
-        text: "Get to your customers where it is most effective. The Google Ads that we create and manage will lead to clicks, sales, and your company's growth that can be tracked and quantified.",
+        title: "GOOGLE SEARCH & DISPLAY",
+        text: "Capture high-intent interest at the exact moment investors and partners search for resource opportunities, commodity analysis, and project updates.",
       },
       {
-        title: "LINKEDIN & META ADS",
-        text: "We create and maintain ad campaigns on LinkedIn and Meta for different purposes, from connecting with professionals to engaging with a large audience that will lead to brand visibility, leads, and awareness of the brand.",
+        title: "LINKEDIN & META TARGETING",
+        text: "Reach institutional executives, retail shareholders, and industry professionals with precisely tailored creative that drives measurable engagement and leads.",
       },
     ],
     ctaText: "",
@@ -583,25 +583,25 @@ export const SERVICE_CARDS: ServiceCardItem[] = [
     id: "pr-events",
     num: "04",
     category: "INDUSTRY AUTHORITY",
-    title: "Public Relations & Webinars",
-    titleWhite: "PUBLIC RELATIONS &",
-    titleGold: "WEBINARS",
-    italicTitle: "Public Relations & Webinars",
-    metaPrice: "PUBLIC RELATIONS (PR)",
-    metaSeason: "WEBINARS & EVENTS",
-    summary: "PUT YOUR COMPANY IN THE LIMELIGHT THROUGH CREDIBILITY & INTERACTIONS.",
+    title: "Public Relations & Executive Webinars",
+    titleWhite: "PUBLIC RELATIONS\u00A0&",
+    titleGold: "EXECUTIVE WEBINARS",
+    italicTitle: "Public Relations & Executive Webinars",
+    metaPrice: "MEDIA OUTREACH",
+    metaSeason: "VIRTUAL SUMMITS",
+    summary: "ELEVATE LEADERSHIP AND CORPORATE ANNOUNCEMENTS ACROSS GLOBAL MEDIA.",
     description:
-      "We make sure that your company is in the limelight not by spending money but by gaining it. Through media contacts, press releases, thought leadership, and proficient webinars and events, we build industry authority and capture audience attention.",
-    image: "/images/services/service_02_media_light.webp",
+      "We elevate your leadership and corporate announcements through top-tier media coverage, strategic press distribution, and high-impact digital events.",
+    image: "/images/services/service_card_04_pr.webp",
     badge: "04 / INDUSTRY AUTHORITY",
     features: [
       {
-        title: "PUBLIC RELATIONS (PR)",
-        text: "We make sure that your company is in the limelight not by spending money but by gaining it. Through media contacts, press releases, and thought leadership, we create credibility and influence the way your story is told.",
+        title: "STRATEGIC MEDIA RELATIONS",
+        text: "We secure prominent editorial coverage across global mining journals, financial press, and industry publications to establish lasting market authority.",
       },
       {
-        title: "WEBINARS & EVENTS",
-        text: "Capture the attention of your audience through significant digital interactions. We organize and conduct proficient webinars and events that provide education, motivation, and development of your position in the industry.",
+        title: "INTERACTIVE WEBINARS & EVENTS",
+        text: "We produce and broadcast polished virtual briefings that allow leadership to present directly to analysts, fund managers, and shareholders worldwide.",
       },
     ],
     ctaText: "",
@@ -611,25 +611,25 @@ export const SERVICE_CARDS: ServiceCardItem[] = [
     id: "web-app-development",
     num: "05",
     category: "DIGITAL INFRASTRUCTURE",
-    title: "Website & App Development",
-    titleWhite: "WEBSITE &",
+    title: "Web Platforms & App Development",
+    titleWhite: "WEB PLATFORMS\u00A0&",
     titleGold: "APP DEVELOPMENT",
-    italicTitle: "Website & App Development",
-    metaPrice: "WEBSITE DEVELOPMENT",
-    metaSeason: "APP DEVELOPMENT",
-    summary: "THE CORNERSTONE OF YOUR ONLINE PRESENCE & INTELLIGENT APPLICATIONS.",
+    italicTitle: "Web Platforms & App Development",
+    metaPrice: "ENTERPRISE WEB",
+    metaSeason: "CUSTOM APPLICATIONS",
+    summary: "HIGH-SPEED WEBSITES AND INTERACTIVE DIGITAL TOOLS FOR MINING.",
     description:
-      "Your website is the cornerstone of your online presence. We create quick, user-friendly, and good-looking websites paired with intelligent, easy-to-use mobile and web applications that improve interaction, make operations easier, and bring actual value to your company.",
-    image: "/images/services/service_05_web_development.webp",
+      "We build modern, high-speed websites and interactive digital tools tailored specifically for the technical demands of mining enterprises.",
+    image: "/images/services/service_card_05_web.webp",
     badge: "05 / DIGITAL INFRASTRUCTURE",
     features: [
       {
-        title: "WEBSITE DEVELOPMENT",
-        text: "Your website is the cornerstone of your online presence. We create and produce quick, user-friendly, and good-looking websites that turn visitors into customers and business allies.",
+        title: "CORPORATE WEB PLATFORMS",
+        text: "Engineered for performance and clarity, our websites deliver drill results, interactive site maps, and regulatory filings with intuitive navigation.",
       },
       {
-        title: "APP DEVELOPMENT",
-        text: "Be in the lead with intelligent, easy-to-use mobile and web applications. We design and launch apps that improve interaction, make operations easier, and bring actual value to the company from beginning to end.",
+        title: "INTELLIGENT WEB & MOBILE APPS",
+        text: "We create custom data dashboards, project portals, and mobile-friendly applications that simplify stakeholder communication and data access.",
       },
     ],
     ctaText: "",
@@ -848,99 +848,96 @@ export const JourneyStory: React.FC = () => {
     const p = scene.progress;
 
     // ====================================================================
-    // CINEMATIC SERVICES SECTION REVEAL (CLEAN EDITORIAL SLIDE-IN)
+    // CINEMATIC SERVICES SECTION (SOLID PINNED STAGE WITH DEDICATED DWELL READING ZONES)
     // ====================================================================
     if (settleStageRef.current) {
       const winW = typeof window !== "undefined" ? window.innerWidth : 1440;
       const totalCards = SERVICE_CARDS.length;
 
-      if (p <= 0.005) {
-        settleStageRef.current.style.opacity = "0";
-        settleStageRef.current.style.pointerEvents = "none";
-        settleStageRef.current.style.transform = `translate3d(${winW}px, 0, 0)`;
-        settleStageRef.current.style.clipPath = "none";
-        if (cardsTrackRef.current) {
-          const cardEls = cardsTrackRef.current.children;
-          for (let i = 0; i < cardEls.length; i++) {
-            const el = cardEls[i] as HTMLElement | undefined;
-            if (!el) continue;
-            if (i === 0) {
-              el.style.transform = "translate3d(0, 0, 0)";
-              el.style.visibility = "visible";
-            } else {
-              el.style.transform = `translate3d(${winW}px, 0, 0)`;
-              el.style.visibility = "hidden";
-            }
-          }
-        }
-      } else if (p < 0.08) {
-        // Stage slides in smoothly from right to left
-        const enterP = Math.max(0, Math.min(1, p / 0.08));
-        const ease = 1 - Math.pow(1 - enterP, 3);
-        const stageX = (1 - ease) * winW;
+      // Pinned stage is fully opaque with zero background bleed
+      settleStageRef.current.style.opacity = "1";
+      settleStageRef.current.style.pointerEvents = "auto";
+      settleStageRef.current.style.transform = "translate3d(0, 0, 0)";
+      settleStageRef.current.style.clipPath = "none";
 
-        settleStageRef.current.style.opacity = "1";
-        settleStageRef.current.style.pointerEvents = "auto";
-        settleStageRef.current.style.transform = `translate3d(${stageX.toFixed(1)}px, 0, 0)`;
-        settleStageRef.current.style.clipPath = "none";
+      // 5 cards, 4 transitions:
+      // Card 0 dwell: p in [0.00, 0.16] -> Card 0 locked & fully readable
+      // Trans 0->1:   p in [0.16, 0.25] -> Card 1 slides in smoothly
+      // Card 1 dwell: p in [0.25, 0.38] -> Card 1 locked & fully readable
+      // Trans 1->2:   p in [0.38, 0.47] -> Card 2 slides in smoothly
+      // Card 2 dwell: p in [0.47, 0.60] -> Card 2 locked & fully readable
+      // Trans 2->3:   p in [0.60, 0.69] -> Card 3 slides in smoothly
+      // Card 3 dwell: p in [0.69, 0.82] -> Card 3 locked & fully readable
+      // Trans 3->4:   p in [0.82, 0.91] -> Card 4 slides in smoothly
+      // Card 4 dwell: p in [0.91, 1.00] -> Card 4 locked & fully readable
 
-        if (cardsTrackRef.current) {
-          const cardEls = cardsTrackRef.current.children;
-          for (let i = 0; i < cardEls.length; i++) {
-            const el = cardEls[i] as HTMLElement | undefined;
-            if (!el) continue;
-            if (i === 0) {
-              el.style.transform = "translate3d(0, 0, 0)";
-              el.style.visibility = "visible";
-            } else {
-              el.style.transform = `translate3d(${winW}px, 0, 0)`;
-              el.style.visibility = "hidden";
-            }
-          }
-        }
-        if (activeCardIndexRef.current !== 0) {
-          activeCardIndexRef.current = 0;
-          setActiveCardIndex(0);
-        }
+      let cardFloat = 0;
+      let currentIdx = 0;
+
+      if (p < 0.16) {
+        cardFloat = 0;
+        currentIdx = 0;
+      } else if (p < 0.25) {
+        const t0 = (p - 0.16) / 0.09;
+        const ease = t0 * t0 * (3 - 2 * t0);
+        cardFloat = 0 + ease;
+        currentIdx = t0 >= 0.5 ? 1 : 0;
+      } else if (p < 0.38) {
+        cardFloat = 1;
+        currentIdx = 1;
+      } else if (p < 0.47) {
+        const t1 = (p - 0.38) / 0.09;
+        const ease = t1 * t1 * (3 - 2 * t1);
+        cardFloat = 1 + ease;
+        currentIdx = t1 >= 0.5 ? 2 : 1;
+      } else if (p < 0.60) {
+        cardFloat = 2;
+        currentIdx = 2;
+      } else if (p < 0.69) {
+        const t2 = (p - 0.60) / 0.09;
+        const ease = t2 * t2 * (3 - 2 * t2);
+        cardFloat = 2 + ease;
+        currentIdx = t2 >= 0.5 ? 3 : 2;
+      } else if (p < 0.82) {
+        cardFloat = 3;
+        currentIdx = 3;
+      } else if (p < 0.91) {
+        const t3 = (p - 0.82) / 0.09;
+        const ease = t3 * t3 * (3 - 2 * t3);
+        cardFloat = 3 + ease;
+        currentIdx = t3 >= 0.5 ? 4 : 3;
       } else {
-        // Stage is fully pinned covering the screen; first card is locked and subsequent cards overlay from right to left on scroll
-        settleStageRef.current.style.opacity = "1";
-        settleStageRef.current.style.pointerEvents = "auto";
-        settleStageRef.current.style.transform = "translate3d(0, 0, 0)";
-        settleStageRef.current.style.clipPath = "none";
+        cardFloat = 4;
+        currentIdx = 4;
+      }
 
-        const cardsP = Math.max(0, Math.min(1, (p - 0.08) / (0.96 - 0.08)));
-        const cardFloat = cardsP * (totalCards - 1);
-        const currentIdx = Math.min(totalCards - 1, Math.round(cardFloat));
+      if (currentIdx !== activeCardIndexRef.current) {
+        activeCardIndexRef.current = currentIdx;
+        setActiveCardIndex(currentIdx);
+      }
 
-        if (currentIdx !== activeCardIndexRef.current) {
-          activeCardIndexRef.current = currentIdx;
-          setActiveCardIndex(currentIdx);
-        }
-
-        if (cardsTrackRef.current) {
-          const cardEls = cardsTrackRef.current.children;
-          for (let i = 0; i < totalCards; i++) {
-            const el = cardEls[i] as HTMLElement | undefined;
-            if (!el) continue;
-            if (i === 0) {
-              // First card / image remains locked in place on screen
+      if (cardsTrackRef.current) {
+        const cardEls = cardsTrackRef.current.children;
+        for (let i = 0; i < totalCards; i++) {
+          const el = cardEls[i] as HTMLElement | undefined;
+          if (!el) continue;
+          if (i === 0) {
+            // First card remains stationary in place on screen
+            el.style.transform = "translate3d(0, 0, 0)";
+            el.style.visibility = "visible";
+          } else {
+            // Subsequent cards overlay on top from right to left
+            if (cardFloat <= i - 1) {
+              el.style.transform = `translate3d(${winW}px, 0, 0)`;
+              el.style.visibility = "hidden";
+            } else if (cardFloat >= i) {
               el.style.transform = "translate3d(0, 0, 0)";
               el.style.visibility = "visible";
             } else {
-              // Subsequent cards overlay on top from right to left as user scrolls
-              if (cardFloat <= i - 1) {
-                el.style.transform = `translate3d(${winW}px, 0, 0)`;
-                el.style.visibility = "hidden";
-              } else if (cardFloat >= i) {
-                el.style.transform = "translate3d(0, 0, 0)";
-                el.style.visibility = "visible";
-              } else {
-                const overlayP = cardFloat - (i - 1);
-                const cardX = (1 - overlayP) * winW;
-                el.style.transform = `translate3d(${cardX.toFixed(1)}px, 0, 0)`;
-                el.style.visibility = "visible";
-              }
+              const overlayP = cardFloat - (i - 1);
+              const cardX = (1 - overlayP) * winW;
+              el.style.transform = `translate3d(${cardX.toFixed(1)}px, 0, 0)`;
+              el.style.visibility = "visible";
             }
           }
         }

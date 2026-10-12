@@ -172,11 +172,11 @@ export const GlobeHero: React.FC = () => {
     // Proportionally balanced scroll runway giving 1:1 natural scroll travel for all cards, events & publications
     const BRIDGE_START = 0.08;
     const BRIDGE_FADE_IN_END = 0.10;
-    const BRIDGE_SCROLL_END = 0.78;
-    const BRIDGE_END = 0.82;
+    const BRIDGE_SCROLL_END = 0.76;
+    const BRIDGE_END = 0.785;
 
     let bOpacity = 0;
-    if (t < BRIDGE_START || t > BRIDGE_END) {
+    if (t < BRIDGE_START || t >= BRIDGE_END) {
       bOpacity = 0;
     } else if (t < BRIDGE_FADE_IN_END) {
       bOpacity = (t - BRIDGE_START) / (BRIDGE_FADE_IN_END - BRIDGE_START);
@@ -199,14 +199,13 @@ export const GlobeHero: React.FC = () => {
       setBridgeScroll(bScroll);
     }
 
-    // 3. Services Section (8 Interactive Cards):
-    // Takes over smoothly after the Value Bridge section completes
-    const SERVICES_START = 0.80;
-    const SERVICES_FADE_IN_END = 0.84;
-    const SERVICES_END = 0.98;
+    // 3. Services Section (5 Interactive Cards):
+    // Takes over cleanly and fully opaquely after the Value Bridge section finishes
+    const SERVICES_START = 0.785;
+    const SERVICES_END = 0.99;
 
     let servicesP = 0;
-    if (t <= SERVICES_START) {
+    if (t < SERVICES_START) {
       servicesP = 0;
     } else {
       servicesP = clamp((t - SERVICES_START) / (SERVICES_END - SERVICES_START), 0, 1);
@@ -227,8 +226,8 @@ export const GlobeHero: React.FC = () => {
       setTransitionState(nextState);
     }
 
-    // Services section active state: only activate when bridge has completed transition
-    const shouldJourneyBeActive = t >= 0.80 && t <= 1.0;
+    // Services section active state: only activate when bridge has completed
+    const shouldJourneyBeActive = t >= SERVICES_START && t <= 1.0;
     if (shouldJourneyBeActive !== journeyActiveRef.current) {
       journeyActiveRef.current = shouldJourneyBeActive;
       setJourneyActive(shouldJourneyBeActive);
@@ -241,10 +240,10 @@ export const GlobeHero: React.FC = () => {
         journeyBox.style.pointerEvents = "none";
         journeyBox.style.zIndex = "10";
       } else {
-        const fade = clamp((t - SERVICES_START) / (SERVICES_FADE_IN_END - SERVICES_START), 0, 1);
-        journeyBox.style.opacity = fade.toFixed(3);
+        // Immediate clean solid handoff so previous section never bleeds through
+        journeyBox.style.opacity = "1";
         journeyBox.style.visibility = "visible";
-        journeyBox.style.pointerEvents = fade > 0.4 ? "auto" : "none";
+        journeyBox.style.pointerEvents = "auto";
         journeyBox.style.zIndex = "40";
       }
     }
@@ -376,10 +375,10 @@ export const GlobeHero: React.FC = () => {
               />
             </div>
 
-            {/* Services Section (All 8 Interactive Cards) */}
+            {/* Services Section (Interactive Cards) */}
             <div
               ref={journeyBoxRef}
-              className="absolute inset-0 h-full w-full"
+              className="absolute inset-0 h-full w-full bg-[#030509]"
               style={{
                 zIndex: 40,
                 opacity: 0,

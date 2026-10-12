@@ -3103,7 +3103,7 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  background: #FAF9F6;
+  background: #04070E;
   overflow: hidden;
   z-index: 60;
   display: flex;
@@ -3253,18 +3253,31 @@
   align-self: flex-start;
   gap: clamp(0.85rem, 1.6vh, 1.35rem);
   width: 100%;
-  max-width: 640px;
-  padding-top: clamp(0.5rem, 1.2vh, 1.2rem);
+  max-width: 620px;
+  padding: clamp(1.4rem, 2.2vw, 2.2rem);
+  background: rgba(4, 7, 14, 0.74);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(246, 208, 104, 0.22);
+  border-radius: 16px;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 .fullScreenColRight {
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 580px;
+  max-width: 560px;
   justify-self: end;
   align-self: flex-end;
-  padding-bottom: clamp(3.8rem, 7.5vh, 5.5rem);
+  padding: clamp(1.4rem, 2.2vw, 2.2rem);
+  margin-bottom: clamp(1.5rem, 4vh, 3rem);
+  background: rgba(4, 7, 14, 0.74);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(246, 208, 104, 0.22);
+  border-radius: 16px;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 .cardFlickHeader {
@@ -3282,7 +3295,7 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #F1F5F9;
+  background: #04070E;
 }
 
 .cardFlickImage img {
@@ -3290,7 +3303,7 @@
   height: 100%;
   object-fit: cover;
   display: block;
-  filter: none !important;
+  filter: brightness(1.15) contrast(1.03) !important;
   transform: scale(1) !important;
 }
 
@@ -3300,16 +3313,16 @@
   display: block;
   background:
     /* Top-left vignette for heading */
-    radial-gradient(ellipse 70% 60% at 12% 18%, rgba(4, 7, 14, 0.9) 0%, rgba(4, 7, 14, 0.55) 55%, transparent 100%),
+    radial-gradient(ellipse 70% 60% at 12% 18%, rgba(4, 7, 14, 0.65) 0%, rgba(4, 7, 14, 0.25) 55%, transparent 100%),
     /* Bottom-right vignette for sub text */
-    radial-gradient(ellipse 70% 60% at 88% 85%, rgba(4, 7, 14, 0.92) 0%, rgba(4, 7, 14, 0.6) 55%, transparent 100%),
+    radial-gradient(ellipse 70% 60% at 88% 85%, rgba(4, 7, 14, 0.68) 0%, rgba(4, 7, 14, 0.28) 55%, transparent 100%),
     /* Screen border depth */
     linear-gradient(
       180deg,
-      rgba(4, 7, 14, 0.65) 0%,
+      rgba(4, 7, 14, 0.35) 0%,
       transparent 22%,
       transparent 68%,
-      rgba(4, 7, 14, 0.8) 100%
+      rgba(4, 7, 14, 0.5) 100%
     );
   pointer-events: none;
 }
@@ -3529,30 +3542,37 @@
 
 .cardFlickTitle {
   font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
-  font-size: clamp(2rem, 3.4vw, 3.5rem);
+  font-size: clamp(1.75rem, 2.7vw, 2.95rem);
   font-style: normal;
   font-weight: 700;
-  line-height: 1.15;
+  line-height: 1.14;
   color: #FFFFFF;
   margin: 0;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   text-shadow: 0 4px 24px rgba(0, 0, 0, 0.85), 0 1px 4px rgba(0, 0, 0, 0.95);
   white-space: normal;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.08em;
+  text-align: left;
 }
 
 .titleWhiteSpan {
+  display: block;
   color: #FFFFFF;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
   text-shadow: 0 4px 24px rgba(0, 0, 0, 0.85), 0 1px 4px rgba(0, 0, 0, 0.95);
+  white-space: normal;
+  word-break: normal;
 }
 
 .titleGoldSpan {
-  display: inline-block;
+  display: block;
   font-style: normal;
   font-weight: 700;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
   text-shadow: none;
   background: linear-gradient(
     135deg,
@@ -3568,6 +3588,8 @@
   -webkit-text-fill-color: transparent;
   animation: metallicGoldFlow 6s ease-in-out infinite;
   filter: drop-shadow(0 2px 14px rgba(223, 159, 40, 0.4)) drop-shadow(0 4px 18px rgba(0, 0, 0, 0.95));
+  white-space: normal;
+  word-break: normal;
 }
 
 @keyframes metallicGoldFlow {
@@ -3605,7 +3627,7 @@
   font-size: clamp(0.72rem, 0.8vw, 0.84rem);
   font-weight: 700;
   letter-spacing: 0.14em;
-  color: #D4AF37;
+  color: #F8D36A;
   text-transform: uppercase;
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.7);
   margin: 0;
@@ -3618,18 +3640,18 @@
 .cardFlickMetaDivider {
   width: 1px;
   height: 0.9em;
-  background: rgba(212, 175, 55, 0.5);
+  background: rgba(246, 208, 104, 0.6);
 }
 
 .cardFlickExcerpt {
   font-family: var(--font-inter), "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: clamp(0.92rem, 1.02vw, 1.06rem);
-  line-height: 1.68;
-  color: #D0D5DD;
+  font-size: clamp(0.94rem, 1.05vw, 1.1rem);
+  line-height: 1.7;
+  color: #F8FAFC;
   margin: 0;
   width: 100%;
   max-width: 560px;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.9);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
   text-wrap: pretty;
 }
 
@@ -3656,7 +3678,7 @@
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   border: none;
-  border-left: 2px solid rgba(229, 195, 120, 0.5);
+  border-left: 2px solid rgba(246, 208, 104, 0.6);
   border-radius: 0;
   padding: clamp(0.3rem, 0.6vh, 0.5rem) 0 clamp(0.3rem, 0.6vh, 0.5rem) clamp(0.6rem, 1vw, 0.85rem);
   box-shadow: none;
@@ -3664,18 +3686,18 @@
 }
 
 .cardFlickFeatureItem:hover {
-  border-color: rgba(229, 195, 120, 0.9);
+  border-color: rgba(246, 208, 104, 0.95);
   transform: none;
 }
 
 .cardFlickFeatureBullet {
-  color: #D4AF37;
+  color: #F6D068;
   font-size: 0.72rem;
   line-height: 1.6;
   text-align: center;
   flex-shrink: 0;
   transform: translateY(2px);
-  text-shadow: 0 0 8px rgba(212, 175, 55, 0.6);
+  text-shadow: 0 0 10px rgba(246, 208, 104, 0.7);
 }
 
 .cardFlickFeatureBody {
@@ -3687,23 +3709,23 @@
 .cardFlickFeatureTitle {
   color: #FCE8A6;
   font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
-  font-size: clamp(0.82rem, 0.9vw, 0.95rem);
+  font-size: clamp(0.85rem, 0.95vw, 1rem);
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   line-height: 1.35;
-  margin-bottom: 0.15rem;
+  margin-bottom: 0.2rem;
   display: block;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
 }
 
 .cardFlickFeatureText {
   font-family: var(--font-inter), "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: clamp(0.85rem, 0.92vw, 0.96rem);
-  line-height: 1.6;
-  color: #CBD5E1;
+  font-size: clamp(0.88rem, 0.95vw, 1rem);
+  line-height: 1.62;
+  color: #F1F5F9;
   margin: 0;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
 }
 
 /* Magazine Flipbook Action Buttons (Card 06) */
@@ -4133,7 +4155,8 @@
   .fullScreenColRight {
     max-width: 100%;
     justify-self: start;
-    padding-bottom: 0;
+    padding: clamp(1rem, 2.5vw, 1.4rem);
+    margin-bottom: 0;
   }
 }
 
@@ -4153,7 +4176,8 @@
   .fullScreenColRight {
     max-width: 100%;
     width: 100%;
-    padding-bottom: 0;
+    padding: 1rem 1.15rem;
+    margin-bottom: 0;
   }
 
   .cardFlickHeader {
@@ -4171,14 +4195,14 @@
     background:
       linear-gradient(
         180deg,
-        rgba(6, 10, 18, 0.72) 0%,
-        rgba(6, 10, 18, 0.46) 35%,
-        rgba(6, 10, 18, 0.52) 65%,
-        rgba(6, 10, 18, 0.82) 100%
+        rgba(6, 10, 18, 0.52) 0%,
+        rgba(6, 10, 18, 0.28) 35%,
+        rgba(6, 10, 18, 0.35) 65%,
+        rgba(6, 10, 18, 0.62) 100%
       ),
       linear-gradient(
         90deg,
-        rgba(6, 10, 18, 0.45) 0%,
+        rgba(6, 10, 18, 0.32) 0%,
         transparent 65%
       );
   }
@@ -4203,11 +4227,15 @@
   }
 
   .cardFlickTitle {
-    font-size: clamp(1.6rem, 6.4vw, 2.3rem);
-    line-height: 1.1;
+    font-size: clamp(1.35rem, 5vw, 1.95rem);
+    line-height: 1.15;
     white-space: normal;
     word-break: normal;
     text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95), 0 0 24px rgba(0, 0, 0, 0.75);
+    display: flex;
+    flex-direction: column;
+    gap: 0.08em;
+    text-align: left;
   }
 
   .cardFlickExcerpt {
