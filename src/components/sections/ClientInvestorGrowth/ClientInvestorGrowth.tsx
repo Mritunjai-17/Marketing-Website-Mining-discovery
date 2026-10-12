@@ -186,12 +186,32 @@ export const ClientInvestorGrowth = React.memo<ClientInvestorGrowthProps>(functi
     };
   }, []);
 
-  // Silky-smooth GPU scroll translation & non-thrashing in-view detection
+  // Silky-smooth uniform-velocity GPU scroll translation with gentle magnetic focal centering
   useEffect(() => {
     if (!trackRef.current) return;
 
     const { maxScroll, headerTop, rowCenters, metricsTop, clientH } = layoutMetricsRef.current;
-    const scrollY = scrollProgress * maxScroll;
+    if (maxScroll <= 0) return;
+
+    // Constant-velocity baseline: 1 scroll unit moves content by the exact same distance everywhere
+    const baseScrollY = scrollProgress * maxScroll;
+
+    // Gentle magnetic focal centering: softly pulls each pillar into optical center as you approach it
+    let magnetOffset = 0;
+    const focalRadius = clientH * 0.32;
+
+    rowCenters.forEach((center) => {
+      if (center <= 0) return;
+      const idealStop = Math.max(0, center - clientH * 0.48);
+      const dist = baseScrollY - idealStop;
+      if (Math.abs(dist) < focalRadius) {
+        const factor = 1 - Math.abs(dist) / focalRadius;
+        // Soft 22% magnetic centering so the card settles beautifully without breaking momentum
+        magnetOffset -= dist * factor * 0.22;
+      }
+    });
+
+    const scrollY = Math.max(0, Math.min(maxScroll, baseScrollY + magnetOffset));
 
     // Direct GPU-accelerated transform
     trackRef.current.style.transform = `translate3d(0, -${scrollY.toFixed(1)}px, 0)`;
@@ -214,7 +234,7 @@ export const ClientInvestorGrowth = React.memo<ClientInvestorGrowthProps>(functi
       return changed ? next : prev;
     });
 
-    // Optical center focal row
+    // Optical center focal row matches the nearest pillar row
     const opticalCenter = scrollY + clientH * 0.5;
     let closestIdx = 0;
     let minDistance = Infinity;

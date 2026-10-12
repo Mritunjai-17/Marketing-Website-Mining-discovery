@@ -111,15 +111,20 @@ const InteractiveCardsRail: React.FC<InteractiveCardsRailProps> = ({
   const startScrollLeftRef = useRef(0);
   const hasDraggedRef = useRef(false);
 
-  // Wheel interception: converts vertical mouse wheel into smooth horizontal rail gliding
+  // Wheel handling: converts explicit horizontal gestures (trackpad deltaX or Shift+Wheel) into rail gliding
+  // Natural vertical scrolling is untouched so normal page scrolling never jumps, stalls or oscillates
   useEffect(() => {
-    const container = containerRef.current;
     const rail = railRef.current;
-    if (!container || !rail) return;
+    if (!rail) return;
 
     const handleWheel = (e: WheelEvent) => {
-      // Pick the active wheel movement (deltaY or deltaX)
-      const delta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+      const isExplicitHorizontal = e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY);
+      if (!isExplicitHorizontal) {
+        // Allow uninterrupted natural vertical page scrolling
+        return;
+      }
+
+      const delta = e.shiftKey ? e.deltaY : e.deltaX;
       if (Math.abs(delta) < 0.5) return;
 
       const maxScroll = rail.scrollWidth - rail.clientWidth;
@@ -128,17 +133,15 @@ const InteractiveCardsRail: React.FC<InteractiveCardsRailProps> = ({
       const atEnd = rail.scrollLeft >= maxScroll - 6 && delta > 0;
       const atStart = rail.scrollLeft <= 6 && delta < 0;
 
-      // If within horizontal scroll range, convert wheel to horizontal scroll
       if (!atEnd && !atStart) {
         e.preventDefault();
-        e.stopPropagation();
-        rail.scrollLeft += delta * 1.25;
+        rail.scrollLeft += delta;
       }
     };
 
-    container.addEventListener("wheel", handleWheel, { passive: false });
+    rail.addEventListener("wheel", handleWheel, { passive: false });
     return () => {
-      container.removeEventListener("wheel", handleWheel);
+      rail.removeEventListener("wheel", handleWheel);
     };
   }, []);
 
@@ -484,7 +487,6 @@ export const PublicationsShowcase: React.FC<PublicationsShowcaseProps> = ({
     if (!isModalOpen) return;
 
     const lenis = typeof window !== "undefined" ? (window as any).lenis : null;
-    const y = window.scrollY;
 
     if (lenis && typeof lenis.stop === "function") {
       lenis.stop();
@@ -512,7 +514,6 @@ export const PublicationsShowcase: React.FC<PublicationsShowcaseProps> = ({
       }
       document.documentElement.style.overflow = prevHtmlOverflow;
       document.body.style.overflow = prevBodyOverflow;
-      window.scrollTo(0, y);
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [activeCategoryModal, readerState, handleCloseReader]);

@@ -571,11 +571,15 @@
   }
 
   .cardsStack {
-    gap: 2.25rem;
+    gap: 3rem;
+    scroll-snap-type: y proximity;
   }
 
   .alternatingRow {
     gap: 1.1rem;
+    scroll-snap-align: center;
+    scroll-margin-top: 5rem;
+    opacity: 1 !important;
   }
 
   .mainTitle {

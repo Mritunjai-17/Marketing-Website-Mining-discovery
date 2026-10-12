@@ -18,14 +18,14 @@ export type TransitionState =
   | "JOURNEY_ACTIVE";
 
 /** Viewport heights for the continuous story (Hero -> Client & Investor Bridge -> Our Services 8 Cards) */
-const DESKTOP_SCROLL_VH = 2500;
-const MOBILE_SCROLL_VH = 1800;
+const DESKTOP_SCROLL_VH = 2600;
+const MOBILE_SCROLL_VH = 2000;
 
 /**
  * How the sampled progress follows the true scroll position.
  * Responsive, critically damped spring for instant, silky scroll-scrubbing.
  */
-const PROGRESS_SPRING = { stiffness: 180, damping: 26 };
+const PROGRESS_SPRING = { stiffness: 320, damping: 38 };
 const RESUME_GAP = 0.8;
 
 interface SpringState {
@@ -140,9 +140,9 @@ export const GlobeHero: React.FC = () => {
 
     // 1. Hardware-scrubbed Hero sequence:
     // Act 1 (Alpine summit) -> Act 2 (Open Pit) -> Act 3 (Cave Continuous Miner)
-    // Scrubbed gracefully from t = 0.00 to t = 0.18, completely fades out by t = 0.22
-    const HERO_END = 0.18;
-    const HERO_FADE_END = 0.22;
+    // Scrubbed gracefully from t = 0.00 to t = 0.08, cleanly completes and hands over by t = 0.10
+    const HERO_END = 0.08;
+    const HERO_FADE_END = 0.10;
     const heroP = clamp(t / HERO_END, 0, 1);
     if (boonHeroRef.current) {
       boonHeroRef.current.scrub(heroP);
@@ -169,11 +169,11 @@ export const GlobeHero: React.FC = () => {
     }
 
     // 2. Value Bridge: Client & Investor Growth Section ("Building Value for Every Stakeholder")
-    // Generously paced scroll runway so each pillar card & publication can be comfortably read & clicked
-    const BRIDGE_START = 0.18;
-    const BRIDGE_FADE_IN_END = 0.22;
-    const BRIDGE_SCROLL_END = 0.63;
-    const BRIDGE_END = 0.67;
+    // Proportionally balanced scroll runway giving 1:1 natural scroll travel for all cards, events & publications
+    const BRIDGE_START = 0.08;
+    const BRIDGE_FADE_IN_END = 0.10;
+    const BRIDGE_SCROLL_END = 0.78;
+    const BRIDGE_END = 0.82;
 
     let bOpacity = 0;
     if (t < BRIDGE_START || t > BRIDGE_END) {
@@ -200,9 +200,9 @@ export const GlobeHero: React.FC = () => {
     }
 
     // 3. Services Section (8 Interactive Cards):
-    // Takes over seamlessly after the Value Bridge section finishes
-    const SERVICES_START = 0.65;
-    const SERVICES_FADE_IN_END = 0.69;
+    // Takes over smoothly after the Value Bridge section completes
+    const SERVICES_START = 0.80;
+    const SERVICES_FADE_IN_END = 0.84;
     const SERVICES_END = 0.98;
 
     let servicesP = 0;
@@ -228,7 +228,7 @@ export const GlobeHero: React.FC = () => {
     }
 
     // Services section active state: only activate when bridge has completed transition
-    const shouldJourneyBeActive = t >= 0.63 && t <= 1.0;
+    const shouldJourneyBeActive = t >= 0.80 && t <= 1.0;
     if (shouldJourneyBeActive !== journeyActiveRef.current) {
       journeyActiveRef.current = shouldJourneyBeActive;
       setJourneyActive(shouldJourneyBeActive);
@@ -331,14 +331,14 @@ export const GlobeHero: React.FC = () => {
         <div
           id="publications"
           className="absolute left-0 w-full pointer-events-none"
-          style={{ top: "56%" }}
+          style={{ top: "62%" }}
           aria-hidden="true"
         />
         {/* Anchor point targeting the Brand & Visual Identity Services stage */}
         <div
           id="services"
           className="absolute left-0 w-full pointer-events-none"
-          style={{ top: "70%" }}
+          style={{ top: "82%" }}
           aria-hidden="true"
         />
         <div
