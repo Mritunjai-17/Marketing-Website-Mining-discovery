@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { ArrowUpRight, ArrowRight, X, BookOpen, MapPin } from "lucide-react";
+import { ArrowUpRight, ArrowRight, X, BookOpen, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
 import { MagazineSpread } from "@/components/sections/MagazineShowcase/MagazineSpread";
 import {
   INITIAL_MAGAZINES,
@@ -19,26 +19,6 @@ import {
 import styles from "./PublicationsShowcase.module.css";
 import magStyles from "@/components/sections/MagazineShowcase/MagazineShowcase.module.css";
 
-interface PublicationCardConfig {
-  id: "magazines" | "newsletter" | "articles" | "ceo-profile";
-  category: string;
-  location: string;
-  title: string;
-  description: string;
-  image: string;
-  badge: string;
-  ctaText: string;
-  stats: {
-    label1: string;
-    value1: string;
-    label2: string;
-    value2: string;
-    label3: string;
-    value3: string;
-  };
-  priceLabel: string;
-  priceValue: string;
-}
 
 const PUBLICATIONS_SUBTITLE_WORDS = [
   "From",
@@ -74,6 +54,298 @@ const PUBLICATIONS_SUBTITLE_WORDS = [
   "resource",
   "sector.",
 ];
+
+export interface PublicationSectionItem {
+  id: string;
+  title: string;
+  subtitle: string;
+  cover: string;
+  doc: {
+    title: string;
+    subtitle: string;
+    pdfUrl: string;
+  };
+}
+
+export interface PublicationSectionConfig {
+  id: "magazines" | "newsletter" | "articles" | "ceo-profile";
+  kicker: string;
+  location: string;
+  title: string;
+  description: string;
+  stats: {
+    label1: string;
+    value1: string;
+    label2: string;
+    value2: string;
+    label3: string;
+    value3: string;
+  };
+  ctaText: string;
+  items: PublicationSectionItem[];
+}
+
+interface InteractiveCardsRailProps {
+  sec: PublicationSectionConfig;
+  allMagazinesCount: number;
+  newslettersCount: number;
+  articlesCount: number;
+  allCeosCount: number;
+  onOpenDoc: (doc: { title: string; subtitle: string; pdfUrl: string }) => void;
+  onOpenCategoryModal: (id: "magazines" | "newsletter" | "articles" | "ceo-profile") => void;
+}
+
+const InteractiveCardsRail: React.FC<InteractiveCardsRailProps> = ({
+  sec,
+  allMagazinesCount,
+  newslettersCount,
+  articlesCount,
+  allCeosCount,
+  onOpenDoc,
+  onOpenCategoryModal,
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const railRef = useRef<HTMLDivElement>(null);
+  const isDraggingRef = useRef(false);
+  const startXRef = useRef(0);
+  const startScrollLeftRef = useRef(0);
+  const hasDraggedRef = useRef(false);
+
+  // Wheel interception: converts vertical mouse wheel into smooth horizontal rail gliding
+  useEffect(() => {
+    const container = containerRef.current;
+    const rail = railRef.current;
+    if (!container || !rail) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      // Pick the active wheel movement (deltaY or deltaX)
+      const delta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+      if (Math.abs(delta) < 0.5) return;
+
+      const maxScroll = rail.scrollWidth - rail.clientWidth;
+      if (maxScroll <= 4) return;
+
+      const atEnd = rail.scrollLeft >= maxScroll - 6 && delta > 0;
+      const atStart = rail.scrollLeft <= 6 && delta < 0;
+
+      // If within horizontal scroll range, convert wheel to horizontal scroll
+      if (!atEnd && !atStart) {
+        e.preventDefault();
+        e.stopPropagation();
+        rail.scrollLeft += delta * 1.25;
+      }
+    };
+
+    container.addEventListener("wheel", handleWheel, { passive: false });
+    return () => {
+      container.removeEventListener("wheel", handleWheel);
+    };
+  }, []);
+
+  // Global mouseup to release grab state even if pointer leaves window
+  useEffect(() => {
+    const handleGlobalMouseUp = () => {
+      if (isDraggingRef.current) {
+        isDraggingRef.current = false;
+        if (railRef.current) {
+          railRef.current.style.cursor = "grab";
+          railRef.current.style.removeProperty("user-select");
+        }
+      }
+    };
+    window.addEventListener("mouseup", handleGlobalMouseUp);
+    return () => window.removeEventListener("mouseup", handleGlobalMouseUp);
+  }, []);
+
+  // Left & right button navigation
+  const handleScrollStep = (direction: "left" | "right") => {
+    if (!railRef.current) return;
+    const offset = direction === "left" ? -280 : 280;
+    railRef.current.scrollBy({ left: offset, behavior: "smooth" });
+  };
+
+  // Mouse Grab-to-Drag
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0 || !railRef.current) return;
+    isDraggingRef.current = true;
+    hasDraggedRef.current = false;
+    startXRef.current = e.pageX;
+    startScrollLeftRef.current = railRef.current.scrollLeft;
+    railRef.current.style.cursor = "grabbing";
+    railRef.current.style.userSelect = "none";
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDraggingRef.current || !railRef.current) return;
+    const dx = e.pageX - startXRef.current;
+    if (Math.abs(dx) > 6) {
+      hasDraggedRef.current = true;
+    }
+    railRef.current.scrollLeft = startScrollLeftRef.current - dx;
+  };
+
+  const handleMouseUp = () => {
+    isDraggingRef.current = false;
+    if (railRef.current) {
+      railRef.current.style.cursor = "grab";
+      railRef.current.style.removeProperty("user-select");
+    }
+  };
+
+  const handleCardClick = (doc: { title: string; subtitle: string; pdfUrl: string }) => {
+    if (hasDraggedRef.current) {
+      hasDraggedRef.current = false;
+      return;
+    }
+    onOpenDoc(doc);
+  };
+
+  const handleViewAllClick = () => {
+    if (hasDraggedRef.current) {
+      hasDraggedRef.current = false;
+      return;
+    }
+    onOpenCategoryModal(sec.id);
+  };
+
+  return (
+    <div ref={containerRef} className={styles.cardsShowcaseCol}>
+      <div className={styles.cardsRailHeader}>
+        <span className={styles.railLabel}>
+          {sec.id === "magazines"
+            ? "LATEST EDITIONS"
+            : sec.id === "newsletter"
+            ? "LATEST DISPATCHES"
+            : sec.id === "articles"
+            ? "LATEST REPORTS"
+            : "LATEST PROFILES"}
+        </span>
+        <div className={styles.railHeaderControls}>
+          <span className={styles.railScrollHint}>Scroll or drag to explore</span>
+          <div className={styles.railNavBtns}>
+            <button
+              type="button"
+              className={styles.railNavBtn}
+              onClick={() => handleScrollStep("left")}
+              aria-label="Scroll left"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <button
+              type="button"
+              className={styles.railNavBtn}
+              onClick={() => handleScrollStep("right")}
+              aria-label="Scroll right"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div
+        ref={railRef}
+        className={styles.cardsRail}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+      >
+        {sec.items.map((item, idx) => (
+          <div
+            key={item.id}
+            className={styles.railCard}
+            onClick={() => handleCardClick(item.doc)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onOpenDoc(item.doc);
+              }
+            }}
+            aria-label={`Open ${item.title}`}
+          >
+            <div className={styles.railCoverWrap}>
+              <img
+                src={item.cover}
+                alt={item.title}
+                className={styles.railCoverImg}
+                loading="lazy"
+                draggable={false}
+              />
+              {idx === 0 && (
+                <span className={styles.railLatestBadge}>LATEST</span>
+              )}
+              <div className={styles.railHoverOverlay}>
+                <span className={styles.railReadBtn}>
+                  <BookOpen size={14} />
+                  <span>OPEN READER</span>
+                </span>
+              </div>
+            </div>
+
+            <div className={styles.railCardBody}>
+              <span className={styles.railCardSubtitle}>{item.subtitle}</span>
+              <h4 className={styles.railCardTitle}>{item.title}</h4>
+              <div className={styles.railCardFooter}>
+                <span className={styles.railReadAction}>
+                  <span>
+                    {sec.id === "magazines"
+                      ? "Read Edition"
+                      : sec.id === "newsletter"
+                      ? "Read Dispatch"
+                      : sec.id === "articles"
+                      ? "Read Report"
+                      : "View Profile"}
+                  </span>
+                  <ArrowUpRight size={13} />
+                </span>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        {/* Dedicated End-of-Rail View All CTA Card with Arrow */}
+        <div
+          className={styles.railViewAllCard}
+          onClick={handleViewAllClick}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              onOpenCategoryModal(sec.id);
+            }
+          }}
+          aria-label={sec.ctaText}
+        >
+          <div className={styles.railViewAllWrap}>
+            <div className={styles.railViewAllIconCircle}>
+              <ArrowRight size={22} className={styles.railViewAllArrow} />
+            </div>
+            <span className={styles.railViewAllKicker}>COMPLETE CATALOG</span>
+            <h4 className={styles.railViewAllTitle}>
+              {sec.id === "magazines"
+                ? `View All ${allMagazinesCount} Magazines`
+                : sec.id === "newsletter"
+                ? `View All ${newslettersCount} Newsletters`
+                : sec.id === "articles"
+                ? `View All ${articlesCount} Reports`
+                : `View All ${allCeosCount} Profiles`}
+            </h4>
+            <p className={styles.railViewAllDesc}>
+              Browse every published volume & archived release.
+            </p>
+            <div className={styles.railViewAllBtn}>
+              <span>OPEN ARCHIVE</span>
+              <ArrowUpRight size={13} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export interface PublicationsShowcaseProps {
   scrollProgress?: number;
@@ -345,17 +617,14 @@ export const PublicationsShowcase: React.FC<PublicationsShowcaseProps> = ({
   const latestNewsletter = newsletters[0] || INITIAL_NEWSLETTERS[0];
   const latestArticle = articles[0] || INITIAL_ARTICLES[0];
 
-  const publicationCards: PublicationCardConfig[] = [
+  const publicationSections: PublicationSectionConfig[] = [
     {
       id: "magazines",
-      category: "MONTHLY PRINT & DIGITAL",
+      kicker: "MONTHLY PRINT & DIGITAL",
       location: "Global Mining & Exploration",
-      title: "Magazine",
+      title: "Monthly Mining Magazines",
       description:
-        "Official published editions featuring in-depth mineral asset teardowns, full-color drill layouts, and c-suite market interviews.",
-      image: latestMag?.cover || INITIAL_MAGAZINES[0].cover,
-      badge: `${allMagazines.length} EDITIONS`,
-      ctaText: `BROWSE ALL ${allMagazines.length} EDITIONS`,
+        "Official published monthly editions featuring in-depth mineral asset teardowns, full-color drill layouts, and c-suite market interviews.",
       stats: {
         label1: "Editions",
         value1: `${allMagazines.length} Vol`,
@@ -364,21 +633,26 @@ export const PublicationsShowcase: React.FC<PublicationsShowcaseProps> = ({
         label3: "Reach",
         value3: "45K+",
       },
-      priceLabel: "Total Access",
-      priceValue: "Free Read",
+      ctaText: `VIEW ALL ${allMagazines.length} MAGAZINES`,
+      items: allMagazines.slice(0, 5).map((mag) => ({
+        id: mag.id,
+        title: mag.title || "Mining Discovery Magazine",
+        subtitle: `${mag.month?.toUpperCase() || ""} ${mag.year || ""}`,
+        cover: mag.cover || INITIAL_MAGAZINES[0].cover,
+        doc: {
+          title: "Monthly Magazine Edition",
+          subtitle: `${mag.month?.toUpperCase() || ""} ${mag.year || ""}`,
+          pdfUrl: getProxiedPdfUrl(mag.pdf),
+        },
+      })),
     },
     {
       id: "newsletter",
-      category: "WEEKLY NEWSPAPER DISPATCH",
+      kicker: "WEEKLY NEWSPAPER DISPATCH",
       location: "Global Commodity Desks",
-      title: "Newsletter",
+      title: "Weekly Discovery Newsletters",
       description:
         "High-frequency weekly discovery dispatches distributed directly to institutional desks, commodity desks, and family offices.",
-      image:
-        latestNewsletter?.cover ||
-        "https://acceptable-desire-0cca5bb827.media.strapiapp.com/medium_17_NOV_converted_25e305b198.webp",
-      badge: `${newsletters.length} ISSUES`,
-      ctaText: `BROWSE ALL ${newsletters.length} ISSUES`,
       stats: {
         label1: "Issues",
         value1: `${newsletters.length} Ed`,
@@ -387,21 +661,34 @@ export const PublicationsShowcase: React.FC<PublicationsShowcaseProps> = ({
         label3: "Reach",
         value3: "28K+",
       },
-      priceLabel: "Total Access",
-      priceValue: "Free Read",
+      ctaText: `VIEW ALL ${newsletters.length} NEWSLETTERS`,
+      items: newsletters.slice(0, 5).map((nl) => ({
+        id: nl.id,
+        title: nl.title || "Weekly Dispatch",
+        subtitle: nl.date
+          ? new Date(nl.date)
+              .toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })
+              .toUpperCase()
+          : "WEEKLY ISSUE",
+        cover: nl.cover || "/cards/bg_card_1.webp",
+        doc: {
+          title: "Weekly Newspaper Dispatch",
+          subtitle: (nl.title || "Weekly Dispatch").toUpperCase(),
+          pdfUrl: getProxiedPdfUrl(nl.pdf),
+        },
+      })),
     },
     {
       id: "articles",
-      category: "TECHNICAL RESEARCH",
+      kicker: "TECHNICAL RESEARCH",
       location: "Verified QP Technical Research",
-      title: "Articles",
+      title: "Technical Research & Articles",
       description:
         "Geological assay breakdowns, maiden mineral resource evaluations, and verified QP project discovery reports.",
-      image:
-        articles[2]?.cover ||
-        "https://acceptable-desire-0cca5bb827.media.strapiapp.com/medium_Pan_Global_Resources_Inc_1b6b03beef.png",
-      badge: `${articles.length} REPORTS`,
-      ctaText: `BROWSE ALL ${articles.length} REPORTS`,
       stats: {
         label1: "Reports",
         value1: `${articles.length} Tech`,
@@ -410,19 +697,26 @@ export const PublicationsShowcase: React.FC<PublicationsShowcaseProps> = ({
         label3: "Reach",
         value3: "Global",
       },
-      priceLabel: "Total Access",
-      priceValue: "Free Read",
+      ctaText: `VIEW ALL ${articles.length} REPORTS`,
+      items: articles.slice(0, 5).map((art) => ({
+        id: art.id,
+        title: art.title || "Technical Report",
+        subtitle: "QP TECHNICAL RESEARCH",
+        cover: art.cover || "/cards/bg_card_3.webp",
+        doc: {
+          title: "Technical Research Report",
+          subtitle: (art.title || "Technical Report").toUpperCase(),
+          pdfUrl: getProxiedPdfUrl(art.pdf),
+        },
+      })),
     },
     {
       id: "ceo-profile",
-      category: "EXECUTIVE INTERVIEWS",
+      kicker: "EXECUTIVE INTERVIEWS",
       location: "Global C-Suite Leadership",
-      title: "CEO Profile",
+      title: "Executive CEO Profiles",
       description:
         "One-on-one leadership interviews, project vision features, and strategic broadcasts with mining executives across the globe.",
-      image: latestCeo?.cover || latestCeo?.ceoImage || "/cards/bg_card_2.webp",
-      badge: `${allCeos.length} PROFILES`,
-      ctaText: `BROWSE ALL ${allCeos.length} PROFILES`,
       stats: {
         label1: "Profiles",
         value1: `${allCeos.length} Exec`,
@@ -431,8 +725,18 @@ export const PublicationsShowcase: React.FC<PublicationsShowcaseProps> = ({
         label3: "Reach",
         value3: "Tier-1",
       },
-      priceLabel: "Total Access",
-      priceValue: "Free Read",
+      ctaText: `VIEW ALL ${allCeos.length} PROFILES`,
+      items: allCeos.slice(0, 5).map((ceo) => ({
+        id: ceo.id,
+        title: ceo.name,
+        subtitle: (ceo.designation || "C-SUITE EXECUTIVE").toUpperCase(),
+        cover: ceo.cover || ceo.ceoImage || "/cards/bg_card_2.webp",
+        doc: {
+          title: "Executive CEO Interview",
+          subtitle: `${ceo.name.toUpperCase()} — ${ceo.designation || "EXECUTIVE"}`,
+          pdfUrl: getProxiedPdfUrl(ceo.pdf),
+        },
+      })),
     },
   ];
 
@@ -503,78 +807,67 @@ export const PublicationsShowcase: React.FC<PublicationsShowcaseProps> = ({
         </p>
       </header>
 
-      {/* 4 Publications Cards */}
-      <div className={styles.publicationsGrid}>
-        {publicationCards.map((card) => (
-          <article
-            key={card.id}
-            className={styles.pubCard}
-            onClick={() => setActiveCategoryModal(card.id)}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                setActiveCategoryModal(card.id);
-              }
-            }}
-          >
-            {/* Visual Cover Header */}
-            <div className={styles.pubCoverWrap}>
-              <img
-                src={card.image}
-                alt={card.title}
-                className={styles.pubCoverImg}
-                loading="lazy"
-              />
-              <div className={styles.pubCoverOverlay} aria-hidden="true" />
+      {/* 4 Dedicated Publication Blocks (Sequential on Scroll) */}
+      <div className={styles.categoriesContainer}>
+        {publicationSections.map((sec) => (
+          <div key={sec.id} className={styles.categoryBlock}>
+            {/* Left Column: Editorial Overview & Action */}
+            <div className={styles.categoryInfoCol}>
+              <div className={styles.categoryTopInfo}>
+                <div className={styles.categoryBadgeRow}>
+                  <span className={styles.categoryDot} />
+                  <span className={styles.categoryKicker}>{sec.kicker}</span>
+                </div>
+
+                <h3 className={styles.categoryTitle}>{sec.title}</h3>
+
+                <div className={styles.categoryLocationRow}>
+                  <MapPin size={13} className={styles.categoryLocationIcon} />
+                  <span>{sec.location}</span>
+                </div>
+
+                <p className={styles.categoryDescription}>{sec.description}</p>
+              </div>
+
+              {/* Key Stats Strip */}
+              <div className={styles.categoryStatsRow}>
+                <div className={styles.categoryStatCol}>
+                  <span className={styles.categoryStatLabel}>{sec.stats.label1}</span>
+                  <span className={styles.categoryStatValue}>{sec.stats.value1}</span>
+                </div>
+                <div className={styles.categoryStatCol}>
+                  <span className={styles.categoryStatLabel}>{sec.stats.label2}</span>
+                  <span className={styles.categoryStatValue}>{sec.stats.value2}</span>
+                </div>
+                <div className={styles.categoryStatCol}>
+                  <span className={styles.categoryStatLabel}>{sec.stats.label3}</span>
+                  <span className={styles.categoryStatValue}>{sec.stats.value3}</span>
+                </div>
+              </div>
+
+              {/* View All Button */}
+              <button
+                type="button"
+                className={styles.viewAllArchiveBtn}
+                onClick={() => setActiveCategoryModal(sec.id)}
+                aria-label={sec.ctaText}
+              >
+                <span>{sec.ctaText}</span>
+                <ArrowRight size={15} />
+              </button>
             </div>
 
-            {/* Card Content Body */}
-            <div className={styles.pubBody}>
-              {/* Title & Location Row */}
-              <div className={styles.pubHeader}>
-                <h3 className={styles.pubTitle}>{card.title}</h3>
-                <div className={styles.pubLocationRow}>
-                  <MapPin size={13} className={styles.pubLocationIcon} />
-                  <span className={styles.pubLocationText}>{card.location}</span>
-                </div>
-              </div>
-
-              {/* Explicit Description Section */}
-              <div className={styles.pubDescriptionSection}>
-                <h4 className={styles.pubDescriptionHeading}>Description</h4>
-                <p className={styles.pubDescription}>{card.description}</p>
-              </div>
-
-              {/* 3-Column Stats Row */}
-              <div className={styles.pubStatsRow}>
-                <div className={styles.pubStatCol}>
-                  <span className={styles.pubStatLabel}>{card.stats.label1}</span>
-                  <span className={styles.pubStatValue}>{card.stats.value1}</span>
-                </div>
-                <div className={styles.pubStatCol}>
-                  <span className={styles.pubStatLabel}>{card.stats.label2}</span>
-                  <span className={styles.pubStatValue}>{card.stats.value2}</span>
-                </div>
-                <div className={styles.pubStatCol}>
-                  <span className={styles.pubStatLabel}>{card.stats.label3}</span>
-                  <span className={styles.pubStatValue}>{card.stats.value3}</span>
-                </div>
-              </div>
-
-              {/* Bottom Price & Circular Action Button */}
-              <div className={styles.pubFooter}>
-                <div className={styles.pubPriceCol}>
-                  <span className={styles.pubPriceLabel}>{card.priceLabel}</span>
-                  <span className={styles.pubPriceValue}>{card.priceValue}</span>
-                </div>
-                <div className={styles.pubActionCircle} aria-label={`Open ${card.title}`}>
-                  <ArrowUpRight size={19} strokeWidth={2.4} />
-                </div>
-              </div>
-            </div>
-          </article>
+            {/* Right Column: Interactive 4-5 Issues Showcase Rail */}
+            <InteractiveCardsRail
+              sec={sec}
+              allMagazinesCount={allMagazines.length}
+              newslettersCount={newsletters.length}
+              articlesCount={articles.length}
+              allCeosCount={allCeos.length}
+              onOpenDoc={handleOpenDoc}
+              onOpenCategoryModal={setActiveCategoryModal}
+            />
+          </div>
         ))}
       </div>
 

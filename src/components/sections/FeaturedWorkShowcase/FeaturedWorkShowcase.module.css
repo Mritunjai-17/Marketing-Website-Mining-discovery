@@ -1605,8 +1605,8 @@
 
   /* On phone viewports: cleanly display 3 balanced lines:
      1. THE MAJOR MINING EVENTS
-     2. THAT BRING
-     3. THE INDUSTRY TOGETHER (all in gold!) */
+     2. WE COVER
+     3. AROUND THE WORLD. (all in gold!) */
   .titleLine:nth-of-type(2) {
     display: flex !important;
     flex-direction: column !important;

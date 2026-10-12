@@ -425,12 +425,12 @@ export const BoonHero = React.memo(
             style={{ opacity: 0 }}
           >
             <h2 className={styles.actHeadline}>
-              <span>HAVE SOMETHING</span>
-              <span>IMPORTANT TO SHARE?</span>
+              <span>GREAT DISCOVERIES</span>
+              <span>DESERVE TO BE SEEN.</span>
             </h2>
 
             <p className={styles.actSubline}>
-              From exploration results and project updates to company news, we help you get your story in front of the mining audience.
+              From promising projects to industry-changing milestones, we help mining companies<br className={styles.sublineBreak} /> tell their stories, build visibility, and reach the audiences that matter.
             </p>
           </div>
 
@@ -443,12 +443,12 @@ export const BoonHero = React.memo(
             style={{ opacity: 0 }}
           >
             <h2 className={styles.actHeadline}>
-              <span>PUT YOUR COMPANY</span>
+              <span>PUT YOUR MINING COMPANY</span>
               <span>IN THE SPOTLIGHT.</span>
             </h2>
 
             <p className={styles.actSubline}>
-              Once you have a story worth sharing, we help bring it to the wider mining community through media coverage, company features, interviews and digital content.
+              Once you have a story worth sharing, we help bring it to the wider mining community<br className={styles.sublineBreak} /> through media coverage, company features, interviews and digital content.
             </p>
 
             <Link

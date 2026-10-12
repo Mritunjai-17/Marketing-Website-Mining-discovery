@@ -479,7 +479,7 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
           </span>
           <span className={styles.titleLine}>
             <span className={styles.subPhrase}>
-              {["THAT", "BRING"].map((word, idx) => (
+              {["WE", "COVER"].map((word, idx) => (
                 <span
                   key={idx + 4}
                   ref={(el) => {
@@ -492,7 +492,7 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
               ))}
             </span>
             <span className={styles.goldPhrase}>
-              {["THE", "INDUSTRY", "TOGETHER"].map((word, idx) => (
+              {["AROUND", "THE", "WORLD."].map((word, idx) => (
                 <span
                   key={idx + 6}
                   ref={(el) => {
@@ -714,9 +714,6 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
         </div>
         <div className={styles.footerRule} />
       </footer>
-
-      {/* EXPLORE OUR PUBLICATIONS: 4 CARDS (MAGAZINE, NEWSLETTER, ARTICLES, CEO PROFILE) */}
-      <PublicationsShowcase scrollProgress={scrollProgress} />
     </>
   );
 
@@ -735,6 +732,9 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
         </div>
 
         <div className={styles.sectionInner}>{innerContent}</div>
+
+        {/* EXPLORE OUR PUBLICATIONS: 4 FULL-WIDTH SECTIONS */}
+        <PublicationsShowcase scrollProgress={scrollProgress} />
       </section>
     );
   }
@@ -763,6 +763,7 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
       {/* Normal vertical scroll track */}
       <div ref={trackRef} className={styles.scrollTrack}>
         {innerContent}
+        <PublicationsShowcase scrollProgress={scrollProgress} />
       </div>
     </div>
   );
