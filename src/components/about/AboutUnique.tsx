@@ -127,21 +127,13 @@ export const AboutUnique: React.FC = () => {
                 >
                   <div className="grid grid-cols-1 gap-x-16 gap-y-6 lg:grid-cols-12">
                     <div className="lg:col-span-5">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center">
                         <span
                           aria-hidden="true"
-                          className={`h-[7px] w-[7px] shrink-0 rounded-full border border-[#B8860B] transition-colors duration-500 ${
+                          className={`h-[8px] w-[8px] shrink-0 rounded-full border border-[#B8860B] transition-colors duration-500 ${
                             isReached ? "bg-[#B8860B]" : "bg-[#F7F5EF]"
                           }`}
                         />
-                        <span
-                          data-about-reveal
-                          className={`font-mono text-[11px] tabular-nums transition-colors duration-500 ${
-                            isReached ? "text-[#B8860B]" : "text-[#B8860B]/40"
-                          } ${HIDDEN_RISE}`}
-                        >
-                          {String(index + 1).padStart(2, "0")}
-                        </span>
                       </div>
 
                       <h3 className="mt-4 font-space-grotesk text-[clamp(1.6rem,3.2vw,2.5rem)] font-bold uppercase leading-[1.12] tracking-[-0.018em] text-[#0B1F3A]">

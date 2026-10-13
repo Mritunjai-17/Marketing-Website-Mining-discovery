@@ -50,6 +50,26 @@ const FAQS: FAQ[] = [
     q: "Who is Mining Discovery's audience?",
     a: "Mining Discovery serves mining executives, investors, geologists, project developers, and industry professionals globally — with a strong focus on U.S. and Canadian mining markets while also covering major regions including Africa, Latin America, and Asia.",
   },
+  {
+    q: "Does Mining Discovery offer marketing services to mining companies?",
+    a: "Yes. Mining Discovery offers services such as digital branding, social media marketing, paid advertising, public relations, and website development to help mining businesses strengthen their online presence and communicate with their target audiences.",
+  },
+  {
+    q: "Can companies promote their projects through Mining Discovery?",
+    a: "Companies can explore opportunities to showcase their projects, share corporate developments, and increase their visibility among mining industry audiences. The available options depend on the type of content and promotional support required.",
+  },
+  {
+    q: "Does Mining Discovery publish magazines and research reports?",
+    a: "Yes. The platform features digital magazine editions and research reports alongside its regular mining news and company updates. Visitors can explore available editions and reports through the website's publications and research sections.",
+  },
+  {
+    q: "How can I contact Mining Discovery about a business opportunity?",
+    a: "You can reach out through the Contact page on the Mining Discovery website. Share your name, email address, and a brief message explaining your enquiry so the team can understand what you need.",
+  },
+  {
+    q: "Does Mining Discovery help companies improve their brand visibility online?",
+    a: "Yes. Its digital marketing and branding services help mining companies present their businesses consistently across websites, social media, advertising campaigns, and other digital channels.",
+  },
 ];
 
 const EASE = [0.25, 0.1, 0.25, 1] as const;

@@ -23,27 +23,72 @@ export const SmoothScroll: React.FC<SmoothScrollProps> = ({ children }) => {
 
     if (prefersReducedMotion) return;
 
-    // Mobile touch devices natively apply 120Hz/60Hz momentum scrolling.
-    // Bypassing Lenis on mobile avoids touch-event fighting, rubber-band clipping,
-    // and address bar height shift glitches that snap the scroll to top.
-    const isTouch =
-      window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 768;
+    // Detect device input capabilities:
+    // Any device with a fine pointer (mouse, precision trackpad on laptops & desktops)
+    // receives butter-smooth Lenis momentum scrolling.
+    // Pure touch mobile devices (iPhone, Android, standalone tablets without trackpad)
+    // use native 120Hz/60Hz hardware momentum scrolling to avoid touch-event contention.
+    const hasFinePointer = window.matchMedia("(pointer: fine)").matches;
+    const isTouchOnly = !hasFinePointer && (window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 768);
 
-    if (isTouch) {
-      gsap.registerPlugin(ScrollTrigger);
-      return;
+    gsap.registerPlugin(ScrollTrigger);
+
+    if (isTouchOnly) {
+      // Provide a zero-overhead native shim so scrollTo, start, stop, and listeners
+      // work seamlessly across the site on touch mobile/tablets without errors or lag
+      const scrollListeners = new Set<(e: any) => void>();
+      const handleNativeScroll = () => {
+        ScrollTrigger.update();
+        const ev = { scroll: window.scrollY };
+        scrollListeners.forEach((fn) => fn(ev));
+      };
+
+      window.addEventListener("scroll", handleNativeScroll, { passive: true });
+
+      const touchShim = {
+        scrollTo: (target: string | number | HTMLElement, options?: { offset?: number; immediate?: boolean }) => {
+          if (typeof target === "string") {
+            const el = document.querySelector(target);
+            if (el) {
+              const top = el.getBoundingClientRect().top + window.scrollY + (options?.offset || 0);
+              window.scrollTo({ top, behavior: options?.immediate ? "auto" : "smooth" });
+            }
+          } else if (typeof target === "number") {
+            window.scrollTo({ top: target, behavior: options?.immediate ? "auto" : "smooth" });
+          } else if (target instanceof HTMLElement) {
+            const top = target.getBoundingClientRect().top + window.scrollY + (options?.offset || 0);
+            window.scrollTo({ top, behavior: options?.immediate ? "auto" : "smooth" });
+          }
+        },
+        on: (event: string, callback: (e: any) => void) => {
+          if (event === "scroll") scrollListeners.add(callback);
+        },
+        off: (event: string, callback: (e: any) => void) => {
+          if (event === "scroll") scrollListeners.delete(callback);
+        },
+        start: () => {},
+        stop: () => {},
+      };
+
+      (window as any).lenis = touchShim;
+
+      return () => {
+        window.removeEventListener("scroll", handleNativeScroll);
+        scrollListeners.clear();
+        if ((window as any).lenis === touchShim) {
+          delete (window as any).lenis;
+        }
+      };
     }
 
     if ("scrollRestoration" in window.history) {
       window.history.scrollRestoration = "manual";
     }
 
-    gsap.registerPlugin(ScrollTrigger);
-
     const lenis = new Lenis({
-      lerp: 0.08,
+      lerp: 0.09,
       smoothWheel: true,
-      wheelMultiplier: 0.85,
+      wheelMultiplier: 0.95,
       syncTouch: false,
       touchMultiplier: 1.0,
     });
@@ -62,7 +107,6 @@ export const SmoothScroll: React.FC<SmoothScrollProps> = ({ children }) => {
 
     gsap.ticker.add(updateGSAP);
     // Disable GSAP lagSmoothing for Lenis (per official Lenis guidelines)
-    // This prevents sudden clock adjustments that cause Lenis to reset/jump scroll to top.
     gsap.ticker.lagSmoothing(0);
 
     return () => {

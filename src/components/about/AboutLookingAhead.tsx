@@ -27,7 +27,7 @@ import { AboutEyebrow } from "./AboutEyebrow";
  * timeline, or target has been added.
  */
 
-const REGIONS = ["Africa", "Latin America", "Asia"];
+const REGIONS = ["Africa", "Asia", "Latin America"];
 
 const BUILDING = [
   "Advanced data tools",
@@ -91,16 +91,17 @@ export const AboutLookingAhead: React.FC = () => {
           </span>
 
           <div ref={driftRef} className="mt-8">
-            <ul className="flex flex-wrap items-baseline gap-x-10 gap-y-4 sm:gap-x-16">
-              {REGIONS.map((region, index) => (
+            <ul className="flex flex-wrap items-center gap-x-10 gap-y-4 sm:gap-x-16">
+              {REGIONS.map((region) => (
                 <li
                   key={region}
                   data-about-reveal
-                  className={`flex items-baseline gap-4 ${HIDDEN_RISE}`}
+                  className={`flex items-center gap-3.5 ${HIDDEN_RISE}`}
                 >
-                  <span className="font-mono text-[11px] font-bold tabular-nums text-[#D4AF37]">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
+                  <span
+                    aria-hidden="true"
+                    className="h-2 w-2 shrink-0 rounded-full border border-[#D4AF37] bg-[#D4AF37]"
+                  />
                   <span className="font-space-grotesk text-[clamp(2rem,5.5vw,4rem)] font-bold uppercase leading-[1.05] tracking-[-0.025em] text-white">
                     {region}
                   </span>
@@ -141,8 +142,8 @@ export const AboutLookingAhead: React.FC = () => {
         </div>
 
         {/* --- The closing commitment -------------------------------------------- */}
-        <div ref={closerRef} className="mt-16 border-t border-white/10 pt-12 md:mt-20">
-          <p className="max-w-[24ch] font-space-grotesk text-[clamp(2rem,5vw,3.75rem)] font-bold uppercase leading-[1.08] tracking-[-0.025em] text-[#D4AF37]">
+        <div ref={closerRef} className="mt-16 flex flex-col items-center justify-center border-t border-white/10 pt-12 text-center md:mt-20">
+          <p className="max-w-[24ch] text-center font-space-grotesk text-[clamp(2rem,5vw,3.75rem)] font-bold uppercase leading-[1.08] tracking-[-0.025em] text-[#D4AF37]">
             <MaskedWords text="Truth over noise." />
           </p>
         </div>

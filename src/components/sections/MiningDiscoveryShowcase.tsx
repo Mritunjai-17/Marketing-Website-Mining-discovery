@@ -1555,9 +1555,9 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   z-index: 10;
   width: 100%;
   height: 100%;
-  max-width: 1240px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: clamp(1.5rem, 4vh, 3.5rem) clamp(1.2rem, 3.5vw, 3rem);
+  padding: clamp(1.5rem, 4vh, 3.5rem) clamp(1rem, 2.5vw, 2.5rem);
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -1571,24 +1571,47 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.6rem;
-  margin-bottom: clamp(0.5rem, 1.4vh, 1.1rem);
+  width: 100%;
+  margin-bottom: clamp(0.75rem, 1.8vh, 1.35rem);
 }
 
-.finaleBrandKicker {
+.finaleEyebrowRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.6rem, 1.6vw, 1.25rem);
+  width: 100%;
+}
+
+.finaleEyebrowRule {
+  width: clamp(28px, 4.5vw, 55px);
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent, rgba(138, 104, 32, 0.75));
+}
+
+.finaleEyebrowRuleRight {
+  width: clamp(28px, 4.5vw, 55px);
+  height: 1.5px;
+  background: linear-gradient(90deg, rgba(138, 104, 32, 0.75), transparent);
+}
+
+.finaleEyebrowPip {
+  display: inline-block;
+  color: #D4AF37;
+  font-size: 0.85em;
+  margin: 0 0.25em;
+  text-shadow: 0 0 8px rgba(212, 175, 55, 0.6);
+  vertical-align: middle;
+  user-select: none;
+}
+
+.finaleEyebrowText {
   font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
-  font-size: clamp(0.64rem, 0.74vw, 0.78rem);
+  font-size: clamp(0.66rem, 0.8vw, 0.78rem);
   font-weight: 700;
-  letter-spacing: 0.28em;
+  letter-spacing: clamp(0.16em, 0.24em, 0.28em);
+  color: #7A5E22;
   text-transform: uppercase;
-  color: #1a365d;
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  padding: 0.3rem 0.9rem;
-  border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  box-shadow: 0 2px 10px rgba(30, 60, 95, 0.05);
 }
 
 .finaleQuoteBlock {
@@ -1602,11 +1625,18 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 
 .finaleQuoteMark {
   font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
-  font-size: clamp(2.6rem, 4.8vw, 4.4rem);
+  font-size: clamp(2.4rem, 4.4vw, 4rem);
   line-height: 0.75;
-  color: rgba(26, 54, 93, 0.4);
+  color: rgba(26, 54, 93, 0.42);
   margin-bottom: clamp(0.35rem, 0.8vh, 0.65rem);
   user-select: none;
+  display: block;
+  text-align: center;
+}
+
+.finaleQuoteMarkClose {
+  margin-top: clamp(0.75rem, 1.6vh, 1.25rem);
+  margin-bottom: 0;
 }
 
 .finaleQuoteBody {
@@ -1640,12 +1670,14 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 /* Logos Section */
 .finaleClientsSection {
   width: 100%;
-  max-width: 1140px;
+  max-width: 1360px;
   margin-top: clamp(1.8rem, 3.8vh, 3.2rem);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.65rem;
+  justify-content: center;
+  gap: 0.75rem;
+  box-sizing: border-box;
 }
 
 .finaleClientsEyebrow {
@@ -1661,20 +1693,21 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 /* 6-Card Single Row 3D Flip Display - Equal Grid Distance & Proportions */
 .flipRowWrapper {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   align-items: center;
   justify-items: center;
-  gap: clamp(1.4rem, 2.8vw, 3.2rem);
+  gap: clamp(0.75rem, 1.8vw, 2.2rem);
   width: 100%;
-  max-width: 1320px;
+  max-width: 1360px;
   margin: 0 auto;
   perspective: 1200px;
+  box-sizing: border-box;
 }
 
 .flipCard {
   width: 100%;
-  height: clamp(52px, 6.5vh, 68px);
-  padding: 0 clamp(6px, 0.8vw, 12px);
+  height: clamp(56px, 7.2vh, 76px);
+  padding: 0 clamp(4px, 0.8vw, 12px);
   background: transparent;
   border: none;
   box-shadow: none;
@@ -1701,6 +1734,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease;
   transform-style: preserve-3d;
   will-change: transform, opacity;
+  box-sizing: border-box;
 }
 
 .flipCardRotating .flipCardInner {
@@ -1710,12 +1744,18 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 
 .finaleLogoImg {
   width: auto;
-  max-width: clamp(135px, 14vw, 175px);
-  height: clamp(40px, 5.2vh, 52px);
-  max-height: clamp(40px, 5.2vh, 52px);
+  max-width: 100%;
+  height: clamp(44px, 5.8vh, 60px);
+  max-height: clamp(44px, 5.8vh, 60px);
   object-fit: contain;
-  filter: drop-shadow(0 1px 3px rgba(15, 35, 65, 0.08));
-  transition: transform 0.2s ease;
+  display: block;
+  margin: 0 auto;
+  filter: drop-shadow(0 2px 6px rgba(15, 35, 65, 0.08));
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.flipCard:hover .finaleLogoImg {
+  filter: drop-shadow(0 4px 12px rgba(15, 35, 65, 0.15));
 }
 
 .flipPaginationDots {
@@ -1723,36 +1763,34 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  margin-top: clamp(0.7rem, 1.5vh, 1.2rem);
+  margin-top: clamp(0.8rem, 1.6vh, 1.3rem);
 }
 
 .flipDot {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: rgba(26, 54, 93, 0.22);
+  background: rgba(26, 54, 93, 0.25);
   transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .flipDotActive {
-  width: 24px;
+  width: 26px;
   border-radius: 9999px;
   background: #1a365d;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .flipRowWrapper {
-    gap: 1.2rem;
-    max-width: 100%;
+    gap: clamp(0.6rem, 1.4vw, 1.2rem);
   }
   .flipCard {
-    height: 52px;
+    height: 56px;
     padding: 0 4px;
   }
   .finaleLogoImg {
-    height: 38px;
-    max-height: 38px;
-    max-width: 135px;
+    height: 42px;
+    max-height: 42px;
   }
 }
 
@@ -1761,14 +1799,20 @@ export const MiningDiscoveryShowcase: React.FC = () => {
     padding: clamp(1.5rem, 3.5vh, 2.5rem) 1rem;
     justify-content: center;
   }
-  .finaleBrandKicker {
-    font-size: 0.68rem;
-    padding: 0.25rem 0.8rem;
-    letter-spacing: 0.2em;
+  .finaleEyebrowText {
+    font-size: 0.64rem;
+    letter-spacing: 0.16em;
+  }
+  .finaleEyebrowRule,
+  .finaleEyebrowRuleRight {
+    width: 22px;
   }
   .finaleQuoteMark {
     font-size: 2.2rem;
     margin-bottom: 0.2rem;
+  }
+  .finaleQuoteMarkClose {
+    margin-top: 0.5rem;
   }
   .finaleQuoteBody {
     font-size: clamp(1.05rem, 3.8vw, 1.35rem);
@@ -1779,19 +1823,18 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   }
   .flipRowWrapper {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.0rem;
-    max-width: 420px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.1rem;
+    max-width: 480px;
     margin: 0 auto;
   }
   .flipCard {
-    height: 48px;
+    height: 52px;
     padding: 0 4px;
   }
   .finaleLogoImg {
-    height: 32px;
-    max-height: 32px;
-    max-width: 110px;
+    height: 38px;
+    max-height: 38px;
   }
 }
 
@@ -1802,25 +1845,27 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   .finaleQuoteMark {
     font-size: 1.8rem;
   }
+  .finaleQuoteMarkClose {
+    margin-top: 0.4rem;
+  }
   .finaleQuoteBody {
     font-size: 0.95rem;
     line-height: 1.35;
   }
   .flipRowWrapper {
-    max-width: 330px;
-    gap: 0.75rem;
+    max-width: 340px;
+    gap: 0.85rem;
   }
   .flipCard {
-    height: 40px;
+    height: 44px;
     padding: 0 3px;
   }
   .finaleLogoImg {
-    height: 26px;
-    max-height: 26px;
-    max-width: 92px;
+    height: 32px;
+    max-height: 32px;
   }
   .flipPaginationDots {
-    margin-top: 0.4rem;
+    margin-top: 0.5rem;
   }
 }
 
@@ -2222,9 +2267,15 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 
                 <div className="finaleEditorialContainer">
                   <div className="finaleBrandHeader">
-                    <span className="finaleBrandKicker">
-                      Global Mining Marketing &amp; Capital
-                    </span>
+                    <div className="finaleEyebrowRow">
+                      <div className="finaleEyebrowRule" aria-hidden="true" />
+                      <span className="finaleEyebrowPip">✦</span>
+                      <span className="finaleEyebrowText">
+                        GLOBAL MINING MARKETING &amp; CAPITAL
+                      </span>
+                      <span className="finaleEyebrowPip">✦</span>
+                      <div className="finaleEyebrowRuleRight" aria-hidden="true" />
+                    </div>
                   </div>
 
                   <div className="finaleQuoteBlock">
@@ -2232,8 +2283,11 @@ export const MiningDiscoveryShowcase: React.FC = () => {
                       &ldquo;
                     </span>
                     <blockquote className="finaleQuoteBody">
-                      &ldquo;...in the world&rsquo;s most demanding resource markets, visibility is capital. We transform complex mineral assets into global market dominance.<span className="quoteClosingMark" aria-hidden="true">&rdquo;</span>
+                      ...in the world&rsquo;s most demanding resource markets, visibility is capital. We transform complex mineral assets into global market dominance.
                     </blockquote>
+                    <span className="finaleQuoteMark finaleQuoteMarkClose" aria-hidden="true">
+                      &rdquo;
+                    </span>
                   </div>
 
                   <div className="finaleClientsSection">

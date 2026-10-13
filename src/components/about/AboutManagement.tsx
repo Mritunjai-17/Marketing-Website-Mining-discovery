@@ -107,7 +107,7 @@ export const AboutManagement: React.FC = () => {
               <div className="grid grid-cols-1 gap-x-16 gap-y-8 lg:grid-cols-12">
                 {/* --- Identity ------------------------------------------------- */}
                 <div className="lg:col-span-5">
-                  <div className="flex items-center gap-5">
+                  <div className="flex items-center">
                     {/* Monogram stands in for a headshot: gold ring, navy initials — the
                         same treatment the leadership cards used before real names existed. */}
                     <div
@@ -117,13 +117,6 @@ export const AboutManagement: React.FC = () => {
                     >
                       {person.initials}
                     </div>
-
-                    <span
-                      data-about-reveal
-                      className={`font-mono text-[11px] tabular-nums text-[#B8860B] ${HIDDEN_RISE}`}
-                    >
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
                   </div>
 
                   <h3 className="mt-7 font-space-grotesk text-[clamp(2rem,4vw,3rem)] font-bold uppercase leading-[1.08] tracking-[-0.02em] text-[#0B1F3A] transition-colors duration-300 group-hover/person:text-[#B8860B]">
