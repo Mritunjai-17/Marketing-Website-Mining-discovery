@@ -181,7 +181,7 @@ export const BoonHero = React.memo(
       const loadNextKeyFrame = () => {
         if (isCancelled) return;
         if (keyPointer >= keyIndices.length) {
-          loadAllRemainingFrames();
+          scheduleRemainingFrames();
           return;
         }
         const idx = keyIndices[keyPointer++];
@@ -203,7 +203,7 @@ export const BoonHero = React.memo(
       loadNextKeyFrame();
       loadNextKeyFrame();
 
-      // Step C: Load remaining interstitial frames with 6 parallel streams
+      // Step C: Load remaining interstitial frames during browser idle time (keeps UI 100% responsive)
       const loadAllRemainingFrames = () => {
         let idx = 1;
         const loadNext = () => {
@@ -221,8 +221,27 @@ export const BoonHero = React.memo(
             loadNext();
           }
         };
-        for (let s = 0; s < 6; s++) {
+
+        const isMobileScreen = typeof window !== "undefined" && window.innerWidth < 768;
+        const streamCount = isMobileScreen ? 3 : 6;
+        for (let s = 0; s < streamCount; s++) {
           loadNext();
+        }
+      };
+
+      const scheduleRemainingFrames = () => {
+        if (isCancelled) return;
+        if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+          (window as any).requestIdleCallback(
+            () => {
+              if (!isCancelled) loadAllRemainingFrames();
+            },
+            { timeout: 1200 }
+          );
+        } else {
+          setTimeout(() => {
+            if (!isCancelled) loadAllRemainingFrames();
+          }, 250);
         }
       };
 

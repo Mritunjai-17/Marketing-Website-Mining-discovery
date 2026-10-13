@@ -640,6 +640,7 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
                             src={chapter.logoImage}
                             alt={chapter.clientName}
                             className={styles.clientLogoBadge}
+                            loading="lazy"
                           />
                         </div>
                       )}

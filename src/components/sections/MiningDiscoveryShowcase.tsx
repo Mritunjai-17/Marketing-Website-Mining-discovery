@@ -175,7 +175,7 @@ const ClientLogosFlipRow: React.FC = () => {
                 src={client.logo}
                 alt={client.name}
                 className="finaleLogoImg"
-                loading="eager"
+                loading="lazy"
               />
             </div>
           </div>
@@ -2261,7 +2261,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
                   src="/images/premium_light_sand_bg.webp"
                   alt="Mining Discovery Global"
                   className="horizontalCardsFinaleImage"
-                  loading="eager"
+                  loading="lazy"
                 />
                 <div className="horizontalCardsFinaleOverlay" />
 
@@ -2352,7 +2352,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
                             src={card.image}
                             alt={card.title}
                             className="horizontalCardBgImage"
-                            loading="eager"
+                            loading="lazy"
                           />
                           <div className="horizontalCardOverlay" />
 
