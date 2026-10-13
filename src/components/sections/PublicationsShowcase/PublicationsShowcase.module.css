@@ -628,10 +628,10 @@
 
 .categoryTitle {
   font-family: var(--font-space-grotesk), sans-serif;
-  font-size: clamp(1.75rem, 2.2vw, 2.35rem);
+  font-size: clamp(1.45rem, 1.9vw, 1.95rem);
   font-weight: 700;
   color: #0F172A;
-  line-height: 1.15;
+  line-height: 1.2;
   margin: 0;
   letter-spacing: -0.02em;
 }
@@ -1133,6 +1133,11 @@
     padding: clamp(3rem, 5vh, 4rem) 0;
   }
 
+  .categoryTitle {
+    font-size: clamp(1.35rem, 2.6vw, 1.65rem);
+    line-height: 1.2;
+  }
+
   .categoryDescription {
     max-width: 100%;
   }
@@ -1149,7 +1154,8 @@
 
 @media (max-width: 640px) {
   .categoryTitle {
-    font-size: 1.85rem;
+    font-size: clamp(1.22rem, 5vw, 1.38rem);
+    line-height: 1.22;
   }
 
   .categoryStatsRow {

@@ -260,24 +260,29 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   const reduceMotionRef = useRef(false);
   const [reduceMotion, setReduceMotion] = useState(false);
   const [totalScrollVh, setTotalScrollVh] = useState(DESKTOP_SCROLL_VH);
+  const [playingCardId, setPlayingCardId] = useState<string | null>(null);
   const [activeVideoModal, setActiveVideoModal] = useState<{ id: string; title: string } | null>(null);
 
-  // Close video modal on Escape key and lock Lenis scroll during playback
+  // Close video modal or in-card video on Escape key and lock Lenis scroll during modal playback
   useEffect(() => {
-    if (!activeVideoModal) return;
+    if (!activeVideoModal && !playingCardId) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        setActiveVideoModal(null);
+        if (activeVideoModal) {
+          setActiveVideoModal(null);
+        } else if (playingCardId) {
+          setPlayingCardId(null);
+        }
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     const lenis = typeof window !== "undefined" ? (window as any).lenis : null;
-    if (lenis) lenis.stop();
+    if (lenis && activeVideoModal) lenis.stop();
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       if (lenis) lenis.start();
     };
-  }, [activeVideoModal]);
+  }, [activeVideoModal, playingCardId]);
 
   useEffect(() => {
     let lastWidth = window.innerWidth;
@@ -1877,6 +1882,102 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   fill: #14100D;
 }
 
+/* ==========================================================================
+   IN-CARD INLINE VIDEO PLAYER (OPTION 1)
+   ========================================================================== */
+
+.inCardVideoContainer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 25;
+  background: #000000;
+  border-radius: inherit;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  animation: inCardFadeIn 0.22s ease-out;
+}
+
+@keyframes inCardFadeIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.inCardVideoIframeWrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000000;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+}
+
+.inCardVideoIframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
+.inCardVideoTopBar {
+  position: absolute;
+  top: clamp(10px, 1.8vh, 16px);
+  left: clamp(12px, 1.8vw, 18px);
+  right: clamp(12px, 1.8vw, 18px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 30;
+  pointer-events: none;
+}
+
+.inCardVideoTag {
+  font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: #D6A84F;
+  text-transform: uppercase;
+  background: rgba(20, 16, 13, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(214, 168, 79, 0.4);
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+.inCardVideoCloseBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(20, 16, 13, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  color: #E5E5E5;
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  padding: 5px 12px;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: all 0.2s ease;
+}
+
+.inCardVideoCloseBtn:hover {
+  background: rgba(214, 168, 79, 0.25);
+  border-color: #D6A84F;
+  color: #FFFFFF;
+}
+
 .videoModalBackdrop {
   position: fixed;
   inset: 0;
@@ -2144,98 +2245,136 @@ export const MiningDiscoveryShowcase: React.FC = () => {
               {/* Horizontal Cards Track */}
               <div className="horizontalCardsViewport">
                 <div ref={horizontalTrackRef} className="horizontalCardsTrack">
-                  {FOCUS_CARDS.map((card) => (
-                    <article
-                      key={card.id}
-                      className="horizontalCardItem"
-                      style={{ cursor: card.youtubeId ? "pointer" : "default" }}
-                      onClick={() => {
-                        if (card.youtubeId) {
-                          setActiveVideoModal({ id: card.youtubeId, title: card.title });
-                        }
-                      }}
-                    >
-                      <div className="horizontalCardInner">
-                        <img
-                          src={card.image}
-                          alt={card.title}
-                          className="horizontalCardBgImage"
-                          loading="eager"
-                        />
-                        <div className="horizontalCardOverlay" />
-
-                        {/* Authentic YouTube Video Play Button */}
-                        {card.youtubeId && (
-                          <button
-                            type="button"
-                            className="horizontalCardYouTubeBtn"
-                            aria-label={`Play YouTube video: ${card.title}`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setActiveVideoModal({ id: card.youtubeId!, title: card.title });
-                            }}
-                          >
-                            <svg
-                              viewBox="0 0 68 48"
-                              className="youtubeSvgIcon"
-                              aria-hidden="true"
+                  {FOCUS_CARDS.map((card) => {
+                    const isPlaying = playingCardId === card.id;
+                    return (
+                      <article
+                        key={card.id}
+                        className="horizontalCardItem"
+                        style={{ cursor: card.youtubeId ? "pointer" : "default" }}
+                        onClick={() => {
+                          if (card.youtubeId && !isPlaying) {
+                            setPlayingCardId(card.id);
+                          }
+                        }}
+                      >
+                        <div className="horizontalCardInner">
+                          {/* IN-CARD INLINE VIDEO PLAYER (OPTION 1) */}
+                          {isPlaying && card.youtubeId && (
+                            <div
+                              className="inCardVideoContainer"
+                              onClick={(e) => e.stopPropagation()}
                             >
-                              <path
-                                className="youtubeSvgBg"
-                                d="M66.52 7.74c-.78-2.93-2.49-5.41-5.42-6.19C55.79.13 34 0 34 0S12.21.13 6.9 1.55c-2.93.78-4.63 3.26-5.42 6.19C.06 13.05 0 24 0 24s.06 10.95 1.48 16.26c.78 2.93 2.49 5.41 5.42 6.19C12.21 47.87 34 48 34 48s21.79-.13 27.1-1.55c2.93-.78 4.64-3.26 5.42-6.19C67.94 34.95 68 24 68 24s-.06-10.95-1.48-16.26z"
-                              />
-                              <polygon
-                                className="youtubeSvgTriangle"
-                                points="28,34 45,24 28,14"
-                              />
-                            </svg>
-                          </button>
-                        )}
-
-                        <div className="horizontalCardUpper">
-                          <div className="horizontalCardTopBar">
-                            {card.category && (
-                              <div className="horizontalCardCategoryRow">
-                                <span className="horizontalCardCategoryPip" aria-hidden="true">✦</span>
-                                <span className="horizontalCardCategory">{card.category}</span>
+                              <div className="inCardVideoIframeWrap">
+                                <iframe
+                                  src={`https://www.youtube-nocookie.com/embed/${card.youtubeId}?autoplay=1&rel=0&modestbranding=1`}
+                                  title={card.title}
+                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+                                  allowFullScreen
+                                  className="inCardVideoIframe"
+                                />
                               </div>
-                            )}
 
+                              {/* Top Bar with Status and Close Button */}
+                              <div className="inCardVideoTopBar">
+                                <span className="inCardVideoTag">NOW PLAYING</span>
+                                <button
+                                  type="button"
+                                  className="inCardVideoCloseBtn"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setPlayingCardId(null);
+                                  }}
+                                  aria-label="Close Video"
+                                >
+                                  <X size={14} />
+                                  <span>CLOSE</span>
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
+                          <img
+                            src={card.image}
+                            alt={card.title}
+                            className="horizontalCardBgImage"
+                            loading="eager"
+                          />
+                          <div className="horizontalCardOverlay" />
+
+                          {/* Authentic YouTube Video Play Button */}
+                          {card.youtubeId && !isPlaying && (
                             <button
                               type="button"
-                              className="horizontalCardAction"
+                              className="horizontalCardYouTubeBtn"
+                              aria-label={`Play YouTube video: ${card.title}`}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                if (card.youtubeId) {
-                                  setActiveVideoModal({ id: card.youtubeId, title: card.title });
-                                }
+                                setPlayingCardId(card.id);
                               }}
                             >
-                              <span>{card.ctaText}</span>
-                              <span className="horizontalCardPlus" aria-hidden="true">▶</span>
+                              <svg
+                                viewBox="0 0 68 48"
+                                className="youtubeSvgIcon"
+                                aria-hidden="true"
+                              >
+                                <path
+                                  className="youtubeSvgBg"
+                                  d="M66.52 7.74c-.78-2.93-2.49-5.41-5.42-6.19C55.79.13 34 0 34 0S12.21.13 6.9 1.55c-2.93.78-4.63 3.26-5.42 6.19C.06 13.05 0 24 0 24s.06 10.95 1.48 16.26c.78 2.93 2.49 5.41 5.42 6.19C12.21 47.87 34 48 34 48s21.79-.13 27.1-1.55c2.93-.78 4.64-3.26 5.42-6.19C67.94 34.95 68 24 68 24s-.06-10.95-1.48-16.26z"
+                                />
+                                <polygon
+                                  className="youtubeSvgTriangle"
+                                  points="28,34 45,24 28,14"
+                                />
+                              </svg>
                             </button>
+                          )}
+
+                          <div className="horizontalCardUpper">
+                            <div className="horizontalCardTopBar">
+                              {card.category && (
+                                <div className="horizontalCardCategoryRow">
+                                  <span className="horizontalCardCategoryPip" aria-hidden="true">✦</span>
+                                  <span className="horizontalCardCategory">{card.category}</span>
+                                </div>
+                              )}
+
+                              <button
+                                type="button"
+                                className="horizontalCardAction"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (card.youtubeId) {
+                                    setPlayingCardId(card.id);
+                                  }
+                                }}
+                              >
+                                <span>{card.ctaText}</span>
+                                <span className="horizontalCardPlus" aria-hidden="true">▶</span>
+                              </button>
+                            </div>
+
+                            <div className="horizontalCardTop">
+                              <h3 className="horizontalCardTitle">
+                                {card.title}
+                              </h3>
+                              <p className="horizontalCardDesc">
+                                {card.description}
+                              </p>
+                            </div>
                           </div>
 
-                          <div className="horizontalCardTop">
-                            <h3 className="horizontalCardTitle">
-                              {card.title}
-                            </h3>
-                            <p className="horizontalCardDesc">
-                              {card.description}
-                            </p>
-                          </div>
+                          {card.locationTag && (
+                            <div className="horizontalCardFooter">
+                              <span className="horizontalCardLocationTag">
+                                {card.locationTag}
+                              </span>
+                            </div>
+                          )}
                         </div>
-
-                        {card.locationTag && (
-                          <div className="horizontalCardFooter">
-                            <span className="horizontalCardLocationTag">
-                              {card.locationTag}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </article>
-                  ))}
+                      </article>
+                    );
+                  })}
                 </div>
               </div>
 

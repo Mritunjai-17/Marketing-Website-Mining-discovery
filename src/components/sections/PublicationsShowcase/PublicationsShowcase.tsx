@@ -135,7 +135,11 @@ const InteractiveCardsRail: React.FC<InteractiveCardsRailProps> = ({
 
       if (!atEnd && !atStart) {
         e.preventDefault();
-        rail.scrollLeft += delta;
+        if (Math.abs(delta) >= 28) {
+          rail.scrollBy({ left: delta * 1.2, behavior: "smooth" });
+        } else {
+          rail.scrollLeft += delta;
+        }
       }
     };
 

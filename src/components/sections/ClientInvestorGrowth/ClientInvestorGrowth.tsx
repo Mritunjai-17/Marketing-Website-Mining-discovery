@@ -367,11 +367,11 @@ export const ClientInvestorGrowth = React.memo<ClientInvestorGrowthProps>(functi
             >
               <div className={styles.metricItem}>
                 <AnimatedMetric
-                  value="$3.5B+"
+                  value="1.2M+"
                   inView={metricsInView}
                   className={styles.metricValue}
                 />
-                <span className={styles.metricLabel}>Client Capital Reach</span>
+                <span className={styles.metricLabel}>Global Reach</span>
               </div>
 
               <div className={styles.metricDivider} />
@@ -389,22 +389,22 @@ export const ClientInvestorGrowth = React.memo<ClientInvestorGrowthProps>(functi
 
               <div className={styles.metricItem}>
                 <AnimatedMetric
-                  value="250,000+"
+                  value="500k+"
                   inView={metricsInView}
                   className={styles.metricValue}
                 />
-                <span className={styles.metricLabel}>Global Readers &amp; Traders</span>
+                <span className={styles.metricLabel}>Daily Actions &amp; Engagement</span>
               </div>
 
               <div className={styles.metricDivider} />
 
               <div className={styles.metricItem}>
                 <AnimatedMetric
-                  value="60+"
+                  value="1,200+"
                   inView={metricsInView}
                   className={styles.metricValue}
                 />
-                <span className={styles.metricLabel}>Mining Jurisdictions Covered</span>
+                <span className={styles.metricLabel}>Global Media Outlets</span>
               </div>
             </div>
           </div>
