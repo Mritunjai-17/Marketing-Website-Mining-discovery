@@ -283,20 +283,7 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
         });
       }
 
-      // Check card deck dynamic height only when active index changes (eliminates layout thrashing)
-      if (activeChapterRef.current !== lastDeckHeightIdx.current) {
-        lastDeckHeightIdx.current = activeChapterRef.current;
-        const activeEl = chapterRefs.current[activeChapterRef.current];
-        if (activeEl && cardDeckRef.current) {
-          const h = activeEl.offsetHeight;
-          if (h > 0) {
-            cardDeckRef.current.style.height = `${h}px`;
-            cardDeckRef.current.style.minHeight = `${h}px`;
-          }
-        }
-      }
-
-      // Check stack pinning and continuous scroll progress
+      // Stack pinning and continuous scroll progress
       if (stackOuterRef.current && stackStickyRef.current) {
         const outerRect = stackOuterRef.current.getBoundingClientRect();
         const stickyEl = stackStickyRef.current;
@@ -325,11 +312,15 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
         }
       }
 
-      // Fluid lerp: responsive 0.28 for scroll momentum, 0.08 for chapter tab clicks
-      const lerpSpeed = isManualClickRef.current ? 0.08 : 0.28;
+      // Direct 1:1 on scroll scrub to prevent trailing lag / oscillation, smooth glide on tab clicks
       const diff = targetProgressRef.current - currentProgressRef.current;
-      if (Math.abs(diff) > 0.0002) {
-        currentProgressRef.current += diff * lerpSpeed;
+      if (isManualClickRef.current) {
+        const lerpSpeed = 0.08;
+        if (Math.abs(diff) > 0.0002) {
+          currentProgressRef.current += diff * lerpSpeed;
+        } else {
+          currentProgressRef.current = targetProgressRef.current;
+        }
       } else {
         currentProgressRef.current = targetProgressRef.current;
       }
@@ -446,7 +437,14 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
       window.removeEventListener("touchmove", handleUserInteraction);
       if (manualTimerRef.current) clearTimeout(manualTimerRef.current);
     };
-  }, [scrollProgress, headerInView]);
+  }, []);
+
+  // Scrub and tick whenever scrollProgress updates without re-registering window listeners
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("scroll"));
+    }
+  }, [scrollProgress]);
 
   const innerContent = (
     <>

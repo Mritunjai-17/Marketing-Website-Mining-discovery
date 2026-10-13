@@ -21,37 +21,6 @@ export type TransitionState =
 const DESKTOP_SCROLL_VH = 2600;
 const MOBILE_SCROLL_VH = 2000;
 
-/**
- * How the sampled progress follows the true scroll position.
- * Responsive, critically damped spring for instant, silky scroll-scrubbing.
- */
-const PROGRESS_SPRING = { stiffness: 320, damping: 38 };
-const RESUME_GAP = 0.8;
-
-interface SpringState {
-  value: number;
-  velocity: number;
-}
-
-function stepSpring(
-  spring: SpringState,
-  target: number,
-  dt: number,
-  { stiffness, damping }: { stiffness: number; damping: number },
-) {
-  const steps = Math.min(6, Math.max(1, Math.ceil(dt * 60)));
-  const h = dt / steps;
-  for (let i = 0; i < steps; i += 1) {
-    const accel = (target - spring.value) * stiffness - spring.velocity * damping;
-    spring.velocity += accel * h;
-    spring.value += spring.velocity * h;
-  }
-  if (Math.abs(target - spring.value) < 1e-4 && Math.abs(spring.velocity) < 1e-3) {
-    spring.value = target;
-    spring.velocity = 0;
-  }
-}
-
 function clamp(v: number, lo: number, hi: number) {
   return Math.min(Math.max(v, lo), hi);
 }
@@ -61,27 +30,20 @@ export const GlobeHero: React.FC = () => {
   const cardRef = useRef<HTMLDivElement>(null);
   const slotRef = useRef<HTMLDivElement>(null);
   const boonHeroBoxRef = useRef<HTMLDivElement>(null);
+  const bridgeBoxRef = useRef<HTMLDivElement>(null);
   const journeyBoxRef = useRef<HTMLDivElement>(null);
 
   const journeyProgress = useCreateJourneyProgress();
   const [journeyActive, setJourneyActive] = useState(false);
   const journeyActiveRef = useRef(false);
-  const [transitionProgress, setTransitionProgress] = useState(0);
-  const lastTransPRef = useRef(0);
-  const [transitionState, setTransitionState] = useState<TransitionState>("HERO_ACTIVE");
-  const transitionStateRef = useRef<TransitionState>("HERO_ACTIVE");
   const boonHeroRef = useRef<BoonHeroHandle>(null);
 
   const progressRef = useRef(0);
-  const progressSpring = useRef<SpringState>({ value: 0, velocity: 0 });
   const rangeMetricsRef = useRef({ top: 0, travel: 0 });
-  const lastSampleRef = useRef(0);
   const reduceMotionRef = useRef(false);
   const [reduceMotion, setReduceMotion] = useState(false);
 
-  const [bridgeOpacity, setBridgeOpacity] = useState(0);
   const [bridgeScroll, setBridgeScroll] = useState(0);
-  const bridgeOpacityRef = useRef(0);
   const bridgeScrollRef = useRef(0);
 
   const [totalScrollVh, setTotalScrollVh] = useState(DESKTOP_SCROLL_VH);
@@ -114,28 +76,10 @@ export const GlobeHero: React.FC = () => {
     const journeyBox = journeyBoxRef.current;
     if (reduceMotionRef.current) return true;
 
-    // --- Sample and damp scroll progress ---------------------------------------------
+    // --- Sample scroll progress in direct 1:1 synchrony with scroll position ---------
     const { top, travel } = rangeMetricsRef.current;
     const target = travel > 0 ? clamp((window.scrollY - top) / travel, 0, 1) : 0;
-
-    const now = performance.now();
-    const gap = (now - lastSampleRef.current) / 1000;
-    lastSampleRef.current = now;
-
-    const isTouch = typeof window !== "undefined" && (window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 900);
-    const progress = progressSpring.current;
-
-    if (isTouch) {
-      // Mobile touch devices natively apply inertia momentum scrolling.
-      progress.value = target;
-      progress.velocity = 0;
-    } else if (gap > RESUME_GAP) {
-      progress.value = target;
-      progress.velocity = 0;
-    } else if (gap > 0) {
-      stepSpring(progress, target, gap, PROGRESS_SPRING);
-    }
-    const t = clamp(progress.value, 0, 1);
+    const t = target;
     progressRef.current = t;
 
     // 1. Hardware-scrubbed Hero sequence:
@@ -189,9 +133,12 @@ export const GlobeHero: React.FC = () => {
 
     const bScroll = clamp((t - BRIDGE_FADE_IN_END) / (BRIDGE_SCROLL_END - BRIDGE_FADE_IN_END), 0, 1);
 
-    if (Math.abs(bOpacity - bridgeOpacityRef.current) > 0.005 || bOpacity === 0 || bOpacity === 1) {
-      bridgeOpacityRef.current = bOpacity;
-      setBridgeOpacity(bOpacity);
+    const bridgeBox = bridgeBoxRef.current;
+    if (bridgeBox) {
+      bridgeBox.style.opacity = bOpacity.toFixed(3);
+      bridgeBox.style.visibility = bOpacity > 0 ? "visible" : "hidden";
+      bridgeBox.style.pointerEvents = bOpacity > 0.5 ? "auto" : "none";
+      bridgeBox.style.zIndex = bOpacity > 0 ? "35" : "10";
     }
 
     if (Math.abs(bScroll - bridgeScrollRef.current) > 0.003 || bScroll === 0 || bScroll === 1) {
@@ -215,17 +162,6 @@ export const GlobeHero: React.FC = () => {
     journeyProgress.descent = 1.0;
     journeyProgress.cardsProgress = 0;
 
-    // Transition state
-    let nextState: TransitionState = "HERO_ACTIVE";
-    if (t < HERO_END) nextState = "HERO_ACTIVE";
-    else if (t < SERVICES_START) nextState = "SIDE_VIEW_LOCKED";
-    else nextState = "JOURNEY_ACTIVE";
-
-    if (nextState !== transitionStateRef.current) {
-      transitionStateRef.current = nextState;
-      setTransitionState(nextState);
-    }
-
     // Services section active state: only activate when bridge has completed
     const shouldJourneyBeActive = t >= SERVICES_START && t <= 1.0;
     if (shouldJourneyBeActive !== journeyActiveRef.current) {
@@ -248,11 +184,11 @@ export const GlobeHero: React.FC = () => {
       }
     }
 
-    const isSettled = isTouch
-      ? true
-      : Math.abs(target - progress.value) < 1e-4 && Math.abs(progress.velocity) < 1e-3;
-    return isSettled;
+    return true;
   }, [journeyProgress]);
+
+  const applyStageRef = useRef(applyStage);
+  applyStageRef.current = applyStage;
 
   useEffect(() => {
     const range = rangeRef.current;
@@ -275,13 +211,9 @@ export const GlobeHero: React.FC = () => {
     let isTicking = false;
 
     const tick = () => {
-      const isSettled = applyStage();
-      if (!isSettled) {
-        animId = requestAnimationFrame(tick);
-      } else {
-        isTicking = false;
-        animId = null;
-      }
+      applyStageRef.current();
+      isTicking = false;
+      animId = null;
     };
 
     const requestTick = () => {
@@ -304,6 +236,10 @@ export const GlobeHero: React.FC = () => {
       requestTick();
     };
     window.addEventListener("scroll", onScroll, { passive: true });
+    const lenis = typeof window !== "undefined" ? (window as any).lenis : null;
+    if (lenis) {
+      lenis.on("scroll", onScroll);
+    }
     const onResize = () => {
       measureRange();
       requestTick();
@@ -315,8 +251,11 @@ export const GlobeHero: React.FC = () => {
       observer.disconnect();
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
+      if (lenis) {
+        lenis.off("scroll", onScroll);
+      }
     };
-  }, [applyStage]);
+  }, []);
 
   return (
     <section className="relative isolate w-full bg-[#030509]">
@@ -348,12 +287,9 @@ export const GlobeHero: React.FC = () => {
             {/* Boon-Inspired Dark Hero Overlay */}
             <div
               ref={boonHeroBoxRef}
-              className="absolute inset-0 h-full w-full transition-opacity duration-150"
+              className="absolute inset-0 h-full w-full"
               style={{
                 zIndex: 30,
-                opacity: 1,
-                visibility: "visible",
-                pointerEvents: "auto",
               }}
             >
               <BoonHero ref={boonHeroRef} />
@@ -361,17 +297,17 @@ export const GlobeHero: React.FC = () => {
 
             {/* Value Bridge: How Mining Discovery Enhances Growth for Clients & Investors */}
             <div
+              ref={bridgeBoxRef}
               className="absolute inset-0 h-full w-full"
               style={{
-                zIndex: bridgeOpacity > 0 ? 35 : 10,
-                visibility: bridgeOpacity > 0 ? "visible" : "hidden",
-                pointerEvents: bridgeOpacity > 0.5 ? "auto" : "none",
-                opacity: bridgeOpacity,
+                zIndex: 10,
+                visibility: "hidden",
+                pointerEvents: "none",
+                opacity: 0,
               }}
             >
               <ClientInvestorGrowth
                 scrollProgress={bridgeScroll}
-                opacity={bridgeOpacity}
               />
             </div>
 
@@ -381,9 +317,6 @@ export const GlobeHero: React.FC = () => {
               className="absolute inset-0 h-full w-full bg-[#030509]"
               style={{
                 zIndex: 40,
-                opacity: 0,
-                visibility: "hidden",
-                pointerEvents: "none",
               }}
             >
               <Journey3D progress={journeyProgress} active={journeyActive} />

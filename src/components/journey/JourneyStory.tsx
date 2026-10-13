@@ -973,8 +973,6 @@ export const JourneyStory: React.FC = () => {
                     className={`${styles.fullScreenCardItem} ${isActive ? styles.fullScreenCardActive : ""}`}
                     style={{
                       zIndex: idx + 1,
-                      transform: idx === 0 ? "translate3d(0, 0, 0)" : "translate3d(100vw, 0, 0)",
-                      visibility: idx === 0 ? "visible" : "hidden",
                     }}
                     role="tabpanel"
                     aria-selected={isActive}

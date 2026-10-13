@@ -3224,6 +3224,13 @@
   box-sizing: border-box;
   will-change: transform;
   box-shadow: -16px 0 40px rgba(0, 0, 0, 0.45);
+  transform: translate3d(100vw, 0, 0);
+  visibility: hidden;
+}
+
+.fullScreenCardItem:first-child {
+  transform: translate3d(0, 0, 0);
+  visibility: visible;
 }
 
 

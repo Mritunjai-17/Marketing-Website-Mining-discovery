@@ -2,6 +2,7 @@
 
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { X } from "lucide-react";
 
 /* ==========================================================================
    DATA CONSTANTS
@@ -17,6 +18,7 @@ export interface FocusCard {
   locationTag?: string;
   ctaText: string;
   ctaHref: string;
+  youtubeId?: string;
 }
 
 export const FOCUS_CARDS: FocusCard[] = [
@@ -26,10 +28,11 @@ export const FOCUS_CARDS: FocusCard[] = [
     category: "BRAND & DIGITAL PRESENCE",
     title: "BUILD A MINING BRAND THAT FEELS CREDIBLE.",
     description: "Your website and visual identity are often the first things people see. We help mining companies build a clear, professional presence that reflects their projects, people and ambitions.",
-    image: "/images/cards/card_01_alliances.webp",
+    image: "/images/cards/card_01_video.jpg",
     locationTag: "[ Branding · Visual Identity · Website Design · Development ]",
-    ctaText: "Learn More",
-    ctaHref: "/contact",
+    ctaText: "Watch Video",
+    ctaHref: "https://www.youtube.com/watch?v=fEkZCZDaJ9M",
+    youtubeId: "fEkZCZDaJ9M",
   },
   {
     id: "service-2",
@@ -37,10 +40,11 @@ export const FOCUS_CARDS: FocusCard[] = [
     category: "CONTENT & MEDIA",
     title: "TURN COMPANY NEWS INTO STORIES PEOPLE NOTICE.",
     description: "Exploration results, project updates and company announcements deserve more than a press release. We turn them into clear, engaging content for the mining audience.",
-    image: "/images/cards/card_02_technology.webp",
+    image: "/images/cards/card_02_video.jpg",
     locationTag: "[ Content · PR · Media Coverage · Social Media ]",
-    ctaText: "Learn More",
-    ctaHref: "/contact",
+    ctaText: "Watch Video",
+    ctaHref: "https://www.youtube.com/watch?v=J9Mfma4uK-Y",
+    youtubeId: "J9Mfma4uK-Y",
   },
   {
     id: "service-3",
@@ -48,10 +52,11 @@ export const FOCUS_CARDS: FocusCard[] = [
     category: "DIGITAL MARKETING",
     title: "GIVE YOUR IMPORTANT UPDATES\nMORE REACH.",
     description: "From exploration results and project updates to company announcements, we help you promote the news that matters through digital campaigns and social media.",
-    image: "/images/cards/card_03_growth.webp",
+    image: "/images/cards/card_03_video.jpg",
     locationTag: "[ Digital Marketing · Paid Campaigns · Social Media · Campaign Strategy ]",
-    ctaText: "Learn More",
-    ctaHref: "/contact",
+    ctaText: "Watch Video",
+    ctaHref: "https://www.youtube.com/watch?v=3L3EV5115DQ",
+    youtubeId: "3L3EV5115DQ",
   },
   {
     id: "service-4",
@@ -59,10 +64,11 @@ export const FOCUS_CARDS: FocusCard[] = [
     category: "EXECUTIVE INFLUENCE",
     title: "PUT THE PEOPLE BEHIND THE PROJECT\nIN THE SPOTLIGHT.",
     description: "Strong companies have strong people behind them. We help mining leaders share their experience, ideas and vision through interviews, profiles and industry content.",
-    image: "/images/cards/card_04_governance.webp",
+    image: "/images/cards/card_04_video.jpg",
     locationTag: "[ CEO Profiles · Interviews · Thought Leadership · Video ]",
-    ctaText: "Learn More",
-    ctaHref: "/contact",
+    ctaText: "Watch Video",
+    ctaHref: "https://www.youtube.com/watch?v=Qc1khDSDUwI",
+    youtubeId: "Qc1khDSDUwI",
   },
   {
     id: "service-5",
@@ -70,10 +76,11 @@ export const FOCUS_CARDS: FocusCard[] = [
     category: "INDUSTRY & EVENT REACH",
     title: "TAKE YOUR STORY BEYOND YOUR WEBSITE",
     description: "Mining is built around relationships. We connect companies with industry conversations, events, publications and networks where important people come together.",
-    image: "/images/cards/card_05_turn_attention.webp",
+    image: "/images/cards/card_05_video.jpg",
     locationTag: "[ Events · Media · Industry Networks · Partnerships ]",
-    ctaText: "Learn More",
-    ctaHref: "/contact",
+    ctaText: "Watch Video",
+    ctaHref: "https://www.youtube.com/watch?v=qcAo4saz2UU",
+    youtubeId: "qcAo4saz2UU",
   },
 ];
 
@@ -193,8 +200,8 @@ const ClientLogosFlipRow: React.FC = () => {
    ========================================================================== */
 
 /** Viewport heights for the continuous Mining Discovery Interactive Showcase */
-const DESKTOP_SCROLL_VH = 1450;
-const MOBILE_SCROLL_VH = 1050;
+const DESKTOP_SCROLL_VH = 550;
+const MOBILE_SCROLL_VH = 420;
 
 /**
  * How the sampled progress follows the true scroll position.
@@ -253,6 +260,24 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   const reduceMotionRef = useRef(false);
   const [reduceMotion, setReduceMotion] = useState(false);
   const [totalScrollVh, setTotalScrollVh] = useState(DESKTOP_SCROLL_VH);
+  const [activeVideoModal, setActiveVideoModal] = useState<{ id: string; title: string } | null>(null);
+
+  // Close video modal on Escape key and lock Lenis scroll during playback
+  useEffect(() => {
+    if (!activeVideoModal) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setActiveVideoModal(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    const lenis = typeof window !== "undefined" ? (window as any).lenis : null;
+    if (lenis) lenis.stop();
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      if (lenis) lenis.start();
+    };
+  }, [activeVideoModal]);
 
   useEffect(() => {
     let lastWidth = window.innerWidth;
@@ -280,26 +305,10 @@ export const MiningDiscoveryShowcase: React.FC = () => {
     const { top, travel } = rangeMetricsRef.current;
     const target = travel > 0 ? clamp((window.scrollY - top) / travel, 0, 1) : 0;
 
-    const now = performance.now();
-    const gap = (now - lastSampleRef.current) / 1000;
-    lastSampleRef.current = now;
-
-    const isTouch =
-      typeof window !== "undefined" &&
-      (window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 900);
     const progress = progressSpring.current;
-
-    if (isTouch) {
-      // Mobile touch devices natively apply inertia momentum scrolling.
-      progress.value = target;
-      progress.velocity = 0;
-    } else if (gap > RESUME_GAP) {
-      progress.value = target;
-      progress.velocity = 0;
-    } else if (gap > 0) {
-      stepSpring(progress, target, gap, PROGRESS_SPRING);
-    }
-    const p = clamp(progress.value, 0, 1);
+    progress.value = target;
+    progress.velocity = 0;
+    const p = clamp(target, 0, 1);
     progressRef.current = p;
 
     const winW = rangeMetricsRef.current.winW || (typeof window !== "undefined" ? window.innerWidth : 1920);
@@ -510,11 +519,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
       }
     }
 
-    const isSettled = isTouch || (
-      Math.abs(target - progress.value) < 1e-4 &&
-      Math.abs(progress.velocity) < 1e-3
-    );
-    return isSettled;
+    return true;
   }, []);
 
   useEffect(() => {
@@ -1157,42 +1162,41 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 }
 
 /* Individual Focus Card - Exact Match to Pic 1 (Frosted blurred glass perimeter shell) */
+/* Individual Focus Card - Clean Luxury Single-Border Frame (No AI-style double glass box) */
 .horizontalCardItem {
   width: clamp(340px, 46vw, 720px);
   height: clamp(500px, 72vh, 670px);
   flex-shrink: 0;
-  border-radius: 26px;
-  /* Frosted blurred glass frame on the sides / perimeter of the card */
-  background: rgba(255, 255, 255, 0.18);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  padding: clamp(14px, 1.8vw, 24px);
-  box-shadow: 0 32px 85px rgba(0, 0, 0, 0.32), 0 10px 28px rgba(0, 0, 0, 0.18);
+  border-radius: 20px;
+  background: rgba(20, 16, 13, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 0;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
   box-sizing: border-box;
   display: flex;
   position: relative;
-  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.3s ease;
   pointer-events: auto;
 }
 
 .horizontalCardItem:hover {
   transform: translateY(-5px);
-  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.42), 0 14px 35px rgba(0, 0, 0, 0.25);
+  border-color: rgba(214, 168, 79, 0.4);
+  box-shadow: 0 32px 75px rgba(0, 0, 0, 0.55), 0 0 25px rgba(214, 168, 79, 0.15);
 }
 
-/* Inner card container framed inside the frosted blurred shell */
+/* Inner card container matching the exact radius seamlessly */
 .horizontalCardInner {
   position: relative;
   width: 100%;
   height: 100%;
-  border-radius: 16px;
+  border-radius: inherit;
   overflow: hidden;
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background: #0f172a;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  background: #14100D;
   box-sizing: border-box;
 }
 
@@ -1213,17 +1217,17 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   transform: scale(1.03);
 }
 
-/* Smooth natural gradient across the upper part of the card with zero boxes */
+/* Smooth natural obsidian gradient that preserves faces while dissolving cropped thumbnail text at corners */
 .horizontalCardOverlay {
   position: absolute;
   inset: 0;
   background: linear-gradient(
     to bottom,
-    rgba(10, 15, 26, 0.88) 0%,
-    rgba(10, 15, 26, 0.72) 30%,
-    rgba(10, 15, 26, 0.38) 52%,
-    rgba(10, 15, 26, 0.08) 72%,
-    rgba(10, 15, 26, 0.42) 100%
+    rgba(20, 16, 13, 0.90) 0%,
+    rgba(20, 16, 13, 0.65) 28%,
+    rgba(20, 16, 13, 0.40) 52%,
+    rgba(20, 16, 13, 0.78) 78%,
+    rgba(20, 16, 13, 0.96) 100%
   );
   z-index: 2;
   pointer-events: none;
@@ -1412,8 +1416,8 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   .horizontalCardItem {
     width: 86vw;
     height: min(68dvh, 520px);
-    border-radius: 22px;
-    padding: 12px;
+    border-radius: 20px;
+    padding: 0;
   }
   .horizontalCardsTrack {
     gap: clamp(1.2rem, 3.5vw, 2.5rem);
@@ -1421,33 +1425,35 @@ export const MiningDiscoveryShowcase: React.FC = () => {
     padding-right: 7vw;
   }
   .horizontalCardUpper {
-    padding: 0.85rem 0.85rem 0;
+    padding: 1rem 1.1rem 0;
   }
   .horizontalCardTopBar {
     padding: 0;
-    margin-bottom: 0.2rem;
+    margin-bottom: 0.35rem;
   }
   .horizontalCardTop {
-    padding: 0 0.4rem;
+    padding: 0 0.2rem;
   }
   .horizontalCardCategory {
     font-size: 0.68rem;
     margin-bottom: 0.1rem;
   }
   .horizontalCardTitle {
-    font-size: clamp(1.2rem, 4.8vw, 1.55rem);
-    line-height: 1.2;
+    font-size: clamp(1.18rem, 4.6vw, 1.48rem);
+    line-height: 1.22;
   }
   .horizontalCardDesc {
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     line-height: 1.42;
     margin-top: 0.35rem;
   }
   .horizontalCardFooter {
-    padding: 0 0.8rem 0.8rem;
+    padding: 0 1rem 1rem;
   }
   .horizontalCardLocationTag {
-    font-size: 0.68rem;
+    font-size: 0.64rem;
+    letter-spacing: 0.08em;
+    line-height: 1.4;
   }
   .horizontalCardsFooter {
     bottom: max(1.2rem, env(safe-area-inset-bottom, 1.2rem));
@@ -1460,7 +1466,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
     width: 88vw;
     height: min(65dvh, 460px);
     border-radius: 18px;
-    padding: 10px;
+    padding: 0;
   }
   .horizontalCardsTrack {
     padding-left: 6vw;
@@ -1468,20 +1474,27 @@ export const MiningDiscoveryShowcase: React.FC = () => {
     gap: 1rem;
   }
   .horizontalCardUpper {
-    padding: 0.75rem 0.6rem 0;
+    padding: 0.85rem 0.9rem 0;
   }
   .horizontalCardTitle {
-    font-size: 1.15rem;
+    font-size: 1.12rem;
+    line-height: 1.25;
   }
   .horizontalCardDesc {
-    font-size: 0.76rem;
+    font-size: 0.74rem;
     line-height: 1.35;
+    margin-top: 0.3rem;
   }
   .horizontalCardAction {
-    font-size: 0.82rem;
+    font-size: 0.78rem;
+  }
+  .horizontalCardFooter {
+    padding: 0 0.8rem 0.8rem;
   }
   .horizontalCardLocationTag {
-    font-size: 0.62rem;
+    font-size: 0.58rem;
+    letter-spacing: 0.06em;
+    line-height: 1.35;
   }
 }
 
@@ -1806,6 +1819,161 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   }
 }
 
+/* ==========================================================================
+   VIDEO POPUP MODAL & PLAY BUTTON (OPTION A)
+   ========================================================================== */
+
+/* Authentic YouTube Play Button (Themed to website's Charcoal & Gold Palette) */
+.horizontalCardYouTubeBtn {
+  position: absolute;
+  top: 56%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: clamp(66px, 5.8vw, 78px);
+  height: clamp(46px, 4vw, 54px);
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.28s ease;
+  filter: drop-shadow(0 14px 30px rgba(0, 0, 0, 0.7)) drop-shadow(0 0 18px rgba(214, 168, 79, 0.35));
+}
+
+.horizontalCardYouTubeBtn:hover {
+  transform: translate(-50%, -50%) scale(1.12);
+  filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.85)) drop-shadow(0 0 32px rgba(214, 168, 79, 0.65));
+}
+
+.horizontalCardYouTubeBtn .youtubeSvgIcon {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  display: block;
+}
+
+.horizontalCardYouTubeBtn .youtubeSvgBg {
+  fill: rgba(20, 16, 13, 0.88);
+  stroke: #D6A84F;
+  stroke-width: 1.8px;
+  transition: fill 0.25s ease, stroke 0.25s ease;
+}
+
+.horizontalCardYouTubeBtn:hover .youtubeSvgBg {
+  fill: #D6A84F;
+  stroke: #F1EEE6;
+}
+
+.horizontalCardYouTubeBtn .youtubeSvgTriangle {
+  fill: #D6A84F;
+  transition: fill 0.25s ease;
+}
+
+.horizontalCardYouTubeBtn:hover .youtubeSvgTriangle {
+  fill: #14100D;
+}
+
+.videoModalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(0.75rem, 3vw, 2rem);
+  box-sizing: border-box;
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.videoModalContent {
+  position: relative;
+  width: 100%;
+  max-width: 980px;
+  background: #000000;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.95);
+  display: flex;
+  flex-direction: column;
+  animation: modalScaleUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalScaleUp {
+  from { transform: scale(0.96); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.videoModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.2rem;
+  background: #000000;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.videoModalTitle {
+  font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
+  font-size: clamp(0.82rem, 0.95vw, 0.98rem);
+  font-weight: 600;
+  color: #E2E2E2;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 1rem;
+}
+
+.videoModalCloseBtn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #CCCCCC;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.videoModalCloseBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #FFFFFF;
+}
+
+.videoModalIframeWrap {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%;
+  background: #000000;
+}
+
+.videoModalIframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
 ` }} />
 
       {/* Pinned Sticky Viewport Window */}
@@ -1977,7 +2145,16 @@ export const MiningDiscoveryShowcase: React.FC = () => {
               <div className="horizontalCardsViewport">
                 <div ref={horizontalTrackRef} className="horizontalCardsTrack">
                   {FOCUS_CARDS.map((card) => (
-                    <article key={card.id} className="horizontalCardItem">
+                    <article
+                      key={card.id}
+                      className="horizontalCardItem"
+                      style={{ cursor: card.youtubeId ? "pointer" : "default" }}
+                      onClick={() => {
+                        if (card.youtubeId) {
+                          setActiveVideoModal({ id: card.youtubeId, title: card.title });
+                        }
+                      }}
+                    >
                       <div className="horizontalCardInner">
                         <img
                           src={card.image}
@@ -1986,6 +2163,34 @@ export const MiningDiscoveryShowcase: React.FC = () => {
                           loading="eager"
                         />
                         <div className="horizontalCardOverlay" />
+
+                        {/* Authentic YouTube Video Play Button */}
+                        {card.youtubeId && (
+                          <button
+                            type="button"
+                            className="horizontalCardYouTubeBtn"
+                            aria-label={`Play YouTube video: ${card.title}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveVideoModal({ id: card.youtubeId!, title: card.title });
+                            }}
+                          >
+                            <svg
+                              viewBox="0 0 68 48"
+                              className="youtubeSvgIcon"
+                              aria-hidden="true"
+                            >
+                              <path
+                                className="youtubeSvgBg"
+                                d="M66.52 7.74c-.78-2.93-2.49-5.41-5.42-6.19C55.79.13 34 0 34 0S12.21.13 6.9 1.55c-2.93.78-4.63 3.26-5.42 6.19C.06 13.05 0 24 0 24s.06 10.95 1.48 16.26c.78 2.93 2.49 5.41 5.42 6.19C12.21 47.87 34 48 34 48s21.79-.13 27.1-1.55c2.93-.78 4.64-3.26 5.42-6.19C67.94 34.95 68 24 68 24s-.06-10.95-1.48-16.26z"
+                              />
+                              <polygon
+                                className="youtubeSvgTriangle"
+                                points="28,34 45,24 28,14"
+                              />
+                            </svg>
+                          </button>
+                        )}
 
                         <div className="horizontalCardUpper">
                           <div className="horizontalCardTopBar">
@@ -1996,13 +2201,19 @@ export const MiningDiscoveryShowcase: React.FC = () => {
                               </div>
                             )}
 
-                            <Link
-                              href={card.ctaHref}
+                            <button
+                              type="button"
                               className="horizontalCardAction"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (card.youtubeId) {
+                                  setActiveVideoModal({ id: card.youtubeId, title: card.title });
+                                }
+                              }}
                             >
                               <span>{card.ctaText}</span>
-                              <span className="horizontalCardPlus" aria-hidden="true">✦</span>
-                            </Link>
+                              <span className="horizontalCardPlus" aria-hidden="true">▶</span>
+                            </button>
                           </div>
 
                           <div className="horizontalCardTop">
@@ -2031,7 +2242,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
               {/* Track Counter */}
               <div className="horizontalCardsFooter">
                 <span ref={horizontalCounterRef} className="horizontalCardsCounter">
-                  01 / 04
+                  01 / 05
                 </span>
                 <span className="horizontalCardsPrompt">
                   SCROLL TO EXPLORE &rarr;
@@ -2041,6 +2252,43 @@ export const MiningDiscoveryShowcase: React.FC = () => {
           </section>
         </div>
       </div>
+
+      {/* VIDEO POPUP MODAL (OPTION A) */}
+      {activeVideoModal && (
+        <div
+          className="videoModalBackdrop"
+          onClick={() => setActiveVideoModal(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label={activeVideoModal.title}
+        >
+          <div
+            className="videoModalContent"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="videoModalHeader">
+              <span className="videoModalTitle">{activeVideoModal.title}</span>
+              <button
+                type="button"
+                className="videoModalCloseBtn"
+                onClick={() => setActiveVideoModal(null)}
+                aria-label="Close Video"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="videoModalIframeWrap">
+              <iframe
+                src={`https://www.youtube-nocookie.com/embed/${activeVideoModal.id}?autoplay=1&rel=0`}
+                title={activeVideoModal.title}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                className="videoModalIframe"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -541,19 +541,22 @@ export const PublicationsShowcase: React.FC<PublicationsShowcaseProps> = ({
 
     const updateWords = () => {
       if (!headerRef.current) return;
+      if (headerInView) return;
       const clientH = window.innerHeight || 800;
       const hRect = headerRef.current.getBoundingClientRect();
 
       // Trigger full reveal as soon as header enters viewport
-      if (!headerInView && hRect.top < clientH * 0.90 && hRect.bottom > 0) {
+      if (hRect.top < clientH * 0.90 && hRect.bottom > 0) {
         setHeaderInView(true);
+        return;
       }
 
       // Responsive scrub range: words reveal quickly and smoothly as section enters
       const revealProgress = Math.max(0, Math.min(1, (clientH * 0.92 - hRect.top) / (clientH * 0.40)));
 
       if (revealProgress >= 1 || hRect.top < clientH * 0.70) {
-        if (!headerInView) setHeaderInView(true);
+        setHeaderInView(true);
+        return;
       }
 
       // Heading words: reveal quickly across 0.00 to 0.40
@@ -563,7 +566,7 @@ export const PublicationsShowcase: React.FC<PublicationsShowcaseProps> = ({
         if (!el) return;
         const start = (idx / headCount) * 0.50;
         const end = start + 0.35;
-        const wProg = headerInView ? 1 : Math.max(0, Math.min(1, (hProg - start) / (end - start)));
+        const wProg = Math.max(0, Math.min(1, (hProg - start) / (end - start)));
         el.style.opacity = (0.20 + 0.80 * wProg).toFixed(3);
         el.style.transform = `translate3d(0, ${((1 - wProg) * 5).toFixed(1)}px, 0)`;
         el.style.filter = wProg >= 0.98 ? "none" : `blur(${((1 - wProg) * 1.2).toFixed(1)}px)`;
@@ -576,7 +579,7 @@ export const PublicationsShowcase: React.FC<PublicationsShowcaseProps> = ({
         if (!el) return;
         const start = (idx / subCount) * 0.60;
         const end = start + 0.25;
-        const wProg = headerInView ? 1 : Math.max(0, Math.min(1, (subProg - start) / (end - start)));
+        const wProg = Math.max(0, Math.min(1, (subProg - start) / (end - start)));
         el.style.opacity = (0.20 + 0.80 * wProg).toFixed(3);
         el.style.transform = `translate3d(0, ${((1 - wProg) * 4).toFixed(1)}px, 0)`;
         el.style.filter = wProg >= 0.98 ? "none" : `blur(${((1 - wProg) * 1.0).toFixed(1)}px)`;
@@ -609,6 +612,13 @@ export const PublicationsShowcase: React.FC<PublicationsShowcaseProps> = ({
       window.removeEventListener("wheel", requestTick);
       window.removeEventListener("touchmove", requestTick);
     };
+  }, [headerInView]);
+
+  // Scrub words when scrollProgress updates
+  useEffect(() => {
+    if (typeof window !== "undefined" && !headerInView) {
+      window.dispatchEvent(new Event("scroll"));
+    }
   }, [scrollProgress, headerInView]);
 
   const allMagazines: MagazineApiItem[] = magazines;

@@ -195,23 +195,7 @@ export const ClientInvestorGrowth = React.memo<ClientInvestorGrowthProps>(functi
 
     // Constant-velocity baseline: 1 scroll unit moves content by the exact same distance everywhere
     const baseScrollY = scrollProgress * maxScroll;
-
-    // Gentle magnetic focal centering: softly pulls each pillar into optical center as you approach it
-    let magnetOffset = 0;
-    const focalRadius = clientH * 0.32;
-
-    rowCenters.forEach((center) => {
-      if (center <= 0) return;
-      const idealStop = Math.max(0, center - clientH * 0.48);
-      const dist = baseScrollY - idealStop;
-      if (Math.abs(dist) < focalRadius) {
-        const factor = 1 - Math.abs(dist) / focalRadius;
-        // Soft 22% magnetic centering so the card settles beautifully without breaking momentum
-        magnetOffset -= dist * factor * 0.22;
-      }
-    });
-
-    const scrollY = Math.max(0, Math.min(maxScroll, baseScrollY + magnetOffset));
+    const scrollY = Math.max(0, Math.min(maxScroll, baseScrollY));
 
     // Direct GPU-accelerated transform
     trackRef.current.style.transform = `translate3d(0, -${scrollY.toFixed(1)}px, 0)`;
