@@ -82,7 +82,7 @@ export const FaqSection: React.FC = () => {
   };
 
   return (
-    <section className="w-full border-t border-[#E5E3DC] bg-[#FAF7F2]">
+    <section className="w-full border-t border-[#E5E3DC] bg-[#FAF7F2] [content-visibility:auto] [contain-intrinsic-size:800px]">
       <SectionReveal className="container-editorial py-14 sm:py-20 md:py-28">
 
         {/* ── Header (Luxury Editorial Style Matching Publications) ── */}

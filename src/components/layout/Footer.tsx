@@ -101,7 +101,7 @@ export const Footer: React.FC = () => {
      * page top and bottom around the light editorial middle. border-t in navy-dark keeps
      * the seam against Services' own surface.
      */
-    <footer className="w-full border-t border-[#061224] bg-[#0B0C0B] font-sans text-white">
+    <footer className="w-full border-t border-[#061224] bg-[#0B0C0B] font-sans text-white [content-visibility:auto] [contain-intrinsic-size:500px]">
       {/*
         The footer closes the page, so it gets the same entrance every section above it
         has: brand, then the link columns left to right, then socials, then the bottom

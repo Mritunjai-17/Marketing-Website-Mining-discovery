@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Space_Grotesk, Inter, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { Header, Footer, SmoothScroll } from "@/components/layout";
-import MiningAICHatWidget from "@/components/ui/MiningAICHatWidget";
 import CustomCursor from "@/components/ui/CustomCursor";
+import ClientWidgets from "@/components/ui/ClientWidgets";
 
 /**
  * Primary Font: Space Grotesk
@@ -60,7 +60,7 @@ export default function RootLayout({
           <main className="flex-1 overflow-x-clip">{children}</main>
           <Footer />
         </SmoothScroll>
-        <MiningAICHatWidget />
+        <ClientWidgets />
         <CustomCursor />
       </body>
     </html>

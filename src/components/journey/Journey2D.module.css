@@ -2798,9 +2798,6 @@
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
 }
 
-.cardFlickItemActive .cardFlickExcerpt {
-  animation: flickExcerptIn 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.38s both;
-}
 
 /* Pagination Dots */
 .cardFlickPagination {
@@ -2970,14 +2967,6 @@
     line-height: 1.15;
   }
 
-  .cardFlickExcerpt {
-    font-size: 0.8rem;
-    line-height: 1.4;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
 
   .cardFlickMeta {
     font-size: 0.7rem;
@@ -4245,13 +4234,26 @@
     text-align: left;
   }
 
+  .titleGoldSpan {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
   .cardFlickExcerpt {
     font-size: clamp(0.84rem, 3.2vw, 0.95rem);
     line-height: 1.5;
     max-width: 100%;
-    display: block;
-    -webkit-line-clamp: unset;
-    overflow: visible;
+    display: block !important;
+    -webkit-line-clamp: unset !important;
+    -webkit-box-orient: unset !important;
+    box-orient: unset !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
     text-shadow: 0 1px 10px rgba(0, 0, 0, 0.95);
   }
 

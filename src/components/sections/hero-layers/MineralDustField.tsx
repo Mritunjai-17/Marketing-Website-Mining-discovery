@@ -94,10 +94,16 @@ export const MineralDustField: React.FC<MineralDustFieldProps> = ({
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseleave", handleMouseLeave);
 
+    let renderLoop: () => void;
+
     // Intersection Observer to pause rendering when scrolled out
     const observer = new IntersectionObserver(
       ([entry]) => {
+        const wasInView = isInViewRef.current;
         isInViewRef.current = entry.isIntersecting;
+        if (entry.isIntersecting && !wasInView && renderLoop && !animFrameId.current) {
+          animFrameId.current = requestAnimationFrame(renderLoop);
+        }
       },
       { threshold: 0.05 }
     );
@@ -105,7 +111,7 @@ export const MineralDustField: React.FC<MineralDustFieldProps> = ({
 
     const render = () => {
       if (!isInViewRef.current) {
-        animFrameId.current = requestAnimationFrame(render);
+        animFrameId.current = null;
         return;
       }
 
@@ -151,6 +157,7 @@ export const MineralDustField: React.FC<MineralDustFieldProps> = ({
       animFrameId.current = requestAnimationFrame(render);
     };
 
+    renderLoop = render;
     animFrameId.current = requestAnimationFrame(render);
 
     return () => {

@@ -66,6 +66,7 @@ export const BoonHero = React.memo(
     // 1. HARDWARE CANVAS RENDER FUNCTION (Instant 0.1ms render time, NO LAG)
     // ========================================================================
     const renderFrame = useCallback((frameIndex: number) => {
+      if (lastDrawnFrameRef.current === frameIndex) return;
       const canvas = canvasRef.current;
       if (!canvas) return;
       let ctx = ctxRef.current;
@@ -137,6 +138,7 @@ export const BoonHero = React.memo(
         lastDimensionsRef.current = { width, height };
         canvas.width = Math.round(width * dpr);
         canvas.height = Math.round(height * dpr);
+        lastDrawnFrameRef.current = -1;
         renderFrame(currentFrameRef.current);
       }
     }, [renderFrame]);
@@ -367,11 +369,13 @@ export const BoonHero = React.memo(
       if (isTouch || reducedMotion) return;
 
       const handleMouseMove = (e: MouseEvent) => {
+        const damp = Math.max(0, 1 - p * 2.2);
+        if (damp <= 0) return;
+
         const nx = (e.clientX / window.innerWidth - 0.5) * 2;
         const ny = (e.clientY / window.innerHeight - 0.5) * 2;
         mousePos.current = { x: nx, y: ny };
 
-        const damp = Math.max(0, 1 - p * 2.2);
         if (stageRef.current) {
           gsap.to(stageRef.current, {
             rotationY: nx * 3.5 * damp,

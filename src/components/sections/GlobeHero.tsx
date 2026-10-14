@@ -47,6 +47,7 @@ export const GlobeHero: React.FC = () => {
   const bridgeScrollRef = useRef(0);
 
   const [totalScrollVh, setTotalScrollVh] = useState(DESKTOP_SCROLL_VH);
+  const lastHeroPRef = useRef<number>(-1);
 
   useEffect(() => {
     let lastWidth = window.innerWidth;
@@ -89,7 +90,15 @@ export const GlobeHero: React.FC = () => {
     const HERO_FADE_END = 0.10;
     const heroP = clamp(t / HERO_END, 0, 1);
     if (boonHeroRef.current) {
-      boonHeroRef.current.scrub(heroP);
+      if (t >= HERO_FADE_END) {
+        if (lastHeroPRef.current !== 1) {
+          boonHeroRef.current.scrub(1);
+          lastHeroPRef.current = 1;
+        }
+      } else {
+        boonHeroRef.current.scrub(heroP);
+        lastHeroPRef.current = heroP;
+      }
     }
 
     if (boonHeroBox) {
