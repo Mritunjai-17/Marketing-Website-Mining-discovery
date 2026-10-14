@@ -28,7 +28,7 @@ export const FOCUS_CARDS: FocusCard[] = [
     category: "BRAND & DIGITAL PRESENCE",
     title: "BUILD A MINING BRAND THAT FEELS CREDIBLE.",
     description: "Your website and visual identity are often the first things people see. We help mining companies build a clear, professional presence that reflects their projects, people and ambitions.",
-    image: "/images/cards/card_01_video.jpg",
+    image: "/images/cards/card_01_video.png",
     locationTag: "[ Branding · Visual Identity · Website Design · Development ]",
     ctaText: "Watch Video",
     ctaHref: "https://www.youtube.com/watch?v=fEkZCZDaJ9M",
