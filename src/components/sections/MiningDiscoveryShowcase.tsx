@@ -26,9 +26,9 @@ export const FOCUS_CARDS: FocusCard[] = [
     id: "service-1",
     badge: "01 — BRAND & DIGITAL PRESENCE",
     category: "BRAND & DIGITAL PRESENCE",
-    title: "BUILD A MINING BRAND THAT FEELS CREDIBLE.",
+    title: "Build a Mining Brand That Feels Credible",
     description: "Your website and visual identity are often the first things people see. We help mining companies build a clear, professional presence that reflects their projects, people and ambitions.",
-    image: "/images/cards/card_01_video.png",
+    image: "/images/cards/card_01.png",
     locationTag: "[ Branding · Visual Identity · Website Design · Development ]",
     ctaText: "Watch Video",
     ctaHref: "https://www.youtube.com/watch?v=fEkZCZDaJ9M",
@@ -38,9 +38,9 @@ export const FOCUS_CARDS: FocusCard[] = [
     id: "service-2",
     badge: "02 — AMPLIFY YOUR STORY",
     category: "CONTENT & MEDIA",
-    title: "TURN COMPANY NEWS INTO STORIES PEOPLE NOTICE.",
+    title: "Turn Company News into Stories People Notice",
     description: "Exploration results, project updates and company announcements deserve more than a press release. We turn them into clear, engaging content for the mining audience.",
-    image: "/images/cards/card_02_video.jpg",
+    image: "/images/cards/card_02_video.webp",
     locationTag: "[ Content · PR · Media Coverage · Social Media ]",
     ctaText: "Watch Video",
     ctaHref: "https://www.youtube.com/watch?v=J9Mfma4uK-Y",
@@ -50,9 +50,9 @@ export const FOCUS_CARDS: FocusCard[] = [
     id: "service-3",
     badge: "03 — DIGITAL MARKETING",
     category: "DIGITAL MARKETING",
-    title: "GIVE YOUR IMPORTANT UPDATES\nMORE REACH.",
+    title: "Give Your Important Updates\nMore Reach",
     description: "From exploration results and project updates to company announcements, we help you promote the news that matters through digital campaigns and social media.",
-    image: "/images/cards/card_03_video.jpg",
+    image: "/images/cards/card_03_video.webp",
     locationTag: "[ Digital Marketing · Paid Campaigns · Social Media · Campaign Strategy ]",
     ctaText: "Watch Video",
     ctaHref: "https://www.youtube.com/watch?v=3L3EV5115DQ",
@@ -62,9 +62,9 @@ export const FOCUS_CARDS: FocusCard[] = [
     id: "service-4",
     badge: "04 — EXECUTIVE VISIBILITY",
     category: "EXECUTIVE INFLUENCE",
-    title: "PUT THE PEOPLE BEHIND THE PROJECT\nIN THE SPOTLIGHT.",
+    title: "Put the People Behind the Project\nin the Spotlight",
     description: "Strong companies have strong people behind them. We help mining leaders share their experience, ideas and vision through interviews, profiles and industry content.",
-    image: "/images/cards/card_04_video.jpg",
+    image: "/images/cards/card_04_video.webp",
     locationTag: "[ CEO Profiles · Interviews · Thought Leadership · Video ]",
     ctaText: "Watch Video",
     ctaHref: "https://www.youtube.com/watch?v=Qc1khDSDUwI",
@@ -74,9 +74,9 @@ export const FOCUS_CARDS: FocusCard[] = [
     id: "service-5",
     badge: "05 — INDUSTRY & EVENT REACH",
     category: "INDUSTRY & EVENT REACH",
-    title: "TAKE YOUR STORY BEYOND YOUR WEBSITE",
+    title: "Take Your Story Beyond Your Website",
     description: "Mining is built around relationships. We connect companies with industry conversations, events, publications and networks where important people come together.",
-    image: "/images/cards/card_05_video.jpg",
+    image: "/images/cards/card_05_video.webp",
     locationTag: "[ Events · Media · Industry Networks · Partnerships ]",
     ctaText: "Watch Video",
     ctaHref: "https://www.youtube.com/watch?v=qcAo4saz2UU",
@@ -1318,56 +1318,56 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   text-shadow: 0 0 8px rgba(212, 175, 55, 0.6);
 }
 
-/* Upper content with title and short description */
+/* Upper content with title and short description — Left-aligned editorial match to Value Bridge */
 .horizontalCardTop {
   position: relative;
-  padding: 0 clamp(0.4rem, 1vw, 1.2rem);
+  padding: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
+  text-align: left;
   max-width: 580px;
   width: 100%;
-  margin: 0 auto;
+  margin: 0;
   pointer-events: auto;
   background: transparent;
 }
 
 .horizontalCardTitle {
   font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
-  font-size: clamp(1.22rem, 1.68vw, 1.85rem);
+  font-size: clamp(1.28rem, 1.75vw, 1.95rem);
   font-weight: 700;
   color: #FFFFFF;
-  line-height: 1.2;
+  line-height: 1.22;
   margin: 0;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  text-align: center;
+  letter-spacing: -0.015em;
+  text-transform: none;
+  text-align: left;
   white-space: pre-line;
   text-shadow: 0 4px 24px rgba(0, 0, 0, 0.85), 0 1px 4px rgba(0, 0, 0, 0.95);
 }
 
 .horizontalCardDesc {
   font-family: var(--font-inter), "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: clamp(0.82rem, 0.88vw, 0.92rem);
-  line-height: 1.58;
+  font-size: clamp(0.85rem, 0.92vw, 0.96rem);
+  line-height: 1.62;
   color: #D0D5DD;
-  margin: clamp(0.35rem, 0.7vh, 0.55rem) auto 0;
-  max-width: 480px;
-  text-align: center;
+  margin: clamp(0.45rem, 0.8vh, 0.75rem) 0 0;
+  max-width: 520px;
+  text-align: left;
   text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95), 0 1px 4px rgba(0, 0, 0, 0.9);
 }
 
-/* Bottom full-width coordinate tag matching Pic 2 */
+/* Bottom coordinate tag — Clean left-aligned anchor */
 .horizontalCardFooter {
   position: relative;
   z-index: 3;
   width: 100%;
-  padding: 0 clamp(1.4rem, 2.5vw, 2.2rem) clamp(1.2rem, 2.2vh, 1.8rem);
+  padding: 0 clamp(1rem, 1.8vw, 1.6rem) clamp(1.2rem, 2.2vh, 1.8rem);
   box-sizing: border-box;
   display: flex;
-  justify-content: center;
-  text-align: center;
+  justify-content: flex-start;
+  text-align: left;
   pointer-events: none;
 }
 
@@ -1437,7 +1437,9 @@ export const MiningDiscoveryShowcase: React.FC = () => {
     margin-bottom: 0.35rem;
   }
   .horizontalCardTop {
-    padding: 0 0.2rem;
+    padding: 0;
+    align-items: flex-start;
+    text-align: left;
   }
   .horizontalCardCategory {
     font-size: 0.68rem;
@@ -1446,14 +1448,19 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   .horizontalCardTitle {
     font-size: clamp(1.18rem, 4.6vw, 1.48rem);
     line-height: 1.22;
+    letter-spacing: -0.015em;
+    text-align: left;
   }
   .horizontalCardDesc {
     font-size: 0.8rem;
-    line-height: 1.42;
+    line-height: 1.5;
     margin-top: 0.35rem;
+    text-align: left;
   }
   .horizontalCardFooter {
     padding: 0 1rem 1rem;
+    justify-content: flex-start;
+    text-align: left;
   }
   .horizontalCardLocationTag {
     font-size: 0.64rem;
@@ -1482,19 +1489,24 @@ export const MiningDiscoveryShowcase: React.FC = () => {
     padding: 0.85rem 0.9rem 0;
   }
   .horizontalCardTitle {
-    font-size: 1.12rem;
+    font-size: 1.15rem;
     line-height: 1.25;
+    letter-spacing: -0.015em;
+    text-align: left;
   }
   .horizontalCardDesc {
-    font-size: 0.74rem;
-    line-height: 1.35;
+    font-size: 0.76rem;
+    line-height: 1.42;
     margin-top: 0.3rem;
+    text-align: left;
   }
   .horizontalCardAction {
     font-size: 0.78rem;
   }
   .horizontalCardFooter {
     padding: 0 0.8rem 0.8rem;
+    justify-content: flex-start;
+    text-align: left;
   }
   .horizontalCardLocationTag {
     font-size: 0.58rem;

@@ -52,22 +52,35 @@ const SOCIALS: Array<{ name: string; href: string; path: string }> = [
  * Link columns pointing directly to on-page showcase sections
  * (Publications, Services) or dedicated pages.
  */
-const COLUMNS: Array<{ heading: string; links: Array<{ name: string; href: string; external?: boolean }> }> = [
+const COLUMNS: Array<{
+  heading: string;
+  colSpanClass: string;
+  links: Array<{ name: string; href: string; external?: boolean }>;
+}> = [
   {
     heading: "Content",
+    colSpanClass: "sm:col-span-1 lg:col-span-2",
     links: [
-      { name: "Services", href: "/#services" },
+      { name: "CEO Profiles", href: "/#publications" },
       { name: "Newsletters", href: "/#publications" },
       { name: "Magazines", href: "/#publications" },
       { name: "Articles", href: "/#publications" },
     ],
   },
   {
-    heading: "Profiles",
-    links: [{ name: "CEO Profiles", href: "/#publications" }],
+    heading: "Services",
+    colSpanClass: "sm:col-span-1 lg:col-span-3",
+    links: [
+      { name: "Brand Identity & Design", href: "/#services" },
+      { name: "Social Media & Reach", href: "/#services" },
+      { name: "Targeted Ads & Growth", href: "/#services" },
+      { name: "PR & Executive Webinars", href: "/#services" },
+      { name: "Web & App Development", href: "/#services" },
+    ],
   },
   {
     heading: "Company",
+    colSpanClass: "sm:col-span-1 lg:col-span-2",
     links: [
       { name: "About Us", href: "/about" },
       { name: "Work", href: "/work" },
@@ -97,42 +110,39 @@ export const Footer: React.FC = () => {
 
   return (
     /*
-     * Same #0B1F3A as the header, deliberately: the two dark bands are what close the
-     * page top and bottom around the light editorial middle. border-t in navy-dark keeps
-     * the seam against Services' own surface.
+     * Deep Mining Midnight Navy (#0B1526) matching header & brand palette:
+     * Symmetrically anchors the bottom of the page.
      */
-    <footer className="w-full border-t border-[#061224] bg-[#0B0C0B] font-sans text-white [content-visibility:auto] [contain-intrinsic-size:500px]">
+    <footer className="w-full border-t border-[#162744] bg-[#0B1526] font-sans text-white [content-visibility:auto] [contain-intrinsic-size:500px]">
       {/*
         The footer closes the page, so it gets the same entrance every section above it
         has: brand, then the link columns left to right, then socials, then the bottom
         bar. Nothing here needs state, so this file stays a server component - the two
         wrappers below are the only client code involved.
       */}
-      <SectionReveal className="container-editorial py-12 md:py-16 lg:py-20">
+      <SectionReveal className="mx-auto w-full max-w-[1520px] px-6 sm:px-10 lg:px-14 xl:px-20 py-12 md:py-16 lg:py-20">
         {/*
-          Twelve columns rather than five. The brand block needs roughly a third to keep
-          its description from wrapping into a narrow ribbon, and 4 + 2 + 2 + 2 + 2 gives
-          it that while leaving the four link columns exactly equal — which is what
-          repeat(4, 1fr) would have done had the brand not been in the same row.
+          Twelve-column responsive layout across wide viewport:
+          Brand (3) + Content (2) + Services (3) + Company (2) + Follow Us (2) = 12 cols.
         */}
-        <div className="grid grid-cols-1 gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-12">
+        <div className="grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-12 xl:gap-x-12">
           {/* Brand */}
-          <RevealItem className="sm:col-span-2 lg:col-span-4">
+          <RevealItem className="sm:col-span-2 lg:col-span-3">
             <Link
               href="/"
-              className="inline-flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B1F3A]"
+              className="inline-flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B1526]"
               aria-label="Mining Discovery Home"
             >
               <Image
                 src="/logo.webp"
                 alt="Mining Discovery Logo"
-                width={220}
-                height={85}
-                className="h-16 w-auto object-contain sm:h-18"
+                width={260}
+                height={100}
+                className="h-20 w-auto object-contain sm:h-[84px]"
               />
             </Link>
 
-            <p className="mt-6 max-w-xs text-sm font-normal leading-relaxed text-[#F0F4F8]/60">
+            <p className="mt-6 max-w-sm text-sm font-normal leading-relaxed text-[#F0F4F8]/60">
               Mining Discovery brings together mining news, company stories, industry insights and
               conversations from across the resource sector. We help keep mining companies,
               investors and industry professionals connected to what is happening in the industry.
@@ -141,12 +151,12 @@ export const Footer: React.FC = () => {
 
           {/* Link columns */}
           {COLUMNS.map((column) => (
-            <RevealItem key={column.heading} className="lg:col-span-2">
+            <RevealItem key={column.heading} className={column.colSpanClass}>
               <nav aria-label={column.heading}>
                 <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-[#D4AF37]">
                   {column.heading}
                 </h2>
-                <ul className="mt-6 space-y-[1.1rem]">
+                <ul className="mt-6 space-y-[0.85rem]">
                   {column.links.map((link) => (
                     <li key={link.name}>
                       {link.external ? (

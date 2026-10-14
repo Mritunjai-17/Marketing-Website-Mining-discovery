@@ -536,7 +536,7 @@ export const SERVICE_CARDS: ServiceCardItem[] = [
     summary: "BUILD AN ACTIVE, CREDIBLE PRESENCE ACROSS SOCIAL PLATFORMS.",
     description:
       "We help resource companies build an active, credible presence across social platforms to engage investors, industry leaders, and commercial partners.",
-    image: "/images/services/service_card_02_social.jpg",
+    image: "/images/services/service_card_02_social.webp",
     badge: "02 / AUDIENCE ENGAGEMENT",
     features: [
       {
