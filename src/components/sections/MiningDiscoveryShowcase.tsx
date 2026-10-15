@@ -15,6 +15,7 @@ export interface FocusCard {
   title: string;
   description: string;
   image: string;
+  imagePosition?: string;
   locationTag?: string;
   ctaText: string;
   ctaHref: string;
@@ -28,7 +29,8 @@ export const FOCUS_CARDS: FocusCard[] = [
     category: "BRAND & DIGITAL PRESENCE",
     title: "Build a Mining Brand That Feels Credible",
     description: "Your website and visual identity are often the first things people see. We help mining companies build a clear, professional presence that reflects their projects, people and ambitions.",
-    image: "/images/cards/card_01.webp",
+    image: "/images/cards/card_01.png",
+    imagePosition: "center center",
     locationTag: "[ Branding · Visual Identity · Website Design · Development ]",
     ctaText: "Watch Video",
     ctaHref: "https://www.youtube.com/watch?v=fEkZCZDaJ9M",
@@ -41,6 +43,7 @@ export const FOCUS_CARDS: FocusCard[] = [
     title: "Turn Company News into Stories People Notice",
     description: "Exploration results, project updates and company announcements deserve more than a press release. We turn them into clear, engaging content for the mining audience.",
     image: "/images/cards/card_02.png",
+    imagePosition: "center 40%",
     locationTag: "[ Content · PR · Media Coverage · Social Media ]",
     ctaText: "Watch Video",
     ctaHref: "https://www.youtube.com/watch?v=J9Mfma4uK-Y",
@@ -53,6 +56,7 @@ export const FOCUS_CARDS: FocusCard[] = [
     title: "Give Your Important Updates\nMore Reach",
     description: "From exploration results and project updates to company announcements, we help you promote the news that matters through digital campaigns and social media.",
     image: "/images/cards/card_03.png",
+    imagePosition: "center center",
     locationTag: "[ Digital Marketing · Paid Campaigns · Social Media · Campaign Strategy ]",
     ctaText: "Watch Video",
     ctaHref: "https://www.youtube.com/watch?v=3L3EV5115DQ",
@@ -65,6 +69,7 @@ export const FOCUS_CARDS: FocusCard[] = [
     title: "Put the People Behind the Project\nin the Spotlight",
     description: "Strong companies have strong people behind them. We help mining leaders share their experience, ideas and vision through interviews, profiles and industry content.",
     image: "/images/cards/card_04.png",
+    imagePosition: "center center",
     locationTag: "[ CEO Profiles · Interviews · Thought Leadership · Video ]",
     ctaText: "Watch Video",
     ctaHref: "https://www.youtube.com/watch?v=Qc1khDSDUwI",
@@ -77,6 +82,7 @@ export const FOCUS_CARDS: FocusCard[] = [
     title: "Take Your Story Beyond Your Website",
     description: "Mining is built around relationships. We connect companies with industry conversations, events, publications and networks where important people come together.",
     image: "/images/cards/card_05.png",
+    imagePosition: "center center",
     locationTag: "[ Events · Media · Industry Networks · Partnerships ]",
     ctaText: "Watch Video",
     ctaHref: "https://www.youtube.com/watch?v=qcAo4saz2UU",
@@ -1212,7 +1218,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center top;
+  object-position: center center;
   display: block;
   z-index: 1;
   transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1423,6 +1429,9 @@ export const MiningDiscoveryShowcase: React.FC = () => {
     height: min(68dvh, 520px);
     border-radius: 20px;
     padding: 0;
+  }
+  .horizontalCardBgImage {
+    object-position: center center;
   }
   .horizontalCardsTrack {
     gap: clamp(1.2rem, 3.5vw, 2.5rem);
@@ -2364,6 +2373,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
                             src={card.image}
                             alt={card.title}
                             className="horizontalCardBgImage"
+                            style={card.imagePosition ? { objectPosition: card.imagePosition } : undefined}
                             loading="lazy"
                           />
                           <div className="horizontalCardOverlay" />
