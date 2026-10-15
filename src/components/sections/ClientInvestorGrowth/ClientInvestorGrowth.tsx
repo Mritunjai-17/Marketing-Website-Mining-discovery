@@ -276,9 +276,13 @@ export const ClientInvestorGrowth = React.memo<ClientInvestorGrowthProps>(functi
               </div>
 
               <h2 className={styles.mainTitle}>
-                <span className={styles.titleLine}>BUILDING VALUE FOR</span>
                 <span className={styles.titleLine}>
-                  <em className={styles.shimmerText}>EVERY STAKEHOLDER</em>
+                  <span className={styles.titleLineInner}>BUILDING VALUE FOR</span>
+                </span>
+                <span className={styles.titleLine}>
+                  <span className={`${styles.titleLineInner} ${styles.titleLineSecond}`}>
+                    <em className={styles.shimmerText}>EVERY STAKEHOLDER</em>
+                  </span>
                 </span>
               </h2>
 

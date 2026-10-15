@@ -86,9 +86,9 @@ export const SmoothScroll: React.FC<SmoothScrollProps> = ({ children }) => {
     }
 
     const lenis = new Lenis({
-      lerp: 0.09,
+      lerp: 0.085,
       smoothWheel: true,
-      wheelMultiplier: 0.95,
+      wheelMultiplier: 0.88,
       syncTouch: false,
       touchMultiplier: 1.0,
     });

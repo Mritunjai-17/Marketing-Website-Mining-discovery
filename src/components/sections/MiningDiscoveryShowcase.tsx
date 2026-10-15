@@ -93,30 +93,30 @@ export const FOCUS_CARDS: FocusCard[] = [
 export const CLIENT_GROUPS: { name: string; logo: string }[][] = [
   // Group 1 (Strip 2 - exactly 6 logos)
   [
-    { name: "Kodiak Copper", logo: "/images/clients/official/kodiak.webp" },
-    { name: "Pan Global Resources", logo: "/images/clients/official/panglobal.svg" },
-    { name: "HE Capital Markets", logo: "/images/clients/official/hecapital.webp" },
-    { name: "Harfang Exploration", logo: "/images/clients/official/harfang.webp" },
-    { name: "NeoCloudz", logo: "/images/clients/official/neocloudz.webp" },
-    { name: "West Red Lake Gold Mines", logo: "/images/clients/official/westredlake.webp" },
+    { name: "Kodiak Copper", logo: "/images/clients/official/kodiak.webp?v=4" },
+    { name: "Pan Global Resources", logo: "/images/clients/official/panglobal.webp?v=4" },
+    { name: "HE Capital Markets", logo: "/images/clients/official/hecapital.webp?v=4" },
+    { name: "Harfang Exploration", logo: "/images/clients/official/harfang.webp?v=4" },
+    { name: "NeoCloudz", logo: "/images/clients/official/neocloudz.webp?v=4" },
+    { name: "West Red Lake Gold Mines", logo: "/images/clients/official/westredlake.webp?v=4" },
   ],
   // Group 2 (Strip 3 - exactly 6 logos)
   [
-    { name: "Astra Exploration", logo: "/images/clients/official/astra.svg" },
-    { name: "U.S. Gold Corp", logo: "/images/clients/official/usgold.webp" },
-    { name: "Guanajuato Silver", logo: "/images/clients/official/guanajuato.webp" },
-    { name: "Arras Minerals", logo: "/images/clients/official/arras.webp" },
-    { name: "Arizona Gold & Silver", logo: "/images/clients/official/arizona.webp" },
-    { name: "Power Metallic", logo: "/images/clients/official/powermetallic.webp" },
+    { name: "Astra Exploration", logo: "/images/clients/official/astra.webp?v=4" },
+    { name: "U.S. Gold Corp", logo: "/images/clients/official/usgold.webp?v=4" },
+    { name: "Guanajuato Silver", logo: "/images/clients/official/guanajuato.webp?v=4" },
+    { name: "Arras Minerals", logo: "/images/clients/official/arras.webp?v=4" },
+    { name: "Arizona Gold & Silver", logo: "/images/clients/official/arizona.webp?v=4" },
+    { name: "Power Metallic", logo: "/images/clients/official/powermetallic.webp?v=4" },
   ],
   // Group 3 (Strip 1 - exactly 6 logos)
   [
-    { name: "USDC Data Centers", logo: "/images/clients/official/usdc.webp" },
-    { name: "Digipower", logo: "/images/clients/official/digipower.webp" },
-    { name: "Aurion Resources", logo: "/images/clients/official/aurion.webp" },
-    { name: "Phenom Resources", logo: "/images/clients/official/phenom.webp" },
-    { name: "Loyalist Exploration", logo: "/images/clients/official/loyalist.webp" },
-    { name: "BluEnergy SolarMind", logo: "/images/clients/official/bluenergies.webp" },
+    { name: "USDC Data Centers", logo: "/images/clients/official/usdc.webp?v=4" },
+    { name: "Digipower", logo: "/images/clients/official/digipower.webp?v=4" },
+    { name: "Aurion Resources", logo: "/images/clients/official/aurion.webp?v=4" },
+    { name: "Phenom Resources", logo: "/images/clients/official/phenom.webp?v=4" },
+    { name: "Loyalist Exploration", logo: "/images/clients/official/loyalist.webp?v=4" },
+    { name: "BluEnergy SolarMind", logo: "/images/clients/official/bluenergies.webp?v=4" },
   ],
 ];
 
@@ -206,8 +206,8 @@ const ClientLogosFlipRow: React.FC = () => {
    ========================================================================== */
 
 /** Viewport heights for the continuous Mining Discovery Interactive Showcase */
-const DESKTOP_SCROLL_VH = 550;
-const MOBILE_SCROLL_VH = 420;
+const DESKTOP_SCROLL_VH = 480;
+const MOBILE_SCROLL_VH = 380;
 
 /**
  * How the sampled progress follows the true scroll position.
@@ -312,42 +312,58 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   const applyStage = useCallback(() => {
     if (reduceMotionRef.current) return true;
 
-    // --- Sample and damp scroll progress with exact Euler spring ---
+    // Dynamically update container metrics to guarantee zero layout-shift desync
+    const container = containerRef.current;
+    if (container) {
+      const rect = container.getBoundingClientRect();
+      rangeMetricsRef.current.top = rect.top + window.scrollY;
+      rangeMetricsRef.current.travel = rect.height - window.innerHeight;
+    }
+
     const { top, travel } = rangeMetricsRef.current;
     const target = travel > 0 ? clamp((window.scrollY - top) / travel, 0, 1) : 0;
 
+    // Smooth critically-damped spring interpolation for silky momentum
+    const now = performance.now();
+    const dt = Math.min(0.04, Math.max(0.001, (now - (lastSampleRef.current || now)) / 1000));
+    lastSampleRef.current = now;
+
     const progress = progressSpring.current;
-    progress.value = target;
-    progress.velocity = 0;
-    const p = clamp(target, 0, 1);
+    stepSpring(progress, target, dt, { stiffness: 105, damping: 24 });
+    const p = clamp(progress.value, 0, 1);
     progressRef.current = p;
+
+    const isSettled = Math.abs(progress.value - target) < 1e-4 && Math.abs(progress.velocity) < 1e-3;
 
     const winW = rangeMetricsRef.current.winW || (typeof window !== "undefined" ? window.innerWidth : 1920);
 
-    // STAGE 1: FULL PAGE EDITORIAL QUOTE (p: 0.00 -> 0.22)
+    // STAGE 1: FULL PAGE EDITORIAL QUOTE (p: 0.00 -> 0.16)
     if (quoteSectionRef.current) {
-      if (p < 0.16) {
+      if (p < 0.04) {
         quoteSectionRef.current.style.opacity = "1";
         quoteSectionRef.current.style.transform = "translate3d(0, 0, 0)";
         quoteSectionRef.current.style.pointerEvents = "auto";
-      } else if (p < 0.26) {
-        const outP = (p - 0.16) / 0.10;
-        quoteSectionRef.current.style.opacity = Math.max(0, 1 - outP).toFixed(3);
-        quoteSectionRef.current.style.transform = `translate3d(0, ${(-outP * 55).toFixed(1)}px, 0)`;
+        quoteSectionRef.current.classList.add("quoteSectionActive");
+      } else if (p < 0.16) {
+        const outP = (p - 0.04) / 0.12;
+        const easedOut = outP * outP * (3 - 2 * outP);
+        quoteSectionRef.current.style.opacity = Math.max(0, 1 - easedOut).toFixed(3);
+        quoteSectionRef.current.style.transform = `translate3d(0, ${(-easedOut * 45).toFixed(1)}px, 0)`;
         quoteSectionRef.current.style.pointerEvents = outP > 0.5 ? "none" : "auto";
       } else {
         quoteSectionRef.current.style.opacity = "0";
         quoteSectionRef.current.style.pointerEvents = "none";
+        quoteSectionRef.current.classList.remove("quoteSectionActive");
       }
     }
 
-    // STAGE 2: IMAGE COMES FROM DOWN TO UP, THEN EXPANDS AS SCROLLED (p: 0.16 -> 0.48)
+    // STAGE 2: IMAGE COMES FROM DOWN TO UP, THEN EXPANDS AS SCROLLED (p: 0.04 -> 0.38)
     if (zoomFrameRef.current) {
       const isMobile = winW <= 768;
       const baseW = isMobile ? 90 : 70;
       const baseH = isMobile ? 46 : 48;
 
-      if (p < 0.16) {
+      if (p < 0.04) {
         // Quote is on full page, image is hidden DOWN below screen
         zoomFrameRef.current.style.opacity = "0";
         zoomFrameRef.current.style.transform = "translate3d(0, 100vh, 0)";
@@ -355,9 +371,9 @@ export const MiningDiscoveryShowcase: React.FC = () => {
         zoomFrameRef.current.style.height = `${baseH}vh`;
         zoomFrameRef.current.style.borderRadius = "16px";
         zoomFrameRef.current.style.boxShadow = "none";
-      } else if (p < 0.32) {
+      } else if (p < 0.20) {
         // IMAGE COMES FROM DOWN TO UP into the center
-        const riseP = (p - 0.16) / 0.16;
+        const riseP = (p - 0.04) / 0.16;
         const eased = riseP * riseP * (3 - 2 * riseP);
         const yOffset = (1 - eased) * 100; // 100vh -> 0vh
 
@@ -367,9 +383,9 @@ export const MiningDiscoveryShowcase: React.FC = () => {
         zoomFrameRef.current.style.height = `${baseH}vh`;
         zoomFrameRef.current.style.borderRadius = "16px";
         zoomFrameRef.current.style.boxShadow = `0 30px 80px rgba(0, 0, 0, ${(riseP * 0.28).toFixed(3)})`;
-      } else if (p < 0.48) {
+      } else if (p < 0.38) {
         // As scrolled down: Image EXPANDS to fill full screen
-        const expandP = (p - 0.32) / 0.16;
+        const expandP = (p - 0.20) / 0.18;
         const easedExp = expandP * expandP * (3 - 2 * expandP);
         const currentW = (baseW + easedExp * (100 - baseW)).toFixed(1);
         const currentH = (baseH + easedExp * (100 - baseH)).toFixed(1);
@@ -395,61 +411,69 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 
     // GRID LINES FADE OUT AS FULLSCREEN ARRIVES
     if (landscapeGridOverlayRef.current) {
-      if (p < 0.32) {
+      if (p < 0.20) {
         landscapeGridOverlayRef.current.style.opacity = "1";
-      } else if (p < 0.44) {
-        const fade = 1 - (p - 0.32) / (0.44 - 0.32);
+      } else if (p < 0.34) {
+        const fade = 1 - (p - 0.20) / (0.34 - 0.20);
         landscapeGridOverlayRef.current.style.opacity = fade.toFixed(3);
       } else {
         landscapeGridOverlayRef.current.style.opacity = "0";
       }
     }
 
-    // SUSTAINABLE MINING HEADLINE FADE
+    // SUSTAINABLE MINING HEADLINE (BUILD YOUR PRESENCE) SMOOTH MASKED ENTRANCE & FADE
     if (zoomTitleRef.current) {
-      if (p >= 0.48) {
-        const titleFade = Math.max(0, 1 - (p - 0.48) / 0.05);
+      if (p < 0.12) {
+        zoomTitleRef.current.classList.remove("zoomTitleRevealed");
+        zoomTitleRef.current.style.opacity = "0";
+      } else if (p < 0.38) {
+        zoomTitleRef.current.classList.add("zoomTitleRevealed");
+        zoomTitleRef.current.style.opacity = "1";
+      } else if (p < 0.44) {
+        zoomTitleRef.current.classList.add("zoomTitleRevealed");
+        const titleFade = Math.max(0, 1 - (p - 0.38) / 0.06);
         zoomTitleRef.current.style.opacity = titleFade.toFixed(3);
       } else {
-        zoomTitleRef.current.style.opacity = "1";
+        zoomTitleRef.current.classList.remove("zoomTitleRevealed");
+        zoomTitleRef.current.style.opacity = "0";
       }
     }
 
-    // SUBTEXT: TRAVELS FROM DOWN TO UP (p: 0.44 -> 0.54)
+    // SUBTEXT: FLOATS SMOOTHLY FROM DOWN TO UP WITH SILKY DECELERATION (p: 0.36 -> 0.46)
     if (zoomInfoColRef.current) {
-      if (p < 0.44) {
+      if (p < 0.36) {
         zoomInfoColRef.current.style.opacity = "0";
-        zoomInfoColRef.current.style.transform = "translate3d(0, 400px, 0)";
-      } else if (p < 0.54) {
-        const subP = (p - 0.44) / 0.10;
-        const subtextY = 400 - subP * 850;
+        zoomInfoColRef.current.style.transform = "translate3d(0, 70px, 0)";
+      } else if (p < 0.46) {
+        const subP = (p - 0.36) / 0.10;
+        const easedSub = subP * subP * (3 - 2 * subP);
+        const subtextY = 70 - easedSub * 140; // 70px -> -70px
         let subtextOpacity = 1;
-        if (subP < 0.20) subtextOpacity = subP / 0.20;
-        else if (subP > 0.65) subtextOpacity = Math.max(0, 1 - (subP - 0.65) / 0.35);
+        if (subP < 0.25) subtextOpacity = subP / 0.25;
+        else if (subP > 0.70) subtextOpacity = Math.max(0, 1 - (subP - 0.70) / 0.30);
 
         zoomInfoColRef.current.style.transform = `translate3d(0, ${subtextY.toFixed(1)}px, 0)`;
         zoomInfoColRef.current.style.opacity = subtextOpacity.toFixed(3);
       } else {
         zoomInfoColRef.current.style.opacity = "0";
-        zoomInfoColRef.current.style.transform = "translate3d(0, -450px, 0)";
+        zoomInfoColRef.current.style.transform = "translate3d(0, -70px, 0)";
       }
     }
 
-    // 6-COLUMN REVEAL OF CLIENT LIGHT IMAGE (p: 0.52 -> 0.60)
+    // 6-COLUMN REVEAL OF CLIENT LIGHT IMAGE (p: 0.44 -> 0.54)
     if (columnRevealRef.current) {
-      if (p < 0.52) {
+      if (p < 0.44) {
         columnRevealRef.current.style.opacity = "0";
         columnRevealRef.current.style.filter = "none";
         for (let i = 0; i < 6; i++) {
           if (columnStripRefs.current[i]) columnStripRefs.current[i]!.style.width = "0%";
         }
-      } else if (p < 0.62) {
-        // Pure image with 100% clarity, NO blur
+      } else if (p < 0.54) {
         columnRevealRef.current.style.opacity = "1";
         columnRevealRef.current.style.filter = "none";
         columnRevealRef.current.style.transform = "none";
 
-        const revealP = Math.min(1, Math.max(0, (p - 0.52) / (0.58 - 0.52)));
+        const revealP = Math.min(1, Math.max(0, (p - 0.44) / (0.52 - 0.44)));
         const wOdd = Math.min(100, Math.max(0, (revealP / 0.65) * 100));
         const wEven = revealP < 0.25 ? 0 : Math.min(100, Math.max(0, ((revealP - 0.25) / 0.75) * 100));
         const widths = [wEven, wOdd, wEven, wOdd, wEven, wOdd];
@@ -459,13 +483,12 @@ export const MiningDiscoveryShowcase: React.FC = () => {
           }
         }
       } else {
-        // p >= 0.62: As cards glide into view, apply smooth progressive blur (up to 10px) with NO white tint
         columnRevealRef.current.style.opacity = "1";
         for (let i = 0; i < 6; i++) {
           if (columnStripRefs.current[i]) columnStripRefs.current[i]!.style.width = "100%";
         }
         const isMobile = winW <= 768;
-        const cardEntryP = Math.min(1, Math.max(0, (p - 0.62) / 0.08));
+        const cardEntryP = Math.min(1, Math.max(0, (p - 0.54) / 0.08));
         const blurPx = (cardEntryP * 10).toFixed(1);
         const scaleVal = (1 + cardEntryP * 0.025).toFixed(3);
         columnRevealRef.current.style.filter = (isMobile || cardEntryP <= 0) ? "none" : `blur(${blurPx}px)`;
@@ -473,9 +496,9 @@ export const MiningDiscoveryShowcase: React.FC = () => {
       }
     }
 
-    // STAGE 3: HORIZONTAL CARDS SCROLL & DYNAMIC FINALE (p: 0.62 -> 1.00)
+    // STAGE 3: HORIZONTAL CARDS SCROLL & DYNAMIC FINALE (p: 0.54 -> 1.00)
     if (horizontalStageRef.current && horizontalTrackRef.current) {
-      if (p < 0.62) {
+      if (p < 0.54) {
         horizontalStageRef.current.style.opacity = "0";
         horizontalStageRef.current.style.pointerEvents = "none";
         horizontalTrackRef.current.style.transform = `translate3d(${winW + 60}px, 0, 0)`;
@@ -497,13 +520,11 @@ export const MiningDiscoveryShowcase: React.FC = () => {
         const exitX = -((FOCUS_CARDS.length - 1) * stride + cardWidth + 50);
         const totalDistance = startX - exitX;
 
-        // Cards glide continuously without dead gap, perfectly synchronized with progressive blur
-        const scrollP = Math.min(1, Math.max(0, (p - 0.62) / (1.00 - 0.62)));
+        const scrollP = Math.min(1, Math.max(0, (p - 0.54) / (1.00 - 0.54)));
         const currentX = startX - scrollP * totalDistance;
         horizontalTrackRef.current.style.transform = `translate3d(${currentX.toFixed(1)}px, 0, 0)`;
 
         if (currentX > centerLastCardX) {
-          // Moving across cards 1 -> FOCUS_CARDS.length
           const rawIndex = Math.round((centerOffset - currentX) / stride) + 1;
           const activeIndex = Math.min(FOCUS_CARDS.length, Math.max(1, rawIndex));
 
@@ -515,7 +536,6 @@ export const MiningDiscoveryShowcase: React.FC = () => {
             finaleSlideRef.current.style.transform = `translate3d(${winW + 20}px, 0, 0)`;
           }
         } else {
-          // As last card exits to left, finale slide glides in from right
           const exitP = Math.min(1, Math.max(0, (currentX - centerLastCardX) / (exitX - centerLastCardX)));
           const slideX = (1 - exitP) * winW;
 
@@ -530,7 +550,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
       }
     }
 
-    return true;
+    return isSettled;
   }, []);
 
   useEffect(() => {
@@ -746,6 +766,9 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   align-self: center;
   text-align: center;
   user-select: none;
+  transform: translateY(22px);
+  opacity: 0;
+  transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.85s ease-out;
 }
 
 .quoteClosingMark {
@@ -760,6 +783,9 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   text-align: center;
   color: #1A202C;
   user-select: none;
+  transform: translateY(22px);
+  opacity: 0;
+  transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.16s, opacity 0.85s ease-out 0.16s;
 }
 
 .quoteBodyText {
@@ -774,6 +800,16 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   letter-spacing: -0.005em;
   color: #1A202C;
   text-indent: clamp(2.6rem, 4.2vw, 4rem);
+  transform: translateY(24px);
+  opacity: 0;
+  transition: transform 0.95s cubic-bezier(0.16, 1, 0.3, 1) 0.08s, opacity 0.9s ease-out 0.08s;
+}
+
+.quoteSectionActive .quoteMarkChar,
+.quoteSectionActive .quoteBodyText,
+.quoteSectionActive .quoteClosingMark {
+  transform: translateY(0);
+  opacity: 1;
 }
 
 .quoteDividerDash {
@@ -901,13 +937,21 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   }
 }
 
+.zoomImagePicture {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
 .zoomImage {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 42%;
+  object-position: center center;
   will-change: transform;
 }
 
@@ -963,6 +1007,19 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   text-shadow: 0 4px 24px rgba(0, 0, 0, 0.85), 0 1px 4px rgba(0, 0, 0, 0.95);
   display: block;
   white-space: nowrap;
+  overflow: hidden;
+}
+
+.zoomTitleLineInner {
+  display: block;
+  transform: translate3d(0, 115%, 0);
+  opacity: 0;
+  transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.75s ease-out;
+}
+
+.zoomTitleRevealed .zoomTitleLineInner {
+  transform: translate3d(0, 0%, 0);
+  opacity: 1;
 }
 
 .zoomTitlePrimary {
@@ -1787,10 +1844,11 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 
 .finaleLogoImg {
   width: auto;
-  max-width: 100%;
-  height: clamp(44px, 5.8vh, 60px);
-  max-height: clamp(44px, 5.8vh, 60px);
+  max-width: clamp(125px, 11vw, 155px);
+  height: clamp(32px, 4.2vh, 40px);
+  max-height: clamp(32px, 4.2vh, 40px);
   object-fit: contain;
+  object-position: center center;
   display: block;
   margin: 0 auto;
   filter: drop-shadow(0 2px 6px rgba(15, 35, 65, 0.08));
@@ -1828,12 +1886,13 @@ export const MiningDiscoveryShowcase: React.FC = () => {
     gap: clamp(0.6rem, 1.4vw, 1.2rem);
   }
   .flipCard {
-    height: 56px;
+    height: 52px;
     padding: 0 4px;
   }
   .finaleLogoImg {
-    height: 42px;
-    max-height: 42px;
+    height: 34px;
+    max-height: 34px;
+    max-width: 135px;
   }
 }
 
@@ -1872,12 +1931,13 @@ export const MiningDiscoveryShowcase: React.FC = () => {
     margin: 0 auto;
   }
   .flipCard {
-    height: 52px;
+    height: 48px;
     padding: 0 4px;
   }
   .finaleLogoImg {
-    height: 38px;
-    max-height: 38px;
+    height: 30px;
+    max-height: 30px;
+    max-width: 120px;
   }
 }
 
@@ -1900,12 +1960,13 @@ export const MiningDiscoveryShowcase: React.FC = () => {
     gap: 0.85rem;
   }
   .flipCard {
-    height: 44px;
+    height: 40px;
     padding: 0 3px;
   }
   .finaleLogoImg {
-    height: 32px;
-    max-height: 32px;
+    height: 26px;
+    max-height: 26px;
+    max-width: 95px;
   }
   .flipPaginationDots {
     margin-top: 0.5rem;
@@ -2256,20 +2317,31 @@ export const MiningDiscoveryShowcase: React.FC = () => {
                 transform: "translate3d(0, 100vh, 0)",
               }}
             >
-              <img
-                ref={zoomImageRef}
-                src="/images/white_desert_mining_landscape.webp?v=2"
-                alt="Mining Discovery Landscape"
-                className="zoomImage"
-              />
+              <picture className="zoomImagePicture">
+                <source srcSet="/images/transition.webp" type="image/webp" />
+                <img
+                  ref={zoomImageRef}
+                  src="/images/transition.png"
+                  alt="Mining Discovery Landscape Transition"
+                  className="zoomImage"
+                  loading="eager"
+                  decoding="async"
+                />
+              </picture>
               <div className="zoomImageOverlay" />
 
               <div className="zoomContentWrap">
                 <div className="zoomHeadlineCol">
                   <h2 ref={zoomTitleRef} className="zoomTitle">
-                    <span className="zoomTitleLine">BUILD YOUR PRESENCE.</span>
-                    <span className="zoomTitleLine">AMPLIFY YOUR STORY.</span>
-                    <span className="zoomTitleLine">REACH THE RIGHT AUDIENCE.</span>
+                    <span className="zoomTitleLine">
+                      <span className="zoomTitleLineInner">BUILD YOUR PRESENCE.</span>
+                    </span>
+                    <span className="zoomTitleLine">
+                      <span className="zoomTitleLineInner" style={{ transitionDelay: "0.12s" }}>AMPLIFY YOUR STORY.</span>
+                    </span>
+                    <span className="zoomTitleLine">
+                      <span className="zoomTitleLineInner" style={{ transitionDelay: "0.24s" }}>REACH THE RIGHT AUDIENCE.</span>
+                    </span>
                   </h2>
                 </div>
 

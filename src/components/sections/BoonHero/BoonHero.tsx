@@ -318,8 +318,8 @@ export const BoonHero = React.memo(
           gsap.to(surfaceLayerRef.current, {
             opacity: act1Fade,
             y: `${act1Y}vh`,
-            duration: 0.1,
-            ease: "none",
+            duration: 0.35,
+            ease: "power2.out",
             overwrite: "auto",
           });
         }
@@ -329,8 +329,8 @@ export const BoonHero = React.memo(
           gsap.to(openPitLayerRef.current, {
             opacity: act2Opacity,
             y: `${act2Y}px`,
-            duration: 0.1,
-            ease: "none",
+            duration: 0.35,
+            ease: "power2.out",
             overwrite: "auto",
           });
         }
@@ -340,8 +340,8 @@ export const BoonHero = React.memo(
           gsap.to(undergroundLayerRef.current, {
             opacity: act3Opacity,
             y: `${act3Y}px`,
-            duration: 0.1,
-            ease: "none",
+            duration: 0.35,
+            ease: "power2.out",
             overwrite: "auto",
           });
         }
