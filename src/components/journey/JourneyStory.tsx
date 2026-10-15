@@ -508,7 +508,7 @@ export const SERVICE_CARDS: ServiceCardItem[] = [
     summary: "BUILD A CLEAR, CONSISTENT BRAND IDENTITY THAT REFLECTS WHO YOU ARE.",
     description:
       "We help mining and industrial companies build a clear, consistent brand identity that reflects who they are, what they do, and what sets them apart.",
-    image: "/images/services/service_card_01_brand.webp",
+    image: "/images/services/service_card_01_brand.webp?v=2",
     badge: "01 / STRATEGIC POSITIONING",
     features: [
       {
@@ -536,7 +536,7 @@ export const SERVICE_CARDS: ServiceCardItem[] = [
     summary: "BUILD AN ACTIVE, CREDIBLE PRESENCE ACROSS SOCIAL PLATFORMS.",
     description:
       "We help resource companies build an active, credible presence across social platforms to engage investors, industry leaders, and commercial partners.",
-    image: "/images/services/service_card_02_social.webp",
+    image: "/images/services/service_card_02_social.webp?v=2",
     badge: "02 / AUDIENCE ENGAGEMENT",
     features: [
       {
@@ -564,7 +564,7 @@ export const SERVICE_CARDS: ServiceCardItem[] = [
     summary: "CONNECT WITH QUALIFIED INVESTORS AND KEY INDUSTRY DECISION-MAKERS.",
     description:
       "We manage high-performing paid campaigns across Google, LinkedIn, and Meta that connect your company with qualified investors and key industry decision-makers.",
-    image: "/images/services/service_card_03_ads.webp",
+    image: "/images/services/service_card_03_ads.webp?v=2",
     badge: "03 / PERFORMANCE MARKETING",
     features: [
       {

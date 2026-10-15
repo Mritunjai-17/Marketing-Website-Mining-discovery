@@ -2851,6 +2851,9 @@
 
   .cardFlickImage img {
     min-width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
   }
 }
 
@@ -3298,6 +3301,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center center;
   display: block;
   filter: brightness(1.15) contrast(1.03) !important;
   transform: scale(1) !important;

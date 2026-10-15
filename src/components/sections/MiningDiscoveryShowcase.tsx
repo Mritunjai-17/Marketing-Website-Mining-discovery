@@ -29,7 +29,7 @@ export const FOCUS_CARDS: FocusCard[] = [
     category: "BRAND & DIGITAL PRESENCE",
     title: "Build a Mining Brand That Feels Credible",
     description: "Your website and visual identity are often the first things people see. We help mining companies build a clear, professional presence that reflects their projects, people and ambitions.",
-    image: "/images/cards/card_01.png",
+    image: "/images/cards/card_01.webp",
     imagePosition: "center center",
     locationTag: "[ Branding · Visual Identity · Website Design · Development ]",
     ctaText: "Watch Video",
@@ -42,7 +42,7 @@ export const FOCUS_CARDS: FocusCard[] = [
     category: "CONTENT & MEDIA",
     title: "Turn Company News into Stories People Notice",
     description: "Exploration results, project updates and company announcements deserve more than a press release. We turn them into clear, engaging content for the mining audience.",
-    image: "/images/cards/card_02.png",
+    image: "/images/cards/card_02.webp",
     imagePosition: "center 40%",
     locationTag: "[ Content · PR · Media Coverage · Social Media ]",
     ctaText: "Watch Video",
@@ -55,7 +55,7 @@ export const FOCUS_CARDS: FocusCard[] = [
     category: "DIGITAL MARKETING",
     title: "Give Your Important Updates\nMore Reach",
     description: "From exploration results and project updates to company announcements, we help you promote the news that matters through digital campaigns and social media.",
-    image: "/images/cards/card_03.png",
+    image: "/images/cards/card_03.webp",
     imagePosition: "center center",
     locationTag: "[ Digital Marketing · Paid Campaigns · Social Media · Campaign Strategy ]",
     ctaText: "Watch Video",
@@ -68,7 +68,7 @@ export const FOCUS_CARDS: FocusCard[] = [
     category: "EXECUTIVE INFLUENCE",
     title: "Put the People Behind the Project\nin the Spotlight",
     description: "Strong companies have strong people behind them. We help mining leaders share their experience, ideas and vision through interviews, profiles and industry content.",
-    image: "/images/cards/card_04.png",
+    image: "/images/cards/card_04.webp",
     imagePosition: "center center",
     locationTag: "[ CEO Profiles · Interviews · Thought Leadership · Video ]",
     ctaText: "Watch Video",
@@ -81,7 +81,7 @@ export const FOCUS_CARDS: FocusCard[] = [
     category: "INDUSTRY & EVENT REACH",
     title: "Take Your Story Beyond Your Website",
     description: "Mining is built around relationships. We connect companies with industry conversations, events, publications and networks where important people come together.",
-    image: "/images/cards/card_05.png",
+    image: "/images/cards/card_05.webp",
     imagePosition: "center center",
     locationTag: "[ Events · Media · Industry Networks · Partnerships ]",
     ctaText: "Watch Video",
@@ -1433,6 +1433,17 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   .horizontalCardBgImage {
     object-position: center center;
   }
+  .horizontalCardPlayBtn {
+    width: 50px;
+    height: 50px;
+    top: 50%;
+    padding: 0;
+    margin: 0;
+  }
+  .horizontalCardPlayBtn .luxuryPlayIcon {
+    width: 18px;
+    height: 18px;
+  }
   .horizontalCardsTrack {
     gap: clamp(1.2rem, 3.5vw, 2.5rem);
     padding-left: 7vw;
@@ -1521,6 +1532,17 @@ export const MiningDiscoveryShowcase: React.FC = () => {
     font-size: 0.58rem;
     letter-spacing: 0.06em;
     line-height: 1.35;
+  }
+  .horizontalCardPlayBtn {
+    width: 44px;
+    height: 44px;
+    top: 50%;
+    padding: 0;
+    margin: 0;
+  }
+  .horizontalCardPlayBtn .luxuryPlayIcon {
+    width: 16px;
+    height: 16px;
   }
 }
 
@@ -1894,57 +1916,50 @@ export const MiningDiscoveryShowcase: React.FC = () => {
    VIDEO POPUP MODAL & PLAY BUTTON (OPTION A)
    ========================================================================== */
 
-/* Authentic YouTube Play Button (Themed to website's Charcoal & Gold Palette) */
-.horizontalCardYouTubeBtn {
+/* Frosted Glass Luxury Circle Play Button (Human-Made Agency Craft) */
+.horizontalCardPlayBtn {
   position: absolute;
-  top: 56%;
+  top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: clamp(66px, 5.8vw, 78px);
-  height: clamp(46px, 4vw, 54px);
+  width: clamp(56px, 4.4vw, 68px);
+  height: clamp(56px, 4.4vw, 68px);
   padding: 0;
-  border: none;
-  background: transparent;
+  margin: 0;
+  border-radius: 50%;
+  background: rgba(18, 14, 11, 0.72);
+  backdrop-filter: blur(14px) saturate(180%);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.24);
   cursor: pointer;
   z-index: 15;
   display: flex;
   align-items: center;
   justify-content: center;
   pointer-events: auto;
-  transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.28s ease;
-  filter: drop-shadow(0 14px 30px rgba(0, 0, 0, 0.7)) drop-shadow(0 0 18px rgba(214, 168, 79, 0.35));
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.3s ease;
 }
 
-.horizontalCardYouTubeBtn:hover {
-  transform: translate(-50%, -50%) scale(1.12);
-  filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.85)) drop-shadow(0 0 32px rgba(214, 168, 79, 0.65));
+.horizontalCardPlayBtn:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+  background: #D6A84F;
+  border-color: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.65), 0 0 30px rgba(214, 168, 79, 0.6);
 }
 
-.horizontalCardYouTubeBtn .youtubeSvgIcon {
-  width: 100%;
-  height: 100%;
-  overflow: visible;
+.horizontalCardPlayBtn .luxuryPlayIcon {
+  width: clamp(20px, 1.6vw, 24px);
+  height: clamp(20px, 1.6vw, 24px);
   display: block;
 }
 
-.horizontalCardYouTubeBtn .youtubeSvgBg {
-  fill: rgba(20, 16, 13, 0.88);
-  stroke: #D6A84F;
-  stroke-width: 1.8px;
-  transition: fill 0.25s ease, stroke 0.25s ease;
-}
-
-.horizontalCardYouTubeBtn:hover .youtubeSvgBg {
-  fill: #D6A84F;
-  stroke: #F1EEE6;
-}
-
-.horizontalCardYouTubeBtn .youtubeSvgTriangle {
-  fill: #D6A84F;
+.horizontalCardPlayBtn .luxuryPlayTriangle {
+  fill: #FFFFFF;
   transition: fill 0.25s ease;
 }
 
-.horizontalCardYouTubeBtn:hover .youtubeSvgTriangle {
+.horizontalCardPlayBtn:hover .luxuryPlayTriangle {
   fill: #14100D;
 }
 
@@ -2243,7 +2258,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
             >
               <img
                 ref={zoomImageRef}
-                src="/images/white_desert_mining_landscape.webp"
+                src="/images/white_desert_mining_landscape.webp?v=2"
                 alt="Mining Discovery Landscape"
                 className="zoomImage"
               />
@@ -2378,29 +2393,25 @@ export const MiningDiscoveryShowcase: React.FC = () => {
                           />
                           <div className="horizontalCardOverlay" />
 
-                          {/* Authentic YouTube Video Play Button */}
+                          {/* Frosted Glass Luxury Circle Play Button (Human-Made Design) */}
                           {card.youtubeId && !isPlaying && (
                             <button
                               type="button"
-                              className="horizontalCardYouTubeBtn"
-                              aria-label={`Play YouTube video: ${card.title}`}
+                              className="horizontalCardPlayBtn"
+                              aria-label={`Play video: ${card.title}`}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setPlayingCardId(card.id);
                               }}
                             >
                               <svg
-                                viewBox="0 0 68 48"
-                                className="youtubeSvgIcon"
+                                viewBox="0 0 24 24"
+                                className="luxuryPlayIcon"
                                 aria-hidden="true"
                               >
                                 <path
-                                  className="youtubeSvgBg"
-                                  d="M66.52 7.74c-.78-2.93-2.49-5.41-5.42-6.19C55.79.13 34 0 34 0S12.21.13 6.9 1.55c-2.93.78-4.63 3.26-5.42 6.19C.06 13.05 0 24 0 24s.06 10.95 1.48 16.26c.78 2.93 2.49 5.41 5.42 6.19C12.21 47.87 34 48 34 48s21.79-.13 27.1-1.55c2.93-.78 4.64-3.26 5.42-6.19C67.94 34.95 68 24 68 24s-.06-10.95-1.48-16.26z"
-                                />
-                                <polygon
-                                  className="youtubeSvgTriangle"
-                                  points="28,34 45,24 28,14"
+                                  d="M7.5 6.1C7.5 5.3 8.4 4.8 9.1 5.2L17.4 10.6C18.1 11.0 18.1 12.0 17.4 12.4L9.1 17.8C8.4 18.2 7.5 17.7 7.5 16.9V6.1Z"
+                                  className="luxuryPlayTriangle"
                                 />
                               </svg>
                             </button>
