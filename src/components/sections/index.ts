@@ -5,4 +5,5 @@ export { ClientInvestorGrowth } from "./ClientInvestorGrowth";
 export { FeaturedWorkShowcase } from "./FeaturedWorkShowcase";
 export { PublicationsShowcase } from "./PublicationsShowcase";
 export { MagazineShowcase } from "./MagazineShowcase";
+export { MiningPackages } from "./MiningPackages";
 export { FaqSection } from "./FaqSection";
