@@ -26,84 +26,103 @@ export interface PricingPlan {
 
 export const DEFAULT_PACKAGES: PricingPlan[] = [
   {
-    id: "plan-digital-visibility",
-    name: "Digital Visibility",
+    id: "plan-discovery",
+    name: "Discovery",
     popular: false,
     cadenceNote: "Starting from",
-    price: "$500",
+    price: "$700",
     period: "/mo",
     description:
-      "Consistent multi-channel social management, daily industry updates, and targeted email campaigns for continuous mining market presence.",
+      "Essential market visibility featuring monthly articles, unlimited press release distribution, daily social reach across all channels, and featured monthly magazine placement.",
     features: [
-      "Social media management",
-      "Daily social media posting",
-      "Email marketing campaigns",
-      "Mining Discovery email shout-outs",
+      "2 Dedicated articles per month",
+      "Unlimited press release distribution",
+      "Substack publication & results graphics",
+      "Daily social posting on all channels (7 days/week)",
+      "4 Shorts/Reels & custom thumbnails",
+      "1 Dedicated email campaign per month",
+      "Featured placement in monthly magazine",
+      "Sidebar website banner placement",
+      "Company, CEO & PR archive pages logo",
+      "Conference promotion campaign & recap",
+      "Written monthly performance report",
+      "Same-day news turnaround (Shared manager)",
     ],
     primaryCta: {
       label: "SELECT PLAN",
-      href: "/contact?tier=digital-visibility",
+      href: "/contact?tier=discovery",
     },
   },
   {
-    id: "plan-audience-amplifier",
-    name: "Audience Amplifier",
+    id: "plan-momentum",
+    name: "Momentum",
     popular: true,
     popularLabel: "POPULAR",
     cadenceNote: "Starting from",
-    price: "$900",
+    price: "$1,200",
     period: "/mo",
     description:
-      "Accelerate audience reach with published monthly editorial articles, YouTube channel management, and an official media co-partnership.",
+      "Accelerate market growth featuring monthly editorial articles, full YouTube channel management, high-visibility homepage banner placement, and dedicated investor collateral.",
     features: [
-      "Social media management",
-      "Daily social media posting",
-      "Email marketing campaigns",
-      "Mining Discovery email shout-outs",
-      "Two articles published monthly",
-      "Monthly performance report",
-      "YouTube channel management",
-      "Mining Discovery partnership",
+      "3 Dedicated articles per month",
+      "Unlimited press release distribution",
+      "Substack publication & results graphics",
+      "Daily posting + CEO.CA, StockTwits & Reddit",
+      "8 Shorts/Reels & full YouTube channel management",
+      "Interview / podcast placement (every 6 months)",
+      "2 Dedicated email campaigns & 3 branded templates",
+      "Full-page placement in monthly magazine",
+      "Homepage website banner placement",
+      "1 Event booth, banner & poster design pack/year",
+      "Quarterly presentation deck & fact sheet refresh",
+      "Quarterly IR review deck & strategy call",
+      "Fast 3-hour news turnaround (Dedicated manager)",
     ],
     primaryCta: {
       label: "SELECT PLAN",
-      href: "/contact?tier=audience-amplifier",
+      href: "/contact?tier=momentum",
     },
   },
   {
-    id: "plan-market-leader",
-    name: "Market Leader",
+    id: "plan-premier",
+    name: "Premier",
     popular: false,
     cadenceNote: "Starting from",
-    price: "$1,500",
+    price: "$1,599",
     period: "/mo",
     description:
-      "Full institutional market leadership with 24/7 AI chatbot integration, dedicated multimedia syndication, and performance optimization.",
+      "Institutional dominance featuring functional website chatbot integration, dedicated monthly articles, magazine front covers, website takeovers, and 1-hour news turnaround.",
     features: [
-      "Social media management",
-      "Daily social media posting",
-      "Email marketing campaigns",
-      "Mining Discovery email shout-outs",
-      "Two articles published monthly",
-      "Monthly performance report",
-      "YouTube channel management",
-      "Mining Discovery partnership",
-      "Website chatbot integration",
-      "Chatbot performance monitoring and optimization",
+      "Functional website chatbot integration",
+      "4 Dedicated articles per month",
+      "Unlimited press release distribution",
+      "Substack publication & results graphics",
+      "Daily posting + CEO.CA, StockTwits & Reddit",
+      "2 Monthly subscriber-growth campaigns",
+      "12 Shorts/Reels & full YouTube channel management",
+      "Quarterly interview / podcast placement",
+      "4 Dedicated email campaigns & unlimited templates",
+      "Full-page magazine placement + 2 front covers/year",
+      "Premium website banner + takeover week",
+      "2 Events booth, banner & poster design packs/year",
+      "Monthly presentation deck design & fact sheet refresh",
+      "All-Language content syndication",
+      "Priority 1-hour news turnaround (Dedicated manager + direct line)",
     ],
     primaryCta: {
       label: "SELECT PLAN",
-      href: "/contact?tier=market-leader",
+      href: "/contact?tier=premier",
     },
   },
 ];
+
 
 /* ==========================================================================
    COMPONENT: MINING PACKAGES (3-CARD PRICING SECTION)
    ========================================================================== */
 
 export const MiningPackages: React.FC = () => {
-  const [plans] = useState<PricingPlan[]>(DEFAULT_PACKAGES);
+  const plans = DEFAULT_PACKAGES;
 
   return (
     <section className="miningPackagesSection" aria-label="Service Packages and Pricing">
@@ -156,7 +175,7 @@ export const MiningPackages: React.FC = () => {
 }
 
 /* --------------------------------------------------------------------------
-   EDITORIAL HEADER (MATCHING IMAGE 3 STYLE)
+   EDITORIAL HEADER (MATCHING PREVIOUS STYLE)
    -------------------------------------------------------------------------- */
 
 .pkgsHeader {
@@ -199,7 +218,7 @@ export const MiningPackages: React.FC = () => {
   vertical-align: middle;
 }
 
-/* Image 3 Main Title Typography & Shimmering Metallic Gold Treatment (matching PublicationsShowcase) */
+/* Main Title Typography & Shimmering Metallic Gold Treatment */
 .pkgsMainTitle {
   font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
   font-size: clamp(1.85rem, 3.2vw, 3rem);
@@ -389,8 +408,9 @@ export const MiningPackages: React.FC = () => {
   line-height: 1.55;
   color: #475569;
   text-align: center;
-  min-height: 3.2rem;
+  min-height: 5.6rem;
   margin: 0 0 1.5rem;
+  text-wrap: balance;
 }
 
 /* Feature list */
@@ -530,6 +550,8 @@ export const MiningPackages: React.FC = () => {
   color: #5A4310;
 }
 
+
+
 /* --------------------------------------------------------------------------
    RESPONSIVE DESIGN (TABLETS & PHONES)
    -------------------------------------------------------------------------- */
@@ -560,14 +582,73 @@ export const MiningPackages: React.FC = () => {
   .pkgDescription {
     min-height: auto;
   }
+  .pkgPrimaryBtn,
+  .pkgPrimaryBtnPopular {
+    background: linear-gradient(135deg, #D4AF37 0%, #AA771C 100%);
+    color: #FFFFFF;
+    border-color: #AA771C;
+    box-shadow: 0 6px 18px rgba(170, 119, 28, 0.30);
+  }
+  .pkgPrimaryBtn svg,
+  .pkgPrimaryBtnPopular svg {
+    color: #FFFFFF;
+  }
+  .pkgPrimaryBtn:active,
+  .pkgPrimaryBtnPopular:active {
+    transform: scale(0.98);
+  }
+}
+
+@media (max-width: 640px) {
+  .pkgsHeader {
+    margin: 0 auto clamp(1.75rem, 4vh, 2.5rem);
+    padding: 0 0.5rem;
+  }
+  .pkgsMainTitle {
+    font-size: clamp(1.15rem, 4.8vw, 1.55rem);
+    line-height: 1.25;
+  }
+  .pkgsTitleLine {
+    display: block;
+    white-space: nowrap;
+  }
+  .pkgsSubtitle {
+    font-size: 0.92rem;
+    line-height: 1.55;
+    padding: 0 0.5rem;
+    text-align: center;
+    text-wrap: balance;
+  }
 }
 
 @media (max-width: 480px) {
   .miningPackagesSection {
     padding: 3.5rem 1rem 4rem;
   }
+  .pkgsEyebrowRow {
+    gap: 0.5rem;
+  }
+  .pkgsEyebrowRule {
+    width: 18px;
+  }
+  .pkgsEyebrowText {
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+  }
   .pkgsMainTitle {
-    font-size: 1.65rem;
+    font-size: clamp(0.96rem, 4.7vw, 1.22rem);
+    line-height: 1.25;
+  }
+  .pkgsTitleLine {
+    display: block;
+    white-space: nowrap;
+  }
+  .pkgsSubtitle {
+    font-size: 0.88rem;
+    line-height: 1.55;
+    padding: 0 0.25rem;
+    text-align: center;
+    text-wrap: balance;
   }
   .pkgPrice {
     font-size: 2.1rem;
@@ -575,6 +656,20 @@ export const MiningPackages: React.FC = () => {
   .pkgCard {
     padding: 1.75rem 1.25rem;
     border-radius: 16px;
+  }
+  .pkgDescription {
+    font-size: 0.88rem;
+    line-height: 1.5;
+    text-align: center;
+    text-wrap: balance;
+    margin: 0 0 1.25rem;
+    min-height: auto;
+  }
+}
+
+@media (max-width: 360px) {
+  .pkgsMainTitle {
+    font-size: 0.90rem;
   }
 }
 ` }} />
@@ -590,38 +685,38 @@ export const MiningPackages: React.FC = () => {
       </div>
 
       <div className="pkgsContainer">
-        {/* Header Section (Image 3 Style: Uppercase + Shimmering Gold Gradient) */}
+        {/* Header Section */}
         <div className="pkgsHeader">
           <div className="pkgsEyebrowRow">
             <span className="pkgsEyebrowRule" aria-hidden="true" />
             <span className="pkgsEyebrowText">
-              <span className="pkgsEyebrowPip">✦</span> YOUR NEXT STEP IN MINING GROWTH <span className="pkgsEyebrowPip">✦</span>
+              <span className="pkgsEyebrowPip">✦</span> PARTNERSHIP PACKAGES <span className="pkgsEyebrowPip">✦</span>
             </span>
             <span className="pkgsEyebrowRule" aria-hidden="true" />
           </div>
 
           <h2 className="pkgsMainTitle">
             <span className="pkgsTitleLine">
-              {["PUT", "YOUR", "MINING", "BUSINESS"].map((word, idx) => (
+              {["FLEXIBLE", "SOLUTIONS", "FOR"].map((word, idx) => (
                 <span key={idx} className="pkgsWordSpan">
                   {word}{" "}
                 </span>
               ))}
             </span>
             <span className="pkgsTitleLine">
-              {["ON", "THE"].map((word, idx) => (
+              {["EVERY", "STAGE", "OF"].map((word, idx) => (
                 <span key={idx} className="pkgsWordSpan">
                   {word}{" "}
                 </span>
               ))}
               <span className="pkgsGoldWordSpan">
-                MAP.
+                GROWTH
               </span>
             </span>
           </h2>
 
           <p className="pkgsSubtitle">
-            Build your brand and showcase your projects to stand out in the mining industry, reach the right audience through targeted digital marketing, and grow your visibility to unlock new business opportunities.
+            Mining Discovery offers tailored solutions designed to support companies at different stages — from exploration and discovery to development and production.
           </p>
         </div>
 
@@ -678,6 +773,8 @@ export const MiningPackages: React.FC = () => {
             </article>
           ))}
         </div>
+
+
 
         {/* Footer Notes */}
         <div className="pkgsFooter">

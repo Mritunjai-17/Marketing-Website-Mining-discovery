@@ -1149,6 +1149,18 @@
   .viewAllArchiveBtn {
     width: 100%;
     max-width: 340px;
+    background: linear-gradient(135deg, #D4AF37 0%, #AA771C 100%);
+    color: #FFFFFF;
+    border-color: #AA771C;
+    box-shadow: 0 6px 18px rgba(170, 119, 28, 0.28);
+  }
+
+  .viewAllArchiveBtn svg {
+    color: #FFFFFF;
+  }
+
+  .viewAllArchiveBtn:active {
+    transform: scale(0.98);
   }
 }
 

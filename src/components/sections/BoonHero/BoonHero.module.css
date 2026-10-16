@@ -498,22 +498,26 @@
   }
 
   .actHeadline {
-    font-size: clamp(1.75rem, 7vw, 2.6rem);
-    line-height: 1.1;
+    font-size: clamp(1.22rem, 5.6vw, 1.95rem);
+    line-height: 1.15;
     margin: 0 0 0.85rem 0;
     text-align: center;
+    letter-spacing: -0.015em;
   }
 
   .actHeadline span {
-    white-space: normal;
+    display: block;
+    white-space: nowrap;
   }
 
   .actSubline {
-    font-size: clamp(0.86rem, 3.5vw, 1.02rem);
+    font-size: clamp(0.85rem, 3.4vw, 0.98rem);
     line-height: 1.55;
     text-align: center;
     margin: 0 auto;
-    max-width: 400px;
+    max-width: 360px;
+    padding: 0 0.5rem;
+    text-wrap: balance;
   }
 
   .sublineBreak {
@@ -525,6 +529,22 @@
     padding: 0.75rem 1.8rem;
     font-size: 0.76rem;
     letter-spacing: 0.18em;
+    background: linear-gradient(90deg, #D6A84F 0%, #F3DC96 50%, #C89A32 100%) !important;
+    color: #0C141E !important;
+    border-color: #D6A84F !important;
+    box-shadow: 0 0 24px rgba(214, 168, 79, 0.55), 0 4px 14px rgba(0, 0, 0, 0.35) !important;
+  }
+
+  .undergroundCtaButton span {
+    color: #0C141E !important;
+  }
+
+  .undergroundCtaButton svg {
+    color: #0C141E !important;
+  }
+
+  .undergroundCtaButton:active {
+    transform: scale(0.97);
   }
 
   .glassTelemetryCard {
