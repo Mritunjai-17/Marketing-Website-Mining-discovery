@@ -16,7 +16,6 @@ export interface PricingPlan {
   cadenceNote: string;
   price: string;
   period: string;
-  secondaryPrice?: string;
   description: string;
   features: string[];
   primaryCta: {
@@ -33,7 +32,6 @@ export const DEFAULT_PACKAGES: PricingPlan[] = [
     cadenceNote: "Starting from",
     price: "$500",
     period: "/mo",
-    secondaryPrice: "₹ 42,000 / month INR",
     description:
       "Consistent multi-channel social management, daily industry updates, and targeted email campaigns for continuous mining market presence.",
     features: [
@@ -55,7 +53,6 @@ export const DEFAULT_PACKAGES: PricingPlan[] = [
     cadenceNote: "Starting from",
     price: "$900",
     period: "/mo",
-    secondaryPrice: "₹ 75,000 / month INR",
     description:
       "Accelerate audience reach with published monthly editorial articles, YouTube channel management, and an official media co-partnership.",
     features: [
@@ -80,7 +77,6 @@ export const DEFAULT_PACKAGES: PricingPlan[] = [
     cadenceNote: "Starting from",
     price: "$1,500",
     period: "/mo",
-    secondaryPrice: "₹ 1,25,000 / month INR",
     description:
       "Full institutional market leadership with 24/7 AI chatbot integration, dedicated multimedia syndication, and performance optimization.",
     features: [
@@ -203,15 +199,15 @@ export const MiningPackages: React.FC = () => {
   vertical-align: middle;
 }
 
-/* Image 3 Main Title Typography & Shimmering Metallic Gold Treatment */
+/* Image 3 Main Title Typography & Shimmering Metallic Gold Treatment (matching PublicationsShowcase) */
 .pkgsMainTitle {
   font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
-  font-size: clamp(1.85rem, 3.3vw, 3.1rem);
+  font-size: clamp(1.85rem, 3.2vw, 3rem);
   font-weight: 700;
   color: #0F172A;
   line-height: 1.15;
   letter-spacing: -0.025em;
-  margin: 0 0 clamp(0.75rem, 1.6vh, 1.15rem) 0;
+  margin: 0 0 clamp(0.75rem, 1.4vh, 1.1rem) 0;
   text-transform: uppercase;
   text-align: center;
 }
@@ -220,8 +216,16 @@ export const MiningPackages: React.FC = () => {
   display: block;
 }
 
+.pkgsWordSpan {
+  display: inline-block;
+  margin-right: 0.28em;
+  color: #0F172A;
+  font-weight: 700;
+}
+
 .pkgsGoldWordSpan {
   display: inline-block;
+  margin-right: 0.28em;
   font-style: normal;
   font-weight: 700;
   background: linear-gradient(135deg,
@@ -372,14 +376,6 @@ export const MiningPackages: React.FC = () => {
   color: #64748B;
 }
 
-.pkgSecondaryPrice {
-  font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
-  font-size: 0.80rem;
-  font-weight: 600;
-  color: #8C6D23;
-  margin-top: 0.4rem;
-  letter-spacing: 0.03em;
-}
 
 .pkgDivider {
   width: 100%;
@@ -599,20 +595,33 @@ export const MiningPackages: React.FC = () => {
           <div className="pkgsEyebrowRow">
             <span className="pkgsEyebrowRule" aria-hidden="true" />
             <span className="pkgsEyebrowText">
-              <span className="pkgsEyebrowPip">✦</span> OUR COST-EFFECTIVE SERVICE PRICING <span className="pkgsEyebrowPip">✦</span>
+              <span className="pkgsEyebrowPip">✦</span> YOUR NEXT STEP IN MINING GROWTH <span className="pkgsEyebrowPip">✦</span>
             </span>
             <span className="pkgsEyebrowRule" aria-hidden="true" />
           </div>
 
           <h2 className="pkgsMainTitle">
-            <span className="pkgsTitleLine">TRANSPARENT PRICING FOR</span>
             <span className="pkgsTitleLine">
-              HIGH-IMPACT <span className="pkgsGoldWordSpan">MINING MARKETING</span>
+              {["PUT", "YOUR", "MINING", "BUSINESS"].map((word, idx) => (
+                <span key={idx} className="pkgsWordSpan">
+                  {word}{" "}
+                </span>
+              ))}
+            </span>
+            <span className="pkgsTitleLine">
+              {["ON", "THE"].map((word, idx) => (
+                <span key={idx} className="pkgsWordSpan">
+                  {word}{" "}
+                </span>
+              ))}
+              <span className="pkgsGoldWordSpan">
+                MAP.
+              </span>
             </span>
           </h2>
 
           <p className="pkgsSubtitle">
-            Our mission is to make digital marketing, AI visibility, and market presence affordable for exploration projects, junior miners, and growing enterprises. Every asset deserves the chance to reach global capital.
+            Build your brand and showcase your projects to stand out in the mining industry, reach the right audience through targeted digital marketing, and grow your visibility to unlock new business opportunities.
           </p>
         </div>
 
@@ -638,10 +647,6 @@ export const MiningPackages: React.FC = () => {
                   <span className="pkgPrice">{plan.price}</span>
                   <span className="pkgPeriod">{plan.period}</span>
                 </div>
-
-                {plan.secondaryPrice && (
-                  <div className="pkgSecondaryPrice">{plan.secondaryPrice}</div>
-                )}
               </div>
 
               <div className="pkgDivider" />
