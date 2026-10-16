@@ -105,10 +105,10 @@
 
 .mainTitle {
   font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
-  font-size: clamp(1.75rem, 3.4vw, 3.4rem);
+  font-size: clamp(1.85rem, 3.2vw, 3rem);
   font-weight: 700;
   letter-spacing: -0.025em;
-  line-height: 1.12;
+  line-height: 1.15;
   color: #0F172A;
   margin: 0 0 clamp(0.65rem, 1.4vh, 1rem);
   text-transform: uppercase;
@@ -608,9 +608,10 @@
   }
 
   .mainTitle {
-    font-size: clamp(1.45rem, 5.5vw, 1.95rem);
+    font-size: clamp(1.25rem, 5.5vw, 1.85rem);
     margin-bottom: 0.5rem;
-    line-height: 1.15;
+    line-height: 1.22;
+    text-wrap: balance;
   }
 
   .subtitle {
@@ -675,7 +676,7 @@
   }
 
   .mainTitle {
-    font-size: 1.35rem;
+    font-size: 1.15rem;
   }
 
   .metricsBar {

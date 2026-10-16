@@ -96,7 +96,7 @@ export const AboutOrigin: React.FC = () => {
         <div ref={headerRef} className="flex flex-col items-center text-center max-w-3xl mx-auto">
           <AboutEyebrow text="Our Origin" className="justify-center" />
 
-          <h2 className="mt-6 font-space-grotesk text-[clamp(2.25rem,4.5vw,3.5rem)] font-bold uppercase leading-[1.1] tracking-[-0.025em] text-[#0B1F3A]">
+          <h2 className="mt-6 font-space-grotesk text-[clamp(1.25rem,5.5vw,1.85rem)] md:text-[clamp(1.85rem,3.2vw,3rem)] font-bold uppercase leading-[1.15] tracking-[-0.025em] text-[#0B1F3A] text-wrap-balance px-2">
             <MaskedWords text="A shared vision." goldWords={["vision"]} />
           </h2>
 

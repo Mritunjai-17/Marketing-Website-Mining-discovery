@@ -85,7 +85,7 @@ export const AboutManagement: React.FC = () => {
       <div className="container-editorial py-20 md:py-28">
         <div ref={headerRef} className="flex flex-col items-center text-center max-w-3xl mx-auto">
           <AboutEyebrow text="Management" className="justify-center" />
-          <h2 className="mt-6 font-space-grotesk text-[clamp(2.25rem,4.5vw,3.5rem)] font-bold uppercase leading-[1.1] tracking-[-0.025em] text-[#0B1F3A]">
+          <h2 className="mt-6 font-space-grotesk text-[clamp(1.25rem,5.5vw,1.85rem)] md:text-[clamp(1.85rem,3.2vw,3rem)] font-bold uppercase leading-[1.15] tracking-[-0.025em] text-[#0B1F3A] text-wrap-balance px-2">
             <MaskedWords text="The people behind the platform." goldWords={["behind", "the", "platform"]} />
           </h2>
         </div>
@@ -119,7 +119,7 @@ export const AboutManagement: React.FC = () => {
                     </div>
                   </div>
 
-                  <h3 className="mt-7 font-space-grotesk text-[clamp(2rem,4vw,3rem)] font-bold uppercase leading-[1.08] tracking-[-0.02em] text-[#0B1F3A] transition-colors duration-300 group-hover/person:text-[#B8860B]">
+                  <h3 className="mt-7 font-space-grotesk text-[clamp(1.5rem,5.5vw,3rem)] font-bold uppercase leading-[1.08] tracking-[-0.02em] text-[#0B1F3A] transition-colors duration-300 group-hover/person:text-[#B8860B] text-wrap-balance">
                     <MaskedWords text={person.name} />
                   </h3>
 

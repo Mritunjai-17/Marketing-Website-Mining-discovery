@@ -605,12 +605,13 @@ export const MiningPackages: React.FC = () => {
     padding: 0 0.5rem;
   }
   .pkgsMainTitle {
-    font-size: clamp(1.15rem, 4.8vw, 1.55rem);
-    line-height: 1.25;
+    font-size: clamp(1.25rem, 5.5vw, 1.85rem);
+    line-height: 1.22;
+    text-wrap: balance;
   }
   .pkgsTitleLine {
     display: block;
-    white-space: nowrap;
+    text-wrap: balance;
   }
   .pkgsSubtitle {
     font-size: 0.92rem;
@@ -623,7 +624,7 @@ export const MiningPackages: React.FC = () => {
 
 @media (max-width: 480px) {
   .miningPackagesSection {
-    padding: 3.5rem 1rem 4rem;
+    padding: 3.5rem clamp(0.75rem, 3.5vw, 1rem) 4rem;
   }
   .pkgsEyebrowRow {
     gap: 0.5rem;
@@ -632,16 +633,8 @@ export const MiningPackages: React.FC = () => {
     width: 18px;
   }
   .pkgsEyebrowText {
-    font-size: 0.68rem;
+    font-size: clamp(0.60rem, 2.8vw, 0.68rem);
     letter-spacing: 0.12em;
-  }
-  .pkgsMainTitle {
-    font-size: clamp(0.96rem, 4.7vw, 1.22rem);
-    line-height: 1.25;
-  }
-  .pkgsTitleLine {
-    display: block;
-    white-space: nowrap;
   }
   .pkgsSubtitle {
     font-size: 0.88rem;
@@ -654,7 +647,7 @@ export const MiningPackages: React.FC = () => {
     font-size: 2.1rem;
   }
   .pkgCard {
-    padding: 1.75rem 1.25rem;
+    padding: 1.75rem clamp(1rem, 3.5vw, 1.25rem);
     border-radius: 16px;
   }
   .pkgDescription {
@@ -669,7 +662,13 @@ export const MiningPackages: React.FC = () => {
 
 @media (max-width: 360px) {
   .pkgsMainTitle {
-    font-size: 0.90rem;
+    font-size: 1.15rem;
+  }
+  .pkgsTitleLine {
+    white-space: normal;
+  }
+  .pkgCard {
+    padding: 1.4rem 0.9rem;
   }
 }
 ` }} />

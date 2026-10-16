@@ -32,7 +32,7 @@ export const AboutClosing: React.FC = () => {
       <div className="container-editorial py-20 text-center md:py-28">
         <AboutEyebrow text="Mining Discovery" className="justify-center" />
 
-        <p className="mx-auto mt-10 max-w-4xl font-space-grotesk text-[clamp(1.75rem,3.6vw,3rem)] font-bold leading-[1.18] tracking-[-0.02em] text-[#0B1F3A]">
+        <p className="mx-auto mt-8 max-w-4xl font-space-grotesk text-[clamp(1.25rem,3.6vw,2.5rem)] font-bold leading-[1.28] tracking-[-0.02em] text-[#0B1F3A] px-3 text-wrap-pretty">
           <MaskedWords
             text="Mining Discovery is the first choice for mining news and insights — covering exploration, production, regulation, investment, and ESG across global mining markets."
             goldWords={["first", "choice"]}

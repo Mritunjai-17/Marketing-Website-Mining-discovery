@@ -762,12 +762,16 @@ export const PublicationsShowcase: React.FC<PublicationsShowcaseProps> = ({
         <div className={styles.eyebrowRow}>
           <span className={styles.eyebrowRule} aria-hidden="true" />
           <span className={styles.eyebrowText}>
-            <span className={styles.eyebrowPip}>✦</span> GLOBAL MEDIA DISTRIBUTION // MULTI-PLATFORM REACH <span className={styles.eyebrowPip}>✦</span>
+            <span className={styles.eyebrowPip}>✦</span>
+            <span className={styles.eyebrowChunk}>GLOBAL MEDIA DISTRIBUTION</span>
+            <span className={styles.eyebrowDivider}>//</span>
+            <span className={styles.eyebrowChunk}>MULTI-PLATFORM REACH</span>
+            <span className={styles.eyebrowPip}>✦</span>
           </span>
           <span className={styles.eyebrowRule} aria-hidden="true" />
         </div>
 
-        <h2 className={styles.mainTitle}>
+        <h1 className={styles.mainTitle}>
           <span className={styles.titleLine}>
             {["PUT", "YOUR", "MINING", "STORY"].map((word, idx) => (
               <span
@@ -805,7 +809,7 @@ export const PublicationsShowcase: React.FC<PublicationsShowcaseProps> = ({
               </span>
             ))}
           </span>
-        </h2>
+        </h1>
 
         <p className={styles.description}>
           {PUBLICATIONS_SUBTITLE_WORDS.map((word, idx) => (
@@ -834,7 +838,7 @@ export const PublicationsShowcase: React.FC<PublicationsShowcaseProps> = ({
                   <span className={styles.categoryKicker}>{sec.kicker}</span>
                 </div>
 
-                <h3 className={styles.categoryTitle}>{sec.title}</h3>
+                <h2 className={styles.categoryTitle}>{sec.title}</h2>
 
                 <div className={styles.categoryLocationRow}>
                   <MapPin size={13} className={styles.categoryLocationIcon} />

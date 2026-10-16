@@ -107,7 +107,7 @@ export const AboutUnique: React.FC = () => {
       <div className="container-editorial py-20 md:py-28">
         <div ref={headerRef} className="flex flex-col items-center text-center max-w-3xl mx-auto">
           <AboutEyebrow text="What Makes Us Unique" className="justify-center" />
-          <h2 className="mt-6 font-space-grotesk text-[clamp(2.25rem,4.5vw,3.5rem)] font-bold uppercase leading-[1.1] tracking-[-0.025em] text-[#0B1F3A]">
+          <h2 className="mt-6 font-space-grotesk text-[clamp(1.25rem,5.5vw,1.85rem)] md:text-[clamp(1.85rem,3.2vw,3rem)] font-bold uppercase leading-[1.15] tracking-[-0.025em] text-[#0B1F3A] text-wrap-balance px-2">
             <MaskedWords text="Five things that set us apart." goldWords={["set", "us", "apart"]} />
           </h2>
         </div>
@@ -136,7 +136,7 @@ export const AboutUnique: React.FC = () => {
                         />
                       </div>
 
-                      <h3 className="mt-4 font-space-grotesk text-[clamp(1.6rem,3.2vw,2.5rem)] font-bold uppercase leading-[1.12] tracking-[-0.018em] text-[#0B1F3A]">
+                      <h3 className="mt-4 font-space-grotesk text-[clamp(1.35rem,4.8vw,2.5rem)] font-bold uppercase leading-[1.12] tracking-[-0.018em] text-[#0B1F3A] text-wrap-balance">
                         <MaskedWords text={item.title} />
                       </h3>
                     </div>

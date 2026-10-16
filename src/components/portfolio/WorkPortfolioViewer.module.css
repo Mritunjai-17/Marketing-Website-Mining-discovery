@@ -46,10 +46,10 @@
 
 .mainTitle {
   font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
-  font-size: clamp(1.85rem, 3.6vw, 3.6rem);
+  font-size: clamp(1.85rem, 3.2vw, 3rem);
   font-weight: 700;
   letter-spacing: -0.025em;
-  line-height: 1.12;
+  line-height: 1.15;
   color: #0F172A;
   margin: 0 auto clamp(0.75rem, 1.6vh, 1.25rem);
   text-transform: uppercase;
@@ -100,4 +100,48 @@
   margin: 0 auto;
   max-width: 740px;
   padding: 0 1rem;
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN (TABLETS & PHONES)
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .eyebrowRow {
+    gap: 0.5rem;
+    margin-bottom: 0.65rem;
+  }
+
+  .eyebrowText {
+    font-size: clamp(0.58rem, 2.4vw, 0.72rem);
+    letter-spacing: 0.12em;
+    text-align: center;
+  }
+
+  .mainTitle {
+    font-size: clamp(1.25rem, 5.5vw, 1.85rem);
+    line-height: 1.22;
+    text-wrap: balance;
+    margin-bottom: 0.85rem;
+  }
+
+  .subtitle {
+    font-size: clamp(0.85rem, 2.8vw, 0.98rem);
+    line-height: 1.6;
+    padding: 0 0.5rem;
+    text-wrap: pretty;
+  }
+}
+
+@media (max-width: 480px) {
+  .eyebrowRule,
+  .eyebrowRuleRight {
+    width: 18px;
+  }
+}
+
+@media (max-width: 360px) {
+  .mainTitle {
+    font-size: 1.15rem;
+  }
 }

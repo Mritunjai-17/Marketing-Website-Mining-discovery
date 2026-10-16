@@ -120,7 +120,7 @@ export const Footer: React.FC = () => {
         bar. Nothing here needs state, so this file stays a server component - the two
         wrappers below are the only client code involved.
       */}
-      <SectionReveal className="mx-auto w-full max-w-[1520px] px-6 sm:px-10 lg:px-14 xl:px-20 py-12 md:py-16 lg:py-20">
+      <SectionReveal className="mx-auto w-full max-w-[1520px] px-4 sm:px-10 lg:px-14 xl:px-20 py-10 md:py-16 lg:py-20">
         {/*
           Twelve-column responsive layout across wide viewport:
           Brand (3) + Content (2) + Services (3) + Company (2) + Follow Us (2) = 12 cols.
@@ -138,7 +138,7 @@ export const Footer: React.FC = () => {
                 alt="Mining Discovery Logo"
                 width={260}
                 height={100}
-                className="h-20 w-auto object-contain sm:h-[84px]"
+                className="h-16 w-auto object-contain sm:h-[84px]"
               />
             </Link>
 
@@ -216,7 +216,7 @@ export const Footer: React.FC = () => {
         </div>
 
         {/* Bottom bar */}
-        <RevealItem className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-7 sm:flex-row lg:mt-14">
+        <RevealItem className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-7 text-center sm:text-left sm:flex-row lg:mt-14 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           <p className="text-xs font-normal text-[#F0F4F8]/50">
             © {new Date().getFullYear()} Mining Discovery. All Rights Reserved.
           </p>

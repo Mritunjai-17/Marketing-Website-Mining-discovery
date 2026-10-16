@@ -154,10 +154,10 @@
 /* Main heading: Deep Obsidian Slate (#0F172A) on Warm Stone */
 .mainTitle {
   font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
-  font-size: clamp(1.45rem, 3.2vw, 3.2rem);
+  font-size: clamp(1.85rem, 3.2vw, 3rem);
   font-weight: 700;
   color: #0F172A;
-  line-height: 1.18;
+  line-height: 1.15;
   letter-spacing: -0.025em;
   margin: 0 auto clamp(0.85rem, 1.5vh, 1.25rem) auto;
   text-transform: uppercase;
@@ -1104,8 +1104,8 @@
   }
 
   .mainTitle {
-    font-size: clamp(1.45rem, 4vw, 2.4rem) !important;
-    line-height: 1.2 !important;
+    font-size: clamp(1.45rem, 3.2vw, 2.4rem) !important;
+    line-height: 1.15 !important;
     padding: 0 0.5rem !important;
   }
 
@@ -1150,16 +1150,53 @@
     display: none;
   }
 
+  .stackOuter {
+    height: auto !important;
+    margin: 1.25rem auto 0 !important;
+  }
+
+  .stackSticky {
+    position: relative !important;
+    width: 100% !important;
+    transform: none !important;
+  }
+
+  .deckNavWrapper {
+    display: none !important;
+  }
+
   .cardDeck {
-    min-height: 480px;
-    padding-top: 0;
+    position: relative !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1.5rem !important;
+    padding: 0 !important;
   }
 
   .stackCard,
   .alternatingRow.stackCard {
-    top: 0 !important;
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    width: 100% !important;
     height: auto !important;
     min-height: auto !important;
+    max-height: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    margin: 0 !important;
+    box-shadow: 0 16px 44px rgba(0, 0, 0, 0.35), 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+  }
+
+  .rowPreceding {
+    filter: none !important;
+    cursor: default !important;
   }
 
   .alternatingRow,
@@ -1417,7 +1454,9 @@
 
 @media (max-width: 540px) {
   .cardDeck {
-    min-height: 420px;
+    min-height: auto !important;
+    height: auto !important;
+    gap: 1.15rem !important;
   }
 
   .alternatingRow,
@@ -1625,8 +1664,8 @@
   }
 
   .mainTitle {
-    font-size: clamp(1.28rem, 5.8vw, 1.65rem) !important;
-    line-height: 1.25 !important;
+    font-size: clamp(1.25rem, 5.5vw, 1.85rem) !important;
+    line-height: 1.22 !important;
     padding: 0 0.25rem !important;
     margin-bottom: 0.75rem !important;
   }
@@ -1655,11 +1694,61 @@
 }
 
 @media (max-width: 360px) {
+  .sectionInner {
+    padding: 2.5rem 0.5rem 2.5rem !important;
+  }
+
   .mainTitle {
     font-size: 1.15rem !important;
   }
 
   .goldPhrase {
     white-space: normal !important;
+  }
+
+  .alternatingRow,
+  .rowHeadingLeft,
+  .rowHeadingRight {
+    padding: 1.1rem 0.75rem 1rem !important;
+    gap: 0.65rem !important;
+    border-radius: 14px !important;
+  }
+
+  .chapterTitle {
+    font-size: 1.05rem !important;
+    line-height: 1.2 !important;
+  }
+
+  .clientDetails {
+    gap: 0.5rem !important;
+  }
+
+  .clientLogoWrap {
+    min-width: 36px !important;
+    max-width: 64px !important;
+    height: 28px !important;
+    padding: 2px 4px !important;
+  }
+
+  .storyLead {
+    font-size: 0.78rem !important;
+    line-height: 1.4 !important;
+  }
+
+  .textMetricsLine {
+    gap: 0.45rem !important;
+    padding: 0.6rem 0.5rem !important;
+  }
+
+  .textMetricNum {
+    font-size: 1.18rem !important;
+  }
+
+  .textMetricLbl {
+    font-size: 0.52rem !important;
+  }
+
+  .cardDeck {
+    gap: 1rem !important;
   }
 }

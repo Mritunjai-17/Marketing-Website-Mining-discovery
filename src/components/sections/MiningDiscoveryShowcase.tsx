@@ -207,7 +207,7 @@ const ClientLogosFlipRow: React.FC = () => {
 
 /** Viewport heights for the continuous Mining Discovery Interactive Showcase */
 const DESKTOP_SCROLL_VH = 480;
-const MOBILE_SCROLL_VH = 380;
+const MOBILE_SCROLL_VH = 220;
 
 /**
  * How the sampled progress follows the true scroll position.
@@ -323,19 +323,30 @@ export const MiningDiscoveryShowcase: React.FC = () => {
     const { top, travel } = rangeMetricsRef.current;
     const target = travel > 0 ? clamp((window.scrollY - top) / travel, 0, 1) : 0;
 
-    // Smooth critically-damped spring interpolation for silky momentum
-    const now = performance.now();
-    const dt = Math.min(0.04, Math.max(0.001, (now - (lastSampleRef.current || now)) / 1000));
-    lastSampleRef.current = now;
+    const winW = rangeMetricsRef.current.winW || (typeof window !== "undefined" ? window.innerWidth : 1920);
+    const isMobile = winW <= 840;
 
     const progress = progressSpring.current;
-    stepSpring(progress, target, dt, { stiffness: 105, damping: 24 });
-    const p = clamp(progress.value, 0, 1);
+    let p = 0;
+    let isSettled = true;
+
+    if (isMobile) {
+      // 1:1 direct follow on mobile devices for instantaneous, zero-lag scrolling
+      progress.value = target;
+      progress.velocity = 0;
+      p = target;
+      isSettled = true;
+    } else {
+      // Smooth critically-damped spring interpolation for desktop precision trackpads & mice
+      const now = performance.now();
+      const dt = Math.min(0.04, Math.max(0.001, (now - (lastSampleRef.current || now)) / 1000));
+      lastSampleRef.current = now;
+
+      stepSpring(progress, target, dt, { stiffness: 105, damping: 24 });
+      p = clamp(progress.value, 0, 1);
+      isSettled = Math.abs(progress.value - target) < 1e-4 && Math.abs(progress.velocity) < 1e-3;
+    }
     progressRef.current = p;
-
-    const isSettled = Math.abs(progress.value - target) < 1e-4 && Math.abs(progress.velocity) < 1e-3;
-
-    const winW = rangeMetricsRef.current.winW || (typeof window !== "undefined" ? window.innerWidth : 1920);
 
     // STAGE 1: FULL PAGE EDITORIAL QUOTE (p: 0.00 -> 0.16)
     if (quoteSectionRef.current) {
@@ -988,7 +999,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
 
 .zoomTitle {
   font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
-  font-size: clamp(1.8rem, 3.4vw, 3.6rem);
+  font-size: clamp(1.85rem, 3.2vw, 3rem);
   font-weight: 700;
   letter-spacing: 0.03em;
   line-height: 1.15;
@@ -1095,7 +1106,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
     gap: 1rem;
   }
   .zoomTitle {
-    font-size: clamp(1.35rem, 5.2vw, 1.9rem);
+    font-size: clamp(1.25rem, 5.5vw, 1.85rem);
     line-height: 1.18;
   }
   .zoomInfoEyebrow {
@@ -1112,9 +1123,6 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   .zoomContentWrap {
     padding: 1.2rem 1rem;
     gap: 0.75rem;
-  }
-  .zoomTitle {
-    font-size: clamp(1.15rem, 5.8vw, 1.45rem);
   }
   .zoomInfoText {
     font-size: 0.78rem;
@@ -1956,7 +1964,7 @@ export const MiningDiscoveryShowcase: React.FC = () => {
     line-height: 1.35;
   }
   .flipRowWrapper {
-    max-width: 340px;
+    max-width: min(340px, 92vw);
     gap: 0.85rem;
   }
   .flipCard {
@@ -1970,6 +1978,25 @@ export const MiningDiscoveryShowcase: React.FC = () => {
   }
   .flipPaginationDots {
     margin-top: 0.5rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .flipRowWrapper {
+    max-width: 285px;
+    gap: 0.65rem;
+  }
+  .flipCard {
+    height: 36px;
+    padding: 0 2px;
+  }
+  .finaleLogoImg {
+    height: 22px;
+    max-height: 22px;
+    max-width: 80px;
+  }
+  .horizontalCardItem {
+    width: 90vw;
   }
 }
 

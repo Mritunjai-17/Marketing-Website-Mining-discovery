@@ -67,7 +67,7 @@ export const AboutPrinciples: React.FC = () => {
       <div className="container-editorial py-20 md:py-28">
         <div ref={headerRef} className="flex flex-col items-center text-center max-w-3xl mx-auto">
           <AboutEyebrow text="Our Principles" className="justify-center" />
-          <h2 className="mt-6 font-space-grotesk text-[clamp(2.25rem,4.5vw,3.5rem)] font-bold uppercase leading-[1.1] tracking-[-0.025em] text-[#0B1F3A]">
+          <h2 className="mt-6 font-space-grotesk text-[clamp(1.25rem,5.5vw,1.85rem)] md:text-[clamp(1.85rem,3.2vw,3rem)] font-bold uppercase leading-[1.15] tracking-[-0.025em] text-[#0B1F3A] text-wrap-balance px-2">
             <MaskedWords text="What we hold to." goldWords={["hold", "to"]} />
           </h2>
         </div>
@@ -101,7 +101,7 @@ export const AboutPrinciples: React.FC = () => {
                     {String(index + 1).padStart(2, "0")}
                   </span>
 
-                  <h3 className="font-space-grotesk text-[clamp(2rem,4.6vw,3.5rem)] font-bold uppercase leading-[1.05] tracking-[-0.025em] text-[#0B1F3A] transition-colors duration-500 group-hover:text-[#B8860B]">
+                  <h3 className="font-space-grotesk text-[clamp(1.5rem,5vw,3.5rem)] font-bold uppercase leading-[1.08] tracking-[-0.025em] text-[#0B1F3A] transition-colors duration-500 group-hover:text-[#B8860B] text-wrap-balance">
                     <MaskedWords text={principle.name} />
                   </h3>
                 </div>

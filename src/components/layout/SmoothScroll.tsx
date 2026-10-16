@@ -28,12 +28,17 @@ export const SmoothScroll: React.FC<SmoothScrollProps> = ({ children }) => {
     // receives butter-smooth Lenis momentum scrolling.
     // Pure touch mobile devices (iPhone, Android, standalone tablets without trackpad)
     // use native 120Hz/60Hz hardware momentum scrolling to avoid touch-event contention.
+    const isMobileWidth = window.innerWidth <= 840;
+    const isCoarsePointer = window.matchMedia("(pointer: coarse)").matches;
     const hasFinePointer = window.matchMedia("(pointer: fine)").matches;
-    const isTouchOnly = !hasFinePointer && (window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 768);
+    // Pure touch mobile devices and all mobile screen ratios (iPhone, Android, Foldables, Tablets)
+    // use native 120Hz/60Hz hardware momentum scrolling for frictionless mobile swiping.
+    const isTouchOnly = isMobileWidth || isCoarsePointer || !hasFinePointer;
 
     gsap.registerPlugin(ScrollTrigger);
 
     if (isTouchOnly) {
+      document.documentElement.classList.add("touch-scroller");
       // Provide a zero-overhead native shim so scrollTo, start, stop, and listeners
       // work seamlessly across the site on touch mobile/tablets without errors or lag
       const scrollListeners = new Set<(e: any) => void>();
@@ -73,6 +78,7 @@ export const SmoothScroll: React.FC<SmoothScrollProps> = ({ children }) => {
       (window as any).lenis = touchShim;
 
       return () => {
+        document.documentElement.classList.remove("touch-scroller");
         window.removeEventListener("scroll", handleNativeScroll);
         scrollListeners.clear();
         if ((window as any).lenis === touchShim) {

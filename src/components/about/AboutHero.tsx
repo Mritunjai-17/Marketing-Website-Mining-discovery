@@ -99,7 +99,7 @@ export const AboutHero: React.FC = () => {
 
         <h1
           ref={headingRef}
-          className="mt-6 max-w-4xl font-space-grotesk text-[clamp(2.5rem,5.6vw,4.5rem)] font-bold uppercase leading-[1.05] tracking-[-0.03em] text-[#0B1F3A]"
+          className="mt-6 max-w-4xl font-space-grotesk text-[clamp(1.25rem,5.5vw,1.85rem)] md:text-[clamp(1.85rem,3.2vw,3rem)] font-bold uppercase leading-[1.15] tracking-[-0.025em] text-[#0B1F3A] px-2 text-wrap-balance"
         >
           <MaskedWords text={HEADING} goldWords={["Discovery"]} />
         </h1>

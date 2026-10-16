@@ -110,7 +110,7 @@ export const AboutPurpose: React.FC = () => {
             <div className="lg:sticky lg:top-32" ref={headerRef}>
               <AboutEyebrow text="Our Purpose" />
 
-              <h2 className="mt-6 max-w-[16ch] font-space-grotesk text-[clamp(2.25rem,4.2vw,3.25rem)] font-bold uppercase leading-[1.1] tracking-[-0.025em] text-[#0B1F3A]">
+              <h2 className="mt-6 max-w-none lg:max-w-[16ch] font-space-grotesk text-[clamp(1.25rem,5.5vw,1.85rem)] md:text-[clamp(1.85rem,3.2vw,3rem)] font-bold uppercase leading-[1.15] tracking-[-0.025em] text-[#0B1F3A] text-wrap-balance">
                 <MaskedWords text="What the platform is for." goldWords={["the", "platform"]} />
               </h2>
 
@@ -189,7 +189,7 @@ export const AboutPurpose: React.FC = () => {
                       {String(index + 1).padStart(2, "0")}
                     </span>
 
-                    <h3 className="mt-5 font-space-grotesk text-[clamp(1.75rem,3.4vw,2.75rem)] font-bold uppercase leading-[1.12] tracking-[-0.02em] text-[#0B1F3A]">
+                    <h3 className="mt-5 font-space-grotesk text-[clamp(1.4rem,5.2vw,2.75rem)] font-bold uppercase leading-[1.12] tracking-[-0.02em] text-[#0B1F3A] text-wrap-balance">
                       <MaskedWords text={purpose.title} />
                     </h3>
 

@@ -76,7 +76,7 @@ export const AboutLookingAhead: React.FC = () => {
       <div className="container-editorial relative py-20 md:py-28">
         <div ref={headerRef} className="flex flex-col items-center text-center max-w-3xl mx-auto">
           <AboutEyebrow text="Looking Ahead" theme="dark" className="justify-center" />
-          <h2 className="mt-6 font-space-grotesk text-[clamp(2.25rem,5.4vw,4rem)] font-bold uppercase leading-[1.06] tracking-[-0.025em] text-white">
+          <h2 className="mt-6 font-space-grotesk text-[clamp(1.25rem,5.5vw,1.85rem)] md:text-[clamp(1.85rem,3.2vw,3rem)] font-bold uppercase leading-[1.15] tracking-[-0.025em] text-white text-wrap-balance px-2">
             <MaskedWords text="A trusted global voice in mining." goldWords={["voice", "in", "mining"]} />
           </h2>
         </div>

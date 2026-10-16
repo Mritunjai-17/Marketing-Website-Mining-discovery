@@ -107,13 +107,13 @@ export const Header: React.FC = () => {
 
         {/* Full-length container with refined responsive padding */}
         <div
-          className={`w-full flex items-center justify-between px-5 sm:px-8 md:px-10 lg:px-12 xl:px-16 transition-all duration-500 ${isScrolled ? "py-2.5 sm:py-3" : "py-3.5 sm:py-4.5"
+          className={`w-full flex items-center justify-between px-3.5 sm:px-8 md:px-10 lg:px-12 xl:px-16 transition-all duration-500 ${isScrolled ? "py-2 sm:py-3" : "py-2.5 sm:py-4.5"
             }`}
         >
           {/* Left: Brand Logo */}
           <Link
             href="/"
-            className="group flex items-center gap-2.5 sm:gap-3 focus:outline-none shrink-0"
+            className="group flex items-center gap-2 sm:gap-3 focus:outline-none shrink-0"
             aria-label="Mining Discovery Home"
           >
             <Image
@@ -122,7 +122,7 @@ export const Header: React.FC = () => {
               width={260}
               height={75}
               priority
-              className={`w-auto object-contain transition-all duration-500 ${isScrolled ? "h-9 sm:h-10 md:h-11" : "h-10 sm:h-12 md:h-13"
+              className={`w-auto object-contain transition-all duration-500 ${isScrolled ? "h-8 sm:h-10 md:h-11" : "h-9 sm:h-12 md:h-13"
                 }`}
             />
           </Link>
@@ -172,11 +172,11 @@ export const Header: React.FC = () => {
           </nav>
 
           {/* Right: Golden Amber Pill CTA + Mobile Menu Trigger */}
-          <div className="flex items-center gap-2.5 sm:gap-3.5 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3.5 shrink-0">
             {/* Golden Amber Pill CTA Button */}
             <Link
               href="/contact"
-              className="inline-flex items-center justify-center px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 rounded-full bg-gradient-to-r from-[#D6A84F] via-[#F3DC96] to-[#C89A32] text-[#0C141E] font-sans font-bold text-[14px] uppercase tracking-[0.16em] hover:brightness-110 hover:shadow-[0_0_24px_rgba(214,168,79,0.55)] transition-all duration-300 hover:scale-[1.03] shrink-0 active:scale-[0.98]"
+              className="inline-flex items-center justify-center px-3 sm:px-5 md:px-6 py-1.5 sm:py-2.5 rounded-full bg-gradient-to-r from-[#D6A84F] via-[#F3DC96] to-[#C89A32] text-[#0C141E] font-sans font-bold text-[11.5px] sm:text-[14px] uppercase tracking-[0.12em] sm:tracking-[0.16em] hover:brightness-110 hover:shadow-[0_0_24px_rgba(214,168,79,0.55)] transition-all duration-300 hover:scale-[1.03] shrink-0 active:scale-[0.98]"
             >
               <span className="hidden sm:inline">GET IN TOUCH</span>
               <span className="sm:hidden">CONTACT</span>

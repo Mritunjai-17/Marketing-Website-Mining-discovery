@@ -283,15 +283,31 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
         });
       }
 
-      // Stack pinning and continuous scroll progress
+      // On mobile viewports (<= 840px across all mobile aspect ratios), cards flow naturally one below the other without pinning or scroll-scrubbing
+      const isMobile = typeof window !== "undefined" && window.innerWidth <= 840;
+      if (isMobile) {
+        if (stackStickyRef.current) {
+          stackStickyRef.current.style.transform = "none";
+        }
+        chapterRefs.current.forEach((el) => {
+          if (!el) return;
+          el.style.removeProperty("transform");
+          el.style.removeProperty("opacity");
+          el.style.removeProperty("z-index");
+          el.style.removeProperty("pointer-events");
+          el.style.removeProperty("visibility");
+        });
+        return false;
+      }
+
+      // Stack pinning and continuous scroll progress (Desktop / Tablets > 768px)
       if (stackOuterRef.current && stackStickyRef.current) {
         const outerRect = stackOuterRef.current.getBoundingClientRect();
         const stickyEl = stackStickyRef.current;
         const stickyH = stickyEl.offsetHeight || 520;
 
         // Position where the card deck pins comfortably below fixed navbar (header is ~80px)
-        const isMobile = clientH < 850 || (typeof window !== "undefined" && window.innerWidth <= 768);
-        const NAV_BUFFER = isMobile ? 74 : 92;
+        const NAV_BUFFER = 92;
         const availableH = Math.max(320, clientH - NAV_BUFFER);
         const pinTop = isMobile
           ? Math.max(NAV_BUFFER, Math.min(84, Math.round(NAV_BUFFER + 6)))

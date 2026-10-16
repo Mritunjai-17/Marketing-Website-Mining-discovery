@@ -19,7 +19,7 @@ export type TransitionState =
 
 /** Viewport heights for the continuous story (Hero -> Client & Investor Bridge -> Our Services 8 Cards) */
 const DESKTOP_SCROLL_VH = 1050;
-const MOBILE_SCROLL_VH = 850;
+const MOBILE_SCROLL_VH = 460;
 
 function clamp(v: number, lo: number, hi: number) {
   return Math.min(Math.max(v, lo), hi);

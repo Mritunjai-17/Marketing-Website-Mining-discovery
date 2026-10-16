@@ -293,19 +293,19 @@ export const OurServicesSection: React.FC<OurServicesSectionProps> = ({
         style={{ willChange: "transform" }}
       >
         {/* Prominent Editorial Header matching Image 1 */}
-        <div className="flex flex-col items-center justify-center text-center mb-12 sm:mb-16">
-          <div className="flex items-center justify-center gap-4 sm:gap-6 w-full max-w-xl mb-2">
+        <div className="flex flex-col items-center justify-center text-center mb-10 sm:mb-16">
+          <div className="flex items-center justify-center gap-3 sm:gap-6 w-full max-w-xl mb-2 px-2">
             <span
               className="h-[1.5px] flex-1 bg-gradient-to-r from-transparent to-[#C5A059]/70"
               aria-hidden="true"
             />
             <h2
-              className="font-space-grotesk text-[2.2rem] sm:text-[3.2rem] md:text-[3.8rem] font-bold tracking-tight text-[#0c2038] uppercase"
+              className="font-space-grotesk text-[clamp(1.25rem,5.5vw,1.85rem)] md:text-[clamp(1.85rem,3.2vw,3rem)] font-bold tracking-tight text-[#0c2038] uppercase whitespace-nowrap"
               style={{
                 fontFamily:
                   'var(--font-space-grotesk), "Space Grotesk", sans-serif',
-                letterSpacing: "-0.015em",
-                lineHeight: 1.05,
+                letterSpacing: "-0.025em",
+                lineHeight: 1.15,
               }}
             >
               OUR SERVICES
@@ -315,7 +315,7 @@ export const OurServicesSection: React.FC<OurServicesSectionProps> = ({
               aria-hidden="true"
             />
           </div>
-          <p className="font-mono text-xs sm:text-sm tracking-[0.22em] text-[#7A5E22] uppercase font-bold">
+          <p className="font-mono text-[clamp(0.62rem,2.3vw,0.875rem)] tracking-[0.12em] sm:tracking-[0.22em] text-[#7A5E22] uppercase font-bold text-center px-3 max-w-lg">
             Institutional Mineral Marketing &amp; Global Capital Dispatches
           </p>
         </div>

@@ -68,6 +68,17 @@
   white-space: nowrap;
 }
 
+.eyebrowChunk {
+  white-space: nowrap;
+}
+
+.eyebrowDivider {
+  display: inline-block;
+  color: #D4AF37;
+  opacity: 0.75;
+  margin: 0 0.2em;
+}
+
 .mainTitle {
   font-family: var(--font-space-grotesk), "Space Grotesk", sans-serif;
   font-size: clamp(1.85rem, 3.2vw, 3rem);
@@ -454,17 +465,24 @@
 }
 
 @media (max-width: 768px) {
+  .publicationsSection {
+    padding: clamp(2.75rem, 5vh, 3.75rem) clamp(0.75rem, 3vw, 1.25rem) clamp(3.5rem, 6vh, 4.5rem);
+    gap: clamp(1.75rem, 3.5vh, 2.5rem);
+  }
+
   .header {
     width: 100%;
-    max-width: 100%;
+    max-width: 620px;
     padding: 0 0.5rem;
     box-sizing: border-box;
+    margin: 0 auto clamp(0.5rem, 1.5vh, 1rem) auto;
   }
 
   .eyebrowRow {
     gap: 0.35rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.65rem;
     width: 100%;
+    justify-content: center;
   }
 
   .eyebrowRule {
@@ -474,31 +492,40 @@
   .eyebrowText {
     white-space: normal;
     text-align: center;
-    font-size: clamp(0.62rem, 2.2vw, 0.72rem);
-    letter-spacing: 0.08em;
-    line-height: 1.35;
+    font-size: clamp(0.60rem, 2.4vw, 0.72rem);
+    letter-spacing: 0.10em;
+    line-height: 1.45;
     max-width: 100%;
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2rem 0.35rem;
   }
 
   .mainTitle {
-    font-size: clamp(1.4rem, 5.2vw, 2.2rem);
-    line-height: 1.2;
-    letter-spacing: -0.01em;
+    font-size: clamp(1.25rem, 5.5vw, 1.85rem);
+    line-height: 1.22;
+    letter-spacing: -0.025em;
     width: 100%;
     max-width: 100%;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.85rem;
+    text-wrap: balance;
+  }
+
+  .titleLine {
+    display: block;
   }
 
   .description {
-    font-size: clamp(0.82rem, 2.6vw, 0.94rem);
-    line-height: 1.5;
-    padding: 0 0.25rem;
-    max-width: 100%;
-  }
-
-  .publicationsSection {
-    padding: 3rem 0.85rem 4rem;
-    gap: 2rem;
+    font-size: clamp(0.85rem, 2.5vw, 0.94rem);
+    line-height: 1.62;
+    color: #475569;
+    padding: 0 0.35rem;
+    max-width: 560px;
+    margin: 0 auto;
+    text-align: center;
+    text-wrap: pretty;
   }
 }
 
@@ -508,18 +535,14 @@
   }
 
   .eyebrowText {
-    font-size: 0.6rem;
-    letter-spacing: 0.06em;
-  }
-
-  .mainTitle {
-    font-size: clamp(1.18rem, 5.8vw, 1.52rem);
-    line-height: 1.22;
+    font-size: clamp(0.56rem, 2.5vw, 0.64rem);
+    letter-spacing: 0.08em;
   }
 
   .description {
-    font-size: 0.8rem;
-    line-height: 1.48;
+    font-size: 0.84rem;
+    line-height: 1.58;
+    max-width: 100%;
   }
 
   .publicationsGrid {
@@ -543,10 +566,6 @@
   .pubDescription {
     font-size: 0.8rem;
     line-height: 1.45;
-  }
-
-  .publicationsSection {
-    padding: 2.5rem 0.75rem 3.5rem;
   }
 }
 
@@ -628,10 +647,10 @@
 
 .categoryTitle {
   font-family: var(--font-space-grotesk), sans-serif;
-  font-size: clamp(1.45rem, 1.9vw, 1.95rem);
+  font-size: clamp(1.35rem, 1.8vw, 1.85rem);
   font-weight: 700;
   color: #0F172A;
-  line-height: 1.2;
+  line-height: 1.22;
   margin: 0;
   letter-spacing: -0.02em;
 }
@@ -1125,30 +1144,83 @@
   transform: translateY(-2px);
 }
 
-/* Responsive adjustments */
+/* Responsive adjustments for 4 Publication Blocks */
 @media (max-width: 1024px) {
   .categoryBlock {
     grid-template-columns: 1fr;
-    gap: 2rem;
-    padding: clamp(3rem, 5vh, 4rem) 0;
+    gap: 1.75rem;
+    padding: clamp(2.5rem, 4.5vh, 3.5rem) 0;
+  }
+
+  .categoryBlock:first-of-type {
+    padding-top: clamp(0.75rem, 1.5vh, 1.5rem);
+  }
+
+  .categoryInfoCol {
+    align-items: flex-start;
+    text-align: left;
+    gap: 1.15rem;
+    width: 100%;
+    max-width: 560px;
+    margin: 0;
+  }
+
+  .categoryTopInfo {
+    align-items: flex-start;
+    text-align: left;
+    gap: 0.55rem;
+    width: 100%;
+  }
+
+  .categoryBadgeRow {
+    margin: 0;
+    padding: 0.28rem 0.85rem;
   }
 
   .categoryTitle {
-    font-size: clamp(1.35rem, 2.6vw, 1.65rem);
-    line-height: 1.2;
+    font-size: clamp(1.25rem, 3.5vw, 1.55rem);
+    line-height: 1.22;
+    text-align: left;
+    margin: 0.1rem 0;
+  }
+
+  .categoryLocationRow {
+    justify-content: flex-start;
+    font-size: 0.84rem;
+    margin-bottom: 0.15rem;
   }
 
   .categoryDescription {
-    max-width: 100%;
+    font-size: clamp(0.85rem, 2.4vw, 0.94rem);
+    line-height: 1.6;
+    color: #475569;
+    max-width: 520px;
+    margin: 0;
+    text-align: left;
+    text-wrap: pretty;
   }
 
   .categoryStatsRow {
-    max-width: 100%;
+    width: 100%;
+    max-width: 440px;
+    margin: 0.35rem 0 0;
+    padding: 0.85rem 0.85rem;
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(200, 154, 50, 0.22);
+    border-radius: 14px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+  }
+
+  .categoryStatCol {
+    align-items: center;
+    text-align: center;
   }
 
   .viewAllArchiveBtn {
     width: 100%;
-    max-width: 340px;
+    max-width: 320px;
+    margin: 0.35rem 0 0;
+    justify-content: center;
     background: linear-gradient(135deg, #D4AF37 0%, #AA771C 100%);
     color: #FFFFFF;
     border-color: #AA771C;
@@ -1165,18 +1237,58 @@
 }
 
 @media (max-width: 640px) {
+  .categoryBlock {
+    gap: 1.4rem;
+    padding: clamp(2rem, 3.5vh, 2.75rem) 0;
+  }
+
   .categoryTitle {
-    font-size: clamp(1.22rem, 5vw, 1.38rem);
-    line-height: 1.22;
+    font-size: clamp(1.15rem, 4.4vw, 1.38rem);
+    line-height: 1.24;
+    text-align: left;
+  }
+
+  .categoryDescription {
+    font-size: 0.84rem;
+    line-height: 1.58;
+    text-align: left;
   }
 
   .categoryStatsRow {
     grid-template-columns: repeat(3, 1fr);
-    padding: 0.75rem;
+    padding: 0.75rem 0.5rem;
+    gap: 0.35rem;
+  }
+
+  .categoryStatLabel {
+    font-size: 0.58rem;
+    letter-spacing: 0.07em;
+  }
+
+  .categoryStatValue {
+    font-size: 1rem;
   }
 
   .railCard {
-    width: 195px;
+    width: clamp(180px, 46vw, 198px);
+  }
+
+  .cardsRailHeader {
+    padding: 0 0.35rem;
+    gap: 0.45rem;
+  }
+
+  .railLabel {
+    font-size: 0.65rem;
+  }
+
+  .railScrollHint {
+    font-size: 0.70rem;
+  }
+
+  .railNavBtn {
+    width: 26px;
+    height: 26px;
   }
 }
 
@@ -1610,5 +1722,15 @@
   .archiveItemAction {
     font-size: 0.58rem;
     margin-top: 0.25rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .mainTitle {
+    font-size: 1.15rem;
+  }
+
+  .categoryTitle {
+    font-size: 1.08rem;
   }
 }
