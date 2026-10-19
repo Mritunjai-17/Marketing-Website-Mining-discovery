@@ -108,14 +108,16 @@ html {
   text-size-adjust: 100%;
 }
 
-@media (prefers-reduced-motion: no-preference) {
+/* Desktop fine-pointer fallback when Lenis is not running */
+@media (prefers-reduced-motion: no-preference) and (pointer: fine) and (min-width: 841px) {
   html:not(.lenis) {
     scroll-behavior: smooth;
   }
 }
 
-/* On all mobile aspect ratios and touch devices, eliminate scroll friction and sticky lag */
-@media (max-width: 840px), (pointer: coarse) {
+/* On ALL mobile aspect ratios, touch screens, and coarse pointer devices:
+   guarantee 100% free, frictionless native momentum scrolling without sticking */
+@media (max-width: 1024px), (pointer: coarse), (hover: none) {
   html,
   html:not(.lenis),
   html.touch-scroller,
@@ -123,7 +125,25 @@ html {
     scroll-behavior: auto !important;
     -webkit-overflow-scrolling: touch !important;
     overscroll-behavior-y: auto !important;
+    touch-action: pan-y !important;
   }
+
+  /* Ensure canvases, background layers, and 3D scenes never capture or interrupt vertical touch scroll */
+  canvas:not([data-interactive="true"]),
+  svg:not([data-interactive="true"]),
+  .canvasContainer,
+  .videoContainer {
+    touch-action: pan-y !important;
+  }
+}
+
+/* Explicit class-based override for touch scroller */
+html.touch-scroller,
+html.touch-scroller body {
+  scroll-behavior: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior-y: auto !important;
+  touch-action: pan-y !important;
 }
 
 body {

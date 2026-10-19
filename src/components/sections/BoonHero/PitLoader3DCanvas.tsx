@@ -704,6 +704,7 @@ export const PitLoader3DCanvas: React.FC<PitLoader3DCanvasProps> = ({ progress }
         width: "100%",
         height: "100%",
         pointerEvents: "none",
+        touchAction: "pan-y",
         overflow: "hidden",
       }}
     >
@@ -714,6 +715,8 @@ export const PitLoader3DCanvas: React.FC<PitLoader3DCanvasProps> = ({ progress }
           height: "100%",
           display: "block",
           objectFit: "cover",
+          pointerEvents: "none",
+          touchAction: "pan-y",
         }}
       />
     </div>

@@ -19,6 +19,7 @@
   background: #D9D6CE;
   box-sizing: border-box;
   overflow: hidden;
+  touch-action: pan-y;
   will-change: opacity, transform;
   transition: opacity 0.4s ease-out;
 }

@@ -365,6 +365,7 @@ export const PublicationsShowcase: React.FC<PublicationsShowcaseProps> = ({
   const headerRef = useRef<HTMLElement>(null);
   const headingWordRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const subheadingWordRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const requestTickRef = useRef<(() => void) | null>(null);
   const [headerInView, setHeaderInView] = useState(false);
 
   const [activeCategoryModal, setActiveCategoryModal] = useState<
@@ -601,6 +602,7 @@ export const PublicationsShowcase: React.FC<PublicationsShowcaseProps> = ({
         rafId = requestAnimationFrame(tick);
       }
     };
+    requestTickRef.current = requestTick;
 
     requestTick();
 
@@ -611,6 +613,7 @@ export const PublicationsShowcase: React.FC<PublicationsShowcaseProps> = ({
 
     return () => {
       if (rafId !== null) cancelAnimationFrame(rafId);
+      requestTickRef.current = null;
       window.removeEventListener("scroll", requestTick);
       window.removeEventListener("resize", requestTick);
       window.removeEventListener("wheel", requestTick);
@@ -620,8 +623,8 @@ export const PublicationsShowcase: React.FC<PublicationsShowcaseProps> = ({
 
   // Scrub words when scrollProgress updates
   useEffect(() => {
-    if (typeof window !== "undefined" && !headerInView) {
-      window.dispatchEvent(new Event("scroll"));
+    if (!headerInView) {
+      requestTickRef.current?.();
     }
   }, [scrollProgress, headerInView]);
 

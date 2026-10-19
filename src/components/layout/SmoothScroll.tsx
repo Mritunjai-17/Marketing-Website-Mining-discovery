@@ -39,6 +39,8 @@ export const SmoothScroll: React.FC<SmoothScrollProps> = ({ children }) => {
 
     if (isTouchOnly) {
       document.documentElement.classList.add("touch-scroller");
+      document.documentElement.style.scrollBehavior = "auto";
+      document.body.style.scrollBehavior = "auto";
       // Provide a zero-overhead native shim so scrollTo, start, stop, and listeners
       // work seamlessly across the site on touch mobile/tablets without errors or lag
       const scrollListeners = new Set<(e: any) => void>();
@@ -79,6 +81,8 @@ export const SmoothScroll: React.FC<SmoothScrollProps> = ({ children }) => {
 
       return () => {
         document.documentElement.classList.remove("touch-scroller");
+        document.documentElement.style.scrollBehavior = "";
+        document.body.style.scrollBehavior = "";
         window.removeEventListener("scroll", handleNativeScroll);
         scrollListeners.clear();
         if ((window as any).lenis === touchShim) {

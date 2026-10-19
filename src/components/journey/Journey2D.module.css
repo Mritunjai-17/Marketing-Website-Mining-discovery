@@ -12,6 +12,7 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
+  touch-action: pan-y;
   /* The deepest value in the scene. Everything else sits on top of it. */
   background: #ffffff;
   /* Layers are promoted individually; this just establishes the context. */

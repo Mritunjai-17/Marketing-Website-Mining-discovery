@@ -202,6 +202,7 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
   const isManualClickRef = useRef<boolean>(false);
   const manualTimerRef = useRef<NodeJS.Timeout | null>(null);
   const lastDeckHeightIdx = useRef<number>(-1);
+  const requestTickRef = useRef<(() => void) | null>(null);
 
   // Auto-cycle stats set every 5.5s unless hovered
   useEffect(() => {
@@ -424,6 +425,7 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
         rafId = requestAnimationFrame(tick);
       }
     };
+    requestTickRef.current = requestTick;
 
     requestTick();
 
@@ -447,6 +449,7 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
 
     return () => {
       if (rafId !== null) cancelAnimationFrame(rafId);
+      requestTickRef.current = null;
       window.removeEventListener("scroll", requestTick);
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("wheel", handleUserInteraction);
@@ -457,9 +460,7 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
 
   // Scrub and tick whenever scrollProgress updates without re-registering window listeners
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(new Event("scroll"));
-    }
+    requestTickRef.current?.();
   }, [scrollProgress]);
 
   const innerContent = (

@@ -19,7 +19,7 @@ export type TransitionState =
 
 /** Viewport heights for the continuous story (Hero -> Client & Investor Bridge -> Our Services 8 Cards) */
 const DESKTOP_SCROLL_VH = 1050;
-const MOBILE_SCROLL_VH = 460;
+const MOBILE_SCROLL_VH = 260;
 
 function clamp(v: number, lo: number, hi: number) {
   return Math.min(Math.max(v, lo), hi);
@@ -45,6 +45,7 @@ export const GlobeHero: React.FC = () => {
 
   const [bridgeScroll, setBridgeScroll] = useState(0);
   const bridgeScrollRef = useRef(0);
+  const isMobileRef = useRef(false);
 
   const [totalScrollVh, setTotalScrollVh] = useState(DESKTOP_SCROLL_VH);
   const lastHeroPRef = useRef<number>(-1);
@@ -58,11 +59,13 @@ export const GlobeHero: React.FC = () => {
       const isMobile =
         currentWidth < 900 ||
         window.matchMedia("(pointer: coarse)").matches;
+      isMobileRef.current = isMobile;
       setTotalScrollVh(isMobile ? MOBILE_SCROLL_VH : DESKTOP_SCROLL_VH);
     };
     const isMobile =
       window.innerWidth < 900 ||
       window.matchMedia("(pointer: coarse)").matches;
+    isMobileRef.current = isMobile;
     setTotalScrollVh(isMobile ? MOBILE_SCROLL_VH : DESKTOP_SCROLL_VH);
     window.addEventListener("resize", updateHeight);
     return () => window.removeEventListener("resize", updateHeight);
@@ -150,7 +153,8 @@ export const GlobeHero: React.FC = () => {
       bridgeBox.style.zIndex = bOpacity > 0 ? "35" : "10";
     }
 
-    if (Math.abs(bScroll - bridgeScrollRef.current) > 0.003 || bScroll === 0 || bScroll === 1) {
+    const scrollThreshold = isMobileRef.current ? 0.008 : 0.003;
+    if (Math.abs(bScroll - bridgeScrollRef.current) > scrollThreshold || bScroll === 0 || bScroll === 1) {
       bridgeScrollRef.current = bScroll;
       setBridgeScroll(bScroll);
     }
@@ -290,13 +294,13 @@ export const GlobeHero: React.FC = () => {
         />
         <div
           ref={cardRef}
-          className="sticky top-0 h-screen supports-[height:100dvh]:h-[100dvh] w-full overflow-hidden bg-[#030509]"
+          className="sticky top-0 h-screen supports-[height:100dvh]:h-[100dvh] w-full overflow-hidden bg-[#030509] touch-pan-y"
         >
-          <div ref={slotRef} className="relative h-full w-full">
+          <div ref={slotRef} className="relative h-full w-full touch-pan-y">
             {/* Boon-Inspired Dark Hero Overlay */}
             <div
               ref={boonHeroBoxRef}
-              className="absolute inset-0 h-full w-full"
+              className="absolute inset-0 h-full w-full touch-pan-y"
               style={{
                 zIndex: 30,
               }}
@@ -307,7 +311,7 @@ export const GlobeHero: React.FC = () => {
             {/* Value Bridge: How Mining Discovery Enhances Growth for Clients & Investors */}
             <div
               ref={bridgeBoxRef}
-              className="absolute inset-0 h-full w-full"
+              className="absolute inset-0 h-full w-full touch-pan-y"
               style={{
                 zIndex: 10,
                 visibility: "hidden",
@@ -323,7 +327,7 @@ export const GlobeHero: React.FC = () => {
             {/* Services Section (Interactive Cards) */}
             <div
               ref={journeyBoxRef}
-              className="absolute inset-0 h-full w-full bg-[#030509]"
+              className="absolute inset-0 h-full w-full bg-[#030509] touch-pan-y"
               style={{
                 zIndex: 40,
               }}
