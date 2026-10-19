@@ -186,9 +186,7 @@ export const BoonHero = React.memo(
       const loadNextKeyFrame = () => {
         if (isCancelled) return;
         if (keyPointer >= keyIndices.length) {
-          if (!isMobileScreen) {
-            scheduleRemainingFrames();
-          }
+          scheduleRemainingFrames();
           return;
         }
         const idx = keyIndices[keyPointer++];
@@ -210,7 +208,7 @@ export const BoonHero = React.memo(
       loadNextKeyFrame();
       loadNextKeyFrame();
 
-      // Step C: On desktop, load remaining interstitial frames during browser idle time (all 240 frames)
+      // Step C: Load remaining interstitial frames during browser idle time (all 240 frames)
       const loadAllRemainingFrames = () => {
         let idx = 1;
         const loadNext = () => {
@@ -229,7 +227,8 @@ export const BoonHero = React.memo(
           }
         };
 
-        for (let s = 0; s < 6; s++) {
+        const streamCount = isMobileScreen ? 4 : 6;
+        for (let s = 0; s < streamCount; s++) {
           loadNext();
         }
       };

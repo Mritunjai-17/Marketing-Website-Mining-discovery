@@ -45,31 +45,134 @@ export const GlobeHero: React.FC = () => {
 
   const [bridgeScroll, setBridgeScroll] = useState(0);
   const bridgeScrollRef = useRef(0);
+  const [mounted, setMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const isMobileRef = useRef(false);
 
   const [totalScrollVh, setTotalScrollVh] = useState(DESKTOP_SCROLL_VH);
   const lastHeroPRef = useRef<number>(-1);
 
+  const mobileHeroBoxRef = useRef<HTMLDivElement>(null);
+  const mobileHeroScrollPxRef = useRef(800);
+  const [mobileHeroScrollPx, setMobileHeroScrollPx] = useState(1300);
+
   useEffect(() => {
+    setMounted(true);
     let lastWidth = window.innerWidth;
     const updateHeight = () => {
       const currentWidth = window.innerWidth;
       if (Math.abs(currentWidth - lastWidth) < 2) return;
       lastWidth = currentWidth;
-      const isMobile =
-        currentWidth < 900 ||
+      const isMobileDevice =
+        currentWidth <= 900 ||
         window.matchMedia("(pointer: coarse)").matches;
-      isMobileRef.current = isMobile;
-      setTotalScrollVh(isMobile ? MOBILE_SCROLL_VH : DESKTOP_SCROLL_VH);
+      isMobileRef.current = isMobileDevice;
+      setIsMobile(isMobileDevice);
+      setTotalScrollVh(isMobileDevice ? MOBILE_SCROLL_VH : DESKTOP_SCROLL_VH);
+      const heroPx = Math.round(window.innerHeight * 1.70);
+      mobileHeroScrollPxRef.current = heroPx;
+      setMobileHeroScrollPx(heroPx);
     };
-    const isMobile =
-      window.innerWidth < 900 ||
+    const isMobileDevice =
+      window.innerWidth <= 900 ||
       window.matchMedia("(pointer: coarse)").matches;
-    isMobileRef.current = isMobile;
-    setTotalScrollVh(isMobile ? MOBILE_SCROLL_VH : DESKTOP_SCROLL_VH);
+    isMobileRef.current = isMobileDevice;
+    setIsMobile(isMobileDevice);
+    setTotalScrollVh(isMobileDevice ? MOBILE_SCROLL_VH : DESKTOP_SCROLL_VH);
+    const initialHeroPx = Math.round(window.innerHeight * 1.70);
+    mobileHeroScrollPxRef.current = initialHeroPx;
+    setMobileHeroScrollPx(initialHeroPx);
+
     window.addEventListener("resize", updateHeight);
     return () => window.removeEventListener("resize", updateHeight);
   }, []);
+
+  // Passive natural scroll listener with critically-damped lerp loop for silky 60-120fps scrubbing & top takeover
+  useEffect(() => {
+    if (!mounted || !isMobile) return;
+
+    let targetProgress = 0;
+    let currentProgress = 0;
+    let targetOpacity = 1.0;
+    let currentOpacity = 1.0;
+    let rafId: number | null = null;
+
+    const renderLoop = () => {
+      // Critically damped inertial glide (silky smooth 60-120fps response)
+      const progDiff = targetProgress - currentProgress;
+      const opacDiff = targetOpacity - currentOpacity;
+
+      const isProgDone = Math.abs(progDiff) < 0.0006;
+      const isOpacDone = Math.abs(opacDiff) < 0.004;
+
+      if (isProgDone) {
+        currentProgress = targetProgress;
+      } else {
+        currentProgress += progDiff * 0.16;
+      }
+
+      if (isOpacDone) {
+        currentOpacity = targetOpacity;
+      } else {
+        currentOpacity += opacDiff * 0.18;
+      }
+
+      // 1. Direct hardware canvas & text scrub
+      if (boonHeroRef.current) {
+        boonHeroRef.current.scrub(currentProgress);
+      }
+
+      // 2. Direct hardware opacity write to container
+      const box = mobileHeroBoxRef.current;
+      if (box) {
+        box.style.opacity = currentOpacity.toFixed(3);
+        if (currentOpacity <= 0.01) {
+          box.style.visibility = "hidden";
+          box.style.pointerEvents = "none";
+        } else {
+          box.style.visibility = "visible";
+          box.style.pointerEvents = currentOpacity > 0.4 ? "auto" : "none";
+        }
+      }
+
+      if (!isProgDone || !isOpacDone) {
+        rafId = requestAnimationFrame(renderLoop);
+      } else {
+        rafId = null;
+      }
+    };
+
+    const onMobileScroll = () => {
+      const y = window.scrollY;
+      const scrollPx = mobileHeroScrollPxRef.current || Math.round(window.innerHeight * 1.70);
+      const fadeStartY = scrollPx * 0.82;
+      const fadeEndY = scrollPx;
+
+      // Frame progress reaches 1.0 at fadeStartY
+      targetProgress = Math.min(1, Math.max(0, y / fadeStartY));
+
+      if (y >= fadeEndY) {
+        targetOpacity = 0.0;
+      } else if (y > fadeStartY) {
+        targetOpacity = Math.max(0, 1.0 - (y - fadeStartY) / (fadeEndY - fadeStartY));
+      } else {
+        targetOpacity = 1.0;
+      }
+
+      if (!rafId) {
+        rafId = requestAnimationFrame(renderLoop);
+      }
+    };
+
+    window.addEventListener("scroll", onMobileScroll, { passive: true });
+    // Immediate initial sync
+    onMobileScroll();
+
+    return () => {
+      window.removeEventListener("scroll", onMobileScroll);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, [mounted, isMobile]);
 
   /**
    * Writes the sequence state for the current scroll progress.
@@ -551,7 +654,70 @@ export const GlobeHero: React.FC = () => {
         lenis.off("scroll", onScroll);
       }
     };
-  }, []);
+  }, [mounted, isMobile]);
+
+  // =========================================================================
+  // MOBILE LAYOUT (<= 900px): 100% NATURAL, STANDARD VERTICAL DOCUMENT FLOW
+  // Zero Lenis, zero GSAP scroll scrubbing, zero sticky pinning traps,
+  // zero artificial runways, and zero gesture interception.
+  // =========================================================================
+  if (mounted && isMobile) {
+    return (
+      <section className="relative isolate w-full bg-[#030509]">
+        {/* Anchor point targeting Publications */}
+        <div
+          id="publications"
+          className="absolute left-0 w-full pointer-events-none"
+          style={{ top: "45%" }}
+          aria-hidden="true"
+        />
+        {/* Anchor point targeting Services */}
+        <div
+          id="services"
+          className="absolute left-0 w-full pointer-events-none"
+          style={{ top: "70%" }}
+          aria-hidden="true"
+        />
+
+        {/* 1. Mobile Fixed Hero Stage (Fades out smoothly from top, never climbs from bottom) */}
+        <div
+          ref={mobileHeroBoxRef}
+          className="fixed top-0 left-0 w-full h-[100dvh] overflow-hidden bg-[#030509]"
+          style={{
+            zIndex: 25,
+            willChange: "opacity",
+          }}
+        >
+          <BoonHero ref={boonHeroRef} progress={0} />
+        </div>
+
+        {/* Natural scroll runway spacer matching the hero descent travel */}
+        <div
+          className="relative w-full pointer-events-none"
+          style={{ height: `${mobileHeroScrollPx}px` }}
+          aria-hidden="true"
+        />
+
+        {/* 2. Client & Investor Bridge: Building Value appears cleanly from the top under navbar */}
+        <div className="relative w-full bg-[#D9D6CE]" style={{ zIndex: 10 }}>
+          <ClientInvestorGrowth scrollProgress={0} opacity={1} />
+        </div>
+
+        {/* 3. Services Section: 5 Services Cards in standard vertical flow */}
+        <div className="relative w-full bg-[#030509]">
+          <Journey3D
+            progress={{
+              current: 1.0,
+              pitch: 0,
+              descent: 1.0,
+              cardsProgress: 1.0,
+            }}
+            active={true}
+          />
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="relative isolate w-full bg-[#030509]">

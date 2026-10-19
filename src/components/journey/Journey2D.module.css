@@ -4170,6 +4170,84 @@
 }
 
 @media (max-width: 960px) {
+  .stage {
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+  }
+
+  .settleMountainStage {
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    transform: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 3rem 1rem 4rem !important;
+    background: #04070E !important;
+    box-shadow: none !important;
+    border-left: none !important;
+  }
+
+  .fullScreenSliderWrap {
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .fullScreenSliderTrack {
+    position: relative !important;
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-snap-type: x mandatory !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    gap: 1rem !important;
+    padding: 0.5rem 1rem 1.25rem !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .fullScreenSliderTrack::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .fullScreenCardItem {
+    position: relative !important;
+    inset: auto !important;
+    flex: 0 0 88vw !important;
+    width: 88vw !important;
+    max-width: 440px !important;
+    scroll-snap-align: center !important;
+    scroll-snap-stop: always !important;
+    height: auto !important;
+    min-height: 520px !important;
+    transform: none !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    border-radius: 20px !important;
+    border: 1px solid rgba(246, 208, 104, 0.28) !important;
+    background: #060a12 !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6) !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  .cardFlickImage {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    opacity: 0.22 !important;
+  }
+
   .fullScreenCardContent {
     position: absolute;
     top: 50%;
@@ -4413,5 +4491,72 @@
 
   .cardFlickFeatureText {
     font-size: 0.73rem;
+  }
+}
+
+/* ==========================================================================
+   MOBILE SERVICES HORIZONTAL CAROUSEL NAV & DOTS (<= 900px)
+   ========================================================================== */
+.mobileServicesNav {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .mobileServicesNav {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0.75rem 1.25rem 0.5rem !important;
+    width: 100% !important;
+    max-width: 480px !important;
+    margin: 0.5rem auto 0 auto !important;
+    box-sizing: border-box !important;
+    z-index: 20 !important;
+  }
+
+  .mobileServicesCount {
+    font-family: var(--font-space-grotesk), sans-serif !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    color: #F6D068 !important;
+    letter-spacing: 0.05em !important;
+  }
+
+  .mobileServicesCountTotal {
+    font-size: 0.75rem !important;
+    color: rgba(255, 255, 255, 0.45) !important;
+    font-weight: 500 !important;
+  }
+
+  .mobileServicesDots {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.45rem !important;
+  }
+
+  .mobileServicesDot {
+    width: 8px !important;
+    height: 8px !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.22) !important;
+    border: none !important;
+    padding: 0 !important;
+    cursor: pointer !important;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+
+  .mobileServicesDotActive {
+    width: 22px !important;
+    border-radius: 9999px !important;
+    background: #F6D068 !important;
+    box-shadow: 0 0 10px rgba(246, 208, 104, 0.6) !important;
+  }
+
+  .mobileSwipeHint {
+    font-family: var(--font-ibm-plex-mono), monospace !important;
+    font-size: 0.68rem !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    color: rgba(246, 208, 104, 0.75) !important;
   }
 }

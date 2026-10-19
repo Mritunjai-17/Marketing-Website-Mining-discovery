@@ -795,6 +795,24 @@ export const JourneyStory: React.FC = () => {
       setActiveIndex(idx);
       handleOpenReader(mag);
     }, [handleOpenReader]);
+
+    const handleMobileCardsScroll = useCallback(() => {
+      const track = cardsTrackRef.current;
+      if (!track) return;
+      const isMobile = typeof window !== "undefined" && (window.innerWidth <= 900 || window.matchMedia("(pointer: coarse)").matches);
+      if (!isMobile) return;
+
+      const scrollLeft = track.scrollLeft;
+      const firstChild = track.children[0] as HTMLElement | undefined;
+      const cardWidth = firstChild ? firstChild.offsetWidth : track.clientWidth * 0.86;
+      const gap = 16;
+      const idx = Math.round(scrollLeft / (cardWidth + gap));
+      const clamped = Math.max(0, Math.min(SERVICE_CARDS.length - 1, idx));
+      if (clamped !== activeCardIndexRef.current) {
+        activeCardIndexRef.current = clamped;
+        setActiveCardIndex(clamped);
+      }
+    }, []);
   
     // Background refresh publications from internal Next.js proxy routes
     useEffect(() => {
@@ -963,7 +981,7 @@ export const JourneyStory: React.FC = () => {
 
           {/* Full-Screen Horizontal Cards Slider Wrap */}
           <div className={styles.fullScreenSliderWrap} role="region" aria-label="Services Showcase">
-            <div ref={cardsTrackRef} className={styles.fullScreenSliderTrack}>
+            <div ref={cardsTrackRef} className={styles.fullScreenSliderTrack} onScroll={handleMobileCardsScroll}>
               {SERVICE_CARDS.map((card, idx) => {
                 const isActive = activeCardIndex === idx;
 
@@ -1055,6 +1073,33 @@ export const JourneyStory: React.FC = () => {
               </div>
             </div>
 
+            {/* Mobile Horizontal Carousel Navigation & Indicator Dots */}
+            <div className={styles.mobileServicesNav} aria-label="Services Navigation">
+              <span className={styles.mobileServicesCount}>
+                0{activeCardIndex + 1} <span className={styles.mobileServicesCountTotal}>/ 0{SERVICE_CARDS.length}</span>
+              </span>
+              <div className={styles.mobileServicesDots}>
+                {SERVICE_CARDS.map((_, dotIdx) => (
+                  <button
+                    key={dotIdx}
+                    type="button"
+                    className={`${styles.mobileServicesDot} ${activeCardIndex === dotIdx ? styles.mobileServicesDotActive : ""}`}
+                    onClick={() => {
+                      const track = cardsTrackRef.current;
+                      if (track && track.children[dotIdx]) {
+                        (track.children[dotIdx] as HTMLElement).scrollIntoView({
+                          behavior: "smooth",
+                          block: "nearest",
+                          inline: "center",
+                        });
+                      }
+                    }}
+                    aria-label={`Go to service ${dotIdx + 1}`}
+                  />
+                ))}
+              </div>
+              <span className={styles.mobileSwipeHint}>Swipe ➔</span>
+            </div>
           </div>
 
       {/* Complete Magazine Archive Modal */}
