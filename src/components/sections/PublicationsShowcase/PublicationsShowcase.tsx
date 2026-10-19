@@ -778,7 +778,7 @@ export const PublicationsShowcase: React.FC<PublicationsShowcaseProps> = ({
   return (
     <section id="publications-showcase" className={styles.publicationsSection} aria-label="Put Your Mining Story in Front of the Industry">
       {/* Editorial Header */}
-      <header ref={headerRef} className={`${styles.header} ${headerInView ? styles.inView : ""}`}>
+      <header ref={headerRef} id="publications-top" className={`${styles.header} ${headerInView ? styles.inView : ""}`}>
         <div className={styles.eyebrowRow}>
           <span className={styles.eyebrowRule} aria-hidden="true" />
           <span className={styles.eyebrowText}>
@@ -849,7 +849,7 @@ export const PublicationsShowcase: React.FC<PublicationsShowcaseProps> = ({
       {/* 4 Dedicated Publication Blocks (Sequential on Scroll) */}
       <div className={styles.categoriesContainer}>
         {publicationSections.map((sec) => (
-          <div key={sec.id} className={styles.categoryBlock}>
+          <div key={sec.id} id={`pub-${sec.id}`} className={styles.categoryBlock}>
             {/* Left Column: Editorial Overview & Action */}
             <div className={styles.categoryInfoCol}>
               <div className={styles.categoryTopInfo}>

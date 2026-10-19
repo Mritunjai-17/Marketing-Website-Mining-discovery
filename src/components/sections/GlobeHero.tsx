@@ -261,55 +261,150 @@ export const GlobeHero: React.FC = () => {
     window.addEventListener("resize", onResize);
 
     // =========================================================================
-    // DISCRETE MOBILE THUMB-SCROLL STEP PROGRESSION
-    // 3 Hero + 4 Building Values + 4 Mining Events + 4 Publications + 5 Services
+    // DYNAMIC MOBILE STEP PROGRESSION (HEADING-ALIGNED, SMOOTH & LIGHTWEIGHT)
+    // - Hero: 3 scrolls (Act 1 -> 2 -> 3), 4th scroll brings Building Values from top
+    // - Building Values: 4 scrolls (1 for each stakeholder card from top of heading)
+    // - Mining Events: 4 scrolls (1 for each event card from top of heading)
+    // - Publications: 4 scrolls (1 for each subheading from top of heading)
+    // - 5th scroll of Publications: changes section to Services (5 cards)
+    // - After Services: smoothly releases to normal free scroll
     // =========================================================================
-    const MOBILE_STEP_T_MAP = [
-      0.000, // Step 0: Hero Act 1
-      0.110, // Step 1: Hero Act 2
-      0.220, // Step 2: Hero Act 3
-      0.260, // Step 3: Building Values Card 1 (Mining Companies)
-      0.300, // Step 4: Building Values Card 2 (Junior Miners)
-      0.340, // Step 5: Building Values Card 3 (Mining Investors)
-      0.380, // Step 6: Building Values Card 4 (Equipment & Tech)
-      0.425, // Step 7: Mining Events 01 (Investment Event of the North)
-      0.468, // Step 8: Mining Events 02 (PDAC Convention)
-      0.510, // Step 9: Mining Events 03 (Mines and Money London)
-      0.552, // Step 10: Mining Events 04 (Mining Indaba Cape Town)
-      0.598, // Step 11: Publications Category 1 (Magazines)
-      0.640, // Step 12: Publications Category 2 (Newsletters)
-      0.682, // Step 13: Publications Category 3 (Articles)
-      0.728, // Step 14: Publications Category 4 (CEO Profiles)
-      0.805, // Step 15: Services Card 1
-      0.845, // Step 16: Services Card 2
-      0.885, // Step 17: Services Card 3
-      0.925, // Step 18: Services Card 4
-      0.975, // Step 19: Services Card 5
-      1.000, // Step 20: Exit to MiningPackages & free normal scroll
-    ];
+    const getMobileStepTargets = (): number[] => {
+      const { travel } = rangeMetricsRef.current;
+      if (travel <= 0) return [];
+
+      // Hero: 3 internal scrolls (Act 1 -> 2 -> 3 -> complete)
+      // On the 4th scroll, the next section (Building Values) appears from the top
+      const heroT = [0.000, 0.075, 0.150, 0.220];
+
+      const bridgeBox = bridgeBoxRef.current;
+      const track = bridgeBox ? (bridgeBox.querySelector('[class*="scrollTrack"]') as HTMLElement | null) : null;
+
+      const bridgeElementIds = [
+        "building-value-top",
+        "stakeholder-campaigns",
+        "stakeholder-syndication",
+        "stakeholder-liquidity",
+        "stakeholder-partnerships",
+        "event-the-mining-investment-event",
+        "event-pdac-convention",
+        "event-mines-and-money",
+        "event-mining-indaba",
+        "pub-magazines",
+        "pub-newsletter",
+        "pub-articles",
+        "pub-ceo-profile",
+      ];
+
+      const getElementByIdWithAliases = (id: string): HTMLElement | null => {
+        const direct = document.getElementById(id);
+        if (direct) return direct;
+        if (id === "stakeholder-campaigns" || id === "stakeholder-spotlight") {
+          return document.getElementById("stakeholder-campaigns") || document.getElementById("stakeholder-spotlight") || document.querySelector('[data-stakeholder-index="0"]') || document.querySelector('[class*="alternatingRow"]:nth-of-type(1)');
+        }
+        if (id === "stakeholder-syndication" || id === "stakeholder-milestones") {
+          return document.getElementById("stakeholder-syndication") || document.getElementById("stakeholder-milestones") || document.querySelector('[data-stakeholder-index="1"]') || document.querySelector('[class*="alternatingRow"]:nth-of-type(2)');
+        }
+        if (id === "stakeholder-liquidity" || id === "stakeholder-intelligence") {
+          return document.getElementById("stakeholder-liquidity") || document.getElementById("stakeholder-intelligence") || document.querySelector('[data-stakeholder-index="2"]') || document.querySelector('[class*="alternatingRow"]:nth-of-type(3)');
+        }
+        if (id === "stakeholder-partnerships") {
+          return document.getElementById("stakeholder-partnerships") || document.querySelector('[data-stakeholder-index="3"]') || document.querySelector('[class*="alternatingRow"]:nth-of-type(4)');
+        }
+        if (id === "pub-newsletter" || id === "pub-newsletters") {
+          return document.getElementById("pub-newsletter") || document.getElementById("pub-newsletters");
+        }
+        return null;
+      };
+
+      const bridgeT: number[] = [];
+      const BRIDGE_FADE_IN_END = isMobileRef.current ? 0.25 : 0.10;
+      const BRIDGE_SCROLL_END = isMobileRef.current ? 0.77 : 0.76;
+      const bridgeSpan = BRIDGE_SCROLL_END - BRIDGE_FADE_IN_END;
+
+      if (track) {
+        const clientH = window.innerHeight || 800;
+        const contentH = track.offsetHeight || 5500;
+        const maxScroll = Math.max(1, contentH - clientH);
+        const NAVBAR_PAD = 70;
+        const trackRect = track.getBoundingClientRect();
+
+        let lastT = BRIDGE_FADE_IN_END;
+        bridgeElementIds.forEach((id, idx) => {
+          const el = getElementByIdWithAliases(id);
+          if (el) {
+            const elRect = el.getBoundingClientRect();
+            // Distance from track origin to element top (invariant to CSS transform)
+            const elTop = elRect.top - trackRect.top;
+            const targetScrollY = Math.max(0, elTop - NAVBAR_PAD);
+            const bScroll = Math.min(1, targetScrollY / maxScroll);
+            let t = BRIDGE_FADE_IN_END + bScroll * bridgeSpan;
+            if (idx > 0 && t <= lastT) {
+              t = lastT + 0.016;
+            }
+            lastT = t;
+            bridgeT.push(t);
+          }
+        });
+      }
+
+      if (bridgeT.length < bridgeElementIds.length) {
+        const fallbackBridge = [
+          0.250, // building-value-top (appears from top on 4th scroll)
+          0.288, // stakeholder 1
+          0.328, // stakeholder 2
+          0.368, // stakeholder 3
+          0.408, // stakeholder 4
+          0.450, // event 1
+          0.490, // event 2
+          0.530, // event 3
+          0.570, // event 4
+          0.615, // pub 1 (magazines)
+          0.655, // pub 2 (newsletters)
+          0.700, // pub 3 (articles)
+          0.745, // pub 4 (ceo profiles)
+        ];
+        bridgeT.length = 0;
+        bridgeT.push(...fallbackBridge);
+      }
+
+      // Services steps (5 cards, with 5th scroll of publications changing section here)
+      const servicesT = [
+        0.805, // Service Card 1 (5th scroll from pub changes section here!)
+        0.845, // Service Card 2
+        0.885, // Service Card 3
+        0.925, // Service Card 4
+        0.970, // Service Card 5
+        1.000, // Release to normal free scroll
+      ];
+
+      return [...heroT, ...bridgeT, ...servicesT];
+    };
 
     let currentStepIndex = 0;
     let isStepAnimating = false;
     let animRafId: number | null = null;
+    let lastStepTime = 0;
 
-    const smoothScrollTo = (targetY: number, duration = 540, onDone?: () => void) => {
+    // Feather-light, velvety-smooth RAF glide (360ms, easeOutQuint)
+    const smoothScrollTo = (targetY: number, duration = 360, onDone?: () => void) => {
       if (animRafId !== null) cancelAnimationFrame(animRafId);
       const startY = window.scrollY;
       const diff = targetY - startY;
       if (Math.abs(diff) < 2) {
         window.scrollTo(0, targetY);
+        isStepAnimating = false;
         onDone?.();
         return;
       }
       isStepAnimating = true;
       const startTime = performance.now();
-      // Silky cubic-bezier ease-out curve for moderate, luxurious glide
-      const easeOutCubic = (x: number): number => 1 - Math.pow(1 - x, 3);
+      const easeOutQuint = (x: number): number => 1 - Math.pow(1 - x, 5);
 
       const animStep = (now: number) => {
         const elapsed = now - startTime;
         const progress = Math.min(1, elapsed / duration);
-        const eased = easeOutCubic(progress);
+        const eased = easeOutQuint(progress);
         window.scrollTo(0, startY + diff * eased);
         if (progress < 1) {
           animRafId = requestAnimationFrame(animStep);
@@ -323,33 +418,27 @@ export const GlobeHero: React.FC = () => {
       animRafId = requestAnimationFrame(animStep);
     };
 
-    const syncCurrentStep = () => {
-      if (isStepAnimating) return;
-      const { top, travel } = rangeMetricsRef.current;
-      if (travel <= 0) return;
-      const t = clamp((window.scrollY - top) / travel, 0, 1);
-      let closest = 0;
-      let minDiff = Infinity;
-      for (let i = 0; i < MOBILE_STEP_T_MAP.length; i++) {
-        const d = Math.abs(t - MOBILE_STEP_T_MAP[i]);
-        if (d < minDiff) {
-          minDiff = d;
-          closest = i;
-        }
-      }
-      currentStepIndex = closest;
-    };
-
     let touchStartY = 0;
     let touchStartX = 0;
+    let touchStartTime = 0;
     let isTouchActive = false;
 
     const onTouchStart = (e: TouchEvent) => {
       if (!isMobileRef.current || e.touches.length !== 1) return;
       touchStartY = e.touches[0].clientY;
       touchStartX = e.touches[0].clientX;
+      touchStartTime = performance.now();
       isTouchActive = true;
-      syncCurrentStep();
+
+      // Only re-sync step index if the user was outside the sticky deck
+      const { top, travel } = rangeMetricsRef.current;
+      const currentY = window.scrollY;
+      if (currentY >= top + travel - 2) {
+        const targets = getMobileStepTargets();
+        currentStepIndex = targets.length - 1;
+      } else if (currentY <= top + 2) {
+        currentStepIndex = 0;
+      }
     };
 
     const onTouchMove = (e: TouchEvent) => {
@@ -357,14 +446,10 @@ export const GlobeHero: React.FC = () => {
       const { top, travel } = rangeMetricsRef.current;
       const currentY = window.scrollY;
 
-      // Inside hero/bridge/services range: prevent default rubber-band drag to keep step discrete
-      if (currentY <= top + travel - 10) {
-        const dy = touchStartY - e.touches[0].clientY;
-        const dx = touchStartX - e.touches[0].clientX;
-        if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 10) {
-          if (e.cancelable) {
-            e.preventDefault();
-          }
+      // Inside sticky sequence, prevent native browser scrolling from fighting step controller
+      if (currentY <= top + travel - 8) {
+        if (e.cancelable) {
+          e.preventDefault();
         }
       }
     };
@@ -372,70 +457,77 @@ export const GlobeHero: React.FC = () => {
     const onTouchEnd = (e: TouchEvent) => {
       if (!isMobileRef.current || !isTouchActive) return;
       isTouchActive = false;
-      if (isStepAnimating) return;
 
       const dy = touchStartY - (e.changedTouches[0]?.clientY ?? touchStartY);
-      if (Math.abs(dy) < 35) return;
+      const touchDuration = performance.now() - touchStartTime;
 
+      // Responsive flick threshold: 16px or quick swipe
+      const isFlick = Math.abs(dy) >= 16 || (Math.abs(dy) > 10 && touchDuration < 250);
+      if (!isFlick) return;
+
+      const now = performance.now();
+      // Allow fluid chained swipes after 160ms
+      if (now - lastStepTime < 160) return;
+
+      const targets = getMobileStepTargets();
+      if (targets.length === 0) return;
       const { top, travel } = rangeMetricsRef.current;
       const currentY = window.scrollY;
 
       if (dy > 0) {
         // Swiping UP -> Advance to NEXT step
-        if (currentY < top + travel && currentStepIndex < MOBILE_STEP_T_MAP.length - 1) {
+        if (currentY < top + travel && currentStepIndex < targets.length - 1) {
           currentStepIndex += 1;
-          const targetT = MOBILE_STEP_T_MAP[currentStepIndex];
+          lastStepTime = now;
+          const targetT = targets[currentStepIndex];
           const targetY = top + targetT * travel;
-          smoothScrollTo(targetY, 540);
+          smoothScrollTo(targetY, 360);
         }
       } else if (dy < 0) {
         // Swiping DOWN -> Go to PREVIOUS step
         if (currentY <= top + travel + 20 && currentStepIndex > 0) {
           currentStepIndex -= 1;
-          const targetT = MOBILE_STEP_T_MAP[currentStepIndex];
+          lastStepTime = now;
+          const targetT = targets[currentStepIndex];
           const targetY = top + targetT * travel;
-          smoothScrollTo(targetY, 540);
+          smoothScrollTo(targetY, 360);
         }
       }
     };
 
     let wheelAccum = 0;
-    let wheelCooldown = false;
-
     const onWheel = (e: WheelEvent) => {
       if (!isMobileRef.current) return;
       const { top, travel } = rangeMetricsRef.current;
       const currentY = window.scrollY;
       if (currentY > top + travel + 10) return;
 
-      if (isStepAnimating || wheelCooldown) {
+      const now = performance.now();
+      if (now - lastStepTime < 200) {
         if (e.cancelable) e.preventDefault();
         return;
       }
 
       wheelAccum += e.deltaY;
-      if (Math.abs(wheelAccum) > 35) {
+      if (Math.abs(wheelAccum) > 16) {
         if (e.cancelable) e.preventDefault();
         const isDown = wheelAccum > 0;
         wheelAccum = 0;
-        wheelCooldown = true;
+        const targets = getMobileStepTargets();
+        if (targets.length === 0) return;
 
-        if (isDown && currentStepIndex < MOBILE_STEP_T_MAP.length - 1) {
+        if (isDown && currentStepIndex < targets.length - 1) {
           currentStepIndex += 1;
-          const targetT = MOBILE_STEP_T_MAP[currentStepIndex];
+          lastStepTime = now;
+          const targetT = targets[currentStepIndex];
           const targetY = top + targetT * travel;
-          smoothScrollTo(targetY, 540, () => {
-            setTimeout(() => { wheelCooldown = false; }, 80);
-          });
+          smoothScrollTo(targetY, 360);
         } else if (!isDown && currentStepIndex > 0) {
           currentStepIndex -= 1;
-          const targetT = MOBILE_STEP_T_MAP[currentStepIndex];
+          lastStepTime = now;
+          const targetT = targets[currentStepIndex];
           const targetY = top + targetT * travel;
-          smoothScrollTo(targetY, 540, () => {
-            setTimeout(() => { wheelCooldown = false; }, 80);
-          });
-        } else {
-          wheelCooldown = false;
+          smoothScrollTo(targetY, 360);
         }
       }
     };
@@ -485,9 +577,9 @@ export const GlobeHero: React.FC = () => {
         />
         <div
           ref={cardRef}
-          className="sticky top-0 h-screen supports-[height:100dvh]:h-[100dvh] w-full overflow-hidden bg-[#030509] touch-pan-y"
+          className="sticky top-0 h-screen supports-[height:100dvh]:h-[100dvh] w-full overflow-hidden bg-[#030509] touch-none md:touch-pan-y"
         >
-          <div ref={slotRef} className="relative h-full w-full touch-pan-y">
+          <div ref={slotRef} className="relative h-full w-full touch-none md:touch-pan-y">
             {/* Boon-Inspired Dark Hero Overlay */}
             <div
               ref={boonHeroBoxRef}

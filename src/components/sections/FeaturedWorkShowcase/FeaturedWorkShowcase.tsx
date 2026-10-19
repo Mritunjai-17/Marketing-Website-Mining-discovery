@@ -477,6 +477,7 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
       {/* Top Header — Pure Editorial Typography with Masked Line Reveals */}
       <header
         ref={headerRef}
+        id="mining-events-top"
         className={`${styles.header} ${headerInView ? styles.inView : ""}`}
       >
         <div className={styles.eyebrowRow}>
@@ -589,6 +590,7 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
               return (
                 <section
                   key={chapter.id}
+                  id={`event-${chapter.id}`}
                   ref={(el) => {
                     chapterRefs.current[idx] = el;
                   }}

@@ -275,6 +275,7 @@ export const ClientInvestorGrowth = React.memo<ClientInvestorGrowthProps>(functi
             {/* Top Header & Overview Description */}
             <header
               ref={headerRef}
+              id="building-value-top"
               className={`${styles.header} ${headerInView ? styles.inView : ""}`}
             >
               <div className={styles.eyebrowRow}>
@@ -312,6 +313,8 @@ export const ClientInvestorGrowth = React.memo<ClientInvestorGrowthProps>(functi
                 return (
                   <div
                     key={item.id}
+                    id={`stakeholder-${item.id}`}
+                    data-stakeholder-index={idx}
                     ref={(el) => {
                       rowRefs.current[idx] = el;
                     }}
