@@ -654,8 +654,8 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
                       </div>
 
                       <h3 className={styles.chapterTitle}>
-                        <span className={styles.titleLine}>{chapter.titleLine1}</span>
-                        <span className={styles.titleLine}>{chapter.titleLine2}</span>
+                        <span className={styles.chapterTitleLine}>{chapter.titleLine1}</span>
+                        <span className={styles.chapterTitleLine}>{chapter.titleLine2}</span>
                       </h3>
                     </div>
 
@@ -671,6 +671,10 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
                         </div>
                       )}
                       <div className={styles.clientTextWrap}>
+                        <div className={styles.partnerBadgeRow}>
+                          <span className={styles.partnerBadgeDot} />
+                          <span className={styles.partnerBadgeLabel}>OFFICIAL MEDIA PARTNER</span>
+                        </div>
                         <span className={styles.clientName}>{chapter.clientName}</span>
                         <span className={styles.tickerText}>{chapter.ticker}</span>
                       </div>
@@ -704,10 +708,17 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
                       </div>
                     </div>
 
-                    {/* Deliverables Meta Line */}
+                    {/* Deliverables Meta Chips */}
                     <div className={styles.deliverablesLine}>
-                      <span className={styles.deliverablesTag}>DELIVERABLES:</span>
-                      <span className={styles.deliverablesContent}>{chapter.deliverables}</span>
+                      <span className={styles.deliverablesTag}>DELIVERABLES</span>
+                      <div className={styles.deliverablesChips}>
+                        {chapter.deliverables.split(" • ").map((item, dIdx) => (
+                          <span key={dIdx} className={styles.deliverableChip}>
+                            <span className={styles.chipDot} />
+                            {item}
+                          </span>
+                        ))}
+                      </div>
                     </div>
 
                     <a

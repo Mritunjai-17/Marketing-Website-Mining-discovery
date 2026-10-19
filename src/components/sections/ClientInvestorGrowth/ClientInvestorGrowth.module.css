@@ -553,6 +553,14 @@
     transition: none !important;
   }
 
+  .shimmerText {
+    animation: none !important;
+    background: linear-gradient(135deg, #F0D58C 0%, #D4AF37 40%, #AA771C 100%) !important;
+    background-size: 100% auto !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+  }
+
   .eyebrowRule {
     transform: scaleX(1) !important;
     transition: none !important;

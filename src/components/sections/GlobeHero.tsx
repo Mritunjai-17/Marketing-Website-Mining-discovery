@@ -260,11 +260,201 @@ export const GlobeHero: React.FC = () => {
     };
     window.addEventListener("resize", onResize);
 
+    // =========================================================================
+    // DISCRETE MOBILE THUMB-SCROLL STEP PROGRESSION
+    // 3 Hero + 4 Building Values + 4 Mining Events + 4 Publications + 5 Services
+    // =========================================================================
+    const MOBILE_STEP_T_MAP = [
+      0.000, // Step 0: Hero Act 1
+      0.110, // Step 1: Hero Act 2
+      0.220, // Step 2: Hero Act 3
+      0.260, // Step 3: Building Values Card 1 (Mining Companies)
+      0.300, // Step 4: Building Values Card 2 (Junior Miners)
+      0.340, // Step 5: Building Values Card 3 (Mining Investors)
+      0.380, // Step 6: Building Values Card 4 (Equipment & Tech)
+      0.425, // Step 7: Mining Events 01 (Investment Event of the North)
+      0.468, // Step 8: Mining Events 02 (PDAC Convention)
+      0.510, // Step 9: Mining Events 03 (Mines and Money London)
+      0.552, // Step 10: Mining Events 04 (Mining Indaba Cape Town)
+      0.598, // Step 11: Publications Category 1 (Magazines)
+      0.640, // Step 12: Publications Category 2 (Newsletters)
+      0.682, // Step 13: Publications Category 3 (Articles)
+      0.728, // Step 14: Publications Category 4 (CEO Profiles)
+      0.805, // Step 15: Services Card 1
+      0.845, // Step 16: Services Card 2
+      0.885, // Step 17: Services Card 3
+      0.925, // Step 18: Services Card 4
+      0.975, // Step 19: Services Card 5
+      1.000, // Step 20: Exit to MiningPackages & free normal scroll
+    ];
+
+    let currentStepIndex = 0;
+    let isStepAnimating = false;
+    let animRafId: number | null = null;
+
+    const smoothScrollTo = (targetY: number, duration = 540, onDone?: () => void) => {
+      if (animRafId !== null) cancelAnimationFrame(animRafId);
+      const startY = window.scrollY;
+      const diff = targetY - startY;
+      if (Math.abs(diff) < 2) {
+        window.scrollTo(0, targetY);
+        onDone?.();
+        return;
+      }
+      isStepAnimating = true;
+      const startTime = performance.now();
+      // Silky cubic-bezier ease-out curve for moderate, luxurious glide
+      const easeOutCubic = (x: number): number => 1 - Math.pow(1 - x, 3);
+
+      const animStep = (now: number) => {
+        const elapsed = now - startTime;
+        const progress = Math.min(1, elapsed / duration);
+        const eased = easeOutCubic(progress);
+        window.scrollTo(0, startY + diff * eased);
+        if (progress < 1) {
+          animRafId = requestAnimationFrame(animStep);
+        } else {
+          window.scrollTo(0, targetY);
+          animRafId = null;
+          isStepAnimating = false;
+          onDone?.();
+        }
+      };
+      animRafId = requestAnimationFrame(animStep);
+    };
+
+    const syncCurrentStep = () => {
+      if (isStepAnimating) return;
+      const { top, travel } = rangeMetricsRef.current;
+      if (travel <= 0) return;
+      const t = clamp((window.scrollY - top) / travel, 0, 1);
+      let closest = 0;
+      let minDiff = Infinity;
+      for (let i = 0; i < MOBILE_STEP_T_MAP.length; i++) {
+        const d = Math.abs(t - MOBILE_STEP_T_MAP[i]);
+        if (d < minDiff) {
+          minDiff = d;
+          closest = i;
+        }
+      }
+      currentStepIndex = closest;
+    };
+
+    let touchStartY = 0;
+    let touchStartX = 0;
+    let isTouchActive = false;
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (!isMobileRef.current || e.touches.length !== 1) return;
+      touchStartY = e.touches[0].clientY;
+      touchStartX = e.touches[0].clientX;
+      isTouchActive = true;
+      syncCurrentStep();
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (!isMobileRef.current || !isTouchActive || e.touches.length !== 1) return;
+      const { top, travel } = rangeMetricsRef.current;
+      const currentY = window.scrollY;
+
+      // Inside hero/bridge/services range: prevent default rubber-band drag to keep step discrete
+      if (currentY <= top + travel - 10) {
+        const dy = touchStartY - e.touches[0].clientY;
+        const dx = touchStartX - e.touches[0].clientX;
+        if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 10) {
+          if (e.cancelable) {
+            e.preventDefault();
+          }
+        }
+      }
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      if (!isMobileRef.current || !isTouchActive) return;
+      isTouchActive = false;
+      if (isStepAnimating) return;
+
+      const dy = touchStartY - (e.changedTouches[0]?.clientY ?? touchStartY);
+      if (Math.abs(dy) < 35) return;
+
+      const { top, travel } = rangeMetricsRef.current;
+      const currentY = window.scrollY;
+
+      if (dy > 0) {
+        // Swiping UP -> Advance to NEXT step
+        if (currentY < top + travel && currentStepIndex < MOBILE_STEP_T_MAP.length - 1) {
+          currentStepIndex += 1;
+          const targetT = MOBILE_STEP_T_MAP[currentStepIndex];
+          const targetY = top + targetT * travel;
+          smoothScrollTo(targetY, 540);
+        }
+      } else if (dy < 0) {
+        // Swiping DOWN -> Go to PREVIOUS step
+        if (currentY <= top + travel + 20 && currentStepIndex > 0) {
+          currentStepIndex -= 1;
+          const targetT = MOBILE_STEP_T_MAP[currentStepIndex];
+          const targetY = top + targetT * travel;
+          smoothScrollTo(targetY, 540);
+        }
+      }
+    };
+
+    let wheelAccum = 0;
+    let wheelCooldown = false;
+
+    const onWheel = (e: WheelEvent) => {
+      if (!isMobileRef.current) return;
+      const { top, travel } = rangeMetricsRef.current;
+      const currentY = window.scrollY;
+      if (currentY > top + travel + 10) return;
+
+      if (isStepAnimating || wheelCooldown) {
+        if (e.cancelable) e.preventDefault();
+        return;
+      }
+
+      wheelAccum += e.deltaY;
+      if (Math.abs(wheelAccum) > 35) {
+        if (e.cancelable) e.preventDefault();
+        const isDown = wheelAccum > 0;
+        wheelAccum = 0;
+        wheelCooldown = true;
+
+        if (isDown && currentStepIndex < MOBILE_STEP_T_MAP.length - 1) {
+          currentStepIndex += 1;
+          const targetT = MOBILE_STEP_T_MAP[currentStepIndex];
+          const targetY = top + targetT * travel;
+          smoothScrollTo(targetY, 540, () => {
+            setTimeout(() => { wheelCooldown = false; }, 80);
+          });
+        } else if (!isDown && currentStepIndex > 0) {
+          currentStepIndex -= 1;
+          const targetT = MOBILE_STEP_T_MAP[currentStepIndex];
+          const targetY = top + targetT * travel;
+          smoothScrollTo(targetY, 540, () => {
+            setTimeout(() => { wheelCooldown = false; }, 80);
+          });
+        } else {
+          wheelCooldown = false;
+        }
+      }
+    };
+
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: false });
+    window.addEventListener("touchend", onTouchEnd, { passive: true });
+    window.addEventListener("wheel", onWheel, { passive: false });
+
     return () => {
       if (animId !== null) cancelAnimationFrame(animId);
+      if (animRafId !== null) cancelAnimationFrame(animRafId);
       observer.disconnect();
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", onTouchEnd);
+      window.removeEventListener("wheel", onWheel);
       if (lenis) {
         lenis.off("scroll", onScroll);
       }

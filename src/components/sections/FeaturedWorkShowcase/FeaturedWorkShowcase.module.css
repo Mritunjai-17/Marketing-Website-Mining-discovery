@@ -802,6 +802,13 @@
   margin: 0;
   text-transform: uppercase;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95), 0 1px 3px rgba(0, 0, 0, 0.95);
+  text-align: left;
+}
+
+.chapterTitleLine {
+  display: block;
+  text-align: left;
+  width: 100%;
 }
 
 .clientDetails {
@@ -844,6 +851,32 @@
   justify-content: center;
   gap: 0.25rem;
   min-width: 0;
+}
+
+.partnerBadgeRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  width: fit-content;
+}
+
+.partnerBadgeDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #C89A32;
+  box-shadow: 0 0 6px rgba(200, 154, 50, 0.75);
+  flex-shrink: 0;
+}
+
+.partnerBadgeLabel {
+  font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #C89A32;
+  text-transform: uppercase;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
 }
 
 /* Secondary heading: Soft Stone (#D9D6CE) */
@@ -979,29 +1012,62 @@
 
 .deliverablesLine {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.5rem 0.75rem;
-  font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
-  font-size: clamp(0.68rem, 0.76vw, 0.74rem);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  line-height: 1.6;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.95);
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
 }
 
 /* Small labels: Gold (#D6A84F) */
 .deliverablesTag {
+  font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
+  font-size: clamp(0.62rem, 0.72vw, 0.68rem);
+  font-weight: 700;
+  letter-spacing: 0.14em;
   color: #D6A84F;
-  font-weight: 600;
-  flex-shrink: 0;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.95);
+  text-transform: uppercase;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
 }
 
-/* Body text: Crisp Stone (#E5E2DC) */
-.deliverablesContent {
-  color: #E5E2DC;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.95);
+.deliverablesChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.6rem;
+  align-items: center;
+}
+
+.deliverableChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.28rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(214, 168, 79, 0.28);
+  color: #F1EEE6;
+  font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
+  font-size: clamp(0.62rem, 0.7vw, 0.7rem);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  line-height: 1.2;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
+}
+
+.deliverableChip:hover {
+  background: rgba(214, 168, 79, 0.16);
+  border-color: rgba(214, 168, 79, 0.55);
+  transform: translateY(-1px);
+}
+
+.chipDot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #C89A32;
+  box-shadow: 0 0 5px rgba(200, 154, 50, 0.7);
+  flex-shrink: 0;
 }
 
 /* Accent / link: Gold (#D6A84F) with #C89A32 border */
@@ -1087,8 +1153,8 @@
 
 @media (max-width: 900px) {
   .sectionInner {
-    padding: clamp(3.5rem, 6vh, 4.5rem) clamp(1rem, 3.5vw, 1.5rem) 3.5rem !important;
-    gap: 1.25rem !important;
+    padding: clamp(5.25rem, 8.5vh, 6.5rem) clamp(1rem, 3.5vw, 1.5rem) 4rem !important;
+    gap: 1.5rem !important;
   }
 
   .header {
@@ -1110,11 +1176,19 @@
     padding: 0 0.5rem !important;
   }
 
-  .titleLine {
+  .mainTitle .titleLine {
     display: flex !important;
     flex-wrap: wrap !important;
     justify-content: center !important;
     align-items: center !important;
+  }
+
+  .goldWordSpan {
+    animation: none !important;
+    background: linear-gradient(135deg, #F0D58C 0%, #D4AF37 40%, #AA771C 100%) !important;
+    background-size: 100% auto !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
   }
 
   .subPhrase {
@@ -1243,64 +1317,113 @@
     flex-direction: column !important;
     gap: 0.45rem !important;
     width: 100% !important;
+    align-items: flex-start !important;
+    text-align: left !important;
   }
 
   .metaRow {
-    padding-left: 2rem;
+    padding-left: 0 !important;
     font-size: 0.7rem;
     letter-spacing: 0.1em;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 0.45rem !important;
+    width: 100% !important;
   }
 
   .chapterTitle {
     font-size: clamp(1.22rem, 4.2vw, 1.55rem);
     line-height: 1.22;
+    text-align: left !important;
+    width: 100% !important;
+  }
+
+  .chapterTitle .titleLine,
+  .chapterTitleLine {
+    display: block !important;
+    text-align: left !important;
+    justify-content: flex-start !important;
+    align-items: flex-start !important;
+    width: 100% !important;
   }
 
   .clientDetails {
-    display: flex !important;
+    display: inline-flex !important;
     flex-direction: row !important;
     align-items: center !important;
-    width: 100% !important;
-    margin-top: 0.25rem !important;
-    padding-top: 0.6rem !important;
-    border-top: 1px solid rgba(214, 168, 79, 0.22) !important;
+    width: fit-content !important;
+    max-width: 100% !important;
+    margin-top: 0.2rem !important;
+    padding: 0.45rem 0.75rem !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(214, 168, 79, 0.28) !important;
+    border-radius: 12px !important;
     gap: 0.75rem !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
   }
 
   .clientLogoWrap {
     flex-shrink: 0 !important;
     min-width: 44px !important;
-    max-width: 90px !important;
-    height: 36px !important;
+    max-width: 80px !important;
+    height: 34px !important;
     padding: 3px 8px !important;
+    background: #FFFFFF !important;
+    border-radius: 8px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
 
   .clientLogoBadge {
-    max-height: 28px !important;
+    max-height: 26px !important;
   }
 
   .clientTextWrap {
     flex: 1 1 auto !important;
     min-width: 0 !important;
-    overflow: hidden !important;
     display: flex !important;
     flex-direction: column !important;
     gap: 0.15rem !important;
   }
 
+  .partnerBadgeRow {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.35rem !important;
+  }
+
+  .partnerBadgeDot {
+    width: 5px !important;
+    height: 5px !important;
+    border-radius: 50% !important;
+    background: #C89A32 !important;
+    box-shadow: 0 0 6px rgba(200, 154, 50, 0.8) !important;
+  }
+
+  .partnerBadgeLabel {
+    font-size: 0.58rem !important;
+    letter-spacing: 0.12em !important;
+    color: #C89A32 !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+  }
+
   .clientName {
-    font-size: 0.84rem !important;
+    font-size: 0.82rem !important;
     line-height: 1.25 !important;
+    color: #F1EEE6 !important;
     white-space: normal !important;
-    word-break: break-word !important;
   }
 
   .tickerText {
-    font-size: 0.62rem !important;
+    font-size: 0.6rem !important;
     line-height: 1.2 !important;
-    letter-spacing: 0.06em !important;
-    white-space: normal !important;
-    word-break: break-word !important;
+    color: rgba(214, 168, 79, 0.9) !important;
+    letter-spacing: 0.05em !important;
   }
 
   .contentColumn {
@@ -1312,67 +1435,163 @@
     display: flex !important;
     flex-direction: column !important;
     justify-content: flex-start !important;
-    gap: 0.75rem !important;
+    gap: 0.85rem !important;
     padding-top: 0 !important;
   }
 
   .storyLead {
-    font-size: 0.9rem;
-    line-height: 1.52;
+    font-size: 0.88rem !important;
+    line-height: 1.55 !important;
+    color: #D9D6CE !important;
+    margin: 0 !important;
   }
 
   .textMetricsLine {
-    display: flex !important;
+    display: grid !important;
+    grid-template-columns: 1fr auto 1fr !important;
     align-items: center !important;
-    padding: 0.6rem 0 !important;
+    padding: 0.85rem 1.1rem !important;
     margin: 0.15rem 0 !important;
-    gap: 1.25rem !important;
+    gap: 1rem !important;
+    background: linear-gradient(135deg, rgba(30, 24, 18, 0.65) 0%, rgba(15, 12, 10, 0.75) 100%) !important;
+    border: 1px solid rgba(214, 168, 79, 0.28) !important;
+    border-radius: 14px !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 6px 18px rgba(0, 0, 0, 0.3) !important;
+  }
+
+  .textMetricCol {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.2rem !important;
   }
 
   .textMetricNum {
-    font-size: clamp(1.3rem, 4vw, 1.65rem);
+    font-size: clamp(1.4rem, 5.2vw, 1.75rem) !important;
+    font-weight: 700 !important;
+    color: #FFFFFF !important;
+    line-height: 1.05 !important;
+    letter-spacing: -0.02em !important;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8) !important;
   }
 
   .textMetricLbl {
-    font-size: 0.65rem;
+    font-size: 0.62rem !important;
+    color: #D6A84F !important;
+    letter-spacing: 0.05em !important;
+    line-height: 1.25 !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+  }
+
+  .textMetricDivider {
+    width: 1px !important;
+    height: 36px !important;
+    background: rgba(214, 168, 79, 0.35) !important;
   }
 
   .deliverablesLine {
     display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.45rem !important;
+    margin-top: 0.15rem !important;
+    width: 100% !important;
+  }
+
+  .deliverablesTag {
+    font-size: 0.62rem !important;
+    letter-spacing: 0.12em !important;
+    color: #C89A32 !important;
+    font-weight: 700 !important;
+  }
+
+  .deliverablesChips {
+    display: flex !important;
     flex-wrap: wrap !important;
-    align-items: baseline !important;
-    gap: 0.35rem 0.6rem !important;
+    gap: 0.4rem !important;
+    align-items: center !important;
+    width: 100% !important;
+  }
+
+  .deliverableChip {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.35rem !important;
+    padding: 0.28rem 0.65rem !important;
+    border-radius: 999px !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(214, 168, 79, 0.32) !important;
+    color: #F1EEE6 !important;
+    font-family: var(--font-ibm-plex-mono), monospace !important;
     font-size: 0.65rem !important;
-    line-height: 1.45 !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.03em !important;
+    line-height: 1.2 !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+  }
+
+  .chipDot {
+    width: 4px !important;
+    height: 4px !important;
+    border-radius: 50% !important;
+    background: #C89A32 !important;
+    box-shadow: 0 0 6px rgba(200, 154, 50, 0.8) !important;
   }
 
   .readStoryLink {
     display: inline-flex !important;
-    font-size: 0.84rem !important;
-    margin-top: 0.15rem !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+    padding: 0.65rem 1.35rem !important;
+    border-radius: 999px !important;
+    background: linear-gradient(135deg, rgba(214, 168, 79, 0.18) 0%, rgba(170, 119, 28, 0.32) 100%) !important;
+    border: 1px solid rgba(214, 168, 79, 0.55) !important;
+    border-bottom: 1px solid rgba(214, 168, 79, 0.55) !important;
+    color: #F8F5EE !important;
+    font-family: var(--font-space-grotesk), sans-serif !important;
+    font-size: 0.82rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.03em !important;
+    text-decoration: none !important;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
     width: fit-content !important;
+    margin-top: 0.35rem !important;
+    transition: all 0.25s ease !important;
+  }
+
+  .readStoryLink:active {
+    transform: scale(0.97) !important;
+    background: linear-gradient(135deg, rgba(214, 168, 79, 0.32) 0%, rgba(170, 119, 28, 0.48) 100%) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5) !important;
   }
 
   .metricsStripContainer {
     width: 100% !important;
-    max-width: 100% !important;
-    gap: 0.5rem !important;
-    margin-top: 0.75rem !important;
+    max-width: 480px !important;
+    gap: 0.85rem !important;
+    margin: 1.5rem auto 1.75rem auto !important;
   }
 
   .statsPillRow {
     display: flex !important;
     align-items: center !important;
-    justify-content: space-between !important;
+    justify-content: center !important;
     width: 100% !important;
-    max-width: 480px !important;
+    max-width: 460px !important;
+    margin: 0 auto !important;
     box-sizing: border-box !important;
-    gap: 0.2rem !important;
-    padding: 0.22rem 0.35rem !important;
+    gap: 0.35rem !important;
+    padding: 0.28rem 0.45rem !important;
     overflow-x: visible !important;
     border-radius: 9999px !important;
-    background: rgba(255, 255, 255, 0.88) !important;
-    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    background: rgba(255, 255, 255, 0.90) !important;
+    border: 1px solid rgba(138, 104, 32, 0.18) !important;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04) !important;
   }
 
@@ -1381,31 +1600,33 @@
   }
 
   .statPillBtn {
-    flex: 1 1 0 !important;
+    flex: 1 1 auto !important;
     min-width: 0 !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 0.22rem !important;
-    padding: 0.26rem 0.3rem !important;
-    font-size: clamp(0.52rem, 1.8vw, 0.64rem) !important;
+    gap: 0.25rem !important;
+    padding: 0.32rem 0.45rem !important;
+    font-size: clamp(0.56rem, 1.9vw, 0.68rem) !important;
     white-space: nowrap !important;
-    letter-spacing: 0.02em !important;
+    letter-spacing: 0.03em !important;
     text-align: center !important;
   }
 
   .editorialMetricsStrip {
     display: grid !important;
-    grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr !important;
-    align-items: center !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    align-items: stretch !important;
     width: 100% !important;
-    padding: 0.85rem 0.6rem !important;
-    gap: 0 !important;
-    background: rgba(255, 255, 255, 0.92) !important;
-    border: 1px solid rgba(0, 0, 0, 0.08) !important;
-    border-top: 2px solid #C89A32 !important;
-    border-radius: 8px !important;
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05) !important;
+    max-width: 460px !important;
+    margin: 0 auto !important;
+    padding: 1.25rem 1rem !important;
+    gap: 1.15rem 1rem !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+    border: 1px solid rgba(138, 104, 32, 0.16) !important;
+    border-top: 3px solid #C89A32 !important;
+    border-radius: 14px !important;
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.06) !important;
     box-sizing: border-box !important;
   }
 
@@ -1414,37 +1635,31 @@
     flex-direction: column !important;
     align-items: center !important;
     text-align: center !important;
-    gap: 0.18rem !important;
-    padding: 0 0.2rem !important;
+    gap: 0.25rem !important;
+    padding: 0.2rem 0.4rem !important;
     min-width: 0 !important;
   }
 
   .metricBigVal {
-    font-size: clamp(1rem, 2.8vw, 1.45rem) !important;
-    font-weight: 600 !important;
+    font-size: clamp(1.25rem, 4.5vw, 1.55rem) !important;
+    font-weight: 700 !important;
     line-height: 1.1 !important;
-    color: #111622 !important;
+    color: #0F172A !important;
     letter-spacing: -0.02em !important;
   }
 
   .metricSubLbl {
-    font-size: clamp(0.52rem, 1.4vw, 0.65rem) !important;
+    font-size: 0.62rem !important;
     font-weight: 700 !important;
-    line-height: 1.2 !important;
+    line-height: 1.35 !important;
     color: #7A5E22 !important;
-    letter-spacing: 0.04em !important;
+    letter-spacing: 0.06em !important;
     text-transform: uppercase !important;
     text-align: center !important;
   }
 
   .metricSeparator {
-    display: block !important;
-    width: 1px !important;
-    height: 26px !important;
-    background: rgba(0, 0, 0, 0.12) !important;
-    transform: scaleY(1) !important;
-    margin: 0 2px !important;
-    flex-shrink: 0 !important;
+    display: none !important;
   }
 
   .chapterBgOverlay {
@@ -1552,22 +1767,35 @@
   }
 
   .deliverablesLine {
-    font-size: 0.6rem;
-    line-height: 1.4;
-    gap: 0.25rem 0.5rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.35rem !important;
+    width: 100% !important;
   }
 
   .deliverablesTag {
-    font-size: 0.6rem;
+    font-size: 0.58rem !important;
+    letter-spacing: 0.12em !important;
   }
 
-  .deliverablesContent {
-    font-size: 0.6rem;
+  .deliverablesChips {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 0.35rem !important;
+    width: 100% !important;
+  }
+
+  .deliverableChip {
+    font-size: clamp(0.58rem, 2.3vw, 0.65rem) !important;
+    padding: 0.24rem 0.55rem !important;
+    gap: 0.3rem !important;
   }
 
   .readStoryLink {
-    font-size: 0.8rem;
-    margin-top: 0.15rem;
+    font-size: 0.78rem !important;
+    padding: 0.55rem 1.15rem !important;
+    margin-top: 0.25rem !important;
   }
 
   .sectionInner {
@@ -1614,31 +1842,37 @@
 
   .editorialMetricsStrip {
     display: grid !important;
-    grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr !important;
-    padding: 0.65rem 0.3rem !important;
-    border-radius: 8px !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1.1rem 0.85rem !important;
+    padding: 1.15rem 0.95rem !important;
+    border-radius: 14px !important;
+    max-width: 420px !important;
+    margin: 0 auto !important;
   }
 
   .editorialMetric {
-    padding: 0 0.1rem !important;
-    gap: 0.12rem !important;
+    padding: 0.2rem 0.3rem !important;
+    gap: 0.2rem !important;
+    align-items: center !important;
+    text-align: center !important;
   }
 
   .metricBigVal {
-    font-size: clamp(0.85rem, 3.8vw, 1.15rem) !important;
+    font-size: clamp(1.25rem, 4.8vw, 1.5rem) !important;
+    font-weight: 700 !important;
+    line-height: 1.1 !important;
   }
 
   .metricSubLbl {
-    font-size: clamp(0.44rem, 1.65vw, 0.54rem) !important;
-    letter-spacing: 0.03em !important;
-    line-height: 1.15 !important;
-    max-width: 68px !important;
+    font-size: clamp(0.56rem, 2.1vw, 0.64rem) !important;
+    letter-spacing: 0.05em !important;
+    line-height: 1.3 !important;
+    max-width: 140px !important;
+    text-align: center !important;
   }
 
   .metricSeparator {
-    display: block !important;
-    height: 22px !important;
-    margin: 0 1px !important;
+    display: none !important;
   }
 
   .tabDistrict {
@@ -1675,7 +1909,7 @@
      1. THE MAJOR MINING EVENTS
      2. WE COVER
      3. AROUND THE WORLD. (all in gold!) */
-  .titleLine:nth-of-type(2) {
+  .mainTitle .titleLine:nth-of-type(2) {
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
@@ -1747,6 +1981,20 @@
 
   .textMetricLbl {
     font-size: 0.52rem !important;
+  }
+
+  .deliverablesChips {
+    gap: 0.3rem !important;
+  }
+
+  .deliverableChip {
+    font-size: 0.56rem !important;
+    padding: 0.2rem 0.45rem !important;
+  }
+
+  .readStoryLink {
+    font-size: 0.74rem !important;
+    padding: 0.5rem 1rem !important;
   }
 
   .cardDeck {
