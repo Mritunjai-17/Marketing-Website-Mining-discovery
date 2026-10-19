@@ -170,6 +170,12 @@ export const ClientInvestorGrowth = React.memo<ClientInvestorGrowthProps>(functi
   };
 
   useEffect(() => {
+    const isMobile = typeof window !== "undefined" && (window.innerWidth <= 980 || window.matchMedia("(pointer: coarse)").matches);
+    if (isMobile) {
+      setHeaderInView(true);
+      setRevealedPillars([true, true, true, true]);
+      setMetricsInView(true);
+    }
     measureLayout();
     const timer = setTimeout(measureLayout, 250);
     const observer = new ResizeObserver(() => {
@@ -200,45 +206,49 @@ export const ClientInvestorGrowth = React.memo<ClientInvestorGrowthProps>(functi
     // Direct GPU-accelerated transform
     trackRef.current.style.transform = `translate3d(0, -${scrollY.toFixed(1)}px, 0)`;
 
-    // Header reveal
-    if (!headerInView && scrollY + clientH * 0.9 > headerTop) {
-      setHeaderInView(true);
-    }
+    const isMobile = typeof window !== "undefined" && (window.innerWidth <= 980 || window.matchMedia("(pointer: coarse)").matches);
 
-    // Reveal pillars once reached
-    setRevealedPillars((prev) => {
-      let changed = false;
-      const next = [...prev];
+    if (!isMobile) {
+      // Header reveal
+      if (!headerInView && scrollY + clientH * 0.9 > headerTop) {
+        setHeaderInView(true);
+      }
+
+      // Reveal pillars once reached
+      setRevealedPillars((prev) => {
+        let changed = false;
+        const next = [...prev];
+        rowCenters.forEach((center, idx) => {
+          if (!next[idx] && scrollY + clientH * 0.95 > center - 180) {
+            next[idx] = true;
+            changed = true;
+          }
+        });
+        return changed ? next : prev;
+      });
+
+      // Optical center focal row matches the nearest pillar row
+      const opticalCenter = scrollY + clientH * 0.5;
+      let closestIdx = 0;
+      let minDistance = Infinity;
+
       rowCenters.forEach((center, idx) => {
-        if (!next[idx] && scrollY + clientH * 0.95 > center - 180) {
-          next[idx] = true;
-          changed = true;
+        const dist = Math.abs(center - opticalCenter);
+        if (dist < minDistance) {
+          minDistance = dist;
+          closestIdx = idx;
         }
       });
-      return changed ? next : prev;
-    });
 
-    // Optical center focal row matches the nearest pillar row
-    const opticalCenter = scrollY + clientH * 0.5;
-    let closestIdx = 0;
-    let minDistance = Infinity;
-
-    rowCenters.forEach((center, idx) => {
-      const dist = Math.abs(center - opticalCenter);
-      if (dist < minDistance) {
-        minDistance = dist;
-        closestIdx = idx;
+      if (closestIdx !== activeFocalRef.current) {
+        activeFocalRef.current = closestIdx;
+        setActiveFocalIndex(closestIdx);
       }
-    });
 
-    if (closestIdx !== activeFocalRef.current) {
-      activeFocalRef.current = closestIdx;
-      setActiveFocalIndex(closestIdx);
-    }
-
-    // Metrics strip reveal
-    if (!metricsInView && scrollY + clientH * 0.92 > metricsTop) {
-      setMetricsInView(true);
+      // Metrics strip reveal
+      if (!metricsInView && scrollY + clientH * 0.92 > metricsTop) {
+        setMetricsInView(true);
+      }
     }
 
   }, [scrollProgress, headerInView, metricsInView]);

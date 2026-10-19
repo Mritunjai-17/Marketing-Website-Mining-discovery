@@ -266,6 +266,32 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
     const updateTransforms = () => {
       const clientH = window.innerHeight || 800;
 
+      // On mobile viewports (<= 840px across all mobile aspect ratios), cards flow naturally one below the other without pinning or scroll-scrubbing
+      const isMobile = typeof window !== "undefined" && window.innerWidth <= 840;
+      if (isMobile) {
+        if (!headerInView) {
+          setHeaderInView(true);
+        }
+        headingWordRefs.current.forEach((el) => {
+          if (!el) return;
+          el.style.opacity = "1";
+          el.style.transform = "none";
+          el.style.filter = "none";
+        });
+        if (stackStickyRef.current) {
+          stackStickyRef.current.style.transform = "none";
+        }
+        chapterRefs.current.forEach((el) => {
+          if (!el) return;
+          el.style.removeProperty("transform");
+          el.style.removeProperty("opacity");
+          el.style.removeProperty("z-index");
+          el.style.removeProperty("pointer-events");
+          el.style.removeProperty("visibility");
+        });
+        return false;
+      }
+
       // Check header in-view and scrub word-by-word reveal tied to scroll
       if (headerRef.current) {
         const hRect = headerRef.current.getBoundingClientRect();
@@ -282,23 +308,6 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
           el.style.transform = `translate3d(0, ${((1 - wProg) * 5).toFixed(1)}px, 0)`;
           el.style.filter = wProg >= 0.99 ? "none" : `blur(${((1 - wProg) * 1.2).toFixed(1)}px)`;
         });
-      }
-
-      // On mobile viewports (<= 840px across all mobile aspect ratios), cards flow naturally one below the other without pinning or scroll-scrubbing
-      const isMobile = typeof window !== "undefined" && window.innerWidth <= 840;
-      if (isMobile) {
-        if (stackStickyRef.current) {
-          stackStickyRef.current.style.transform = "none";
-        }
-        chapterRefs.current.forEach((el) => {
-          if (!el) return;
-          el.style.removeProperty("transform");
-          el.style.removeProperty("opacity");
-          el.style.removeProperty("z-index");
-          el.style.removeProperty("pointer-events");
-          el.style.removeProperty("visibility");
-        });
-        return false;
       }
 
       // Stack pinning and continuous scroll progress (Desktop / Tablets > 768px)

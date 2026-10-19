@@ -141,15 +141,13 @@
 .shimmerText {
   font-style: normal;
   font-weight: 700;
-  background: linear-gradient(
-    135deg,
-    #FCE8A6 0%,
-    #D4AF37 25%,
-    #FFF2B2 45%,
-    #AA771C 70%,
-    #D4AF37 88%,
-    #FCE8A6 100%
-  );
+  background: linear-gradient(135deg,
+      #FCE8A6 0%,
+      #D4AF37 25%,
+      #FFF2B2 45%,
+      #AA771C 70%,
+      #D4AF37 88%,
+      #FCE8A6 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -161,9 +159,11 @@
   0% {
     background-position: 0% 50%;
   }
+
   50% {
     background-position: 100% 50%;
   }
+
   100% {
     background-position: 0% 50%;
   }
@@ -546,10 +546,22 @@
     gap: clamp(2rem, 4vh, 3rem);
   }
 
-  .alternatingRow {
-    flex-direction: column !important;
-    gap: 1.75rem;
-    align-items: flex-start !important;
+  /* Reduced animation on mobile/tablets for instant, butter-smooth 60-120fps touch scrolling */
+  .titleLineInner {
+    transform: none !important;
+    opacity: 1 !important;
+    transition: none !important;
+  }
+
+  .eyebrowRule {
+    transform: scaleX(1) !important;
+    transition: none !important;
+  }
+
+  .subtitle {
+    transform: none !important;
+    opacity: 1 !important;
+    transition: none !important;
   }
 
   .cardVisualWrap,
@@ -557,12 +569,48 @@
     max-width: 100%;
     flex: 1 1 100%;
     width: 100%;
+    transform: none !important;
+    opacity: 1 !important;
+    transition: none !important;
+    will-change: auto !important;
+  }
+
+  .cardImage {
+    transform: none !important;
+    transition: none !important;
+    will-change: auto !important;
+  }
+
+  .categoryBadge,
+  .itemTitle,
+  .itemDescription,
+  .bulletItem {
+    transform: none !important;
+    opacity: 1 !important;
+    transition: none !important;
+  }
+
+  .alternatingRow {
+    flex-direction: column !important;
+    gap: 1.75rem;
+    align-items: flex-start !important;
+    opacity: 1 !important;
+  }
+
+  .cardsStack {
+    scroll-snap-type: none !important;
   }
 
   .imageCard {
     min-height: unset;
     height: auto;
     aspect-ratio: 16 / 10;
+    transform: none !important;
+    transition: border-color 0.2s ease !important;
+  }
+
+  .rowFocal .imageCard {
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2), 0 0 0 1.5px rgba(245, 158, 11, 0.4) !important;
   }
 
   .cardTextWrap {
@@ -599,13 +647,13 @@
 
   .cardsStack {
     gap: 3rem;
-    scroll-snap-type: y proximity;
+    scroll-snap-type: none !important;
   }
 
   .alternatingRow {
     gap: 1.1rem;
-    scroll-snap-align: center;
-    scroll-margin-top: 5rem;
+    scroll-snap-align: none !important;
+    scroll-margin-top: 0 !important;
     opacity: 1 !important;
   }
 

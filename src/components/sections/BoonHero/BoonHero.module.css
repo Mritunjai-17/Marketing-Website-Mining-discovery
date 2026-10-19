@@ -455,6 +455,14 @@
 @media (max-width: 900px) {
   .heroContainer {
     padding: 0;
+    will-change: auto;
+  }
+
+  .glassPanel,
+  .glassBadge {
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
   }
 
   .surfaceLayer {
@@ -462,6 +470,7 @@
     max-width: 100%;
     padding: 0 1.25rem;
     box-sizing: border-box;
+    will-change: auto;
   }
 
   .heroTitle {

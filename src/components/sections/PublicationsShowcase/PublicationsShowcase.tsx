@@ -546,7 +546,24 @@ export const PublicationsShowcase: React.FC<PublicationsShowcaseProps> = ({
 
     const updateWords = () => {
       if (!headerRef.current) return;
-      if (headerInView) return;
+      const isMobile = typeof window !== "undefined" && window.innerWidth <= 840;
+      if (isMobile) {
+        setHeaderInView(true);
+        headingWordRefs.current.forEach((el) => {
+          if (!el) return;
+          el.style.opacity = "1";
+          el.style.transform = "none";
+          el.style.filter = "none";
+        });
+        subheadingWordRefs.current.forEach((el) => {
+          if (!el) return;
+          el.style.opacity = "1";
+          el.style.transform = "none";
+          el.style.filter = "none";
+        });
+        return;
+      }
+
       const clientH = window.innerHeight || 800;
       const hRect = headerRef.current.getBoundingClientRect();
 

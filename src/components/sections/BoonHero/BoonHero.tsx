@@ -160,7 +160,7 @@ export const BoonHero = React.memo(
         }
       };
 
-      const isMobileScreen = typeof window !== "undefined" && window.innerWidth < 768;
+      const isMobileScreen = typeof window !== "undefined" && (window.innerWidth < 900 || window.matchMedia("(pointer: coarse)").matches);
 
       // Step A: Load Frame 1 immediately and draw
       const frame1 = new Image();
@@ -172,10 +172,7 @@ export const BoonHero = React.memo(
         renderFrame(currentFrameRef.current);
       };
 
-      // Step B: Preload key frames
-      // On mobile screens (<768px), loading every 3rd frame (80 frames total = ~7.5 MB instead of 25 MB)
-      // delivers identical visual fluid motion on touch screens while saving 70% data and RAM.
-      // On desktop, key frames load first for immediate coverage, then all 240 frames load.
+      // Step B: Preload key frames (progressive loading for smooth fluid playback)
       const step = isMobileScreen ? 3 : 4;
       const keyIndices: number[] = [];
       for (let i = 1; i <= TOTAL_FRAMES; i += step) {
@@ -189,7 +186,6 @@ export const BoonHero = React.memo(
       const loadNextKeyFrame = () => {
         if (isCancelled) return;
         if (keyPointer >= keyIndices.length) {
-          // On mobile, the 80 key frames provide full coverage; on desktop, load remaining interstitial frames
           if (!isMobileScreen) {
             scheduleRemainingFrames();
           }
@@ -268,47 +264,49 @@ export const BoonHero = React.memo(
     // ========================================================================
     const scrub = useCallback((progressValue: number) => {
       const p = Math.max(0, Math.min(1, progressValue));
+      const isMobile = typeof window !== "undefined" && (window.innerWidth < 900 || window.matchMedia("(pointer: coarse)").matches);
 
-      // 1. Draw frame to canvas immediately
+      // 1. Draw frame to canvas immediately (0.1ms hardware canvas blit)
       const targetFrame = Math.min(TOTAL_FRAMES, Math.max(1, Math.round(p * (TOTAL_FRAMES - 1)) + 1));
       currentFrameRef.current = targetFrame;
       renderFrame(targetFrame);
 
       // 2. Direct hardware CSS transforms (0ms, 120fps)
       const act1Fade = Math.max(0, 1 - p / 0.28);
-      const act1Y = -p * 60; // vh
+      const act1Y = isMobile ? -p * 35 : -p * 60; // vh
 
-      const act2Enter = Math.max(0, Math.min(1, (p - 0.28) / 0.12));
-      const act2Exit = Math.max(0, 1 - Math.max(0, (p - 0.62) / 0.1));
+      const act2Enter = Math.max(0, Math.min(1, (p - 0.26) / 0.12));
+      const act2Exit = Math.max(0, 1 - Math.max(0, (p - 0.60) / 0.12));
       const act2Opacity = act2Enter * act2Exit;
-      const act2Y = (1 - act2Enter) * 30 - Math.max(0, (p - 0.62) * 50);
+      const act2Y = isMobile
+        ? (1 - act2Enter) * 20 - Math.max(0, (p - 0.60) * 35)
+        : (1 - act2Enter) * 30 - Math.max(0, (p - 0.62) * 50);
 
-      const act3Enter = Math.max(0, Math.min(1, (p - 0.68) / 0.12));
+      const act3Enter = Math.max(0, Math.min(1, (p - 0.64) / 0.12));
       const act3Opacity = act3Enter;
-      const act3Y = (1 - act3Enter) * 30;
+      const act3Y = isMobile ? (1 - act3Enter) * 20 : (1 - act3Enter) * 30;
 
-      const isMobile = typeof window !== "undefined" && (window.innerWidth < 900 || window.matchMedia("(pointer: coarse)").matches);
-
-      const isAct3Active = act3Opacity > 0.4;
-      const isAct2Active = act2Opacity > 0.2;
+      const isAct3Active = act3Opacity > 0.3;
+      const isAct2Active = act2Opacity > 0.15;
 
       if (isMobile) {
+        // Direct zero-latency hardware writes on mobile for butter-smooth touch scrubbing
         if (surfaceLayerRef.current) {
           surfaceLayerRef.current.style.opacity = act1Fade.toFixed(3);
-          surfaceLayerRef.current.style.transform = `translate3d(0, ${act1Y}vh, 0)`;
+          surfaceLayerRef.current.style.transform = `translate3d(0, ${act1Y.toFixed(1)}vh, 0)`;
           surfaceLayerRef.current.style.filter = "none";
           surfaceLayerRef.current.style.pointerEvents = act1Fade > 0.1 ? "auto" : "none";
         }
         if (openPitLayerRef.current) {
           openPitLayerRef.current.style.opacity = act2Opacity.toFixed(3);
-          openPitLayerRef.current.style.transform = `translate3d(0, ${act2Y}px, 0)`;
+          openPitLayerRef.current.style.transform = `translate3d(0, ${act2Y.toFixed(1)}px, 0)`;
           openPitLayerRef.current.style.filter = "none";
           openPitLayerRef.current.style.pointerEvents = isAct2Active ? "auto" : "none";
           openPitLayerRef.current.style.visibility = isAct2Active ? "visible" : "hidden";
         }
         if (undergroundLayerRef.current) {
           undergroundLayerRef.current.style.opacity = act3Opacity.toFixed(3);
-          undergroundLayerRef.current.style.transform = `translate3d(0, ${act3Y}px, 0)`;
+          undergroundLayerRef.current.style.transform = `translate3d(0, ${act3Y.toFixed(1)}px, 0)`;
           undergroundLayerRef.current.style.filter = "none";
           undergroundLayerRef.current.style.pointerEvents = isAct3Active ? "auto" : "none";
           undergroundLayerRef.current.style.visibility = isAct3Active ? "visible" : "hidden";

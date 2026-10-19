@@ -40,21 +40,17 @@
 
 .sky {
   background:
-    radial-gradient(
-      110% 70% at 65% 95%,
+    radial-gradient(110% 70% at 65% 95%,
       rgba(210, 140, 60, 0.18) 0%,
       rgba(130, 85, 45, 0.08) 28%,
-      rgba(8, 20, 40, 0) 65%
-    ),
-    linear-gradient(
-      to bottom,
+      rgba(8, 20, 40, 0) 65%),
+    linear-gradient(to bottom,
       #030712 0%,
       #061122 25%,
       #0a1a33 50%,
       #0f2545 74%,
       #153054 88%,
-      #1a3a62 100%
-    );
+      #1a3a62 100%);
 }
 
 .skyGrain {
@@ -294,12 +290,10 @@
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(
-      128% 92% at 50% 44%,
+    radial-gradient(128% 92% at 50% 44%,
       rgba(5, 11, 22, 0) 46%,
       rgba(5, 11, 22, 0.42) 78%,
-      rgba(4, 8, 17, 0.78) 100%
-    );
+      rgba(4, 8, 17, 0.78) 100%);
 }
 
 .grade {
@@ -307,13 +301,11 @@
   inset: 0;
   pointer-events: none;
   /* A faint warm lift low and cool fall high — the colour grade, in one layer. */
-  background: linear-gradient(
-    to bottom,
-    rgba(10, 26, 52, 0.42) 0%,
-    rgba(10, 26, 52, 0) 38%,
-    rgba(58, 38, 16, 0.08) 74%,
-    rgba(4, 9, 18, 0.5) 100%
-  );
+  background: linear-gradient(to bottom,
+      rgba(10, 26, 52, 0.42) 0%,
+      rgba(10, 26, 52, 0) 38%,
+      rgba(58, 38, 16, 0.08) 74%,
+      rgba(4, 9, 18, 0.5) 100%);
   mix-blend-mode: soft-light;
 }
 
@@ -451,6 +443,7 @@
 }
 
 @media (max-width: 1400px) {
+
   /*
    * Below this the two columns meet in the middle of the road. Measured, not
    * guessed: at 1280px the truck swings to within 9px of the beat column, and
@@ -503,6 +496,7 @@
 }
 
 @media (max-width: 760px) {
+
   /*
    * Phone: the composition stacks. Copy takes the top, the landscape and the
    * truck keep the lower half, and the beats tuck under the copy rather than
@@ -578,20 +572,16 @@
   overflow: hidden;
   pointer-events: none;
   z-index: 25;
-  mask-image: linear-gradient(
-    to right,
-    transparent 0%,
-    black 5%,
-    black 95%,
-    transparent 100%
-  );
-  -webkit-mask-image: linear-gradient(
-    to right,
-    transparent 0%,
-    black 5%,
-    black 95%,
-    transparent 100%
-  );
+  mask-image: linear-gradient(to right,
+      transparent 0%,
+      black 5%,
+      black 95%,
+      transparent 100%);
+  -webkit-mask-image: linear-gradient(to right,
+      transparent 0%,
+      black 5%,
+      black 95%,
+      transparent 100%);
 }
 
 .roadTextTrack {
@@ -666,14 +656,12 @@
 .milestoneBar {
   width: 48px;
   height: 2px;
-  background: linear-gradient(
-    90deg,
-    #9a7218 0%,
-    #d4af37 25%,
-    #fff4ba 50%,
-    #d4af37 75%,
-    #9a7218 100%
-  );
+  background: linear-gradient(90deg,
+      #9a7218 0%,
+      #d4af37 25%,
+      #fff4ba 50%,
+      #d4af37 75%,
+      #9a7218 100%);
   background-size: 200% 100%;
   animation: goldBarShimmer 3.6s ease-in-out infinite;
   transform-origin: left center;
@@ -704,9 +692,11 @@
   0% {
     background-position: 100% 50%;
   }
+
   50% {
     background-position: 0% 50%;
   }
+
   100% {
     background-position: 100% 50%;
   }
@@ -737,18 +727,22 @@
     height: auto;
     min-height: 160px;
   }
+
   .roadTextTrack {
     gap: 2.25rem;
     padding-left: 1.5rem;
     padding-right: 2.5rem;
   }
+
   .roadCard {
     flex: 0 0 clamp(260px, 75vw, 300px);
     padding-left: 1.25rem;
   }
+
   .milestoneHeadline {
     font-size: 1.15rem;
   }
+
   .milestoneDescription {
     font-size: 0.82rem;
   }
@@ -758,58 +752,64 @@
   .underRoadSection {
     bottom: clamp(6.5rem, 16vh, 10rem);
     min-height: 140px;
-    mask-image: linear-gradient(
-      to right,
-      transparent 0%,
-      black 4%,
-      black 96%,
-      transparent 100%
-    );
-    -webkit-mask-image: linear-gradient(
-      to right,
-      transparent 0%,
-      black 4%,
-      black 96%,
-      transparent 100%
-    );
+    mask-image: linear-gradient(to right,
+        transparent 0%,
+        black 4%,
+        black 96%,
+        transparent 100%);
+    -webkit-mask-image: linear-gradient(to right,
+        transparent 0%,
+        black 4%,
+        black 96%,
+        transparent 100%);
   }
+
   .roadTextTrack {
     gap: 1.75rem;
     padding-left: 1rem;
     padding-right: 2rem;
   }
+
   .roadCard {
     flex: 0 0 clamp(240px, 78vw, 280px);
     padding-left: 0.95rem;
     gap: 0.45rem;
   }
+
   .roadCard:first-child {
     margin-right: clamp(35vw, 48vw, 60vw);
   }
+
   .milestoneIconRow {
     gap: 0.5rem;
   }
+
   .milestoneIcon {
     width: 1.2rem;
     height: 1.2rem;
   }
+
   .milestoneTag {
     font-size: 0.62rem;
     letter-spacing: 0.18em;
   }
+
   .milestoneHeadline {
     font-size: clamp(1rem, 4.2vw, 1.15rem);
     line-height: 1.2;
   }
+
   .milestoneBar {
     width: 32px;
     height: 2px;
     margin: 0.1rem 0 0.15rem;
   }
+
   .milestoneDescription {
     font-size: clamp(0.74rem, 3.1vw, 0.82rem);
     line-height: 1.48;
   }
+
   .speedometerBadge {
     top: max(1rem, env(safe-area-inset-top, 0px));
     left: max(1rem, env(safe-area-inset-left, 0px));
@@ -873,10 +873,12 @@
     transform: scale(0.92);
     opacity: 0.8;
   }
+
   50% {
     transform: scale(1.18);
     opacity: 1;
   }
+
   100% {
     transform: scale(0.92);
     opacity: 0.8;
@@ -933,7 +935,8 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  z-index: 1; /* Sits behind the 3D canvas (z-index: 2) */
+  z-index: 1;
+  /* Sits behind the 3D canvas (z-index: 2) */
   pointer-events: none;
   opacity: 0;
   will-change: opacity, transform;
@@ -1090,6 +1093,7 @@
     flex-direction: column;
     padding: 2rem 1.5rem;
   }
+
   .ucLeftBlock {
     position: relative;
     left: auto;
@@ -1098,6 +1102,7 @@
     width: 100%;
     margin-bottom: 2rem;
   }
+
   .ucRightViewport {
     position: relative;
     right: auto;
@@ -1303,8 +1308,15 @@
 }
 
 @keyframes topDownBounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(4px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(4px);
+  }
 }
 
 /* Connecting Telemetry SVG passing over the highway */
@@ -1377,8 +1389,13 @@
 }
 
 @keyframes radarRotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .radarCrosshairX {
@@ -1537,10 +1554,12 @@
   .topDownTimeline {
     display: none;
   }
+
   .topDownLeftBlock {
     left: clamp(1.5rem, 4vw, 3rem);
     max-width: 85%;
   }
+
   .topDownRightBlock {
     display: none;
   }
@@ -1779,14 +1798,17 @@
     top: 3.5rem;
     max-width: 280px;
   }
+
   .secondPartBigHeadline {
     font-size: 2.1rem;
   }
+
   .secondPartLeftBottom {
     left: 1.25rem;
     bottom: 2rem;
     max-width: 260px;
   }
+
   .secondPartRightSide {
     right: 1.25rem;
     top: 3.5rem;
@@ -1794,6 +1816,7 @@
     width: 240px;
     gap: 1.5rem;
   }
+
   .secondPartStatValue {
     font-size: 2.2rem;
   }
@@ -1803,6 +1826,7 @@
   .secondPartSidesWrap {
     pointer-events: auto;
   }
+
   /* Top heading pushed little down from the header bar */
   .secondPartLeftSide {
     left: clamp(1rem, 4.5vw, 1.4rem);
@@ -1820,6 +1844,7 @@
     z-index: 30;
     pointer-events: none;
   }
+
   .secondPartBigHeadline {
     font-size: clamp(1.2rem, 4.2vw, 1.55rem);
     line-height: 1.18;
@@ -1863,6 +1888,7 @@
     padding: 1.5rem 0.2rem clamp(6rem, 15vh, 10rem);
     box-sizing: border-box;
   }
+
   .statsScrollTrack::-webkit-scrollbar {
     display: none;
   }
@@ -1879,6 +1905,7 @@
     min-height: clamp(110px, 20vh, 150px);
     box-sizing: border-box;
   }
+
   .statEditorialItem:last-child {
     border-bottom: none;
     margin-bottom: 0;
@@ -1918,6 +1945,7 @@
   .secondPartStatDesc {
     display: none !important;
   }
+
   .statCalloutBlock {
     display: none !important;
   }
@@ -2100,11 +2128,13 @@
     overflow: visible;
     min-height: clamp(380px, 58vh, 540px);
   }
+
   .alignedCardItem {
     width: clamp(215px, 64vw, 290px);
     height: clamp(295px, 88vw, 400px);
     border-radius: 18px;
   }
+
   .alignedControls {
     bottom: max(1.25rem, env(safe-area-inset-bottom, 16px));
   }
@@ -3318,13 +3348,11 @@
     /* Bottom-right vignette for sub text */
     radial-gradient(ellipse 70% 60% at 88% 85%, rgba(4, 7, 14, 0.68) 0%, rgba(4, 7, 14, 0.28) 55%, transparent 100%),
     /* Screen border depth */
-    linear-gradient(
-      180deg,
+    linear-gradient(180deg,
       rgba(4, 7, 14, 0.35) 0%,
       transparent 22%,
       transparent 68%,
-      rgba(4, 7, 14, 0.5) 100%
-    );
+      rgba(4, 7, 14, 0.5) 100%);
   pointer-events: none;
 }
 
@@ -3575,15 +3603,13 @@
   font-weight: 700;
   letter-spacing: 0.02em;
   text-shadow: none;
-  background: linear-gradient(
-    135deg,
-    #FFF4C6 0%,
-    #F6D068 18%,
-    #FFEA98 38%,
-    #DF9F28 62%,
-    #F8D36A 82%,
-    #FFF8DC 100%
-  );
+  background: linear-gradient(135deg,
+      #FFF4C6 0%,
+      #F6D068 18%,
+      #FFEA98 38%,
+      #DF9F28 62%,
+      #F8D36A 82%,
+      #FFF8DC 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -3597,9 +3623,11 @@
   0% {
     background-position: 0% 50%;
   }
+
   50% {
     background-position: 100% 50%;
   }
+
   100% {
     background-position: 0% 50%;
   }
@@ -4154,9 +4182,9 @@
     display: flex;
     flex-direction: column;
     gap: 0.85rem;
-    background: rgba(6, 10, 18, 0.84);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    background: rgba(6, 10, 18, 0.90);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     border: 1.5px solid rgba(246, 208, 104, 0.28);
     border-radius: 20px;
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.12);
@@ -4195,6 +4223,7 @@
 }
 
 @media (max-width: 640px) {
+
   .cardFlickContent,
   .fullScreenCardContent {
     position: absolute;
@@ -4335,18 +4364,14 @@
 
   .cardFlickGradient {
     background:
-      linear-gradient(
-        180deg,
+      linear-gradient(180deg,
         rgba(6, 10, 18, 0.52) 0%,
         rgba(6, 10, 18, 0.28) 35%,
         rgba(6, 10, 18, 0.35) 65%,
-        rgba(6, 10, 18, 0.62) 100%
-      ),
-      linear-gradient(
-        90deg,
+        rgba(6, 10, 18, 0.62) 100%),
+      linear-gradient(90deg,
         rgba(6, 10, 18, 0.32) 0%,
-        transparent 65%
-      );
+        transparent 65%);
   }
 
   .fullScreenNavControls {

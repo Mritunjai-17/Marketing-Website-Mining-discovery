@@ -19,7 +19,7 @@ export type TransitionState =
 
 /** Viewport heights for the continuous story (Hero -> Client & Investor Bridge -> Our Services 8 Cards) */
 const DESKTOP_SCROLL_VH = 1050;
-const MOBILE_SCROLL_VH = 260;
+const MOBILE_SCROLL_VH = 550;
 
 function clamp(v: number, lo: number, hi: number) {
   return Math.min(Math.max(v, lo), hi);
@@ -88,9 +88,10 @@ export const GlobeHero: React.FC = () => {
 
     // 1. Hardware-scrubbed Hero sequence:
     // Act 1 (Alpine summit) -> Act 2 (Open Pit) -> Act 3 (Cave Continuous Miner)
-    // Scrubbed gracefully from t = 0.00 to t = 0.08, cleanly completes and hands over by t = 0.10
-    const HERO_END = 0.08;
-    const HERO_FADE_END = 0.10;
+    // On mobile, dedicated runway allows the full 3-act visual descent and video to play with smooth pacing
+    const isMobile = isMobileRef.current;
+    const HERO_END = isMobile ? 0.22 : 0.08;
+    const HERO_FADE_END = isMobile ? 0.25 : 0.10;
     const heroP = clamp(t / HERO_END, 0, 1);
     if (boonHeroRef.current) {
       if (t >= HERO_FADE_END) {
@@ -126,10 +127,10 @@ export const GlobeHero: React.FC = () => {
 
     // 2. Value Bridge: Client & Investor Growth Section ("Building Value for Every Stakeholder")
     // Proportionally balanced scroll runway giving 1:1 natural scroll travel for all cards, events & publications
-    const BRIDGE_START = 0.08;
-    const BRIDGE_FADE_IN_END = 0.10;
-    const BRIDGE_SCROLL_END = 0.76;
-    const BRIDGE_END = 0.785;
+    const BRIDGE_START = isMobile ? 0.22 : 0.08;
+    const BRIDGE_FADE_IN_END = isMobile ? 0.25 : 0.10;
+    const BRIDGE_SCROLL_END = isMobile ? 0.77 : 0.76;
+    const BRIDGE_END = isMobile ? 0.80 : 0.785;
 
     let bOpacity = 0;
     if (t < BRIDGE_START || t >= BRIDGE_END) {
@@ -161,7 +162,7 @@ export const GlobeHero: React.FC = () => {
 
     // 3. Services Section (5 Interactive Cards):
     // Takes over cleanly and fully opaquely after the Value Bridge section finishes
-    const SERVICES_START = 0.785;
+    const SERVICES_START = isMobile ? 0.80 : 0.785;
     const SERVICES_END = 0.99;
 
     let servicesP = 0;
