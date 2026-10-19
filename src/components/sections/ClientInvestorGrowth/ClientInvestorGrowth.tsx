@@ -203,10 +203,16 @@ export const ClientInvestorGrowth = React.memo<ClientInvestorGrowthProps>(functi
     const baseScrollY = scrollProgress * maxScroll;
     const scrollY = Math.max(0, Math.min(maxScroll, baseScrollY));
 
-    // Direct GPU-accelerated transform
-    trackRef.current.style.transform = `translate3d(0, -${scrollY.toFixed(1)}px, 0)`;
+    const isMobile = typeof window !== "undefined" && (window.innerWidth <= 900 || window.matchMedia("(pointer: coarse)").matches);
+    if (isMobile) {
+      if (trackRef.current) {
+        trackRef.current.style.transform = "none";
+      }
+      return;
+    }
 
-    const isMobile = typeof window !== "undefined" && (window.innerWidth <= 980 || window.matchMedia("(pointer: coarse)").matches);
+    // Direct GPU-accelerated transform on desktop
+    trackRef.current.style.transform = `translate3d(0, -${scrollY.toFixed(1)}px, 0)`;
 
     if (!isMobile) {
       // Header reveal

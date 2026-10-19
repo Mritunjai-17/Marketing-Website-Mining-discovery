@@ -441,6 +441,16 @@ export const BoonHero = React.memo(
             <p className={styles.heroSubline}>
               We help mining companies turn discoveries, projects and milestones into stories that get noticed
             </p>
+
+            <div className={styles.mobileHeroCtaWrap}>
+              <Link
+                href="/contact"
+                className={styles.mobileHeroCtaBtn}
+              >
+                <span>GET FEATURED</span>
+                <ArrowRight size={15} />
+              </Link>
+            </div>
           </div>
 
 

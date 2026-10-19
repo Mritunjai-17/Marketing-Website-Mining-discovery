@@ -845,6 +845,28 @@ export const JourneyStory: React.FC = () => {
 
 
   useJourneyFrame((scene) => {
+    // Mobile: cards sit in standard vertical document flow without virtual scrub transforms
+    const isMobile = typeof window !== "undefined" && (window.innerWidth <= 900 || window.matchMedia("(pointer: coarse)").matches);
+    if (isMobile) {
+      if (settleStageRef.current) {
+        settleStageRef.current.style.opacity = "1";
+        settleStageRef.current.style.transform = "none";
+        settleStageRef.current.style.visibility = "visible";
+      }
+      if (cardsTrackRef.current) {
+        const cardEls = cardsTrackRef.current.children;
+        for (let i = 0; i < cardEls.length; i++) {
+          const el = cardEls[i] as HTMLElement | undefined;
+          if (el) {
+            el.style.transform = "none";
+            el.style.visibility = "visible";
+            el.style.opacity = "1";
+          }
+        }
+      }
+      return;
+    }
+
     const p = scene.progress;
 
     // ====================================================================

@@ -28,11 +28,11 @@ export const SmoothScroll: React.FC<SmoothScrollProps> = ({ children }) => {
     // receives butter-smooth Lenis momentum scrolling.
     // Pure touch mobile devices (iPhone, Android, standalone tablets without trackpad)
     // use native 120Hz/60Hz hardware momentum scrolling to avoid touch-event contention.
-    const isMobileWidth = window.innerWidth <= 840;
+    const isMobileWidth = window.innerWidth <= 900;
     const isCoarsePointer = window.matchMedia("(pointer: coarse)").matches;
     const hasFinePointer = window.matchMedia("(pointer: fine)").matches;
-    // Pure touch mobile devices and all mobile screen ratios (iPhone, Android, Foldables, Tablets)
-    // use native 120Hz/60Hz hardware momentum scrolling for frictionless mobile swiping.
+    // Pure touch mobile devices and all mobile screen ratios (iPhone, Android, Foldables, Tablets <= 900px)
+    // use native hardware momentum scrolling with zero Lenis intervention.
     const isTouchOnly = isMobileWidth || isCoarsePointer || !hasFinePointer;
 
     gsap.registerPlugin(ScrollTrigger);

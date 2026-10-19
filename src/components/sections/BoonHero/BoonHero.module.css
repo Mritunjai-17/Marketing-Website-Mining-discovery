@@ -591,3 +591,38 @@
     font-size: 0.72rem;
   }
 }
+
+.mobileHeroCtaWrap {
+  display: none;
+  margin-top: 1.75rem;
+  pointer-events: auto;
+  z-index: 20;
+}
+
+@media (max-width: 900px) {
+  .mobileHeroCtaWrap {
+    display: flex;
+    justify-content: center;
+  }
+
+  .mobileHeroCtaBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.85rem 1.85rem;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, #d6a84f 0%, #c59a3f 100%);
+    color: #030509;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    box-shadow: 0 6px 24px rgba(214, 168, 79, 0.4);
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .mobileHeroCtaBtn:active {
+    transform: scale(0.97);
+  }
+}

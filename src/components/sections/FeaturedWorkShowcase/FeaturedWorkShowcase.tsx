@@ -266,8 +266,8 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
     const updateTransforms = () => {
       const clientH = window.innerHeight || 800;
 
-      // On mobile viewports (<= 840px across all mobile aspect ratios), cards flow naturally one below the other without pinning or scroll-scrubbing
-      const isMobile = typeof window !== "undefined" && window.innerWidth <= 840;
+      // On mobile viewports (<= 900px), cards flow naturally one below the other without pinning or scroll-scrubbing
+      const isMobile = typeof window !== "undefined" && (window.innerWidth <= 900 || window.matchMedia("(pointer: coarse)").matches);
       if (isMobile) {
         if (!headerInView) {
           setHeaderInView(true);
@@ -365,7 +365,19 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
         });
       }
 
-      // Continuous, fluid downward-to-upward transform for each card
+      if (isMobile) {
+        chapterRefs.current.forEach((el) => {
+          if (!el) return;
+          el.style.transform = "none";
+          el.style.opacity = "1";
+          el.style.zIndex = "1";
+          el.style.pointerEvents = "auto";
+          el.style.visibility = "visible";
+        });
+        return false;
+      }
+
+      // Continuous, fluid downward-to-upward transform for each card on desktop
       chapterRefs.current.forEach((el, idx) => {
         if (!el) return;
         const delta = pVal - idx;

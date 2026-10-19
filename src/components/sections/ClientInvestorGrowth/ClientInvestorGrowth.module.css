@@ -742,3 +742,29 @@
     gap: 0.85rem;
   }
 }
+
+/* ==========================================================================
+   PURE NATIVE MOBILE FLOW (NO SCROLL HIJACKING, NO ABSOLUTE PINNING)
+   ========================================================================== */
+@media (max-width: 900px) {
+  .bridgeContainer {
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
+    z-index: 1 !important;
+  }
+
+  .scrollTrack {
+    position: relative !important;
+    transform: none !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+}
