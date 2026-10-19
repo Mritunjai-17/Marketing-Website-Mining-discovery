@@ -707,12 +707,12 @@ export const GlobeHero: React.FC = () => {
         <div className="relative w-full bg-[#030509]">
           <Journey3D
             progress={{
-              current: 1.0,
+              current: 0,
               pitch: 0,
-              descent: 1.0,
-              cardsProgress: 1.0,
+              descent: 0,
+              cardsProgress: 0,
             }}
-            active={true}
+            active={false}
           />
         </div>
       </section>

@@ -799,18 +799,33 @@ export const JourneyStory: React.FC = () => {
     const handleMobileCardsScroll = useCallback(() => {
       const track = cardsTrackRef.current;
       if (!track) return;
-      const isMobile = typeof window !== "undefined" && (window.innerWidth <= 900 || window.matchMedia("(pointer: coarse)").matches);
+      const isMobile = typeof window !== "undefined" && (window.innerWidth <= 960 || window.matchMedia("(pointer: coarse)").matches);
       if (!isMobile) return;
 
       const scrollLeft = track.scrollLeft;
       const firstChild = track.children[0] as HTMLElement | undefined;
-      const cardWidth = firstChild ? firstChild.offsetWidth : track.clientWidth * 0.86;
+      const cardWidth = firstChild ? firstChild.offsetWidth : track.clientWidth * 0.88;
       const gap = 16;
       const idx = Math.round(scrollLeft / (cardWidth + gap));
       const clamped = Math.max(0, Math.min(SERVICE_CARDS.length - 1, idx));
       if (clamped !== activeCardIndexRef.current) {
         activeCardIndexRef.current = clamped;
         setActiveCardIndex(clamped);
+      }
+    }, []);
+
+    // Ensure mobile cards have clean inline styles (no leftover GSAP desktop transforms)
+    useEffect(() => {
+      const isMobile = typeof window !== "undefined" && (window.innerWidth <= 960 || window.matchMedia("(pointer: coarse)").matches);
+      if (isMobile && cardsTrackRef.current) {
+        const cardEls = cardsTrackRef.current.children;
+        for (let i = 0; i < cardEls.length; i++) {
+          const el = cardEls[i] as HTMLElement;
+          if (el) {
+            el.style.transform = "";
+            el.style.visibility = "";
+          }
+        }
       }
     }, []);
   
@@ -869,6 +884,13 @@ export const JourneyStory: React.FC = () => {
     // CINEMATIC SERVICES SECTION (SOLID PINNED STAGE WITH DEDICATED DWELL READING ZONES)
     // ====================================================================
     if (settleStageRef.current) {
+      const isMobile = typeof window !== "undefined" && (window.innerWidth <= 960 || window.matchMedia("(pointer: coarse)").matches);
+      if (isMobile) {
+        // On mobile, native CSS scroll-snap horizontal carousel handles cards.
+        // Do not override transforms or activeCardIndex on mobile.
+        return;
+      }
+
       const winW = typeof window !== "undefined" ? window.innerWidth : 1440;
       const totalCards = SERVICE_CARDS.length;
 
