@@ -796,6 +796,28 @@ export const JourneyStory: React.FC = () => {
       handleOpenReader(mag);
     }, [handleOpenReader]);
 
+    const getStepWidth = useCallback(() => {
+      const track = cardsTrackRef.current;
+      if (!track) return 360;
+      const firstChild = track.children[0] as HTMLElement | undefined;
+      const cardWidth = firstChild ? firstChild.offsetWidth : track.clientWidth * 0.88;
+      const gap = 16;
+      return cardWidth + gap;
+    }, []);
+
+    const snapToCard = useCallback((targetIdx: number) => {
+      const track = cardsTrackRef.current;
+      if (!track) return;
+      const clamped = Math.max(0, Math.min(SERVICE_CARDS.length - 1, targetIdx));
+      activeCardIndexRef.current = clamped;
+      setActiveCardIndex(clamped);
+      const step = getStepWidth();
+      track.scrollTo({
+        left: clamped * step,
+        behavior: "smooth",
+      });
+    }, [getStepWidth]);
+
     const handleMobileCardsScroll = useCallback(() => {
       const track = cardsTrackRef.current;
       if (!track) return;
@@ -803,16 +825,160 @@ export const JourneyStory: React.FC = () => {
       if (!isMobile) return;
 
       const scrollLeft = track.scrollLeft;
-      const firstChild = track.children[0] as HTMLElement | undefined;
-      const cardWidth = firstChild ? firstChild.offsetWidth : track.clientWidth * 0.88;
-      const gap = 16;
-      const idx = Math.round(scrollLeft / (cardWidth + gap));
+      const step = getStepWidth();
+      const idx = Math.round(scrollLeft / step);
       const clamped = Math.max(0, Math.min(SERVICE_CARDS.length - 1, idx));
       if (clamped !== activeCardIndexRef.current) {
         activeCardIndexRef.current = clamped;
         setActiveCardIndex(clamped);
       }
-    }, []);
+    }, [getStepWidth]);
+
+    // Touch & pointer drag swipe listener on cardsTrackRef for frictionless thumb swiping
+    useEffect(() => {
+      const track = cardsTrackRef.current;
+      if (!track) return;
+
+      let startX = 0;
+      let startY = 0;
+      let startScrollLeft = 0;
+      let startTime = 0;
+      let isDown = false;
+      let hasMoved = false;
+      let lockDirection: "horizontal" | "vertical" | null = null;
+
+      const onTouchStart = (e: TouchEvent) => {
+        if (e.touches.length !== 1) return;
+        isDown = true;
+        hasMoved = false;
+        lockDirection = null;
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        startScrollLeft = track.scrollLeft;
+        startTime = performance.now();
+      };
+
+      const onTouchMove = (e: TouchEvent) => {
+        if (!isDown || e.touches.length !== 1) return;
+        const currentX = e.touches[0].clientX;
+        const currentY = e.touches[0].clientY;
+        const dx = currentX - startX;
+        const dy = currentY - startY;
+
+        if (lockDirection === null) {
+          if (Math.abs(dx) > 6 || Math.abs(dy) > 6) {
+            lockDirection = Math.abs(dx) >= Math.abs(dy) ? "horizontal" : "vertical";
+          }
+        }
+
+        if (lockDirection === "horizontal") {
+          // Horizontal swipe over cards: prevent vertical window scroll jitter
+          if (e.cancelable) {
+            e.preventDefault();
+          }
+          hasMoved = true;
+          track.scrollLeft = startScrollLeft - dx;
+        }
+      };
+
+      const onTouchEnd = (e: TouchEvent) => {
+        if (!isDown) return;
+        isDown = false;
+
+        if (lockDirection === "horizontal" && hasMoved) {
+          const endX = e.changedTouches[0]?.clientX ?? startX;
+          const dx = endX - startX;
+          const duration = Math.max(1, performance.now() - startTime);
+          const velocityX = dx / duration;
+          const step = getStepWidth();
+
+          let target = activeCardIndexRef.current;
+          if (dx < -35 || velocityX < -0.2) {
+            // Swiped left -> next card
+            target = Math.min(SERVICE_CARDS.length - 1, activeCardIndexRef.current + 1);
+          } else if (dx > 35 || velocityX > 0.2) {
+            // Swiped right -> previous card
+            target = Math.max(0, activeCardIndexRef.current - 1);
+          } else {
+            // Nearest card snap
+            target = Math.round(track.scrollLeft / step);
+          }
+          snapToCard(target);
+        }
+        lockDirection = null;
+      };
+
+      // Mouse drag handlers for desktop/DevTools testing
+      let isMouseDown = false;
+      const onMouseDown = (e: MouseEvent) => {
+        if (e.button !== 0) return;
+        isMouseDown = true;
+        hasMoved = false;
+        lockDirection = null;
+        startX = e.clientX;
+        startY = e.clientY;
+        startScrollLeft = track.scrollLeft;
+        startTime = performance.now();
+      };
+
+      const onMouseMove = (e: MouseEvent) => {
+        if (!isMouseDown) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+
+        if (lockDirection === null) {
+          if (Math.abs(dx) > 6 || Math.abs(dy) > 6) {
+            lockDirection = Math.abs(dx) >= Math.abs(dy) ? "horizontal" : "vertical";
+          }
+        }
+
+        if (lockDirection === "horizontal") {
+          hasMoved = true;
+          track.scrollLeft = startScrollLeft - dx;
+        }
+      };
+
+      const onMouseUp = (e: MouseEvent) => {
+        if (!isMouseDown) return;
+        isMouseDown = false;
+
+        if (lockDirection === "horizontal" && hasMoved) {
+          const dx = e.clientX - startX;
+          const duration = Math.max(1, performance.now() - startTime);
+          const velocityX = dx / duration;
+          const step = getStepWidth();
+
+          let target = activeCardIndexRef.current;
+          if (dx < -35 || velocityX < -0.2) {
+            target = Math.min(SERVICE_CARDS.length - 1, activeCardIndexRef.current + 1);
+          } else if (dx > 35 || velocityX > 0.2) {
+            target = Math.max(0, activeCardIndexRef.current - 1);
+          } else {
+            target = Math.round(track.scrollLeft / step);
+          }
+          snapToCard(target);
+        }
+        lockDirection = null;
+      };
+
+      track.addEventListener("touchstart", onTouchStart, { passive: true });
+      track.addEventListener("touchmove", onTouchMove, { passive: false });
+      track.addEventListener("touchend", onTouchEnd, { passive: true });
+      track.addEventListener("touchcancel", onTouchEnd, { passive: true });
+      track.addEventListener("mousedown", onMouseDown);
+      window.addEventListener("mousemove", onMouseMove);
+      window.addEventListener("mouseup", onMouseUp);
+
+      return () => {
+        track.removeEventListener("touchstart", onTouchStart);
+        track.removeEventListener("touchmove", onTouchMove);
+        track.removeEventListener("touchend", onTouchEnd);
+        track.removeEventListener("touchcancel", onTouchEnd);
+        track.removeEventListener("mousedown", onMouseDown);
+        window.removeEventListener("mousemove", onMouseMove);
+        window.removeEventListener("mouseup", onMouseUp);
+      };
+    }, [getStepWidth, snapToCard]);
 
     // Ensure mobile cards have clean inline styles (no leftover GSAP desktop transforms)
     useEffect(() => {
@@ -1106,21 +1272,22 @@ export const JourneyStory: React.FC = () => {
                     key={dotIdx}
                     type="button"
                     className={`${styles.mobileServicesDot} ${activeCardIndex === dotIdx ? styles.mobileServicesDotActive : ""}`}
-                    onClick={() => {
-                      const track = cardsTrackRef.current;
-                      if (track && track.children[dotIdx]) {
-                        (track.children[dotIdx] as HTMLElement).scrollIntoView({
-                          behavior: "smooth",
-                          block: "nearest",
-                          inline: "center",
-                        });
-                      }
-                    }}
+                    onClick={() => snapToCard(dotIdx)}
                     aria-label={`Go to service ${dotIdx + 1}`}
                   />
                 ))}
               </div>
-              <span className={styles.mobileSwipeHint}>Swipe ➔</span>
+              <button
+                type="button"
+                className={styles.mobileSwipeHint}
+                onClick={() => {
+                  const nextIdx = (activeCardIndex + 1) % SERVICE_CARDS.length;
+                  snapToCard(nextIdx);
+                }}
+                aria-label="Next service card"
+              >
+                <span>Swipe ➔</span>
+              </button>
             </div>
           </div>
 

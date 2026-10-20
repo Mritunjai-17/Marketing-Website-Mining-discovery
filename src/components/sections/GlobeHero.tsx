@@ -129,7 +129,9 @@ export const GlobeHero: React.FC = () => {
         if (currentOpacity <= 0.01) {
           box.style.visibility = "hidden";
           box.style.pointerEvents = "none";
+          box.style.display = "none";
         } else {
+          box.style.display = "block";
           box.style.visibility = "visible";
           box.style.pointerEvents = currentOpacity > 0.4 ? "auto" : "none";
         }
@@ -704,7 +706,7 @@ export const GlobeHero: React.FC = () => {
         </div>
 
         {/* 3. Services Section: 5 Services Cards in standard vertical flow */}
-        <div className="relative w-full bg-[#030509]">
+        <div className="relative w-full bg-[#030509] z-30">
           <Journey3D
             progress={{
               current: 0,

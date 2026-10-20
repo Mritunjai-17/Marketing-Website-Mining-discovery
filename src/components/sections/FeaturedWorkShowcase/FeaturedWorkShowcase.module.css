@@ -323,6 +323,14 @@
   background: rgba(0, 0, 0, 0.04);
 }
 
+.statPillLabelFull {
+  display: inline;
+}
+
+.statPillLabelMobile {
+  display: none;
+}
+
 .statPillActive {
   color: #111622;
   background: rgba(200, 154, 50, 0.16);
@@ -1581,17 +1589,17 @@
   .statsPillRow {
     display: flex !important;
     align-items: center !important;
-    justify-content: center !important;
+    justify-content: space-between !important;
     width: 100% !important;
     max-width: 460px !important;
     margin: 0 auto !important;
     box-sizing: border-box !important;
-    gap: 0.35rem !important;
-    padding: 0.28rem 0.45rem !important;
-    overflow-x: visible !important;
+    gap: 0.25rem !important;
+    padding: 0.24rem 0.28rem !important;
+    overflow: hidden !important;
     border-radius: 9999px !important;
-    background: rgba(255, 255, 255, 0.90) !important;
-    border: 1px solid rgba(138, 104, 32, 0.18) !important;
+    background: rgba(255, 255, 255, 0.94) !important;
+    border: 1px solid rgba(138, 104, 32, 0.2) !important;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04) !important;
   }
 
@@ -1600,17 +1608,27 @@
   }
 
   .statPillBtn {
-    flex: 1 1 auto !important;
+    flex: 1 1 0 !important;
     min-width: 0 !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 0.25rem !important;
-    padding: 0.32rem 0.45rem !important;
-    font-size: clamp(0.56rem, 1.9vw, 0.68rem) !important;
+    gap: 0.28rem !important;
+    padding: 0.35rem 0.4rem !important;
+    font-size: clamp(0.58rem, 1.85vw, 0.68rem) !important;
     white-space: nowrap !important;
-    letter-spacing: 0.03em !important;
+    letter-spacing: 0.02em !important;
     text-align: center !important;
+    border-radius: 9999px !important;
+    box-sizing: border-box !important;
+  }
+
+  .statPillLabelFull {
+    display: none !important;
+  }
+
+  .statPillLabelMobile {
+    display: inline !important;
   }
 
   .editorialMetricsStrip {
@@ -1818,20 +1836,22 @@
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
-    gap: 0.15rem !important;
-    padding: 0.2rem 0.25rem !important;
-    overflow-x: visible !important;
+    gap: 0.2rem !important;
+    padding: 0.22rem 0.25rem !important;
+    overflow: hidden !important;
+    border-radius: 9999px !important;
   }
 
   .statPillBtn {
     flex: 1 1 0 !important;
     min-width: 0 !important;
-    padding: 0.22rem 0.15rem !important;
-    font-size: clamp(0.46rem, 1.75vw, 0.56rem) !important;
+    padding: 0.32rem 0.2rem !important;
+    font-size: clamp(0.52rem, 1.85vw, 0.62rem) !important;
     letter-spacing: 0.01em !important;
-    gap: 0.18rem !important;
+    gap: 0.2rem !important;
     justify-content: center !important;
     text-align: center !important;
+    border-radius: 9999px !important;
   }
 
   .statPillDot {

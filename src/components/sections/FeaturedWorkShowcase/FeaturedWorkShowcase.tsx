@@ -141,6 +141,7 @@ const CHAPTERS: ChapterData[] = [
 
 interface StatSet {
   category: string;
+  shortCategory?: string;
   stats: {
     value: string;
     label: string;
@@ -150,6 +151,7 @@ interface StatSet {
 const STAT_SETS: StatSet[] = [
   {
     category: "Global Reach",
+    shortCategory: "Global Reach",
     stats: [
       { value: "45,000+", label: "Annual Summit Delegates" },
       { value: "130+", label: "Countries Represented" },
@@ -159,6 +161,7 @@ const STAT_SETS: StatSet[] = [
   },
   {
     category: "Media & Industry Connections",
+    shortCategory: "Media & Industry",
     stats: [
       { value: "4 Major", label: "Tier-1 Mining Summits" },
       { value: "12,000+", label: "Institutional Funds Reached" },
@@ -168,6 +171,7 @@ const STAT_SETS: StatSet[] = [
   },
   {
     category: "Audience & Network",
+    shortCategory: "Audience & Network",
     stats: [
       { value: "50,000+", label: "Global Mining Leaders" },
       { value: "1,500+", label: "Fund Managers & Desks" },
@@ -553,7 +557,8 @@ export const FeaturedWorkShowcase: React.FC<FeaturedWorkShowcaseProps> = ({
                 className={`${styles.statPillBtn} ${activeStatSet === sIdx ? styles.statPillActive : ""}`}
               >
                 <span className={styles.statPillDot} />
-                <span>{set.category}</span>
+                <span className={styles.statPillLabelFull}>{set.category}</span>
+                <span className={styles.statPillLabelMobile}>{set.shortCategory || set.category}</span>
               </button>
             ))}
           </div>

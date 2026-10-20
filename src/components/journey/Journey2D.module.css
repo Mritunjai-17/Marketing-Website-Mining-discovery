@@ -4174,7 +4174,7 @@
     height: auto !important;
     min-height: auto !important;
     overflow: visible !important;
-    touch-action: pan-y !important;
+    touch-action: pan-x pan-y !important;
   }
 
   .settleMountainStage {
@@ -4191,7 +4191,7 @@
     background: #04070E !important;
     box-shadow: none !important;
     border-left: none !important;
-    touch-action: pan-y !important;
+    touch-action: pan-x pan-y !important;
   }
 
   .fullScreenSliderWrap {
@@ -4208,7 +4208,7 @@
     display: flex !important;
     flex-direction: row !important;
     overflow-x: auto !important;
-    overflow-y: visible !important;
+    overflow-y: hidden !important;
     scroll-snap-type: x mandatory !important;
     -webkit-overflow-scrolling: touch !important;
     scrollbar-width: none !important;
@@ -4217,6 +4217,13 @@
     width: 100% !important;
     box-sizing: border-box !important;
     touch-action: pan-x pan-y !important;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .fullScreenSliderTrack:active {
+    cursor: grabbing;
   }
 
   .fullScreenSliderTrack::-webkit-scrollbar {
@@ -4583,5 +4590,18 @@
     letter-spacing: 0.08em !important;
     text-transform: uppercase !important;
     color: rgba(246, 208, 104, 0.75) !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0.2rem 0.4rem !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.25rem !important;
+    transition: color 0.2s ease, transform 0.2s ease !important;
+  }
+
+  .mobileSwipeHint:active {
+    color: #F6D068 !important;
+    transform: scale(0.96) !important;
   }
 }
